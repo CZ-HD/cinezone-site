@@ -87,6 +87,12 @@ export default function LoginPage() {
             </button>
           </div>
 
+          <div style={forgotBox}>
+            <Link href="/forgot-password" style={forgotLink}>
+              🔐 J’ai oublié mon mot de passe
+            </Link>
+          </div>
+
           <button onClick={login} disabled={loading} style={buttonStyle}>
             {loading ? "Connexion..." : "Se connecter"}
           </button>
@@ -130,8 +136,7 @@ const pageStyle: React.CSSProperties = {
   padding: "24px",
   color: "#fff",
   fontFamily: "Arial, sans-serif",
-  background:
-    "linear-gradient(135deg, #02050a 0%, #061528 45%, #000 100%)",
+  background: "linear-gradient(135deg, #02050a 0%, #061528 45%, #000 100%)",
 };
 
 const bgOverlay: React.CSSProperties = {
@@ -246,6 +251,19 @@ const eyeBtn: React.CSSProperties = {
   color: "#fff",
   cursor: "pointer",
   fontSize: "18px",
+};
+
+const forgotBox: React.CSSProperties = {
+  marginTop: "12px",
+  textAlign: "right",
+};
+
+const forgotLink: React.CSSProperties = {
+  color: "#00c6ff",
+  textDecoration: "none",
+  fontSize: "14px",
+  fontWeight: 800,
+  textShadow: "0 0 18px rgba(0,198,255,0.45)",
 };
 
 const buttonStyle: React.CSSProperties = {
