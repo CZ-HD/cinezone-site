@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 const DEFAULT_AVATAR =
   "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/Boss.png";
 
+const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+
 type Message = {
   id: string;
   user_id: string;
@@ -27,8 +29,17 @@ type Profile = {
   status_text?: string;
 };
 
+type Reaction = {
+  id: string;
+  message_id: string;
+  user_id: string;
+  emoji: string;
+  created_at: string;
+};
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
   const [text, setText] = useState("");
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -77,6 +88,12 @@ export default function ChatPage() {
         .order("created_at", { ascending: true });
 
       setMessages(msgs || []);
+
+      const { data: reacts } = await supabase
+        .from("message_reactions")
+        .select("*");
+
+      setReactions(reacts || []);
       setLoading(false);
     }
 
@@ -97,6 +114,21 @@ export default function ChatPage() {
         (payload) => {
           const deleted = payload.old as Message;
           setMessages((prev) => prev.filter((m) => m.id !== deleted.id));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "message_reactions" },
+        (payload) => {
+          setReactions((prev) => [...prev, payload.new as Reaction]);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "message_reactions" },
+        (payload) => {
+          const deleted = payload.old as Reaction;
+          setReactions((prev) => prev.filter((r) => r.id !== deleted.id));
         }
       )
       .subscribe();
@@ -140,7 +172,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, reactions]);
 
   const isAdmin = profile?.role === "admin";
 
@@ -238,6 +270,32 @@ export default function ChatPage() {
       status_text: freshProfile?.status_text || "🟢 En ligne",
       content: message,
     });
+  };
+
+  const toggleReaction = async (messageId: string, emoji: string) => {
+    if (!user) return;
+
+    const existing = reactions.find(
+      (r) =>
+        r.message_id === messageId &&
+        r.user_id === user.id &&
+        r.emoji === emoji
+    );
+
+    if (existing) {
+      await supabase.from("message_reactions").delete().eq("id", existing.id);
+      return;
+    }
+
+    await supabase.from("message_reactions").insert({
+      message_id: messageId,
+      user_id: user.id,
+      emoji,
+    });
+  };
+
+  const getMessageReactions = (messageId: string) => {
+    return reactions.filter((r) => r.message_id === messageId);
   };
 
   const deleteMessage = async (messageId: string) => {
@@ -357,6 +415,7 @@ export default function ChatPage() {
               const userIsOnline = onlineUsers.includes(msg.user_id);
               const nameColor =
                 msg.role === "admin" ? "gold" : msg.role_color || "#dbeafe";
+              const msgReactions = getMessageReactions(msg.id);
 
               return (
                 <div
@@ -403,6 +462,35 @@ export default function ChatPage() {
                     </div>
 
                     <div style={messageText}>{msg.content}</div>
+
+                    <div style={reactionRow}>
+                      {REACTION_EMOJIS.map((emoji) => {
+                        const count = msgReactions.filter(
+                          (r) => r.emoji === emoji
+                        ).length;
+
+                        const active = msgReactions.some(
+                          (r) => r.emoji === emoji && r.user_id === user?.id
+                        );
+
+                        return (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => toggleReaction(msg.id, emoji)}
+                            style={{
+                              ...reactionBtn,
+                              ...(active ? reactionBtnActive : {}),
+                            }}
+                          >
+                            <span style={active ? reactionEmojiActive : reactionEmoji}>
+                              {emoji}
+                            </span>
+                            {count > 0 && <span style={reactionCount}>{count}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
 
                     {isAdmin && (
                       <button
@@ -578,6 +666,52 @@ const messageText: React.CSSProperties = {
   fontSize: "15px",
   color: "#fff",
   wordBreak: "break-word",
+};
+
+const reactionRow: React.CSSProperties = {
+  display: "flex",
+  gap: "7px",
+  marginTop: "12px",
+  flexWrap: "wrap",
+};
+
+const reactionBtn: React.CSSProperties = {
+  minWidth: "36px",
+  height: "30px",
+  padding: "4px 9px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#fff",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "5px",
+  transition:
+    "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
+};
+
+const reactionBtnActive: React.CSSProperties = {
+  transform: "scale(1.12)",
+  background: "rgba(0,198,255,0.2)",
+  border: "1px solid rgba(0,198,255,0.75)",
+  boxShadow: "0 0 16px rgba(0,198,255,0.55)",
+};
+
+const reactionEmoji: React.CSSProperties = {
+  fontSize: "15px",
+};
+
+const reactionEmojiActive: React.CSSProperties = {
+  fontSize: "17px",
+  filter: "drop-shadow(0 0 8px rgba(0,198,255,0.9))",
+};
+
+const reactionCount: React.CSSProperties = {
+  fontSize: "12px",
+  fontWeight: 900,
+  color: "#dbeafe",
 };
 
 const adminBadge: React.CSSProperties = {
