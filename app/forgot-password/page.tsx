@@ -33,7 +33,13 @@ export default function ForgotPasswordPage() {
 
   return (
     <main style={pageStyle}>
+      <div style={bgOverlay} />
+      <div style={blueGlow} />
+      <div style={goldGlow} />
+
       <div style={cardStyle}>
+        <div style={topLine} />
+
         <h1 style={titleStyle}>Mot de passe oublié</h1>
 
         <p style={textStyle}>
@@ -52,11 +58,20 @@ export default function ForgotPasswordPage() {
           {loading ? "Envoi..." : "Envoyer le lien"}
         </button>
 
-        {message && <p style={messageStyle}>{message}</p>}
+        {message && (
+          <p
+            style={{
+              marginTop: "16px",
+              color: message.includes("❌") ? "#ff8b8b" : "#4cff9b",
+            }}
+          >
+            {message}
+          </p>
+        )}
 
-        <Link href="/login" style={backLink}>
+        <a href="/login" style={backLink}>
           ← Retour connexion
-        </Link>
+        </a>
       </div>
     </main>
   );
@@ -64,23 +79,69 @@ export default function ForgotPasswordPage() {
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
+  position: "relative",
+  overflow: "hidden",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   padding: "24px",
   color: "#fff",
-  background: "linear-gradient(135deg, #02050a 0%, #061528 45%, #000 100%)",
   fontFamily: "Arial, sans-serif",
+  background: "linear-gradient(135deg, #02050a 0%, #061528 45%, #000 100%)",
+};
+
+const bgOverlay: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  background:
+    "radial-gradient(circle at top left, rgba(0,198,255,0.22), transparent 35%), radial-gradient(circle at bottom right, rgba(255,215,100,0.12), transparent 30%)",
+};
+
+const blueGlow: React.CSSProperties = {
+  position: "absolute",
+  width: "420px",
+  height: "420px",
+  borderRadius: "50%",
+  background: "rgba(0,140,255,0.22)",
+  filter: "blur(80px)",
+  top: "10%",
+  left: "10%",
+};
+
+const goldGlow: React.CSSProperties = {
+  position: "absolute",
+  width: "320px",
+  height: "320px",
+  borderRadius: "50%",
+  background: "rgba(255,215,100,0.13)",
+  filter: "blur(80px)",
+  bottom: "12%",
+  right: "12%",
 };
 
 const cardStyle: React.CSSProperties = {
+  position: "relative",
+  zIndex: 2,
   width: "100%",
   maxWidth: "430px",
   padding: "34px",
   borderRadius: "28px",
-  background: "linear-gradient(180deg, rgba(13,20,34,0.95), rgba(5,8,14,0.95))",
+  background:
+    "linear-gradient(180deg, rgba(13,20,34,0.95), rgba(5,8,14,0.95))",
   border: "1px solid rgba(0,198,255,0.35)",
-  boxShadow: "0 30px 100px rgba(0,0,0,0.82), 0 0 35px rgba(0,140,255,0.18)",
+  boxShadow:
+    "0 30px 100px rgba(0,0,0,0.82), 0 0 35px rgba(0,140,255,0.18)",
+  backdropFilter: "blur(18px)",
+};
+
+const topLine: React.CSSProperties = {
+  position: "absolute",
+  top: 0,
+  left: "24px",
+  right: "24px",
+  height: "2px",
+  background:
+    "linear-gradient(90deg, transparent, #00c6ff, #ffd76a, transparent)",
 };
 
 const titleStyle: React.CSSProperties = {
@@ -115,12 +176,9 @@ const buttonStyle: React.CSSProperties = {
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
-  background: "linear-gradient(135deg, #00c6ff 0%, #0072ff 55%, #3a00ff 100%)",
-};
-
-const messageStyle: React.CSSProperties = {
-  marginTop: "16px",
-  color: "#4cff9b",
+  background:
+    "linear-gradient(135deg, #00c6ff 0%, #0072ff 55%, #3a00ff 100%)",
+  boxShadow: "0 14px 40px rgba(0,114,255,0.45)",
 };
 
 const backLink: React.CSSProperties = {
@@ -129,4 +187,5 @@ const backLink: React.CSSProperties = {
   color: "#00c6ff",
   textDecoration: "none",
   fontWeight: 800,
+  textAlign: "center",
 };
