@@ -11,7 +11,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function checkUser() {
-      const publicPages = ["/login", "/register", "/waiting"];
+      const publicPages = [
+        "/login",
+        "/register",
+        "/waiting",
+        "/forgot-password",
+        "/reset-password",
+      ];
 
       if (publicPages.includes(pathname)) {
         setAllowed(true);
@@ -46,6 +52,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       setAllowed(true);
     }
 
+    setAllowed(false);
     checkUser();
   }, [pathname, router]);
 
