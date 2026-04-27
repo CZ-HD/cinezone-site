@@ -88,10 +88,16 @@ export default function LoginPage() {
           </div>
 
           <div style={forgotBox}>
-            <Link href="/forgot-password" style={forgotLink}>
-              🔐 J’ai oublié mon mot de passe
-            </Link>
-          </div>
+  <button
+    type="button"
+    onClick={() => {
+      window.location.href = "/forgot-password";
+    }}
+    style={forgotLink}
+  >
+    🔐 J’ai oublié mon mot de passe
+  </button>
+</div>
 
           <button onClick={login} disabled={loading} style={buttonStyle}>
             {loading ? "Connexion..." : "Se connecter"}
@@ -260,6 +266,9 @@ const forgotBox: React.CSSProperties = {
 
 const forgotLink: React.CSSProperties = {
   color: "#00c6ff",
+  background: "transparent",
+  border: "none",
+  cursor: "pointer",
   textDecoration: "none",
   fontSize: "14px",
   fontWeight: 800,
