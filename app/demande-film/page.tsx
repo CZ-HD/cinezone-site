@@ -300,10 +300,11 @@ export default function DemandeFilmPage() {
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  padding: "34px",
+  padding: "54px 34px",
   color: "#fff",
-  background: "radial-gradient(circle at top, rgba(0,120,255,0.18), #000 60%)",
   fontFamily: "Arial, sans-serif",
+  background:
+    "radial-gradient(circle at 20% 20%, rgba(0,198,255,0.24), transparent 30%), radial-gradient(circle at 80% 10%, rgba(80,0,255,0.18), transparent 28%), radial-gradient(circle at 70% 80%, rgba(255,215,100,0.13), transparent 32%), linear-gradient(135deg, #02050a 0%, #061528 45%, #000 100%)",
 };
 
 const containerStyle: React.CSSProperties = {
