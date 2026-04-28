@@ -8,6 +8,7 @@ const CREATOR_EMAIL = "blackph4tom@gmail.com";
 
 export default function AdminButton() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
     async function checkAdmin() {
@@ -16,9 +17,9 @@ export default function AdminButton() {
 
       if (!user) return;
 
-      // 🔥 TON COMPTE CRÉATEUR = ADMIN TOUJOURS
       if (user.email === CREATOR_EMAIL) {
         setIsAdmin(true);
+        await loadPendingCount();
         return;
       }
 
@@ -30,7 +31,17 @@ export default function AdminButton() {
 
       if (profile?.role === "admin" && profile?.status === "approved") {
         setIsAdmin(true);
+        await loadPendingCount();
       }
+    }
+
+    async function loadPendingCount() {
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending");
+
+      setPendingCount(count || 0);
     }
 
     checkAdmin();
@@ -42,6 +53,7 @@ export default function AdminButton() {
     <Link
       href="/admin"
       style={{
+        position: "relative",
         color: "#fff",
         textDecoration: "none",
         fontSize: "14px",
@@ -55,6 +67,30 @@ export default function AdminButton() {
       }}
     >
       👑 Admin
+
+      {pendingCount > 0 && (
+        <span
+          style={{
+            position: "absolute",
+            top: "-7px",
+            right: "-7px",
+            minWidth: "18px",
+            height: "18px",
+            padding: "2px 5px",
+            borderRadius: "999px",
+            background: "#ff1744",
+            color: "#fff",
+            fontSize: "11px",
+            fontWeight: 950,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 0 12px rgba(255,23,68,0.8)",
+          }}
+        >
+          {pendingCount}
+        </span>
+      )}
     </Link>
   );
 }
