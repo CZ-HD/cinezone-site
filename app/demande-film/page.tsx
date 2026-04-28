@@ -16,6 +16,12 @@ export default function DemandeFilmPage() {
   const [commentaire, setCommentaire] = useState("");
   const [message, setMessage] = useState("");
 
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editTmdbLink, setEditTmdbLink] = useState("");
+  const [editAnnee, setEditAnnee] = useState("");
+  const [editCodec, setEditCodec] = useState("X264");
+  const [editCommentaire, setEditCommentaire] = useState("");
+
   useEffect(() => {
     init();
   }, []);
@@ -83,6 +89,41 @@ export default function DemandeFilmPage() {
     loadDemandes();
   }
 
+  function startEdit(demande: any) {
+    setEditId(demande.id);
+    setEditTmdbLink(demande.tmdb_link);
+    setEditAnnee(demande.annee);
+    setEditCodec(demande.codec);
+    setEditCommentaire(demande.commentaire);
+  }
+
+  async function sauvegarderModification() {
+    if (!editId) return;
+
+    if (!editTmdbLink || !editAnnee || !editCodec || !editCommentaire) {
+      alert("Tous les champs sont obligatoires.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("demandes_films")
+      .update({
+        tmdb_link: editTmdbLink,
+        annee: editAnnee,
+        codec: editCodec,
+        commentaire: editCommentaire,
+      })
+      .eq("id", editId);
+
+    if (error) {
+      alert("Erreur modification : " + error.message);
+      return;
+    }
+
+    setEditId(null);
+    loadDemandes();
+  }
+
   async function supprimerDemande(id: string) {
     if (!isAdmin) return;
     if (!confirm("Supprimer cette demande ?")) return;
@@ -102,90 +143,157 @@ export default function DemandeFilmPage() {
 
   return (
     <main style={pageStyle}>
-      <section style={cardStyle}>
-        <h1>🎬 Demande de film</h1>
+      <div style={containerStyle}>
+        <section style={cardStyle}>
+          <h1>🎬 Demande de film</h1>
 
-        <p style={textStyle}>
-          Remplis ce formulaire avec politesse. Toute demande incomplète pourra
-          être refusée.
-        </p>
+          <p style={textStyle}>
+            Remplis ce formulaire avec politesse. Toute demande incomplète pourra
+            être refusée.
+          </p>
 
-        <input
-          value={tmdbLink}
-          onChange={(e) => setTmdbLink(e.target.value)}
-          placeholder="Lien ou n° ID TMDB"
-          style={inputStyle}
-        />
+          <input
+            value={tmdbLink}
+            onChange={(e) => setTmdbLink(e.target.value)}
+            placeholder="Lien ou n° ID TMDB"
+            style={inputStyle}
+          />
 
-        <input
-          value={annee}
-          onChange={(e) => setAnnee(e.target.value)}
-          placeholder="Année"
-          style={inputStyle}
-        />
+          <input
+            value={annee}
+            onChange={(e) => setAnnee(e.target.value)}
+            placeholder="Année"
+            style={inputStyle}
+          />
 
-        <select
-          value={codec}
-          onChange={(e) => setCodec(e.target.value)}
-          style={inputStyle}
-        >
-          <option value="X264">X264</option>
-          <option value="H265">H265</option>
-        </select>
+          <select
+            value={codec}
+            onChange={(e) => setCodec(e.target.value)}
+            style={inputStyle}
+          >
+            <option value="X264">X264</option>
+            <option value="H265">H265</option>
+          </select>
 
-        <textarea
-          value={commentaire}
-          onChange={(e) => setCommentaire(e.target.value)}
-          placeholder="Petit commentaire"
-          rows={5}
-          style={inputStyle}
-        />
+          <textarea
+            value={commentaire}
+            onChange={(e) => setCommentaire(e.target.value)}
+            placeholder="Petit commentaire"
+            rows={5}
+            style={inputStyle}
+          />
 
-        <button onClick={envoyerDemande} style={buttonStyle}>
-          Envoyer la demande
-        </button>
+          <button onClick={envoyerDemande} style={buttonStyle}>
+            Envoyer la demande
+          </button>
 
-        {message && <p style={{ marginTop: "14px" }}>{message}</p>}
-      </section>
+          {message && <p style={{ marginTop: "14px" }}>{message}</p>}
+        </section>
 
-      <section style={cardStyle}>
-        <h2>📋 Demandes envoyées</h2>
+        <section style={cardStyle}>
+          <h2>📋 Demandes envoyées</h2>
 
-        {demandes.length === 0 ? (
-          <p style={textStyle}>Aucune demande pour le moment.</p>
-        ) : (
-          <div style={{ display: "grid", gap: "14px" }}>
-            {demandes.map((demande) => (
-              <div key={demande.id} style={demandeCard}>
-                <p>
-                  <b>TMDB / Lien :</b> {demande.tmdb_link}
-                </p>
-                <p>
-                  <b>Année :</b> {demande.annee}
-                </p>
-                <p>
-                  <b>Codec :</b> {demande.codec}
-                </p>
-                <p>
-                  <b>Commentaire :</b> {demande.commentaire}
-                </p>
-                <p style={{ color: "#8b95a7", fontSize: "13px" }}>
-                  Demandé par : {demande.email}
-                </p>
+          {demandes.length === 0 ? (
+            <p style={textStyle}>Aucune demande pour le moment.</p>
+          ) : (
+            <div style={{ display: "grid", gap: "14px" }}>
+              {demandes.map((demande) => {
+                const canEdit = demande.user_id === user?.id;
 
-                {isAdmin && (
-                  <button
-                    onClick={() => supprimerDemande(demande.id)}
-                    style={deleteButton}
-                  >
-                    🗑 Supprimer
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+                return (
+                  <div key={demande.id} style={demandeCard}>
+                    {editId === demande.id ? (
+                      <>
+                        <input
+                          value={editTmdbLink}
+                          onChange={(e) => setEditTmdbLink(e.target.value)}
+                          style={inputStyle}
+                        />
+
+                        <input
+                          value={editAnnee}
+                          onChange={(e) => setEditAnnee(e.target.value)}
+                          style={inputStyle}
+                        />
+
+                        <select
+                          value={editCodec}
+                          onChange={(e) => setEditCodec(e.target.value)}
+                          style={inputStyle}
+                        >
+                          <option value="X264">X264</option>
+                          <option value="H265">H265</option>
+                        </select>
+
+                        <textarea
+                          value={editCommentaire}
+                          onChange={(e) => setEditCommentaire(e.target.value)}
+                          rows={4}
+                          style={inputStyle}
+                        />
+
+                        <div style={buttonRow}>
+                          <button
+                            onClick={sauvegarderModification}
+                            style={smallBlueButton}
+                          >
+                            💾 Sauvegarder
+                          </button>
+
+                          <button
+                            onClick={() => setEditId(null)}
+                            style={smallGrayButton}
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p>
+                          <b>TMDB / Lien :</b> {demande.tmdb_link}
+                        </p>
+                        <p>
+                          <b>Année :</b> {demande.annee}
+                        </p>
+                        <p>
+                          <b>Codec :</b> {demande.codec}
+                        </p>
+                        <p>
+                          <b>Commentaire :</b> {demande.commentaire}
+                        </p>
+                        <p style={{ color: "#8b95a7", fontSize: "13px" }}>
+                          Demandé par : {demande.email}
+                        </p>
+
+                        <div style={buttonRow}>
+                          {canEdit && (
+                            <button
+                              onClick={() => startEdit(demande)}
+                              style={smallBlueButton}
+                            >
+                              ✏️ Modifier
+                            </button>
+                          )}
+
+                          {isAdmin && (
+                            <button
+                              onClick={() => supprimerDemande(demande.id)}
+                              style={deleteButton}
+                            >
+                              🗑 Supprimer
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   );
 }
@@ -198,14 +306,21 @@ const pageStyle: React.CSSProperties = {
   fontFamily: "Arial, sans-serif",
 };
 
+const containerStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "900px",
+  margin: "0 auto",
+};
+
 const cardStyle: React.CSSProperties = {
-  maxWidth: "850px",
+  width: "100%",
   marginBottom: "28px",
   padding: "24px",
   borderRadius: "24px",
   background: "rgba(10,15,25,0.92)",
   border: "1px solid rgba(0,198,255,0.25)",
   boxShadow: "0 20px 60px rgba(0,0,0,0.55)",
+  boxSizing: "border-box",
 };
 
 const textStyle: React.CSSProperties = {
@@ -244,8 +359,34 @@ const demandeCard: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.1)",
 };
 
+const buttonRow: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
+  flexWrap: "wrap",
+  marginTop: "12px",
+};
+
+const smallBlueButton: React.CSSProperties = {
+  padding: "10px 14px",
+  borderRadius: "12px",
+  border: "1px solid rgba(0,198,255,0.45)",
+  background: "rgba(0,198,255,0.16)",
+  color: "#9deaff",
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const smallGrayButton: React.CSSProperties = {
+  padding: "10px 14px",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.2)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#fff",
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
 const deleteButton: React.CSSProperties = {
-  marginTop: "10px",
   padding: "10px 14px",
   borderRadius: "12px",
   border: "1px solid rgba(255,90,90,0.45)",
