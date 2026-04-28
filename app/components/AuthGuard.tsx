@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+const CREATOR_EMAIL = "blackph4tom@gmail.com";
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -28,29 +30,31 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
       const {
         data: { user },
-        error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError || !user) {
+      if (!user) {
         router.push("/login");
         return;
       }
 
-      const { data: profile, error } = await supabase
+      // ✅ Ton compte créateur passe toujours
+      if (user.email === CREATOR_EMAIL) {
+        setAllowed(true);
+        return;
+      }
+
+      const { data: profile } = await supabase
         .from("profiles")
         .select("status, role")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (error || !profile) {
+      if (!profile) {
         router.push("/waiting");
         return;
       }
 
-      const isAdmin = profile.role === "admin";
-      const isApproved = profile.status === "approved";
-
-      if (!isAdmin && !isApproved) {
+      if (profile.status !== "approved") {
         router.push("/waiting");
         return;
       }
