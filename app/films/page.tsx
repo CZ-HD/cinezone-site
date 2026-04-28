@@ -94,7 +94,7 @@ export default function FilmsPage() {
         <>
           {filteredMovies.length > 0 && (
             <section>
-              <h2 style={sectionTitle}>Films déjà ajoutés</h2>
+              <h2 style={sectionTitle}>🍿 Catalogue CineZone</h2>
               <MovieGrid movies={filteredMovies} local />
             </section>
           )}
