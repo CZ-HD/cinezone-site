@@ -562,11 +562,15 @@ export default function ChatPage() {
                               ...reactionBtn,
                               ...(active ? reactionBtnActive : {}),
                               transform:
-                                reactionPulse === `${msg.id}-${emoji}`
-                                  ? "scale(1.35)"
-                                  : active
-                                  ? "scale(1.12)"
-                                  : "scale(1)",
+  reactionPulse === `${msg.id}-${emoji}`
+    ? "scale(1.55) rotate(-8deg)"
+    : active
+    ? "scale(1.15)"
+    : "scale(1)",
+filter:
+  reactionPulse === `${msg.id}-${emoji}`
+    ? "drop-shadow(0 0 14px #00c6ff)"
+    : "none",
                             }}
                           >
                             <span
