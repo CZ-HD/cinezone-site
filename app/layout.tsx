@@ -22,7 +22,6 @@ export default function RootLayout({
     ["Films", "/films"],
     ...(showSeries ? [["Séries", "/series"]] : []),
     ["⭐ Favoris", "/favoris"],
-    ["👤 Perso", "/perso"],
     ["💬 Chat", "/chat"],
   ];
 
