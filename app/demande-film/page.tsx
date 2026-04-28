@@ -311,6 +311,7 @@ const containerStyle: React.CSSProperties = {
   width: "100%",
   maxWidth: "900px",
   margin: "0 auto",
+  position: "relative",
 };
 
 const cardStyle: React.CSSProperties = {
