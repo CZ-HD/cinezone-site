@@ -81,7 +81,7 @@ export default function DemandeFilmPage() {
       return;
     }
 
-    setMessage("✅ Demande envoyée avec succès.");
+    setMessage("✅ Demande envoyée !");
     setTmdbLink("");
     setAnnee("");
     setCodec("X264");
@@ -98,13 +98,6 @@ export default function DemandeFilmPage() {
   }
 
   async function sauvegarderModification() {
-    if (!editId) return;
-
-    if (!editTmdbLink || !editAnnee || !editCodec || !editCommentaire) {
-      alert("Tous les champs sont obligatoires.");
-      return;
-    }
-
     const { error } = await supabase
       .from("demandes_films")
       .update({
@@ -115,43 +108,34 @@ export default function DemandeFilmPage() {
       })
       .eq("id", editId);
 
-    if (error) {
-      alert("Erreur modification : " + error.message);
-      return;
+    if (!error) {
+      setEditId(null);
+      loadDemandes();
     }
-
-    setEditId(null);
-    loadDemandes();
   }
 
   async function supprimerDemande(id: string) {
     if (!isAdmin) return;
-    if (!confirm("Supprimer cette demande ?")) return;
 
-    const { error } = await supabase
-      .from("demandes_films")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      alert("Erreur suppression : " + error.message);
-      return;
-    }
-
+    await supabase.from("demandes_films").delete().eq("id", id);
     loadDemandes();
   }
 
   return (
     <main style={pageStyle}>
       <div style={containerStyle}>
-        <section style={cardStyle}>
-          <h1>🎬 Demande de film</h1>
 
-          <p style={textStyle}>
-            Remplis ce formulaire avec politesse. Toute demande incomplète pourra
-            être refusée.
+        {/* 🔥 HERO */}
+        <div style={heroStyle}>
+          <h1 style={heroTitle}>🎬 Demande de film</h1>
+          <p style={heroText}>
+            Propose un film à ajouter sur CineZone.  
+            Merci de faire une demande claire et complète.
           </p>
+        </div>
 
+        {/* FORM */}
+        <section style={cardStyle}>
           <input
             value={tmdbLink}
             onChange={(e) => setTmdbLink(e.target.value)}
@@ -171,8 +155,8 @@ export default function DemandeFilmPage() {
             onChange={(e) => setCodec(e.target.value)}
             style={inputStyle}
           >
-            <option value="X264">X264</option>
-            <option value="H265">H265</option>
+            <option>X264</option>
+            <option>H265</option>
           </select>
 
           <textarea
@@ -184,113 +168,44 @@ export default function DemandeFilmPage() {
           />
 
           <button onClick={envoyerDemande} style={buttonStyle}>
-            Envoyer la demande
+            🚀 Envoyer la demande
           </button>
 
-          {message && <p style={{ marginTop: "14px" }}>{message}</p>}
+          {message && <p style={{ marginTop: 14 }}>{message}</p>}
         </section>
 
+        {/* LISTE */}
         <section style={cardStyle}>
           <h2>📋 Demandes envoyées</h2>
 
           {demandes.length === 0 ? (
-            <p style={textStyle}>Aucune demande pour le moment.</p>
+            <p style={textStyle}>Aucune demande.</p>
           ) : (
-            <div style={{ display: "grid", gap: "14px" }}>
-              {demandes.map((demande) => {
-                const canEdit = demande.user_id === user?.id;
+            demandes.map((d) => {
+              const canEdit = d.user_id === user?.id;
 
-                return (
-                  <div key={demande.id} style={demandeCard}>
-                    {editId === demande.id ? (
-                      <>
-                        <input
-                          value={editTmdbLink}
-                          onChange={(e) => setEditTmdbLink(e.target.value)}
-                          style={inputStyle}
-                        />
+              return (
+                <div key={d.id} style={demandeCard}>
+                  <p><b>{d.tmdb_link}</b> ({d.annee})</p>
+                  <p>{d.codec}</p>
+                  <p>{d.commentaire}</p>
 
-                        <input
-                          value={editAnnee}
-                          onChange={(e) => setEditAnnee(e.target.value)}
-                          style={inputStyle}
-                        />
+                  <div style={buttonRow}>
+                    {canEdit && (
+                      <button onClick={() => startEdit(d)} style={btnBlue}>
+                        ✏️ Modifier
+                      </button>
+                    )}
 
-                        <select
-                          value={editCodec}
-                          onChange={(e) => setEditCodec(e.target.value)}
-                          style={inputStyle}
-                        >
-                          <option value="X264">X264</option>
-                          <option value="H265">H265</option>
-                        </select>
-
-                        <textarea
-                          value={editCommentaire}
-                          onChange={(e) => setEditCommentaire(e.target.value)}
-                          rows={4}
-                          style={inputStyle}
-                        />
-
-                        <div style={buttonRow}>
-                          <button
-                            onClick={sauvegarderModification}
-                            style={smallBlueButton}
-                          >
-                            💾 Sauvegarder
-                          </button>
-
-                          <button
-                            onClick={() => setEditId(null)}
-                            style={smallGrayButton}
-                          >
-                            Annuler
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <p>
-                          <b>TMDB / Lien :</b> {demande.tmdb_link}
-                        </p>
-                        <p>
-                          <b>Année :</b> {demande.annee}
-                        </p>
-                        <p>
-                          <b>Codec :</b> {demande.codec}
-                        </p>
-                        <p>
-                          <b>Commentaire :</b> {demande.commentaire}
-                        </p>
-                        <p style={{ color: "#8b95a7", fontSize: "13px" }}>
-                          Demandé par : {demande.email}
-                        </p>
-
-                        <div style={buttonRow}>
-                          {canEdit && (
-                            <button
-                              onClick={() => startEdit(demande)}
-                              style={smallBlueButton}
-                            >
-                              ✏️ Modifier
-                            </button>
-                          )}
-
-                          {isAdmin && (
-                            <button
-                              onClick={() => supprimerDemande(demande.id)}
-                              style={deleteButton}
-                            >
-                              🗑 Supprimer
-                            </button>
-                          )}
-                        </div>
-                      </>
+                    {isAdmin && (
+                      <button onClick={() => supprimerDemande(d.id)} style={btnRed}>
+                        🗑 Supprimer
+                      </button>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })
           )}
         </section>
       </div>
@@ -298,102 +213,99 @@ export default function DemandeFilmPage() {
   );
 }
 
+/* 🔥 STYLE PREMIUM */
+
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  padding: "54px 34px",
-  color: "#fff",
-  fontFamily: "Arial, sans-serif",
+  padding: "60px 30px",
   background:
-    "radial-gradient(circle at 20% 20%, rgba(0,198,255,0.24), transparent 30%), radial-gradient(circle at 80% 10%, rgba(80,0,255,0.18), transparent 28%), radial-gradient(circle at 70% 80%, rgba(255,215,100,0.13), transparent 32%), linear-gradient(135deg, #02050a 0%, #061528 45%, #000 100%)",
+    "radial-gradient(circle at 20% 20%, rgba(0,198,255,0.25), transparent), radial-gradient(circle at 80% 0%, rgba(120,0,255,0.2), transparent), #000",
 };
 
-const containerStyle: React.CSSProperties = {
-  width: "100%",
+const containerStyle = {
   maxWidth: "900px",
   margin: "0 auto",
-  position: "relative",
 };
 
-const cardStyle: React.CSSProperties = {
-  width: "100%",
-  marginBottom: "28px",
+const heroStyle = {
+  padding: "30px",
+  borderRadius: "25px",
+  marginBottom: "30px",
+  background: "rgba(0,0,0,0.5)",
+  border: "1px solid rgba(0,198,255,0.3)",
+  boxShadow: "0 0 40px rgba(0,198,255,0.2)",
+};
+
+const heroTitle = {
+  fontSize: "36px",
+  margin: 0,
+};
+
+const heroText = {
+  color: "#aaa",
+  marginTop: "10px",
+};
+
+const cardStyle = {
   padding: "24px",
-  borderRadius: "24px",
-  background: "rgba(10,15,25,0.92)",
-  border: "1px solid rgba(0,198,255,0.25)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.55)",
-  boxSizing: "border-box",
+  borderRadius: "20px",
+  background: "rgba(10,15,25,0.9)",
+  marginBottom: "25px",
 };
 
-const textStyle: React.CSSProperties = {
-  color: "#aab6c8",
-  lineHeight: 1.6,
-};
-
-const inputStyle: React.CSSProperties = {
+const inputStyle = {
   width: "100%",
-  boxSizing: "border-box",
   padding: "14px",
   marginTop: "12px",
-  borderRadius: "14px",
-  border: "1px solid rgba(255,255,255,0.14)",
+  borderRadius: "12px",
   background: "#0b0f18",
   color: "#fff",
-  outline: "none",
-};
-
-const buttonStyle: React.CSSProperties = {
-  width: "100%",
-  marginTop: "16px",
-  padding: "14px",
-  borderRadius: "14px",
-  border: "none",
-  color: "#fff",
-  fontWeight: 900,
-  cursor: "pointer",
-  background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
-};
-
-const demandeCard: React.CSSProperties = {
-  padding: "16px",
-  borderRadius: "18px",
-  background: "rgba(255,255,255,0.06)",
   border: "1px solid rgba(255,255,255,0.1)",
 };
 
-const buttonRow: React.CSSProperties = {
+const buttonStyle = {
+  width: "100%",
+  marginTop: "16px",
+  padding: "14px",
+  borderRadius: "12px",
+  background: "linear-gradient(135deg,#00c6ff,#0072ff)",
+  border: "none",
+  color: "#fff",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
+
+const demandeCard = {
+  padding: "16px",
+  borderRadius: "15px",
+  marginTop: "14px",
+  background: "rgba(255,255,255,0.05)",
+};
+
+const buttonRow = {
   display: "flex",
   gap: "10px",
-  flexWrap: "wrap",
-  marginTop: "12px",
+  marginTop: "10px",
 };
 
-const smallBlueButton: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: "12px",
-  border: "1px solid rgba(0,198,255,0.45)",
-  background: "rgba(0,198,255,0.16)",
-  color: "#9deaff",
-  fontWeight: 800,
+const btnBlue = {
+  background: "#00c6ff",
+  border: "none",
+  padding: "8px 12px",
+  borderRadius: "8px",
+  color: "#000",
   cursor: "pointer",
 };
 
-const smallGrayButton: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: "12px",
-  border: "1px solid rgba(255,255,255,0.2)",
-  background: "rgba(255,255,255,0.08)",
+const btnRed = {
+  background: "#ff1744",
+  border: "none",
+  padding: "8px 12px",
+  borderRadius: "8px",
   color: "#fff",
-  fontWeight: 800,
   cursor: "pointer",
 };
 
-const deleteButton: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: "12px",
-  border: "1px solid rgba(255,90,90,0.45)",
-  background: "rgba(255,70,70,0.16)",
-  color: "#ffb3b3",
-  fontWeight: 800,
-  cursor: "pointer",
+const textStyle = {
+  color: "#aaa",
 };
