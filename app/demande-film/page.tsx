@@ -218,8 +218,13 @@ export default function DemandeFilmPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   padding: "60px 30px",
-  background:
-    "radial-gradient(circle at 20% 20%, rgba(0,198,255,0.25), transparent), radial-gradient(circle at 80% 0%, rgba(120,0,255,0.2), transparent), #000",
+  background: `
+    linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9)),
+    url("https://images.unsplash.com/photo-1524985069026-dd778a71c7b4")
+  `,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundAttachment: "fixed",
 };
 
 const containerStyle = {
