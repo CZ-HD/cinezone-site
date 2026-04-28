@@ -19,6 +19,7 @@ type Message = {
   status_text?: string;
   content: string;
   created_at: string;
+  pinned?: boolean;
 };
 
 type Profile = {
@@ -45,6 +46,11 @@ type OnlineMember = {
   status_text?: string;
 };
 
+type TypingUser = {
+  user_id: string;
+  username: string;
+};
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
@@ -59,8 +65,36 @@ export default function ChatPage() {
   const [editStatus, setEditStatus] = useState("🟢 En ligne");
   const [uploading, setUploading] = useState(false);
   const [onlineMembers, setOnlineMembers] = useState<OnlineMember[]>([]);
+  const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [hasNewMessage, setHasNewMessage] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const typingTimeoutRef = useRef<any>({});
+
+  const playNotificationSound = () => {
+    if (!soundEnabled) return;
+
+    try {
+      const AudioContext =
+        window.AudioContext || (window as any).webkitAudioContext;
+      const audioCtx = new AudioContext();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = "sine";
+      oscillator.frequency.value = 880;
+      gainNode.gain.value = 0.05;
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.12);
+    } catch {
+      // Son bloqué par le navigateur, pas grave.
+    }
+  };
 
   useEffect(() => {
     async function init() {
@@ -114,7 +148,24 @@ export default function ChatPage() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
+          const newMessage = payload.new as Message;
+
+          setMessages((prev) => [...prev, newMessage]);
+
+          if (newMessage.user_id !== user?.id) {
+            setHasNewMessage(true);
+            playNotificationSound();
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages" },
+        (payload) => {
+          const updated = payload.new as Message;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === updated.id ? updated : m))
+          );
         }
       )
       .on(
@@ -163,7 +214,7 @@ export default function ChatPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [soundEnabled, user?.id]);
 
   useEffect(() => {
     if (!user || !profile) return;
@@ -215,11 +266,63 @@ export default function ChatPage() {
   }, [user, profile]);
 
   useEffect(() => {
+    if (!user || !profile) return;
+
+    const typingChannel = supabase.channel("typing-room");
+
+    typingChannel
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (!payload?.user_id || payload.user_id === user.id) return;
+
+        setTypingUsers((prev) => {
+          const exists = prev.some((u) => u.user_id === payload.user_id);
+          if (exists) return prev;
+
+          return [
+            ...prev,
+            {
+              user_id: payload.user_id,
+              username: payload.username || "Quelqu’un",
+            },
+          ];
+        });
+
+        clearTimeout(typingTimeoutRef.current[payload.user_id]);
+
+        typingTimeoutRef.current[payload.user_id] = setTimeout(() => {
+          setTypingUsers((prev) =>
+            prev.filter((u) => u.user_id !== payload.user_id)
+          );
+        }, 1800);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(typingChannel);
+    };
+  }, [user, profile]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, reactions]);
+    setHasNewMessage(false);
+  }, [messages.length]);
 
   const onlineUserIds = onlineMembers.map((member) => member.user_id);
   const isAdmin = profile?.role === "admin";
+  const pinnedMessage = messages.find((m) => m.pinned);
+
+  const sendTyping = async () => {
+    if (!user || !profile) return;
+
+    await supabase.channel("typing-room").send({
+      type: "broadcast",
+      event: "typing",
+      payload: {
+        user_id: user.id,
+        username: profile.username || user.email || "Quelqu’un",
+      },
+    });
+  };
 
   const saveProfile = async () => {
     if (!user) return;
@@ -314,6 +417,7 @@ export default function ChatPage() {
       role_color: freshProfile?.role_color || "#00c6ff",
       status_text: freshProfile?.status_text || "🟢 En ligne",
       content: message,
+      pinned: false,
     });
 
     if (error) {
@@ -369,6 +473,29 @@ export default function ChatPage() {
     }
   };
 
+  const togglePin = async (messageId: string) => {
+    if (!isAdmin) return;
+
+    const target = messages.find((m) => m.id === messageId);
+    if (!target) return;
+
+    const shouldPin = !target.pinned;
+
+    if (shouldPin) {
+      await supabase
+        .from("messages")
+        .update({ pinned: false })
+        .neq("id", messageId);
+    }
+
+    const { error } = await supabase
+      .from("messages")
+      .update({ pinned: shouldPin })
+      .eq("id", messageId);
+
+    if (error) alert("Erreur épinglage : " + error.message);
+  };
+
   const deleteMessage = async (messageId: string) => {
     if (!isAdmin) return;
     if (!confirm("Supprimer ce message ?")) return;
@@ -400,13 +527,43 @@ export default function ChatPage() {
     <main style={pageStyle}>
       <div style={chatLayout}>
         <div style={chatBox}>
+          {hasNewMessage && (
+            <button
+              onClick={() => {
+                bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+                setHasNewMessage(false);
+              }}
+              style={newMessageBadge}
+            >
+              🔔 Nouveau message
+            </button>
+          )}
+
           <div style={headerStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "12px",
+              }}
+            >
               <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
 
-              <button onClick={() => setShowProfile(!showProfile)} style={profileBtn}>
-                ⚙️ Mon profil
-              </button>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  style={soundBtn}
+                >
+                  {soundEnabled ? "🔊 Son ON" : "🔇 Son OFF"}
+                </button>
+
+                <button
+                  onClick={() => setShowProfile(!showProfile)}
+                  style={profileBtn}
+                >
+                  ⚙️ Mon profil
+                </button>
+              </div>
             </div>
 
             <div style={connectedBox}>
@@ -423,13 +580,25 @@ export default function ChatPage() {
               <div>
                 <p style={{ margin: 0, color: "#fff", fontWeight: "bold" }}>
                   Connecté :{" "}
-                  <span style={{ color: isAdmin ? "gold" : profile?.role_color || "#00c6ff" }}>
+                  <span
+                    style={{
+                      color: isAdmin
+                        ? "gold"
+                        : profile?.role_color || "#00c6ff",
+                    }}
+                  >
                     {displayName}
                   </span>
                   {isAdmin && <span style={adminBadge}>ADMIN</span>}
                 </p>
 
-                <p style={{ margin: "4px 0 0", color: "#4cff9b", fontSize: "13px" }}>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    color: "#4cff9b",
+                    fontSize: "13px",
+                  }}
+                >
                   {profile?.status_text || "🟢 En ligne"}
                 </p>
               </div>
@@ -460,9 +629,13 @@ export default function ChatPage() {
                   <option value="🟢 En ligne">🟢 En ligne</option>
                   <option value="🔴 Hors ligne">🔴 Hors ligne</option>
                   <option value="⛔ Occupé">⛔ Occupé</option>
-                  <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
+                  <option value="🎬 Je regarde un film">
+                    🎬 Je regarde un film
+                  </option>
                   {isAdmin && (
-                    <option value="👑 Admin disponible">👑 Admin disponible</option>
+                    <option value="👑 Admin disponible">
+                      👑 Admin disponible
+                    </option>
                   )}
                 </select>
 
@@ -473,6 +646,13 @@ export default function ChatPage() {
             )}
           </div>
 
+          {pinnedMessage && (
+            <div style={pinnedBox}>
+              <strong>📌 Message épinglé</strong>
+              <p style={{ margin: "8px 0 0" }}>{pinnedMessage.content}</p>
+            </div>
+          )}
+
           <div style={messagesBox}>
             {messages.length === 0 ? (
               <p style={{ color: "#888", textAlign: "center" }}>
@@ -481,8 +661,12 @@ export default function ChatPage() {
             ) : (
               messages.map((msg) => {
                 const isMe = msg.user_id === user?.id;
-                const name = isMe ? displayName : msg.username || msg.email || "Utilisateur";
-                const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
+                const name = isMe
+                  ? displayName
+                  : msg.username || msg.email || "Utilisateur";
+                const msgAvatar = isMe
+                  ? avatarUrl
+                  : msg.avatar || DEFAULT_AVATAR;
                 const userIsOnline = onlineUserIds.includes(msg.user_id);
                 const nameColor =
                   msg.role === "admin" ? "gold" : msg.role_color || "#dbeafe";
@@ -519,7 +703,12 @@ export default function ChatPage() {
                             }}
                           >
                             {name}
-                            {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                            {msg.role === "admin" && (
+                              <span style={adminBadge}>ADMIN</span>
+                            )}
+                            {msg.pinned && (
+                              <span style={pinnedBadge}>ÉPINGLÉ</span>
+                            )}
                           </div>
 
                           <div
@@ -537,7 +726,9 @@ export default function ChatPage() {
 
                       <div style={reactionRow}>
                         {REACTION_EMOJIS.map((emoji) => {
-                          const count = msgReactions.filter((r) => r.emoji === emoji).length;
+                          const count = msgReactions.filter(
+                            (r) => r.emoji === emoji
+                          ).length;
                           const active = msgReactions.some(
                             (r) => r.emoji === emoji && r.user_id === user?.id
                           );
@@ -562,19 +753,37 @@ export default function ChatPage() {
                                     : "none",
                               }}
                             >
-                              <span style={active ? reactionEmojiActive : reactionEmoji}>
+                              <span
+                                style={
+                                  active ? reactionEmojiActive : reactionEmoji
+                                }
+                              >
                                 {emoji}
                               </span>
-                              {count > 0 && <span style={reactionCount}>{count}</span>}
+                              {count > 0 && (
+                                <span style={reactionCount}>{count}</span>
+                              )}
                             </button>
                           );
                         })}
                       </div>
 
                       {isAdmin && (
-                        <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
-                          🗑 Supprimer
-                        </button>
+                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                          <button
+                            onClick={() => togglePin(msg.id)}
+                            style={pinBtn}
+                          >
+                            {msg.pinned ? "📌 Désépingler" : "📌 Épingler"}
+                          </button>
+
+                          <button
+                            onClick={() => deleteMessage(msg.id)}
+                            style={deleteBtn}
+                          >
+                            🗑 Supprimer
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -585,10 +794,21 @@ export default function ChatPage() {
             <div ref={bottomRef} />
           </div>
 
+          {typingUsers.length > 0 && (
+            <div style={typingBox}>
+              ✍️{" "}
+              {typingUsers.map((u) => u.username).join(", ")}{" "}
+              {typingUsers.length > 1 ? "écrivent..." : "écrit..."}
+            </div>
+          )}
+
           <div style={inputBox}>
             <input
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => {
+                setText(e.target.value);
+                sendTyping();
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") sendMessage();
               }}
@@ -603,13 +823,11 @@ export default function ChatPage() {
         </div>
 
         <aside style={onlinePanel}>
-          <h2 style={{ margin: 0, fontSize: "18px" }}>
-            🟢 En ligne
-          </h2>
+          <h2 style={{ margin: 0, fontSize: "18px" }}>🟢 En ligne</h2>
 
           <p style={{ color: "#9ca3af", marginTop: "6px" }}>
-            {onlineMembers.length} membre{onlineMembers.length > 1 ? "s" : ""} connecté
-            {onlineMembers.length > 1 ? "s" : ""}
+            {onlineMembers.length} membre{onlineMembers.length > 1 ? "s" : ""}{" "}
+            connecté{onlineMembers.length > 1 ? "s" : ""}
           </p>
 
           <div style={{ display: "grid", gap: "12px", marginTop: "18px" }}>
@@ -624,15 +842,31 @@ export default function ChatPage() {
                       alt="avatar"
                       style={avatarMsg}
                     />
-                    <span style={{ ...onlineDotSmall, background: "#4cff9b" }} />
+                    <span
+                      style={{ ...onlineDotSmall, background: "#4cff9b" }}
+                    />
                   </div>
 
                   <div>
-                    <p style={{ margin: 0, fontWeight: 900, color: member.role === "admin" ? "gold" : "#fff" }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontWeight: 900,
+                        color: member.role === "admin" ? "gold" : "#fff",
+                      }}
+                    >
                       {member.username || "Utilisateur"}
-                      {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                      {member.role === "admin" && (
+                        <span style={adminBadge}>ADMIN</span>
+                      )}
                     </p>
-                    <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#4cff9b" }}>
+                    <p
+                      style={{
+                        margin: "4px 0 0",
+                        fontSize: "12px",
+                        color: "#4cff9b",
+                      }}
+                    >
                       {member.status_text || "🟢 En ligne"}
                     </p>
                   </div>
@@ -676,6 +910,47 @@ const chatBox: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
+  position: "relative",
+};
+
+const newMessageBadge: React.CSSProperties = {
+  position: "absolute",
+  top: "94px",
+  right: "24px",
+  zIndex: 20,
+  padding: "8px 14px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.18)",
+  background: "linear-gradient(135deg, #ff3b3b, #b00020)",
+  color: "#fff",
+  fontWeight: 900,
+  cursor: "pointer",
+  boxShadow: "0 0 22px rgba(255,60,60,0.45)",
+};
+
+const pinnedBox: React.CSSProperties = {
+  padding: "12px 18px",
+  background: "linear-gradient(135deg, rgba(255,215,100,0.22), rgba(255,165,0,0.08))",
+  borderBottom: "1px solid rgba(255,215,100,0.35)",
+  color: "#fff",
+};
+
+const pinnedBadge: React.CSSProperties = {
+  color: "#000",
+  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
+  fontSize: "9px",
+  fontWeight: 900,
+  marginLeft: "7px",
+  padding: "3px 7px",
+  borderRadius: "999px",
+};
+
+const typingBox: React.CSSProperties = {
+  padding: "8px 18px",
+  color: "#00c6ff",
+  fontSize: "13px",
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,198,255,0.06)",
 };
 
 const onlinePanel: React.CSSProperties = {
@@ -871,6 +1146,18 @@ const adminBadge: React.CSSProperties = {
   boxShadow: "0 0 12px rgba(255,215,100,0.55)",
 };
 
+const pinBtn: React.CSSProperties = {
+  marginTop: "12px",
+  background: "rgba(255,215,100,0.16)",
+  color: "#ffe58a",
+  border: "1px solid rgba(255,215,100,0.45)",
+  borderRadius: "10px",
+  padding: "7px 10px",
+  cursor: "pointer",
+  fontSize: "12px",
+  fontWeight: "bold",
+};
+
 const deleteBtn: React.CSSProperties = {
   marginTop: "12px",
   background: "rgba(255,70,70,0.16)",
@@ -918,6 +1205,16 @@ const profileBtn: React.CSSProperties = {
   border: "1px solid rgba(0,198,255,0.35)",
   color: "#fff",
   background: "rgba(0,198,255,0.12)",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
+
+const soundBtn: React.CSSProperties = {
+  padding: "10px 14px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.18)",
+  color: "#fff",
+  background: "rgba(255,255,255,0.08)",
   fontWeight: "bold",
   cursor: "pointer",
 };
