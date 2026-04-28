@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
+const CREATOR_EMAIL = "blackph4tom@gmail.com";
 
 type Profile = {
   id: string;
@@ -22,6 +23,7 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
     checkAdmin();
@@ -45,11 +47,18 @@ export default function AdminPage() {
       return;
     }
 
+    if (user.email === CREATOR_EMAIL) {
+      setIsAdmin(true);
+      setLoading(false);
+      loadUsers();
+      return;
+    }
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("role,status")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!profile || profile.role !== "admin" || profile.status !== "approved") {
       window.location.href = "/";
@@ -62,12 +71,18 @@ export default function AdminPage() {
   };
 
   const loadUsers = async () => {
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from("profiles")
-      .select("*")
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false });
 
-    if (!error) setProfiles(data || []);
+    if (error) {
+      setMessage("❌ Erreur chargement utilisateurs : " + error.message);
+      return;
+    }
+
+    setProfiles(data || []);
+    setMemberCount(count || 0);
   };
 
   const saveDownload = async () => {
@@ -202,6 +217,8 @@ export default function AdminPage() {
     <main style={pageStyle}>
       <h1>👑 Admin CineZone HD</h1>
 
+      <div style={counterStyle}>👥 {memberCount} membres inscrits</div>
+
       <section style={cardStyle}>
         <h2>🎬 Ajouter / modifier un lien</h2>
 
@@ -293,6 +310,20 @@ const pageStyle: React.CSSProperties = {
   color: "#fff",
   padding: "34px",
   fontFamily: "Arial, sans-serif",
+};
+
+const counterStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "10px 16px",
+  borderRadius: "999px",
+  background: "rgba(0,198,255,0.12)",
+  border: "1px solid rgba(0,198,255,0.35)",
+  color: "#fff",
+  fontWeight: 900,
+  boxShadow: "0 0 20px rgba(0,198,255,0.18)",
+  marginBottom: "22px",
 };
 
 const cardStyle: React.CSSProperties = {
