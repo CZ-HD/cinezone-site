@@ -9,6 +9,7 @@ const CREATOR_EMAIL = "blackph4tom@gmail.com";
 export default function AdminButton() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [demandeCount, setDemandeCount] = useState(0);
 
   useEffect(() => {
     async function checkAdmin() {
@@ -19,7 +20,7 @@ export default function AdminButton() {
 
       if (user.email === CREATOR_EMAIL) {
         setIsAdmin(true);
-        await loadPendingCount();
+        await loadCounts();
         return;
       }
 
@@ -31,23 +32,30 @@ export default function AdminButton() {
 
       if (profile?.role === "admin" && profile?.status === "approved") {
         setIsAdmin(true);
-        await loadPendingCount();
+        await loadCounts();
       }
     }
 
-    async function loadPendingCount() {
-      const { count } = await supabase
+    async function loadCounts() {
+      const { count: pending } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending");
 
-      setPendingCount(count || 0);
+      const { count: demandes } = await supabase
+        .from("demandes_films")
+        .select("*", { count: "exact", head: true });
+
+      setPendingCount(pending || 0);
+      setDemandeCount(demandes || 0);
     }
 
     checkAdmin();
   }, []);
 
   if (!isAdmin) return null;
+
+  const totalAlerts = pendingCount + demandeCount;
 
   return (
     <Link
@@ -65,10 +73,11 @@ export default function AdminButton() {
         border: "1px solid rgba(255,215,100,0.55)",
         boxShadow: "0 0 18px rgba(255,215,100,0.35)",
       }}
+      title={`${pendingCount} membre(s) en attente, ${demandeCount} demande(s) film`}
     >
       👑 Admin
 
-      {pendingCount > 0 && (
+      {totalAlerts > 0 && (
         <span
           style={{
             position: "absolute",
@@ -88,7 +97,7 @@ export default function AdminButton() {
             boxShadow: "0 0 12px rgba(255,23,68,0.8)",
           }}
         >
-          {pendingCount}
+          {totalAlerts}
         </span>
       )}
     </Link>
