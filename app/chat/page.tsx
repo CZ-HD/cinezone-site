@@ -40,6 +40,7 @@ type Reaction = {
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [reactionPulse, setReactionPulse] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -120,7 +121,27 @@ export default function ChatPage() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "message_reactions" },
         (payload) => {
-          setReactions((prev) => [...prev, payload.new as Reaction]);
+          const newReaction = payload.new as Reaction;
+
+          setReactions((prev) => {
+            const withoutTemp = prev.filter(
+              (r) =>
+                !(
+                  r.id.startsWith("temp-") &&
+                  r.message_id === newReaction.message_id &&
+                  r.user_id === newReaction.user_id &&
+                  r.emoji === newReaction.emoji
+                )
+            );
+
+            const alreadyExists = withoutTemp.some(
+              (r) => r.id === newReaction.id
+            );
+
+            if (alreadyExists) return withoutTemp;
+
+            return [...withoutTemp, newReaction];
+          });
         }
       )
       .on(
@@ -260,7 +281,7 @@ export default function ChatPage() {
       .eq("id", user.id)
       .single();
 
-    await supabase.from("messages").insert({
+    const { error } = await supabase.from("messages").insert({
       user_id: user.id,
       email: user.email,
       username: freshProfile?.username || user.email,
@@ -270,10 +291,18 @@ export default function ChatPage() {
       status_text: freshProfile?.status_text || "🟢 En ligne",
       content: message,
     });
+
+    if (error) {
+      alert("Erreur message : " + error.message);
+    }
   };
 
   const toggleReaction = async (messageId: string, emoji: string) => {
     if (!user) return;
+
+    const pulseKey = `${messageId}-${emoji}`;
+    setReactionPulse(pulseKey);
+    setTimeout(() => setReactionPulse(null), 220);
 
     const existing = reactions.find(
       (r) =>
@@ -283,15 +312,40 @@ export default function ChatPage() {
     );
 
     if (existing) {
-      await supabase.from("message_reactions").delete().eq("id", existing.id);
+      setReactions((prev) => prev.filter((r) => r.id !== existing.id));
+
+      const { error } = await supabase
+        .from("message_reactions")
+        .delete()
+        .eq("id", existing.id);
+
+      if (error) {
+        alert("Erreur réaction : " + error.message);
+      }
+
       return;
     }
 
-    await supabase.from("message_reactions").insert({
+    const tempReaction: Reaction = {
+      id: `temp-${Date.now()}`,
+      message_id: messageId,
+      user_id: user.id,
+      emoji,
+      created_at: new Date().toISOString(),
+    };
+
+    setReactions((prev) => [...prev, tempReaction]);
+
+    const { error } = await supabase.from("message_reactions").insert({
       message_id: messageId,
       user_id: user.id,
       emoji,
     });
+
+    if (error) {
+      alert("Erreur réaction : " + error.message);
+      setReactions((prev) => prev.filter((r) => r.id !== tempReaction.id));
+    }
   };
 
   const getMessageReactions = (messageId: string) => {
@@ -328,10 +382,19 @@ export default function ChatPage() {
     <main style={pageStyle}>
       <div style={chatBox}>
         <div style={headerStyle}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "12px",
+            }}
+          >
             <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
 
-            <button onClick={() => setShowProfile(!showProfile)} style={profileBtn}>
+            <button
+              onClick={() => setShowProfile(!showProfile)}
+              style={profileBtn}
+            >
               ⚙️ Mon profil
             </button>
           </div>
@@ -350,13 +413,23 @@ export default function ChatPage() {
             <div>
               <p style={{ margin: 0, color: "#fff", fontWeight: "bold" }}>
                 Connecté :{" "}
-                <span style={{ color: isAdmin ? "gold" : profile?.role_color || "#00c6ff" }}>
+                <span
+                  style={{
+                    color: isAdmin ? "gold" : profile?.role_color || "#00c6ff",
+                  }}
+                >
                   {displayName}
                 </span>
                 {isAdmin && <span style={adminBadge}>ADMIN</span>}
               </p>
 
-              <p style={{ margin: "4px 0 0", color: "#4cff9b", fontSize: "13px" }}>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  color: "#4cff9b",
+                  fontSize: "13px",
+                }}
+              >
                 {profile?.status_text || "🟢 En ligne"}
               </p>
             </div>
@@ -387,9 +460,13 @@ export default function ChatPage() {
                 <option value="🟢 En ligne">🟢 En ligne</option>
                 <option value="🔴 Hors ligne">🔴 Hors ligne</option>
                 <option value="⛔ Occupé">⛔ Occupé</option>
-                <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
+                <option value="🎬 Je regarde un film">
+                  🎬 Je regarde un film
+                </option>
                 {isAdmin && (
-                  <option value="👑 Admin disponible">👑 Admin disponible</option>
+                  <option value="👑 Admin disponible">
+                    👑 Admin disponible
+                  </option>
                 )}
               </select>
 
@@ -424,6 +501,7 @@ export default function ChatPage() {
                     display: "flex",
                     justifyContent: isMe ? "flex-end" : "flex-start",
                     marginBottom: "16px",
+                    animation: "fadeIn 0.25s ease",
                   }}
                 >
                   <div style={isMe ? myMessageBox : otherMessageBox}>
@@ -447,7 +525,9 @@ export default function ChatPage() {
                           }}
                         >
                           {name}
-                          {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                          {msg.role === "admin" && (
+                            <span style={adminBadge}>ADMIN</span>
+                          )}
                         </div>
 
                         <div
@@ -481,12 +561,24 @@ export default function ChatPage() {
                             style={{
                               ...reactionBtn,
                               ...(active ? reactionBtnActive : {}),
+                              transform:
+                                reactionPulse === `${msg.id}-${emoji}`
+                                  ? "scale(1.35)"
+                                  : active
+                                  ? "scale(1.12)"
+                                  : "scale(1)",
                             }}
                           >
-                            <span style={active ? reactionEmojiActive : reactionEmoji}>
+                            <span
+                              style={
+                                active ? reactionEmojiActive : reactionEmoji
+                              }
+                            >
                               {emoji}
                             </span>
-                            {count > 0 && <span style={reactionCount}>{count}</span>}
+                            {count > 0 && (
+                              <span style={reactionCount}>{count}</span>
+                            )}
                           </button>
                         );
                       })}
@@ -688,12 +780,12 @@ const reactionBtn: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: "5px",
-  transition:
-    "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
+  transition: "all 0.18s ease",
+  position: "relative",
+  zIndex: 10,
 };
 
 const reactionBtnActive: React.CSSProperties = {
-  transform: "scale(1.12)",
   background: "rgba(0,198,255,0.2)",
   border: "1px solid rgba(0,198,255,0.75)",
   boxShadow: "0 0 16px rgba(0,198,255,0.55)",
