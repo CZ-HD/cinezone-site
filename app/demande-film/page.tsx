@@ -284,11 +284,14 @@ const buttonStyle = {
   cursor: "pointer",
 };
 
-const demandeCard = {
+const demandeCard: React.CSSProperties = {
   padding: "16px",
   borderRadius: "15px",
   marginTop: "14px",
-  background: "rgba(255,255,255,0.05)",
+  background: "rgba(255,255,255,0.06)",
+  backdropFilter: "blur(6px)",
+  WebkitBackdropFilter: "blur(6px)",
+  border: "1px solid rgba(255,255,255,0.1)",
 };
 
 const buttonRow = {
