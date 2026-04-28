@@ -37,6 +37,14 @@ type Reaction = {
   created_at: string;
 };
 
+type OnlineMember = {
+  user_id: string;
+  username?: string;
+  avatar?: string;
+  role?: string;
+  status_text?: string;
+};
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
@@ -50,7 +58,7 @@ export default function ChatPage() {
   const [editUsername, setEditUsername] = useState("");
   const [editStatus, setEditStatus] = useState("🟢 En ligne");
   const [uploading, setUploading] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineMembers, setOnlineMembers] = useState<OnlineMember[]>([]);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -134,11 +142,9 @@ export default function ChatPage() {
                 )
             );
 
-            const alreadyExists = withoutTemp.some(
-              (r) => r.id === newReaction.id
-            );
-
-            if (alreadyExists) return withoutTemp;
+            if (withoutTemp.some((r) => r.id === newReaction.id)) {
+              return withoutTemp;
+            }
 
             return [...withoutTemp, newReaction];
           });
@@ -173,7 +179,23 @@ export default function ChatPage() {
     presenceChannel
       .on("presence", { event: "sync" }, () => {
         const state = presenceChannel.presenceState();
-        setOnlineUsers(Object.keys(state));
+
+        const members = Object.values(state)
+          .flat()
+          .map((item: any) => ({
+            user_id: item.user_id,
+            username: item.username,
+            avatar: item.avatar,
+            role: item.role,
+            status_text: item.status_text,
+          }));
+
+        const uniqueMembers = members.filter(
+          (member, index, self) =>
+            index === self.findIndex((m) => m.user_id === member.user_id)
+        );
+
+        setOnlineMembers(uniqueMembers);
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
@@ -182,6 +204,7 @@ export default function ChatPage() {
             username: profile.username,
             avatar: profile.avatar,
             role: profile.role,
+            status_text: profile.status_text || "🟢 En ligne",
           });
         }
       });
@@ -195,6 +218,7 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, reactions]);
 
+  const onlineUserIds = onlineMembers.map((member) => member.user_id);
   const isAdmin = profile?.role === "admin";
 
   const saveProfile = async () => {
@@ -319,10 +343,7 @@ export default function ChatPage() {
         .delete()
         .eq("id", existing.id);
 
-      if (error) {
-        alert("Erreur réaction : " + error.message);
-      }
-
+      if (error) alert("Erreur réaction : " + error.message);
       return;
     }
 
@@ -348,10 +369,6 @@ export default function ChatPage() {
     }
   };
 
-  const getMessageReactions = (messageId: string) => {
-    return reactions.filter((r) => r.message_id === messageId);
-  };
-
   const deleteMessage = async (messageId: string) => {
     if (!isAdmin) return;
     if (!confirm("Supprimer ce message ?")) return;
@@ -361,10 +378,11 @@ export default function ChatPage() {
       .delete()
       .eq("id", messageId);
 
-    if (error) {
-      alert("Erreur suppression : " + error.message);
-    }
+    if (error) alert("Erreur suppression : " + error.message);
   };
+
+  const getMessageReactions = (messageId: string) =>
+    reactions.filter((r) => r.message_id === messageId);
 
   if (loading) {
     return (
@@ -376,250 +394,253 @@ export default function ChatPage() {
 
   const displayName = profile?.username || user?.email || "Utilisateur";
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
-  const realOnline = onlineUsers.includes(user?.id);
+  const realOnline = onlineUserIds.includes(user?.id);
 
   return (
     <main style={pageStyle}>
-      <div style={chatBox}>
-        <div style={headerStyle}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "12px",
-            }}
-          >
-            <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
+      <div style={chatLayout}>
+        <div style={chatBox}>
+          <div style={headerStyle}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+              <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
 
-            <button
-              onClick={() => setShowProfile(!showProfile)}
-              style={profileBtn}
-            >
-              ⚙️ Mon profil
-            </button>
-          </div>
-
-          <div style={connectedBox}>
-            <div style={avatarWrap}>
-              <img src={avatarUrl} alt="avatar" style={avatarSmall} />
-              <span
-                style={{
-                  ...onlineDot,
-                  background: realOnline ? "#4cff9b" : "#ff5c5c",
-                }}
-              />
-            </div>
-
-            <div>
-              <p style={{ margin: 0, color: "#fff", fontWeight: "bold" }}>
-                Connecté :{" "}
-                <span
-                  style={{
-                    color: isAdmin ? "gold" : profile?.role_color || "#00c6ff",
-                  }}
-                >
-                  {displayName}
-                </span>
-                {isAdmin && <span style={adminBadge}>ADMIN</span>}
-              </p>
-
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  color: "#4cff9b",
-                  fontSize: "13px",
-                }}
-              >
-                {profile?.status_text || "🟢 En ligne"}
-              </p>
-            </div>
-          </div>
-
-          {showProfile && (
-            <div style={profileBox}>
-              <h3 style={{ marginTop: 0 }}>Modifier mon profil</h3>
-
-              <label>Pseudo</label>
-              <input
-                value={editUsername}
-                onChange={(e) => setEditUsername(e.target.value)}
-                style={inputStyle}
-                placeholder="Ton pseudo"
-              />
-
-              <label>Avatar</label>
-              <input type="file" accept="image/*" onChange={uploadAvatar} />
-              {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
-
-              <label>Statut</label>
-              <select
-                value={editStatus}
-                onChange={(e) => setEditStatus(e.target.value)}
-                style={inputStyle}
-              >
-                <option value="🟢 En ligne">🟢 En ligne</option>
-                <option value="🔴 Hors ligne">🔴 Hors ligne</option>
-                <option value="⛔ Occupé">⛔ Occupé</option>
-                <option value="🎬 Je regarde un film">
-                  🎬 Je regarde un film
-                </option>
-                {isAdmin && (
-                  <option value="👑 Admin disponible">
-                    👑 Admin disponible
-                  </option>
-                )}
-              </select>
-
-              <button onClick={saveProfile} style={btnStyle}>
-                💾 Sauvegarder
+              <button onClick={() => setShowProfile(!showProfile)} style={profileBtn}>
+                ⚙️ Mon profil
               </button>
             </div>
-          )}
-        </div>
 
-        <div style={messagesBox}>
-          {messages.length === 0 ? (
-            <p style={{ color: "#888", textAlign: "center" }}>
-              Aucun message pour le moment.
-            </p>
-          ) : (
-            messages.map((msg) => {
-              const isMe = msg.user_id === user?.id;
-              const name = isMe
-                ? displayName
-                : msg.username || msg.email || "Utilisateur";
-              const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
-              const userIsOnline = onlineUsers.includes(msg.user_id);
-              const nameColor =
-                msg.role === "admin" ? "gold" : msg.role_color || "#dbeafe";
-              const msgReactions = getMessageReactions(msg.id);
-
-              return (
-                <div
-                  key={msg.id}
+            <div style={connectedBox}>
+              <div style={avatarWrap}>
+                <img src={avatarUrl} alt="avatar" style={avatarSmall} />
+                <span
                   style={{
-                    display: "flex",
-                    justifyContent: isMe ? "flex-end" : "flex-start",
-                    marginBottom: "16px",
-                    animation: "fadeIn 0.25s ease",
+                    ...onlineDot,
+                    background: realOnline ? "#4cff9b" : "#ff5c5c",
                   }}
+                />
+              </div>
+
+              <div>
+                <p style={{ margin: 0, color: "#fff", fontWeight: "bold" }}>
+                  Connecté :{" "}
+                  <span style={{ color: isAdmin ? "gold" : profile?.role_color || "#00c6ff" }}>
+                    {displayName}
+                  </span>
+                  {isAdmin && <span style={adminBadge}>ADMIN</span>}
+                </p>
+
+                <p style={{ margin: "4px 0 0", color: "#4cff9b", fontSize: "13px" }}>
+                  {profile?.status_text || "🟢 En ligne"}
+                </p>
+              </div>
+            </div>
+
+            {showProfile && (
+              <div style={profileBox}>
+                <h3 style={{ marginTop: 0 }}>Modifier mon profil</h3>
+
+                <label>Pseudo</label>
+                <input
+                  value={editUsername}
+                  onChange={(e) => setEditUsername(e.target.value)}
+                  style={inputStyle}
+                  placeholder="Ton pseudo"
+                />
+
+                <label>Avatar</label>
+                <input type="file" accept="image/*" onChange={uploadAvatar} />
+                {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
+
+                <label>Statut</label>
+                <select
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value)}
+                  style={inputStyle}
                 >
-                  <div style={isMe ? myMessageBox : otherMessageBox}>
-                    <div style={messageHeader}>
-                      <div style={avatarWrapSmall}>
-                        <img src={msgAvatar} alt="avatar" style={avatarMsg} />
-                        <span
-                          style={{
-                            ...onlineDotSmall,
-                            background: userIsOnline ? "#4cff9b" : "#ff5c5c",
-                          }}
-                        />
-                      </div>
+                  <option value="🟢 En ligne">🟢 En ligne</option>
+                  <option value="🔴 Hors ligne">🔴 Hors ligne</option>
+                  <option value="⛔ Occupé">⛔ Occupé</option>
+                  <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
+                  {isAdmin && (
+                    <option value="👑 Admin disponible">👑 Admin disponible</option>
+                  )}
+                </select>
 
-                      <div>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            color: isMe ? "#fff" : nameColor,
-                            fontWeight: 900,
-                          }}
-                        >
-                          {name}
-                          {msg.role === "admin" && (
-                            <span style={adminBadge}>ADMIN</span>
-                          )}
-                        </div>
+                <button onClick={saveProfile} style={btnStyle}>
+                  💾 Sauvegarder
+                </button>
+              </div>
+            )}
+          </div>
 
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: userIsOnline ? "#4cff9b" : "#ff7777",
-                          }}
-                        >
-                          {userIsOnline ? "🟢 En ligne" : "🔴 Hors ligne"}
-                        </div>
-                      </div>
-                    </div>
+          <div style={messagesBox}>
+            {messages.length === 0 ? (
+              <p style={{ color: "#888", textAlign: "center" }}>
+                Aucun message pour le moment.
+              </p>
+            ) : (
+              messages.map((msg) => {
+                const isMe = msg.user_id === user?.id;
+                const name = isMe ? displayName : msg.username || msg.email || "Utilisateur";
+                const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
+                const userIsOnline = onlineUserIds.includes(msg.user_id);
+                const nameColor =
+                  msg.role === "admin" ? "gold" : msg.role_color || "#dbeafe";
+                const msgReactions = getMessageReactions(msg.id);
 
-                    <div style={messageText}>{msg.content}</div>
-
-                    <div style={reactionRow}>
-                      {REACTION_EMOJIS.map((emoji) => {
-                        const count = msgReactions.filter(
-                          (r) => r.emoji === emoji
-                        ).length;
-
-                        const active = msgReactions.some(
-                          (r) => r.emoji === emoji && r.user_id === user?.id
-                        );
-
-                        return (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => toggleReaction(msg.id, emoji)}
+                return (
+                  <div
+                    key={msg.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: isMe ? "flex-end" : "flex-start",
+                      marginBottom: "16px",
+                      animation: "fadeIn 0.25s ease",
+                    }}
+                  >
+                    <div style={isMe ? myMessageBox : otherMessageBox}>
+                      <div style={messageHeader}>
+                        <div style={avatarWrapSmall}>
+                          <img src={msgAvatar} alt="avatar" style={avatarMsg} />
+                          <span
                             style={{
-                              ...reactionBtn,
-                              ...(active ? reactionBtnActive : {}),
-                              transform:
-  reactionPulse === `${msg.id}-${emoji}`
-    ? "scale(1.55) rotate(-8deg)"
-    : active
-    ? "scale(1.15)"
-    : "scale(1)",
-filter:
-  reactionPulse === `${msg.id}-${emoji}`
-    ? "drop-shadow(0 0 14px #00c6ff)"
-    : "none",
+                              ...onlineDotSmall,
+                              background: userIsOnline ? "#4cff9b" : "#ff5c5c",
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <div
+                            style={{
+                              fontSize: "14px",
+                              color: isMe ? "#fff" : nameColor,
+                              fontWeight: 900,
                             }}
                           >
-                            <span
-                              style={
-                                active ? reactionEmojiActive : reactionEmoji
-                              }
-                            >
-                              {emoji}
-                            </span>
-                            {count > 0 && (
-                              <span style={reactionCount}>{count}</span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                            {name}
+                            {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                          </div>
 
-                    {isAdmin && (
-                      <button
-                        onClick={() => deleteMessage(msg.id)}
-                        style={deleteBtn}
-                      >
-                        🗑 Supprimer
-                      </button>
-                    )}
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: userIsOnline ? "#4cff9b" : "#ff7777",
+                            }}
+                          >
+                            {userIsOnline ? "🟢 En ligne" : "🔴 Hors ligne"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={messageText}>{msg.content}</div>
+
+                      <div style={reactionRow}>
+                        {REACTION_EMOJIS.map((emoji) => {
+                          const count = msgReactions.filter((r) => r.emoji === emoji).length;
+                          const active = msgReactions.some(
+                            (r) => r.emoji === emoji && r.user_id === user?.id
+                          );
+
+                          return (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => toggleReaction(msg.id, emoji)}
+                              style={{
+                                ...reactionBtn,
+                                ...(active ? reactionBtnActive : {}),
+                                transform:
+                                  reactionPulse === `${msg.id}-${emoji}`
+                                    ? "scale(1.55) rotate(-8deg)"
+                                    : active
+                                    ? "scale(1.15)"
+                                    : "scale(1)",
+                                filter:
+                                  reactionPulse === `${msg.id}-${emoji}`
+                                    ? "drop-shadow(0 0 14px #00c6ff)"
+                                    : "none",
+                              }}
+                            >
+                              <span style={active ? reactionEmojiActive : reactionEmoji}>
+                                {emoji}
+                              </span>
+                              {count > 0 && <span style={reactionCount}>{count}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {isAdmin && (
+                        <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
+                          🗑 Supprimer
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            <div ref={bottomRef} />
+          </div>
+
+          <div style={inputBox}>
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") sendMessage();
+              }}
+              placeholder="Écris ton message..."
+              style={inputStyle}
+            />
+
+            <button onClick={sendMessage} style={btnStyle}>
+              Envoyer
+            </button>
+          </div>
+        </div>
+
+        <aside style={onlinePanel}>
+          <h2 style={{ margin: 0, fontSize: "18px" }}>
+            🟢 En ligne
+          </h2>
+
+          <p style={{ color: "#9ca3af", marginTop: "6px" }}>
+            {onlineMembers.length} membre{onlineMembers.length > 1 ? "s" : ""} connecté
+            {onlineMembers.length > 1 ? "s" : ""}
+          </p>
+
+          <div style={{ display: "grid", gap: "12px", marginTop: "18px" }}>
+            {onlineMembers.length === 0 ? (
+              <p style={{ color: "#888" }}>Aucun membre en ligne.</p>
+            ) : (
+              onlineMembers.map((member) => (
+                <div key={member.user_id} style={onlineMemberCard}>
+                  <div style={avatarWrapSmall}>
+                    <img
+                      src={member.avatar || DEFAULT_AVATAR}
+                      alt="avatar"
+                      style={avatarMsg}
+                    />
+                    <span style={{ ...onlineDotSmall, background: "#4cff9b" }} />
+                  </div>
+
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 900, color: member.role === "admin" ? "gold" : "#fff" }}>
+                      {member.username || "Utilisateur"}
+                      {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                    </p>
+                    <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#4cff9b" }}>
+                      {member.status_text || "🟢 En ligne"}
+                    </p>
                   </div>
                 </div>
-              );
-            })
-          )}
-
-          <div ref={bottomRef} />
-        </div>
-
-        <div style={inputBox}>
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") sendMessage();
-            }}
-            placeholder="Écris ton message..."
-            style={inputStyle}
-          />
-
-          <button onClick={sendMessage} style={btnStyle}>
-            Envoyer
-          </button>
-        </div>
+              ))
+            )}
+          </div>
+        </aside>
       </div>
     </main>
   );
@@ -636,9 +657,17 @@ const pageStyle: React.CSSProperties = {
   fontFamily: "Arial, sans-serif",
 };
 
+const chatLayout: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "1180px",
+  display: "grid",
+  gridTemplateColumns: "1fr 280px",
+  gap: "18px",
+  alignItems: "stretch",
+};
+
 const chatBox: React.CSSProperties = {
   width: "100%",
-  maxWidth: "900px",
   height: "78vh",
   background: "rgba(8,13,22,0.92)",
   border: "1px solid rgba(0,198,255,0.26)",
@@ -647,6 +676,26 @@ const chatBox: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
+};
+
+const onlinePanel: React.CSSProperties = {
+  height: "78vh",
+  padding: "20px",
+  borderRadius: "24px",
+  background: "rgba(8,13,22,0.92)",
+  border: "1px solid rgba(0,198,255,0.26)",
+  boxShadow: "0 25px 80px rgba(0,0,0,0.55)",
+  overflowY: "auto",
+};
+
+const onlineMemberCard: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  padding: "10px",
+  borderRadius: "16px",
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.1)",
 };
 
 const headerStyle: React.CSSProperties = {
@@ -784,7 +833,8 @@ const reactionBtn: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: "5px",
-  transition: "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
+  transition:
+    "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
   position: "relative",
   zIndex: 10,
 };
