@@ -11,6 +11,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function checkUser() {
+      setAllowed(false);
+
       const publicPages = [
         "/login",
         "/register",
@@ -26,9 +28,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (userError || !user) {
         router.push("/login");
         return;
       }
@@ -44,7 +47,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      if (profile.status !== "approved") {
+      const isAdmin = profile.role === "admin";
+      const isApproved = profile.status === "approved";
+
+      if (!isAdmin && !isApproved) {
         router.push("/waiting");
         return;
       }
@@ -52,7 +58,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       setAllowed(true);
     }
 
-    setAllowed(false);
     checkUser();
   }, [pathname, router]);
 
