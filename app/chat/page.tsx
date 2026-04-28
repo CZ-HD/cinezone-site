@@ -784,7 +784,7 @@ const reactionBtn: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: "5px",
-  transition: "all 0.18s ease",
+  transition: "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
   position: "relative",
   zIndex: 10,
 };
