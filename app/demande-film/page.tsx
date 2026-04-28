@@ -251,11 +251,15 @@ const heroText = {
   marginTop: "10px",
 };
 
-const cardStyle = {
+const cardStyle: React.CSSProperties = {
   padding: "24px",
   borderRadius: "20px",
-  background: "rgba(10,15,25,0.9)",
+  background: "rgba(10,15,25,0.75)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
   marginBottom: "25px",
+  border: "1px solid rgba(0,198,255,0.25)",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.55)",
 };
 
 const inputStyle = {
