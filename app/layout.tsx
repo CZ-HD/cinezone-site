@@ -138,8 +138,74 @@ export default function RootLayout({
 
         <AuthGuard>
           <div style={{ paddingTop: "76px" }}>{children}</div>
+
+          <footer style={footerStyle}>
+            <h2 style={footerTitle}>CineZone HD</h2>
+
+            <p style={footerSubtitle}>
+              Plateforme communautaire gratuite pour les passionnés de cinéma.
+            </p>
+
+            <div style={footerLinks}>
+              <Link href="/actualites" style={footerLink}>
+                Actualités
+              </Link>
+
+              <span style={{ color: "#4b5563" }}>/</span>
+
+              <Link href="/contact" style={footerLink}>
+                Contactez-nous
+              </Link>
+            </div>
+
+            <p style={footerLegal}>
+              Made with ❤️ by CineZone — 2026. Aucun contenu vidéo n’est hébergé
+              sur nos serveurs. Les liens proposés redirigent vers des services
+              externes.
+            </p>
+          </footer>
         </AuthGuard>
       </body>
     </html>
   );
 }
+
+const footerStyle: React.CSSProperties = {
+  padding: "45px 20px 28px",
+  textAlign: "center",
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.45)",
+  color: "#8b95a7",
+};
+
+const footerTitle: React.CSSProperties = {
+  margin: 0,
+  color: "#ff2b2b",
+  fontSize: "28px",
+  fontWeight: 900,
+};
+
+const footerSubtitle: React.CSSProperties = {
+  marginTop: "10px",
+  fontSize: "16px",
+};
+
+const footerLinks: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  gap: "18px",
+  marginTop: "18px",
+  flexWrap: "wrap",
+};
+
+const footerLink: React.CSSProperties = {
+  color: "#dbeafe",
+  textDecoration: "none",
+  fontWeight: 700,
+};
+
+const footerLegal: React.CSSProperties = {
+  marginTop: "26px",
+  fontSize: "14px",
+  lineHeight: 1.6,
+};
