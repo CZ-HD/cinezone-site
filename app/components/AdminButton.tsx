@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+const CREATOR_EMAIL = "blackph4tom@gmail.com";
+
 export default function AdminButton() {
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -13,6 +15,12 @@ export default function AdminButton() {
       const user = data.user;
 
       if (!user) return;
+
+      // 🔥 TON COMPTE CRÉATEUR = ADMIN TOUJOURS
+      if (user.email === CREATOR_EMAIL) {
+        setIsAdmin(true);
+        return;
+      }
 
       const { data: profile } = await supabase
         .from("profiles")
