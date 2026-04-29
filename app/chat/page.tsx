@@ -947,14 +947,6 @@ const darkOverlayStyle: React.CSSProperties = {
   zIndex: 1,
 };
 
-const darkOverlayStyle: React.CSSProperties = {
-  position: "absolute",
-  inset: 0,
-  background:
-    "radial-gradient(circle at center, rgba(0,40,70,0.18), rgba(0,0,0,0.58) 55%, rgba(0,0,0,0.86) 100%)",
-  zIndex: 1,
-};
-
 const chatLayout: React.CSSProperties = {
   position: "relative",
   zIndex: 2, // 🔥 SUPER IMPORTANT
