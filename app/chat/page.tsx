@@ -1001,3 +1001,10 @@ const newMessageBadge: React.CSSProperties = {
   cursor: "pointer",
   boxShadow: "0 0 22px rgba(255,60,60,0.45)",
 };
+
+const headerStyle: React.CSSProperties = {
+  padding: "20px",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  background:
+    "linear-gradient(135deg, rgba(0,198,255,0.16), rgba(255,215,100,0.06))",
+};
