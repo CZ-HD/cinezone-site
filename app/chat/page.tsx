@@ -986,3 +986,18 @@ const onlinePanel: React.CSSProperties = {
     "0 25px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.12)",
   overflowY: "auto",
 };
+
+const newMessageBadge: React.CSSProperties = {
+  position: "absolute",
+  top: "94px",
+  right: "24px",
+  zIndex: 20,
+  padding: "8px 14px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.18)",
+  background: "linear-gradient(135deg, #ff3b3b, #b00020)",
+  color: "#fff",
+  fontWeight: 900,
+  cursor: "pointer",
+  boxShadow: "0 0 22px rgba(255,60,60,0.45)",
+};
