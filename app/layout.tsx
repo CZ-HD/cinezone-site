@@ -8,6 +8,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CineZone",
   description: "Films et séries",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
