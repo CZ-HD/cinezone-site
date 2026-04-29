@@ -139,7 +139,7 @@ export default function DemandeFilmPage() {
           <input
             value={tmdbLink}
             onChange={(e) => setTmdbLink(e.target.value)}
-            placeholder="Lien ou n° ID TMDB"
+            placeholder="Lien TMDB"
             style={inputStyle}
           />
 
@@ -155,7 +155,7 @@ export default function DemandeFilmPage() {
             onChange={(e) => setCodec(e.target.value)}
             style={inputStyle}
           >
-            <option>X264</option>
+            <option>H264</option>
             <option>H265</option>
           </select>
 
