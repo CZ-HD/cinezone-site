@@ -862,8 +862,8 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: `
-    linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.9)),
-    url("https://i.imgur.com/Eup4mSg.jpg")
+    linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.88)),
+    url("/Tchat.jpg")
   `,
   backgroundSize: "cover",
   backgroundPosition: "center",
@@ -888,13 +888,10 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(8,13,22,0.76)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
+  background: "rgba(8,13,22,0.88)",
   border: "1px solid rgba(0,198,255,0.32)",
   borderRadius: "24px",
-  boxShadow:
-    "0 25px 90px rgba(0,0,0,0.85), 0 0 40px rgba(0,198,255,0.18)",
+  boxShadow: "0 25px 90px rgba(0,0,0,0.85)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
@@ -946,12 +943,9 @@ const onlinePanel: React.CSSProperties = {
   height: "78vh",
   padding: "20px",
   borderRadius: "24px",
-  background: "rgba(8,13,22,0.76)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
+  background: "rgba(8,13,22,0.88)",
   border: "1px solid rgba(0,198,255,0.32)",
-  boxShadow:
-    "0 25px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.14)",
+  boxShadow: "0 25px 90px rgba(0,0,0,0.65)",
   overflowY: "auto",
 };
 const onlineMemberCard: React.CSSProperties = {
