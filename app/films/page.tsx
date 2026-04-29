@@ -14,6 +14,9 @@ export default function FilmsPage() {
   const [loading, setLoading] = useState(true);
   const [tmdbLoading, setTmdbLoading] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(100);
+
   useEffect(() => {
     loadMovies();
   }, []);
@@ -77,13 +80,23 @@ export default function FilmsPage() {
     (movie.title || "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalPages = Math.max(1, Math.ceil(filteredMovies.length / itemsPerPage));
+
+  const paginatedMovies = filteredMovies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <main style={pageStyle}>
       <h1>🎬 Films disponibles</h1>
 
       <input
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
         placeholder="🔍 Rechercher un film..."
         style={inputStyle}
       />
@@ -95,7 +108,20 @@ export default function FilmsPage() {
           {filteredMovies.length > 0 && (
             <section>
               <h2 style={sectionTitle}>🍿 Catalogue CineZone</h2>
-              <MovieGrid movies={filteredMovies} local />
+
+              <MovieGrid movies={paginatedMovies} local />
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredMovies.length}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(value) => {
+                  setItemsPerPage(value);
+                  setCurrentPage(1);
+                }}
+              />
             </section>
           )}
 
@@ -141,6 +167,7 @@ function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
             }
             alt={movie.title || "Film"}
             style={posterStyle}
+            loading="lazy"
           />
 
           <h3 style={{ fontSize: "15px", marginTop: "12px" }}>
@@ -156,6 +183,72 @@ function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
           )}
         </Link>
       ))}
+    </div>
+  );
+}
+
+function Pagination({
+  currentPage,
+  totalPages,
+  itemsPerPage,
+  totalItems,
+  onPageChange,
+  onItemsPerPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  itemsPerPage: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (value: number) => void;
+}) {
+  return (
+    <div style={paginationStyle}>
+      <div style={selectWrapperStyle}>
+        <span style={{ color: "#cbd5e1" }}>Éléments par page</span>
+
+        <select
+          value={itemsPerPage}
+          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+          style={selectStyle}
+        >
+          <option value={10}>10</option>
+          <option value={15}>15</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </select>
+      </div>
+
+      <div style={pageInfoStyle}>
+        Page {currentPage} sur {totalPages} — {totalItems} films
+      </div>
+
+      <div style={buttonsWrapperStyle}>
+        <button
+          onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
+          disabled={currentPage === 1}
+          style={{
+            ...buttonStyle,
+            opacity: currentPage === 1 ? 0.45 : 1,
+            cursor: currentPage === 1 ? "not-allowed" : "pointer",
+          }}
+        >
+          Précédent
+        </button>
+
+        <button
+          onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          style={{
+            ...buttonStyle,
+            opacity: currentPage === totalPages ? 0.45 : 1,
+            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+          }}
+        >
+          Suivant
+        </button>
+      </div>
     </div>
   );
 }
@@ -198,4 +291,52 @@ const posterStyle: React.CSSProperties = {
   objectFit: "cover",
   borderRadius: "16px",
   boxShadow: "0 18px 45px rgba(0,0,0,0.55)",
+};
+
+const paginationStyle: React.CSSProperties = {
+  marginTop: "36px",
+  paddingTop: "22px",
+  borderTop: "1px solid rgba(0,198,255,0.22)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "18px",
+  flexWrap: "wrap",
+};
+
+const selectWrapperStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  fontSize: "14px",
+};
+
+const selectStyle: React.CSSProperties = {
+  background: "#0b0f18",
+  color: "#fff",
+  border: "1px solid rgba(0,198,255,0.35)",
+  borderRadius: "10px",
+  padding: "10px 14px",
+  outline: "none",
+  cursor: "pointer",
+};
+
+const pageInfoStyle: React.CSSProperties = {
+  color: "#94a3b8",
+  fontSize: "14px",
+};
+
+const buttonsWrapperStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+};
+
+const buttonStyle: React.CSSProperties = {
+  padding: "10px 16px",
+  borderRadius: "12px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(0,198,255,0.1)",
+  color: "#67e8f9",
+  fontWeight: 700,
 };
