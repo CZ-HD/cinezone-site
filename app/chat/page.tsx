@@ -861,12 +861,13 @@ export default function ChatPage() {
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  background: `
-    linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.88)),
+  backgroundImage: `
+    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)),
     url("/Tchat.jpg")
   `,
   backgroundSize: "cover",
   backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
   backgroundAttachment: "fixed",
   color: "#fff",
   display: "flex",
