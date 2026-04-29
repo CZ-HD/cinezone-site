@@ -363,7 +363,7 @@ export default function ChatPage() {
 
       const file = e.target.files[0];
       const fileExt = file.name.split(".").pop();
-      const filePath = ${user.id}/avatar.${fileExt};
+      const filePath = `${user.id}/avatar.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
