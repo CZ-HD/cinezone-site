@@ -523,9 +523,9 @@ export default function ChatPage() {
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
   return (
-    <main style={pageStyle}>
-      <div style={backgroundImageStyle} />
-      <div style={darkOverlayStyle} />
+  <main style={pageStyle}>
+    <div style={backgroundImageStyle} />
+    <div style={darkOverlayStyle} />
 
       <div style={chatLayout}>
         <div style={chatBox}>
@@ -934,9 +934,17 @@ const backgroundImageStyle: React.CSSProperties = {
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
   filter: "blur(6px)",
-  opacity: 0.42,
+  opacity: 0.35, // 👈 règle ici la visibilité
   transform: "scale(1.04)",
   zIndex: 0,
+};
+
+const darkOverlayStyle: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  background:
+    "radial-gradient(circle at center, rgba(0,40,70,0.15), rgba(0,0,0,0.6) 55%, rgba(0,0,0,0.9) 100%)",
+  zIndex: 1,
 };
 
 const darkOverlayStyle: React.CSSProperties = {
@@ -949,7 +957,7 @@ const darkOverlayStyle: React.CSSProperties = {
 
 const chatLayout: React.CSSProperties = {
   position: "relative",
-  zIndex: 2,
+  zIndex: 2, // 🔥 SUPER IMPORTANT
   width: "100%",
   maxWidth: "1180px",
   display: "grid",
