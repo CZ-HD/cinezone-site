@@ -572,7 +572,8 @@ export default function ChatPage() {
                 <span
                   style={{
                     ...onlineDot,
-                    background: realOnline ? "#4cff9b" : "#ff5c5c",
+                    background:
+  profile?.status_text === "🔴 Hors ligne" ? "#ff5c5c" : "#4cff9b",
                   }}
                 />
               </div>
@@ -687,11 +688,12 @@ export default function ChatPage() {
                         <div style={avatarWrapSmall}>
                           <img src={msgAvatar} alt="avatar" style={avatarMsg} />
                           <span
-                            style={{
-                              ...onlineDotSmall,
-                              background: userIsOnline ? "#4cff9b" : "#ff5c5c",
-                            }}
-                          />
+  style={{
+    ...onlineDotSmall,
+    background:
+      member.status_text === "🔴 Hors ligne" ? "#ff5c5c" : "#4cff9b",
+  }}
+/>
                         </div>
 
                         <div>
