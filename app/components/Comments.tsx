@@ -66,7 +66,6 @@ export default function Comments({
 
       await loadComments();
       await loadReactions();
-
       setLoading(false);
     }
 
@@ -240,7 +239,7 @@ export default function Comments({
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
 
-    return (
+  return (
     <section style={box}>
       <div style={header}>
         <div>
@@ -251,18 +250,20 @@ export default function Comments({
         </div>
       </div>
 
-      {/* INPUT PRINCIPAL */}
       <div style={inputBox}>
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendComment()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") sendComment();
+          }}
           placeholder={
             user ? "Écrire un commentaire..." : "Connecte-toi pour commenter..."
           }
           disabled={!user}
           style={input}
         />
+
         <button onClick={sendComment} disabled={!user} style={btn}>
           Envoyer
         </button>
@@ -280,30 +281,29 @@ export default function Comments({
 
             return (
               <div key={comment.id}>
-                {/* COMMENT PRINCIPAL */}
                 <div style={card}>
                   <img
                     src={comment.avatar || DEFAULT_AVATAR}
+                    alt="avatar"
                     style={avatar}
                   />
 
                   <div style={{ flex: 1 }}>
                     <div style={topRow}>
-                      <strong
-                        style={{ color: isAdmin ? "gold" : "#00c6ff" }}
-                      >
-                        {comment.username}
+                      <strong style={{ color: isAdmin ? "gold" : "#00c6ff" }}>
+                        {comment.username || "Utilisateur"}
                         {isAdmin && <span style={adminBadge}>ADMIN</span>}
                       </strong>
 
                       <span style={dateText}>
-                        {new Date(comment.created_at).toLocaleDateString()}
+                        {new Date(comment.created_at).toLocaleDateString(
+                          "fr-FR"
+                        )}
                       </span>
                     </div>
 
                     <p style={content}>{comment.content}</p>
 
-                    {/* RÉACTIONS */}
                     <div style={reactionRow}>
                       {REACTION_EMOJIS.map((emoji) => {
                         const count = getReactionCount(comment.id, emoji);
@@ -312,27 +312,22 @@ export default function Comments({
                         return (
                           <button
                             key={emoji}
-                            onClick={() =>
-                              toggleReaction(comment.id, emoji)
-                            }
+                            onClick={() => toggleReaction(comment.id, emoji)}
                             style={{
                               ...reactionBtn,
                               ...(active ? reactionBtnActive : {}),
                             }}
                           >
-                            {emoji} {count || ""}
+                            <span>{emoji}</span>
+                            {count > 0 && <span>{count}</span>}
                           </button>
                         );
                       })}
                     </div>
 
-                    {/* ACTIONS */}
-                    <div style={{ marginTop: 8, display: "flex", gap: 10 }}>
-                      <button
-                        onClick={() => setReplyTo(comment)}
-                        style={replyBtn}
-                      >
-                        Répondre
+                    <div style={actionRow}>
+                      <button onClick={() => setReplyTo(comment)} style={replyBtn}>
+                        ↩️ Répondre
                       </button>
 
                       {profile?.role === "admin" && (
@@ -340,39 +335,93 @@ export default function Comments({
                           onClick={() => deleteComment(comment.id)}
                           style={deleteBtn}
                         >
-                          🗑
+                          🗑 Supprimer
                         </button>
                       )}
                     </div>
 
-                    {/* INPUT RÉPONSE */}
                     {replyTo?.id === comment.id && (
-                      <div style={{ marginTop: 10 }}>
-                        <input
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          placeholder="Répondre..."
-                          style={input}
-                        />
-                        <button onClick={sendReply} style={btn}>
-                          Envoyer
-                        </button>
+                      <div style={replyInputBox}>
+                        <div style={replyingTo}>
+                          Réponse à {comment.username || "Utilisateur"}
+                          <button
+                            onClick={() => {
+                              setReplyTo(null);
+                              setReplyText("");
+                            }}
+                            style={cancelReplyBtn}
+                          >
+                            Annuler
+                          </button>
+                        </div>
+
+                        <div style={inputBox}>
+                          <input
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") sendReply();
+                            }}
+                            placeholder="Écrire une réponse..."
+                            style={input}
+                          />
+                          <button onClick={sendReply} style={btn}>
+                            Répondre
+                          </button>
+                        </div>
                       </div>
                     )}
 
-                    {/* RÉPONSES */}
-                    {replies.map((reply) => (
-                      <div key={reply.id} style={replyCard}>
-                        <img src={reply.avatar} style={avatarSmall} />
+                    {replies.length > 0 && (
+                      <div style={repliesBox}>
+                        {replies.map((reply) => {
+                          const replyIsAdmin = reply.role === "admin";
 
-                        <div>
-                          <strong style={{ color: "#00c6ff" }}>
-                            {reply.username}
-                          </strong>
-                          <p style={content}>{reply.content}</p>
-                        </div>
+                          return (
+                            <div key={reply.id} style={replyCard}>
+                              <img
+                                src={reply.avatar || DEFAULT_AVATAR}
+                                alt="avatar"
+                                style={avatarSmall}
+                              />
+
+                              <div style={{ flex: 1 }}>
+                                <div style={topRow}>
+                                  <strong
+                                    style={{
+                                      color: replyIsAdmin ? "gold" : "#00c6ff",
+                                      fontSize: "13px",
+                                    }}
+                                  >
+                                    {reply.username || "Utilisateur"}
+                                    {replyIsAdmin && (
+                                      <span style={adminBadge}>ADMIN</span>
+                                    )}
+                                  </strong>
+
+                                  <span style={dateText}>
+                                    {new Date(
+                                      reply.created_at
+                                    ).toLocaleDateString("fr-FR")}
+                                  </span>
+                                </div>
+
+                                <p style={replyContent}>{reply.content}</p>
+
+                                {profile?.role === "admin" && (
+                                  <button
+                                    onClick={() => deleteComment(reply.id)}
+                                    style={smallDeleteBtn}
+                                  >
+                                    🗑 Supprimer
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               </div>
@@ -384,136 +433,221 @@ export default function Comments({
   );
 }
 
-/* ================== STYLES ================== */
-
-const box = {
-  marginTop: 44,
-  padding: 24,
-  borderRadius: 24,
+const box: React.CSSProperties = {
+  marginTop: "44px",
+  padding: "24px",
+  borderRadius: "24px",
   background:
     "linear-gradient(180deg, rgba(12,18,30,0.88), rgba(5,8,14,0.92))",
+  border: "1px solid rgba(0,198,255,0.22)",
+  boxShadow: "0 20px 70px rgba(0,0,0,0.65)",
 };
 
-const header = {
-  marginBottom: 18,
-};
-
-const inputBox = {
-  display: "flex",
-  gap: 10,
-  marginBottom: 20,
-};
-
-const input = {
-  flex: 1,
-  padding: 12,
-  borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.1)",
-  background: "#0b0f18",
-  color: "#fff",
-};
-
-const btn = {
-  padding: "12px 16px",
-  borderRadius: 12,
-  border: "none",
-  background: "#0072ff",
-  color: "#fff",
-  cursor: "pointer",
-};
-
-const list = {
-  display: "grid",
-  gap: 16,
-};
-
-const card = {
-  display: "flex",
-  gap: 12,
-  padding: 16,
-  borderRadius: 16,
-  background: "rgba(255,255,255,0.05)",
-};
-
-const replyCard = {
-  display: "flex",
-  gap: 10,
-  marginTop: 10,
-  paddingLeft: 20,
-};
-
-const avatar = {
-  width: 42,
-  height: 42,
-  borderRadius: "50%",
-};
-
-const avatarSmall = {
-  width: 30,
-  height: 30,
-  borderRadius: "50%",
-};
-
-const topRow = {
+const header: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "18px",
 };
 
-const adminBadge = {
-  marginLeft: 6,
-  fontSize: 10,
-  background: "gold",
-  color: "#000",
-  padding: "2px 6px",
-  borderRadius: 999,
-};
-
-const dateText = {
-  fontSize: 12,
-  color: "#aaa",
-};
-
-const content = {
-  marginTop: 6,
-  color: "#fff",
-};
-
-const reactionRow = {
+const inputBox: React.CSSProperties = {
   display: "flex",
-  gap: 6,
-  marginTop: 8,
+  gap: "10px",
+  marginBottom: "0",
 };
 
-const reactionBtn = {
-  padding: "4px 8px",
-  borderRadius: 999,
+const input: React.CSSProperties = {
+  flex: 1,
+  padding: "15px",
+  borderRadius: "16px",
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "#0b0f18",
+  color: "#fff",
+  outline: "none",
+};
+
+const btn: React.CSSProperties = {
+  padding: "15px 20px",
+  borderRadius: "16px",
+  border: "none",
+  color: "#fff",
+  fontWeight: 900,
+  background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
+  boxShadow: "0 10px 28px rgba(0,114,255,0.35)",
+  cursor: "pointer",
+};
+
+const list: React.CSSProperties = {
+  display: "grid",
+  gap: "14px",
+  marginTop: "22px",
+};
+
+const card: React.CSSProperties = {
+  display: "flex",
+  gap: "14px",
+  padding: "16px",
+  borderRadius: "18px",
+  background: "rgba(255,255,255,0.055)",
   border: "1px solid rgba(255,255,255,0.1)",
-  background: "transparent",
+};
+
+const avatar: React.CSSProperties = {
+  width: "42px",
+  height: "42px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.55)",
+  boxShadow: "0 0 14px rgba(0,198,255,0.35)",
+};
+
+const avatarSmall: React.CSSProperties = {
+  width: "32px",
+  height: "32px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.35)",
+};
+
+const topRow: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "12px",
+  alignItems: "center",
+};
+
+const adminBadge: React.CSSProperties = {
+  marginLeft: "7px",
+  padding: "3px 7px",
+  borderRadius: "999px",
+  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
+  color: "#000",
+  fontSize: "10px",
+  fontWeight: 900,
+};
+
+const dateText: React.CSSProperties = {
+  color: "#7f8da3",
+  fontSize: "12px",
+};
+
+const content: React.CSSProperties = {
+  color: "#f1f5ff",
+  lineHeight: 1.55,
+  margin: "8px 0",
+};
+
+const reactionRow: React.CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  flexWrap: "wrap",
+  marginTop: "10px",
+};
+
+const reactionBtn: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "5px",
+  padding: "6px 10px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.07)",
   color: "#fff",
   cursor: "pointer",
+  fontWeight: 800,
 };
 
-const reactionBtnActive = {
-  background: "#00c6ff",
+const reactionBtnActive: React.CSSProperties = {
+  background: "rgba(0,198,255,0.2)",
+  border: "1px solid rgba(0,198,255,0.7)",
+  boxShadow: "0 0 14px rgba(0,198,255,0.35)",
 };
 
-const replyBtn = {
-  fontSize: 12,
+const actionRow: React.CSSProperties = {
+  marginTop: "10px",
+  display: "flex",
+  gap: "10px",
+  flexWrap: "wrap",
+};
+
+const replyBtn: React.CSSProperties = {
+  padding: "7px 11px",
+  borderRadius: "10px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(0,198,255,0.1)",
+  color: "#67e8f9",
+  cursor: "pointer",
+  fontWeight: 800,
+};
+
+const deleteBtn: React.CSSProperties = {
+  padding: "7px 11px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,80,80,0.45)",
+  background: "rgba(255,40,40,0.15)",
+  color: "#ffabab",
+  cursor: "pointer",
+  fontWeight: 800,
+};
+
+const smallDeleteBtn: React.CSSProperties = {
+  ...deleteBtn,
+  marginTop: "6px",
+  padding: "5px 9px",
+  fontSize: "12px",
+};
+
+const replyInputBox: React.CSSProperties = {
+  marginTop: "14px",
+  padding: "12px",
+  borderRadius: "14px",
+  background: "rgba(0,198,255,0.06)",
+  border: "1px solid rgba(0,198,255,0.16)",
+};
+
+const replyingTo: React.CSSProperties = {
+  color: "#9ca9bd",
+  fontSize: "13px",
+  marginBottom: "10px",
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "10px",
+};
+
+const cancelReplyBtn: React.CSSProperties = {
   background: "transparent",
   border: "none",
-  color: "#00c6ff",
+  color: "#ffabab",
   cursor: "pointer",
+  fontWeight: 800,
 };
 
-const deleteBtn = {
-  fontSize: 12,
-  background: "transparent",
-  border: "none",
-  color: "red",
-  cursor: "pointer",
+const repliesBox: React.CSSProperties = {
+  marginTop: "14px",
+  paddingLeft: "14px",
+  display: "grid",
+  gap: "10px",
+  borderLeft: "2px solid rgba(0,198,255,0.22)",
 };
 
-const empty = {
+const replyCard: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
+  padding: "12px",
+  borderRadius: "14px",
+  background: "rgba(0,0,0,0.24)",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+
+const replyContent: React.CSSProperties = {
+  color: "#e5edff",
+  lineHeight: 1.5,
+  margin: "6px 0 0",
+  fontSize: "14px",
+};
+
+const empty: React.CSSProperties = {
+  color: "#8b98aa",
   textAlign: "center",
-  color: "#aaa",
+  padding: "20px",
 };
