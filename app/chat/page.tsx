@@ -91,9 +91,7 @@ export default function ChatPage() {
 
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + 0.12);
-    } catch {
-      // Son bloqué par le navigateur.
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -482,7 +480,10 @@ export default function ChatPage() {
     const shouldPin = !target.pinned;
 
     if (shouldPin) {
-      await supabase.from("messages").update({ pinned: false }).neq("id", messageId);
+      await supabase
+        .from("messages")
+        .update({ pinned: false })
+        .neq("id", messageId);
     }
 
     const { error } = await supabase
@@ -511,17 +512,21 @@ export default function ChatPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <p>Chargement du chat...</p>
+        <div style={backgroundImageStyle} />
+        <div style={darkOverlayStyle} />
+        <p style={{ position: "relative", zIndex: 2 }}>Chargement du chat...</p>
       </main>
     );
   }
 
   const displayName = profile?.username || user?.email || "Utilisateur";
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
-  const realOnline = onlineUserIds.includes(user?.id);
 
   return (
     <main style={pageStyle}>
+      <div style={backgroundImageStyle} />
+      <div style={darkOverlayStyle} />
+
       <div style={chatLayout}>
         <div style={chatBox}>
           {hasNewMessage && (
@@ -537,15 +542,27 @@ export default function ChatPage() {
           )}
 
           <div style={headerStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "12px",
+              }}
+            >
               <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
 
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <button onClick={() => setSoundEnabled(!soundEnabled)} style={soundBtn}>
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  style={soundBtn}
+                >
                   {soundEnabled ? "🔊 Son ON" : "🔇 Son OFF"}
                 </button>
 
-                <button onClick={() => setShowProfile(!showProfile)} style={profileBtn}>
+                <button
+                  onClick={() => setShowProfile(!showProfile)}
+                  style={profileBtn}
+                >
                   ⚙️ Mon profil
                 </button>
               </div>
@@ -570,7 +587,9 @@ export default function ChatPage() {
                   Connecté :{" "}
                   <span
                     style={{
-                      color: isAdmin ? "gold" : profile?.role_color || "#00c6ff",
+                      color: isAdmin
+                        ? "gold"
+                        : profile?.role_color || "#00c6ff",
                     }}
                   >
                     {displayName}
@@ -618,9 +637,13 @@ export default function ChatPage() {
                   <option value="🟢 En ligne">🟢 En ligne</option>
                   <option value="🔴 Hors ligne">🔴 Hors ligne</option>
                   <option value="⛔ Occupé">⛔ Occupé</option>
-                  <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
+                  <option value="🎬 Je regarde un film">
+                    🎬 Je regarde un film
+                  </option>
                   {isAdmin && (
-                    <option value="👑 Admin disponible">👑 Admin disponible</option>
+                    <option value="👑 Admin disponible">
+                      👑 Admin disponible
+                    </option>
                   )}
                 </select>
 
@@ -649,7 +672,9 @@ export default function ChatPage() {
                 const name = isMe
                   ? displayName
                   : msg.username || msg.email || "Utilisateur";
-                const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
+                const msgAvatar = isMe
+                  ? avatarUrl
+                  : msg.avatar || DEFAULT_AVATAR;
                 const userIsOnline = onlineUserIds.includes(msg.user_id);
                 const isStatusOffline = msg.status_text === "🔴 Hors ligne";
                 const nameColor =
@@ -672,7 +697,9 @@ export default function ChatPage() {
                           <span
                             style={{
                               ...onlineDotSmall,
-                              background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+                              background: isStatusOffline
+                                ? "#ff5c5c"
+                                : "#4cff9b",
                             }}
                           />
                         </div>
@@ -686,8 +713,12 @@ export default function ChatPage() {
                             }}
                           >
                             {name}
-                            {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
-                            {msg.pinned && <span style={pinnedBadge}>ÉPINGLÉ</span>}
+                            {msg.role === "admin" && (
+                              <span style={adminBadge}>ADMIN</span>
+                            )}
+                            {msg.pinned && (
+                              <span style={pinnedBadge}>ÉPINGLÉ</span>
+                            )}
                           </div>
 
                           <div
@@ -713,7 +744,9 @@ export default function ChatPage() {
 
                       <div style={reactionRow}>
                         {REACTION_EMOJIS.map((emoji) => {
-                          const count = msgReactions.filter((r) => r.emoji === emoji).length;
+                          const count = msgReactions.filter(
+                            (r) => r.emoji === emoji
+                          ).length;
                           const active = msgReactions.some(
                             (r) => r.emoji === emoji && r.user_id === user?.id
                           );
@@ -738,22 +771,40 @@ export default function ChatPage() {
                                     : "none",
                               }}
                             >
-                              <span style={active ? reactionEmojiActive : reactionEmoji}>
+                              <span
+                                style={
+                                  active ? reactionEmojiActive : reactionEmoji
+                                }
+                              >
                                 {emoji}
                               </span>
-                              {count > 0 && <span style={reactionCount}>{count}</span>}
+                              {count > 0 && (
+                                <span style={reactionCount}>{count}</span>
+                              )}
                             </button>
                           );
                         })}
                       </div>
 
                       {isAdmin && (
-                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                          <button onClick={() => togglePin(msg.id)} style={pinBtn}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <button
+                            onClick={() => togglePin(msg.id)}
+                            style={pinBtn}
+                          >
                             {msg.pinned ? "📌 Désépingler" : "📌 Épingler"}
                           </button>
 
-                          <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
+                          <button
+                            onClick={() => deleteMessage(msg.id)}
+                            style={deleteBtn}
+                          >
                             🗑 Supprimer
                           </button>
                         </div>
@@ -798,7 +849,8 @@ export default function ChatPage() {
           <h2 style={{ margin: 0, fontSize: "18px" }}>🟢 En ligne</h2>
 
           <p style={{ color: "#9ca3af", marginTop: "6px" }}>
-            {onlineMembers.length} membre{onlineMembers.length > 1 ? "s" : ""} connecté
+            {onlineMembers.length} membre
+            {onlineMembers.length > 1 ? "s" : ""} connecté
             {onlineMembers.length > 1 ? "s" : ""}
           </p>
 
@@ -834,7 +886,9 @@ export default function ChatPage() {
                       }}
                     >
                       {member.username || "Utilisateur"}
-                      {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                      {member.role === "admin" && (
+                        <span style={adminBadge}>ADMIN</span>
+                      )}
                     </p>
                     <p
                       style={{
@@ -869,9 +923,33 @@ const pageStyle: React.CSSProperties = {
   alignItems: "center",
   padding: "24px",
   fontFamily: "Arial, sans-serif",
+  background: "#000",
+};
+
+const backgroundImageStyle: React.CSSProperties = {
+  position: "absolute",
+  inset: "-20px",
+  backgroundImage: 'url("/Tchat.jpg")',
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+  filter: "blur(6px)",
+  opacity: 0.42,
+  transform: "scale(1.04)",
+  zIndex: 0,
+};
+
+const darkOverlayStyle: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  background:
+    "radial-gradient(circle at center, rgba(0,40,70,0.18), rgba(0,0,0,0.58) 55%, rgba(0,0,0,0.86) 100%)",
+  zIndex: 1,
 };
 
 const chatLayout: React.CSSProperties = {
+  position: "relative",
+  zIndex: 2,
   width: "100%",
   maxWidth: "1180px",
   display: "grid",
@@ -883,318 +961,28 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(8,13,22,0.88)",
-  border: "1px solid rgba(0,198,255,0.32)",
+  background: "rgba(8,13,22,0.72)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  border: "1px solid rgba(0,198,255,0.34)",
   borderRadius: "24px",
-  boxShadow: "0 25px 90px rgba(0,0,0,0.85)",
+  boxShadow:
+    "0 25px 90px rgba(0,0,0,0.85), 0 0 40px rgba(0,198,255,0.13)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
   position: "relative",
 };
 
-const newMessageBadge: React.CSSProperties = {
-  position: "absolute",
-  top: "94px",
-  right: "24px",
-  zIndex: 20,
-  padding: "8px 14px",
-  borderRadius: "999px",
-  border: "1px solid rgba(255,255,255,0.18)",
-  background: "linear-gradient(135deg, #ff3b3b, #b00020)",
-  color: "#fff",
-  fontWeight: 900,
-  cursor: "pointer",
-  boxShadow: "0 0 22px rgba(255,60,60,0.45)",
-};
-
-const pinnedBox: React.CSSProperties = {
-  padding: "12px 18px",
-  background:
-    "linear-gradient(135deg, rgba(255,215,100,0.22), rgba(255,165,0,0.08))",
-  borderBottom: "1px solid rgba(255,215,100,0.35)",
-  color: "#fff",
-};
-
-const pinnedBadge: React.CSSProperties = {
-  color: "#000",
-  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
-  fontSize: "9px",
-  fontWeight: 900,
-  marginLeft: "7px",
-  padding: "3px 7px",
-  borderRadius: "999px",
-};
-
-const typingBox: React.CSSProperties = {
-  padding: "8px 18px",
-  color: "#00c6ff",
-  fontSize: "13px",
-  borderTop: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(0,198,255,0.06)",
-};
-
 const onlinePanel: React.CSSProperties = {
   height: "78vh",
   padding: "20px",
   borderRadius: "24px",
-  background: "rgba(8,13,22,0.88)",
-  border: "1px solid rgba(0,198,255,0.32)",
-  boxShadow: "0 25px 90px rgba(0,0,0,0.65)",
+  background: "rgba(8,13,22,0.72)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  border: "1px solid rgba(0,198,255,0.34)",
+  boxShadow:
+    "0 25px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.12)",
   overflowY: "auto",
-};
-const onlineMemberCard: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "10px",
-  padding: "10px",
-  borderRadius: "16px",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
-};
-
-const headerStyle: React.CSSProperties = {
-  padding: "20px",
-  borderBottom: "1px solid rgba(255,255,255,0.1)",
-  background:
-    "linear-gradient(135deg, rgba(0,198,255,0.16), rgba(255,215,100,0.06))",
-};
-
-const connectedBox: React.CSSProperties = {
-  display: "flex",
-  gap: "12px",
-  alignItems: "center",
-  marginTop: "12px",
-};
-
-const avatarWrap: React.CSSProperties = {
-  position: "relative",
-  width: "50px",
-  height: "50px",
-};
-
-const avatarSmall: React.CSSProperties = {
-  width: "50px",
-  height: "50px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.8)",
-  boxShadow: "0 0 18px rgba(0,198,255,0.65)",
-};
-
-const onlineDot: React.CSSProperties = {
-  position: "absolute",
-  right: "1px",
-  bottom: "1px",
-  width: "12px",
-  height: "12px",
-  borderRadius: "50%",
-  border: "2px solid #07111f",
-};
-
-const profileBox: React.CSSProperties = {
-  marginTop: "18px",
-  padding: "16px",
-  borderRadius: "16px",
-  background: "rgba(0,0,0,0.42)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  display: "grid",
-  gap: "10px",
-};
-
-const messagesBox: React.CSSProperties = {
-  flex: 1,
-  padding: "22px",
-  overflowY: "auto",
-};
-
-const messageHeader: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "10px",
-};
-
-const avatarWrapSmall: React.CSSProperties = {
-  position: "relative",
-  width: "38px",
-  height: "38px",
-};
-
-const avatarMsg: React.CSSProperties = {
-  width: "38px",
-  height: "38px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.75)",
-  boxShadow: "0 0 14px rgba(0,198,255,0.5)",
-};
-
-const onlineDotSmall: React.CSSProperties = {
-  position: "absolute",
-  right: "-1px",
-  bottom: "-1px",
-  width: "10px",
-  height: "10px",
-  borderRadius: "50%",
-  border: "2px solid #07111f",
-};
-
-const myMessageBox: React.CSSProperties = {
-  maxWidth: "78%",
-  padding: "14px 16px",
-  borderRadius: "20px 20px 5px 20px",
-  background:
-    "linear-gradient(135deg, rgba(0,150,255,0.95), rgba(0,85,210,0.95))",
-  border: "1px solid rgba(130,220,255,0.55)",
-  boxShadow: "0 0 26px rgba(0,140,255,0.35)",
-  color: "#fff",
-};
-
-const otherMessageBox: React.CSSProperties = {
-  maxWidth: "78%",
-  padding: "14px 16px",
-  borderRadius: "20px 20px 20px 5px",
-  background: "rgba(18,26,40,0.95)",
-  border: "1px solid rgba(255,255,255,0.14)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
-  color: "#f2f7ff",
-};
-
-const messageText: React.CSSProperties = {
-  marginTop: "10px",
-  lineHeight: 1.55,
-  fontSize: "15px",
-  color: "#fff",
-  wordBreak: "break-word",
-};
-
-const reactionRow: React.CSSProperties = {
-  display: "flex",
-  gap: "7px",
-  marginTop: "12px",
-  flexWrap: "wrap",
-};
-
-const reactionBtn: React.CSSProperties = {
-  minWidth: "36px",
-  height: "30px",
-  padding: "4px 9px",
-  borderRadius: "999px",
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.08)",
-  color: "#fff",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "5px",
-  transition:
-    "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
-  position: "relative",
-  zIndex: 10,
-};
-
-const reactionBtnActive: React.CSSProperties = {
-  background: "rgba(0,198,255,0.2)",
-  border: "1px solid rgba(0,198,255,0.75)",
-  boxShadow: "0 0 16px rgba(0,198,255,0.55)",
-};
-
-const reactionEmoji: React.CSSProperties = {
-  fontSize: "15px",
-};
-
-const reactionEmojiActive: React.CSSProperties = {
-  fontSize: "17px",
-  filter: "drop-shadow(0 0 8px rgba(0,198,255,0.9))",
-};
-
-const reactionCount: React.CSSProperties = {
-  fontSize: "12px",
-  fontWeight: 900,
-  color: "#dbeafe",
-};
-
-const adminBadge: React.CSSProperties = {
-  color: "#000",
-  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
-  fontSize: "10px",
-  fontWeight: 900,
-  marginLeft: "7px",
-  padding: "3px 7px",
-  borderRadius: "999px",
-  boxShadow: "0 0 12px rgba(255,215,100,0.55)",
-};
-
-const pinBtn: React.CSSProperties = {
-  marginTop: "12px",
-  background: "rgba(255,215,100,0.16)",
-  color: "#ffe58a",
-  border: "1px solid rgba(255,215,100,0.45)",
-  borderRadius: "10px",
-  padding: "7px 10px",
-  cursor: "pointer",
-  fontSize: "12px",
-  fontWeight: "bold",
-};
-
-const deleteBtn: React.CSSProperties = {
-  marginTop: "12px",
-  background: "rgba(255,70,70,0.16)",
-  color: "#ffb3b3",
-  border: "1px solid rgba(255,90,90,0.45)",
-  borderRadius: "10px",
-  padding: "7px 10px",
-  cursor: "pointer",
-  fontSize: "12px",
-  fontWeight: "bold",
-};
-
-const inputBox: React.CSSProperties = {
-  display: "flex",
-  gap: "10px",
-  padding: "16px",
-  borderTop: "1px solid rgba(255,255,255,0.1)",
-  background: "rgba(0,0,0,0.4)",
-};
-
-const inputStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "14px",
-  borderRadius: "14px",
-  border: "1px solid rgba(255,255,255,0.16)",
-  background: "#0b0f18",
-  color: "#fff",
-  outline: "none",
-};
-
-const btnStyle: React.CSSProperties = {
-  padding: "14px 20px",
-  borderRadius: "14px",
-  border: "none",
-  color: "#fff",
-  fontWeight: "bold",
-  cursor: "pointer",
-  background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
-  boxShadow: "0 10px 30px rgba(0,114,255,0.35)",
-};
-
-const profileBtn: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: "999px",
-  border: "1px solid rgba(0,198,255,0.35)",
-  color: "#fff",
-  background: "rgba(0,198,255,0.12)",
-  fontWeight: "bold",
-  cursor: "pointer",
-};
-
-const soundBtn: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: "999px",
-  border: "1px solid rgba(255,255,255,0.18)",
-  color: "#fff",
-  background: "rgba(255,255,255,0.08)",
-  fontWeight: "bold",
-  cursor: "pointer",
 };
