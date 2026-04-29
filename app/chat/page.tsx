@@ -861,8 +861,8 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   backgroundImage: `
-    linear-gradient(rgba(0,0,0,0.76), rgba(0,0,0,0.93)),
-    url('/bg-chat.jpg')
+    linear-gradient(rgba(0,0,0,0.48), rgba(0,0,0,0.72)),
+    url('/Tchat.jpg')
   `,
   backgroundSize: "cover",
   backgroundPosition: "center",
@@ -888,9 +888,9 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(8,13,22,0.9)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
+  background: "rgba(8,13,22,0.72)",
+  backdropFilter: "blur(8px)",
+  WebkitBackdropFilter: "blur(8px)",
   border: "1px solid rgba(0,198,255,0.32)",
   borderRadius: "24px",
   boxShadow:
@@ -946,9 +946,9 @@ const onlinePanel: React.CSSProperties = {
   height: "78vh",
   padding: "20px",
   borderRadius: "24px",
-  background: "rgba(8,13,22,0.9)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
+  background: "rgba(8,13,22,0.72)",
+  backdropFilter: "blur(8px)",
+  WebkitBackdropFilter: "blur(8px)",
   border: "1px solid rgba(0,198,255,0.32)",
   boxShadow:
     "0 25px 90px rgba(0,0,0,0.75), 0 0 45px rgba(0,198,255,0.12)",
