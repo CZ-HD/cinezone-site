@@ -18,6 +18,7 @@ type Comment = {
   role: string;
   content: string;
   created_at: string;
+  parent_id?: string | null;
 };
 
 type CommentReaction = {
@@ -38,6 +39,8 @@ export default function Comments({
   const [comments, setComments] = useState<Comment[]>([]);
   const [reactions, setReactions] = useState<CommentReaction[]>([]);
   const [text, setText] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [replyTo, setReplyTo] = useState<Comment | null>(null);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -86,6 +89,28 @@ export default function Comments({
     setReactions(data || []);
   };
 
+  const createAdminNotification = async (content: string) => {
+    if (profile?.role === "admin") return;
+
+    const { data: admins } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "admin");
+
+    if (admins?.length) {
+      await supabase.from("notifications").insert(
+        admins.map((admin) => ({
+          user_id: admin.id,
+          type: "comment",
+          title: "💬 Nouveau commentaire",
+          message: content,
+          link: `/movie/${itemId}`,
+          read: false,
+        }))
+      );
+    }
+  };
+
   const sendComment = async () => {
     if (!text.trim() || !user) return;
 
@@ -100,6 +125,7 @@ export default function Comments({
       avatar: profile?.avatar || DEFAULT_AVATAR,
       role: profile?.role || "user",
       content,
+      parent_id: null,
     });
 
     if (error) {
@@ -107,26 +133,34 @@ export default function Comments({
       return;
     }
 
-    if (profile?.role !== "admin") {
-      const { data: admins } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("role", "admin");
+    await createAdminNotification(content);
+    await loadComments();
+  };
 
-      if (admins?.length) {
-        await supabase.from("notifications").insert(
-          admins.map((admin) => ({
-            user_id: admin.id,
-            type: "comment",
-            title: "💬 Nouveau commentaire",
-            message: content,
-            link: `/movie/${itemId}`,
-            read: false,
-          }))
-        );
-      }
+  const sendReply = async () => {
+    if (!replyText.trim() || !user || !replyTo) return;
+
+    const content = replyText.trim();
+    setReplyText("");
+
+    const { error } = await supabase.from("comments").insert({
+      item_id: String(itemId),
+      item_type: itemType,
+      user_id: user.id,
+      username: profile?.username || user.email,
+      avatar: profile?.avatar || DEFAULT_AVATAR,
+      role: profile?.role || "user",
+      content,
+      parent_id: replyTo.id,
+    });
+
+    if (error) {
+      alert("Erreur réponse : " + error.message);
+      return;
     }
 
+    setReplyTo(null);
+    await createAdminNotification(content);
     await loadComments();
   };
 
@@ -196,7 +230,17 @@ export default function Comments({
         r.emoji === emoji
     );
 
-  return (
+  const parentComments = comments.filter((comment) => !comment.parent_id);
+
+  const getReplies = (commentId: string) =>
+    comments
+      .filter((comment) => comment.parent_id === commentId)
+      .sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+
+    return (
     <section style={box}>
       <div style={header}>
         <div>
@@ -207,20 +251,18 @@ export default function Comments({
         </div>
       </div>
 
+      {/* INPUT PRINCIPAL */}
       <div style={inputBox}>
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") sendComment();
-          }}
+          onKeyDown={(e) => e.key === "Enter" && sendComment()}
           placeholder={
             user ? "Écrire un commentaire..." : "Connecte-toi pour commenter..."
           }
           disabled={!user}
           style={input}
         />
-
         <button onClick={sendComment} disabled={!user} style={btn}>
           Envoyer
         </button>
@@ -228,68 +270,110 @@ export default function Comments({
 
       {loading ? (
         <p style={{ color: "#aaa" }}>Chargement...</p>
-      ) : comments.length === 0 ? (
+      ) : parentComments.length === 0 ? (
         <p style={empty}>Aucun commentaire pour le moment.</p>
       ) : (
         <div style={list}>
-          {comments.map((comment) => {
+          {parentComments.map((comment) => {
+            const replies = getReplies(comment.id);
             const isAdmin = comment.role === "admin";
 
             return (
-              <div key={comment.id} style={card}>
-                <img
-                  src={comment.avatar || DEFAULT_AVATAR}
-                  alt="avatar"
-                  style={avatar}
-                />
+              <div key={comment.id}>
+                {/* COMMENT PRINCIPAL */}
+                <div style={card}>
+                  <img
+                    src={comment.avatar || DEFAULT_AVATAR}
+                    style={avatar}
+                  />
 
-                <div style={{ flex: 1 }}>
-                  <div style={topRow}>
-                    <strong
-                      style={{
-                        color: isAdmin ? "gold" : "#00c6ff",
-                      }}
-                    >
-                      {comment.username || "Utilisateur"}
-                      {isAdmin && <span style={adminBadge}>ADMIN</span>}
-                    </strong>
+                  <div style={{ flex: 1 }}>
+                    <div style={topRow}>
+                      <strong
+                        style={{ color: isAdmin ? "gold" : "#00c6ff" }}
+                      >
+                        {comment.username}
+                        {isAdmin && <span style={adminBadge}>ADMIN</span>}
+                      </strong>
 
-                    <span style={dateText}>
-                      {new Date(comment.created_at).toLocaleDateString("fr-FR")}
-                    </span>
-                  </div>
+                      <span style={dateText}>
+                        {new Date(comment.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
 
-                  <p style={content}>{comment.content}</p>
+                    <p style={content}>{comment.content}</p>
 
-                  <div style={reactionRow}>
-                    {REACTION_EMOJIS.map((emoji) => {
-                      const count = getReactionCount(comment.id, emoji);
-                      const active = hasReacted(comment.id, emoji);
+                    {/* RÉACTIONS */}
+                    <div style={reactionRow}>
+                      {REACTION_EMOJIS.map((emoji) => {
+                        const count = getReactionCount(comment.id, emoji);
+                        const active = hasReacted(comment.id, emoji);
 
-                      return (
+                        return (
+                          <button
+                            key={emoji}
+                            onClick={() =>
+                              toggleReaction(comment.id, emoji)
+                            }
+                            style={{
+                              ...reactionBtn,
+                              ...(active ? reactionBtnActive : {}),
+                            }}
+                          >
+                            {emoji} {count || ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* ACTIONS */}
+                    <div style={{ marginTop: 8, display: "flex", gap: 10 }}>
+                      <button
+                        onClick={() => setReplyTo(comment)}
+                        style={replyBtn}
+                      >
+                        Répondre
+                      </button>
+
+                      {profile?.role === "admin" && (
                         <button
-                          key={emoji}
-                          onClick={() => toggleReaction(comment.id, emoji)}
-                          style={{
-                            ...reactionBtn,
-                            ...(active ? reactionBtnActive : {}),
-                          }}
+                          onClick={() => deleteComment(comment.id)}
+                          style={deleteBtn}
                         >
-                          <span>{emoji}</span>
-                          {count > 0 && <span>{count}</span>}
+                          🗑
                         </button>
-                      );
-                    })}
-                  </div>
+                      )}
+                    </div>
 
-                  {profile?.role === "admin" && (
-                    <button
-                      onClick={() => deleteComment(comment.id)}
-                      style={deleteBtn}
-                    >
-                      🗑 Supprimer
-                    </button>
-                  )}
+                    {/* INPUT RÉPONSE */}
+                    {replyTo?.id === comment.id && (
+                      <div style={{ marginTop: 10 }}>
+                        <input
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Répondre..."
+                          style={input}
+                        />
+                        <button onClick={sendReply} style={btn}>
+                          Envoyer
+                        </button>
+                      </div>
+                    )}
+
+                    {/* RÉPONSES */}
+                    {replies.map((reply) => (
+                      <div key={reply.id} style={replyCard}>
+                        <img src={reply.avatar} style={avatarSmall} />
+
+                        <div>
+                          <strong style={{ color: "#00c6ff" }}>
+                            {reply.username}
+                          </strong>
+                          <p style={content}>{reply.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             );
@@ -300,140 +384,136 @@ export default function Comments({
   );
 }
 
-const box: React.CSSProperties = {
-  marginTop: "44px",
-  padding: "24px",
-  borderRadius: "24px",
+/* ================== STYLES ================== */
+
+const box = {
+  marginTop: 44,
+  padding: 24,
+  borderRadius: 24,
   background:
     "linear-gradient(180deg, rgba(12,18,30,0.88), rgba(5,8,14,0.92))",
-  border: "1px solid rgba(0,198,255,0.22)",
-  boxShadow: "0 20px 70px rgba(0,0,0,0.65)",
 };
 
-const header: React.CSSProperties = {
+const header = {
+  marginBottom: 18,
+};
+
+const inputBox = {
   display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "18px",
+  gap: 10,
+  marginBottom: 20,
 };
 
-const inputBox: React.CSSProperties = {
-  display: "flex",
-  gap: "10px",
-  marginBottom: "22px",
-};
-
-const input: React.CSSProperties = {
+const input = {
   flex: 1,
-  padding: "15px",
-  borderRadius: "16px",
-  border: "1px solid rgba(255,255,255,0.14)",
+  padding: 12,
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.1)",
   background: "#0b0f18",
   color: "#fff",
-  outline: "none",
 };
 
-const btn: React.CSSProperties = {
-  padding: "15px 20px",
-  borderRadius: "16px",
+const btn = {
+  padding: "12px 16px",
+  borderRadius: 12,
   border: "none",
+  background: "#0072ff",
   color: "#fff",
-  fontWeight: 900,
-  background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
-  boxShadow: "0 10px 28px rgba(0,114,255,0.35)",
   cursor: "pointer",
 };
 
-const list: React.CSSProperties = {
+const list = {
   display: "grid",
-  gap: "14px",
+  gap: 16,
 };
 
-const card: React.CSSProperties = {
+const card = {
   display: "flex",
-  gap: "14px",
-  padding: "16px",
-  borderRadius: "18px",
-  background: "rgba(255,255,255,0.055)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  gap: 12,
+  padding: 16,
+  borderRadius: 16,
+  background: "rgba(255,255,255,0.05)",
 };
 
-const avatar: React.CSSProperties = {
-  width: "42px",
-  height: "42px",
+const replyCard = {
+  display: "flex",
+  gap: 10,
+  marginTop: 10,
+  paddingLeft: 20,
+};
+
+const avatar = {
+  width: 42,
+  height: 42,
   borderRadius: "50%",
-  objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.55)",
-  boxShadow: "0 0 14px rgba(0,198,255,0.35)",
 };
 
-const topRow: React.CSSProperties = {
+const avatarSmall = {
+  width: 30,
+  height: 30,
+  borderRadius: "50%",
+};
+
+const topRow = {
   display: "flex",
   justifyContent: "space-between",
-  gap: "12px",
-  alignItems: "center",
 };
 
-const adminBadge: React.CSSProperties = {
-  marginLeft: "7px",
-  padding: "3px 7px",
-  borderRadius: "999px",
-  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
+const adminBadge = {
+  marginLeft: 6,
+  fontSize: 10,
+  background: "gold",
   color: "#000",
-  fontSize: "10px",
-  fontWeight: 900,
+  padding: "2px 6px",
+  borderRadius: 999,
 };
 
-const dateText: React.CSSProperties = {
-  color: "#7f8da3",
-  fontSize: "12px",
+const dateText = {
+  fontSize: 12,
+  color: "#aaa",
 };
 
-const content: React.CSSProperties = {
-  color: "#f1f5ff",
-  lineHeight: 1.55,
-  margin: "8px 0",
+const content = {
+  marginTop: 6,
+  color: "#fff",
 };
 
-const reactionRow: React.CSSProperties = {
+const reactionRow = {
   display: "flex",
-  gap: "8px",
-  flexWrap: "wrap",
-  marginTop: "10px",
+  gap: 6,
+  marginTop: 8,
 };
 
-const reactionBtn: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "5px",
-  padding: "6px 10px",
-  borderRadius: "999px",
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.07)",
+const reactionBtn = {
+  padding: "4px 8px",
+  borderRadius: 999,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "transparent",
   color: "#fff",
   cursor: "pointer",
-  fontWeight: 800,
 };
 
-const reactionBtnActive: React.CSSProperties = {
-  background: "rgba(0,198,255,0.2)",
-  border: "1px solid rgba(0,198,255,0.7)",
-  boxShadow: "0 0 14px rgba(0,198,255,0.35)",
+const reactionBtnActive = {
+  background: "#00c6ff",
 };
 
-const empty: React.CSSProperties = {
-  color: "#8b98aa",
-  textAlign: "center",
-  padding: "20px",
-};
-
-const deleteBtn: React.CSSProperties = {
-  marginTop: "10px",
-  padding: "7px 11px",
-  borderRadius: "10px",
-  border: "1px solid rgba(255,80,80,0.45)",
-  background: "rgba(255,40,40,0.15)",
-  color: "#ffabab",
+const replyBtn = {
+  fontSize: 12,
+  background: "transparent",
+  border: "none",
+  color: "#00c6ff",
   cursor: "pointer",
-  fontWeight: 800,
+};
+
+const deleteBtn = {
+  fontSize: 12,
+  background: "transparent",
+  border: "none",
+  color: "red",
+  cursor: "pointer",
+};
+
+const empty = {
+  textAlign: "center",
+  color: "#aaa",
 };
