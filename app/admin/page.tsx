@@ -364,7 +364,7 @@ export default function AdminPage() {
                         </span>
 
                         <span style={statusTextPill}>
-  Statut choisi : {member.status_text || "Aucun statut"}
+  {onlineUserIds.includes(member.id) ? "🟢 En ligne" : "⚫ Hors ligne"}
 </span>
                       </div>
                     </div>
