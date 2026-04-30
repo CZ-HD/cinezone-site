@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
+const START_YEAR = 1900;
+const END_YEAR = 2027;
 
 export default function FilmsPage() {
   const [movies, setMovies] = useState<any[]>([]);
@@ -14,8 +16,16 @@ export default function FilmsPage() {
   const [loading, setLoading] = useState(true);
   const [tmdbLoading, setTmdbLoading] = useState(false);
 
+  const [minYear, setMinYear] = useState(START_YEAR);
+  const [maxYear, setMaxYear] = useState(END_YEAR);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(100);
+
+  const years = useMemo(
+    () => Array.from({ length: END_YEAR - START_YEAR + 1 }, (_, i) => START_YEAR + i),
+    []
+  );
 
   useEffect(() => {
     loadMovies();
@@ -34,7 +44,7 @@ export default function FilmsPage() {
 
     const { data, error } = await supabase
       .from("downloads")
-      .select("id, title, poster_path, vote_average, release_date")
+      .select("id, title, poster_path, vote_average, release_date, release_year")
       .order("id", { ascending: false });
 
     if (error) {
@@ -76,9 +86,23 @@ export default function FilmsPage() {
     }
   };
 
-  const filteredMovies = movies.filter((movie) =>
-    (movie.title || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const getMovieYear = (movie: any) => {
+    const year =
+      movie.release_year ||
+      (movie.release_date ? Number(String(movie.release_date).substring(0, 4)) : null);
+
+    return Number.isFinite(Number(year)) ? Number(year) : null;
+  };
+
+  const filteredMovies = movies.filter((movie) => {
+    const titleMatch = (movie.title || "").toLowerCase().includes(search.toLowerCase());
+    const year = getMovieYear(movie);
+
+    if (!titleMatch) return false;
+    if (!year) return false;
+
+    return year >= minYear && year <= maxYear;
+  });
 
   const totalPages = Math.max(1, Math.ceil(filteredMovies.length / itemsPerPage));
 
@@ -87,43 +111,104 @@ export default function FilmsPage() {
     currentPage * itemsPerPage
   );
 
+  const resetFilters = () => {
+    setMinYear(START_YEAR);
+    setMaxYear(END_YEAR);
+    setCurrentPage(1);
+  };
+
   return (
     <main style={pageStyle}>
       <h1>🎬 Films disponibles</h1>
 
-      <input
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }}
-        placeholder="🔍 Rechercher un film..."
-        style={inputStyle}
-      />
+      <div style={topBarStyle}>
+        <input
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
+          placeholder="🔍 Rechercher un film..."
+          style={inputStyle}
+        />
+
+        <div style={filterBox}>
+          <strong>🎛️ Filtre année</strong>
+
+          <div style={filterRow}>
+            <label style={labelStyle}>
+              De
+              <select
+                value={minYear}
+                onChange={(e) => {
+                  setMinYear(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                style={selectStyle}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label style={labelStyle}>
+              À
+              <select
+                value={maxYear}
+                onChange={(e) => {
+                  setMaxYear(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                style={selectStyle}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <button onClick={resetFilters} style={clearBtn}>
+              Effacer
+            </button>
+          </div>
+        </div>
+      </div>
 
       {loading ? (
         <p>Chargement...</p>
       ) : (
         <>
-          {filteredMovies.length > 0 && (
-            <section>
-              <h2 style={sectionTitle}>🍿 Catalogue CineZone</h2>
+          <section>
+            <h2 style={sectionTitle}>
+              🍿 Catalogue CineZone — {filteredMovies.length} film
+              {filteredMovies.length > 1 ? "s" : ""}
+            </h2>
 
-              <MovieGrid movies={paginatedMovies} local />
+            {filteredMovies.length === 0 ? (
+              <p style={{ color: "#aaa" }}>Aucun film trouvé pour ce filtre.</p>
+            ) : (
+              <>
+                <MovieGrid movies={paginatedMovies} local />
 
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                itemsPerPage={itemsPerPage}
-                totalItems={filteredMovies.length}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={(value) => {
-                  setItemsPerPage(value);
-                  setCurrentPage(1);
-                }}
-              />
-            </section>
-          )}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={filteredMovies.length}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={(value) => {
+                    setItemsPerPage(value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </>
+            )}
+          </section>
 
           {search.trim().length >= 2 && (
             <section style={{ marginTop: "38px" }}>
@@ -138,12 +223,6 @@ export default function FilmsPage() {
               )}
             </section>
           )}
-
-          {filteredMovies.length === 0 &&
-            tmdbResults.length === 0 &&
-            search.trim().length < 2 && (
-              <p style={{ color: "#aaa" }}>Aucun film trouvé.</p>
-            )}
         </>
       )}
     </main>
@@ -151,38 +230,48 @@ export default function FilmsPage() {
 }
 
 function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
+  const getYear = (movie: any) =>
+    movie.release_year ||
+    (movie.release_date ? String(movie.release_date).substring(0, 4) : "");
+
   return (
     <div style={gridStyle}>
-      {movies.map((movie) => (
-        <Link
-          key={movie.id}
-          href={local ? `/movie/${movie.id}` : `/admin?tmdb=${movie.id}`}
-          style={{ color: "#fff", textDecoration: "none" }}
-        >
-          <img
-            src={
-              movie.poster_path
-                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                : "https://via.placeholder.com/300x450?text=No+Image"
-            }
-            alt={movie.title || "Film"}
-            style={posterStyle}
-            loading="lazy"
-          />
+      {movies.map((movie) => {
+        const year = getYear(movie);
 
-          <h3 style={{ fontSize: "15px", marginTop: "12px" }}>
-            {movie.title || `Film ${movie.id}`}
-          </h3>
+        return (
+          <Link
+            key={movie.id}
+            href={local ? `/movie/${movie.id}` : `/admin?tmdb=${movie.id}`}
+            style={{ color: "#fff", textDecoration: "none" }}
+          >
+            <div style={posterWrapStyle}>
+              {year && <span style={yearBadge}>{year}</span>}
 
-          <p style={{ opacity: 0.75, margin: "4px 0" }}>
-            ID TMDB : {movie.id}
-          </p>
+              <img
+                src={
+                  movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : "https://via.placeholder.com/300x450?text=No+Image"
+                }
+                alt={movie.title || "Film"}
+                style={posterStyle}
+                loading="lazy"
+              />
+            </div>
 
-          {movie.vote_average && (
-            <p style={{ opacity: 0.75 }}>⭐ {movie.vote_average} / 10</p>
-          )}
-        </Link>
-      ))}
+            <h3 style={{ fontSize: "15px", marginTop: "12px" }}>
+              {movie.title || `Film ${movie.id}`}
+            </h3>
+
+            <p style={{ opacity: 0.75, margin: "4px 0" }}>ID TMDB : {movie.id}</p>
+
+            {movie.vote_average && (
+              <p style={{ opacity: 0.75 }}>⭐ {movie.vote_average} / 10</p>
+            )}
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -261,6 +350,14 @@ const pageStyle: React.CSSProperties = {
   fontFamily: "Arial, sans-serif",
 };
 
+const topBarStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "18px",
+  flexWrap: "wrap",
+  margin: "20px 0 30px",
+};
+
 const inputStyle: React.CSSProperties = {
   width: "100%",
   maxWidth: "520px",
@@ -270,8 +367,40 @@ const inputStyle: React.CSSProperties = {
   background: "#0b0f18",
   color: "#fff",
   outline: "none",
-  margin: "20px 0 30px",
   boxShadow: "0 0 18px rgba(0,140,255,0.18)",
+};
+
+const filterBox: React.CSSProperties = {
+  padding: "14px",
+  borderRadius: "16px",
+  background: "rgba(255,255,255,0.055)",
+  border: "1px solid rgba(0,198,255,0.22)",
+  display: "grid",
+  gap: "12px",
+};
+
+const filterRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "end",
+  gap: "10px",
+  flexWrap: "wrap",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "grid",
+  gap: "6px",
+  color: "#cbd5e1",
+  fontSize: "13px",
+};
+
+const clearBtn: React.CSSProperties = {
+  padding: "10px 14px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: 800,
 };
 
 const sectionTitle: React.CSSProperties = {
@@ -283,6 +412,24 @@ const gridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
   gap: "24px",
+};
+
+const posterWrapStyle: React.CSSProperties = {
+  position: "relative",
+};
+
+const yearBadge: React.CSSProperties = {
+  position: "absolute",
+  top: "8px",
+  left: "8px",
+  zIndex: 2,
+  padding: "5px 9px",
+  borderRadius: "8px",
+  background: "linear-gradient(135deg, #ff1744, #b00020)",
+  color: "#fff",
+  fontSize: "12px",
+  fontWeight: 900,
+  boxShadow: "0 8px 20px rgba(0,0,0,0.45)",
 };
 
 const posterStyle: React.CSSProperties = {
