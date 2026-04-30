@@ -1,63 +1,42 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function PresenceTracker() {
+  const pathname = usePathname();
+
   useEffect(() => {
-    let channel: any = null;
-    let mounted = true;
+    let interval: any;
 
-    async function trackPresence() {
-      try {
-        const { data } = await supabase.auth.getUser();
-        const user = data.user;
+    async function updatePresence() {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+      if (!user) return;
 
-        if (!mounted || !user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("username, avatar, role")
+        .eq("id", user.id)
+        .maybeSingle();
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("username, avatar, role, status_text")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (!mounted) return;
-
-        channel = supabase.channel("site-presence", {
-          config: {
-            presence: {
-              key: user.id,
-            },
-          },
-        });
-
-        channel.subscribe(async (status: string) => {
-          if (status !== "SUBSCRIBED" || !channel) return;
-
-          await channel.track({
-            user_id: user.id,
-            email: user.email || "",
-            username: profile?.username || user.email || "Utilisateur",
-            avatar: profile?.avatar || "",
-            role: profile?.role || "user",
-            status_text: profile?.status_text || "🟢 En ligne",
-          });
-        });
-      } catch (error) {
-        console.error("PresenceTracker error:", error);
-      }
+      await supabase.from("user_presence").upsert({
+        user_id: user.id,
+        email: user.email,
+        username: profile?.username || user.email,
+        avatar: profile?.avatar,
+        role: profile?.role || "user",
+        current_page: pathname,
+        last_seen: new Date().toISOString(),
+      });
     }
 
-    trackPresence();
+    updatePresence();
+    interval = setInterval(updatePresence, 20000);
 
-    return () => {
-      mounted = false;
-
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [pathname]);
 
   return null;
 }
