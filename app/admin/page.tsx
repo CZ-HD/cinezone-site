@@ -170,14 +170,17 @@ export default function AdminPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: Number(id),
-          link: addAffiliate(link),
-          title: movie.title,
-          poster_path: movie.poster_path,
-          backdrop_path: movie.backdrop_path,
-          vote_average: movie.vote_average,
-          release_date: movie.release_date,
-        }),
+  id: Number(id),
+  link: addAffiliate(link),
+  title: movie.title,
+  poster_path: movie.poster_path,
+  backdrop_path: movie.backdrop_path,
+  vote_average: movie.vote_average,
+  release_date: movie.release_date,
+  release_year: movie.release_date
+    ? Number(movie.release_date.substring(0, 4))
+    : null,
+}),
       });
 
       const result = await res.json();
