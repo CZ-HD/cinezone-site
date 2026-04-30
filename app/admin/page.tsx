@@ -341,8 +341,8 @@ export default function AdminPage() {
                         </span>
 
                         <span style={statusTextPill}>
-                          {member.status_text || "Aucun statut"}
-                        </span>
+  Profil : {member.status_text || "Aucun statut"}
+</span>
                       </div>
                     </div>
                   </div>
