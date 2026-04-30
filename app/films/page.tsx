@@ -279,10 +279,12 @@ function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
 
               <img
                 src={
-                  movie.poster_path
-                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                    : "https://via.placeholder.com/300x450?text=No+Image"
-                }
+  movie.poster_path
+    ? movie.poster_path.startsWith("http")
+      ? movie.poster_path
+      : `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    : "https://via.placeholder.com/300x450?text=No+Image"
+}
                 alt={movie.title || "Film"}
                 style={posterStyle}
                 loading="lazy"
