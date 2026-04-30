@@ -4,6 +4,7 @@ import AuthButton from "./components/AuthButton";
 import AuthGuard from "./components/AuthGuard";
 import AdminButton from "./components/AdminButton";
 import "./globals.css";
+import PresenceTracker from "./components/PresenceTracker";
 
 export const metadata: Metadata = {
   title: "CineZone",
