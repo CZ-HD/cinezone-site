@@ -42,7 +42,7 @@ export default function RootLayout({
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <PresenceTracker />
+    
         <header
           style={{
             position: "fixed",
