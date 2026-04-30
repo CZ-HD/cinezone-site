@@ -38,6 +38,14 @@ export default function AdminPage() {
   const [link, setLink] = useState("");
   const [message, setMessage] = useState("");
 
+  const [manualTitle, setManualTitle] = useState("");
+  const [manualYear, setManualYear] = useState("");
+  const [manualPoster, setManualPoster] = useState("");
+  const [manualBackdrop, setManualBackdrop] = useState("");
+  const [manualVote, setManualVote] = useState("");
+  const [manualImdb, setManualImdb] = useState("");
+  const [manualLink, setManualLink] = useState("");
+
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [presences, setPresences] = useState<Presence[]>([]);
   const [memberCount, setMemberCount] = useState(0);
@@ -61,6 +69,11 @@ export default function AdminPage() {
     if (!url.includes("1fichier.com")) return url;
     if (url.includes("af=")) return url;
     return url.includes("?") ? `${url}&${affiliate}` : `${url}?${affiliate}`;
+  };
+
+  const cleanImdb = (value: string) => {
+    const found = value.match(/tt\d+/);
+    return found ? found[0] : value.trim();
   };
 
   const checkAdmin = async () => {
@@ -121,7 +134,6 @@ export default function AdminPage() {
   const isOnline = (userId: string) => {
     const presence = getPresence(userId);
     if (!presence?.last_seen) return false;
-
     return Date.now() - new Date(presence.last_seen).getTime() < 60000;
   };
 
@@ -158,30 +170,32 @@ export default function AdminPage() {
       );
 
       if (!movieRes.ok) {
-        setMessage("❌ ID TMDB introuvable.");
+        setMessage("❌ ID TMDB introuvable. Utilise l’ajout manuel.");
         return;
       }
 
       const movie = await movieRes.json();
 
       const res = await fetch("/api/downloads", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    id: Number(id),
-    link: addAffiliate(link),
-    title: movie.title,
-    poster_path: movie.poster_path,
-    backdrop_path: movie.backdrop_path,
-    vote_average: movie.vote_average,
-    release_date: movie.release_date,
-    release_year: movie.release_date
-      ? Number(movie.release_date.substring(0, 4))
-      : null,
-  }),
-});
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: Number(id),
+          link: addAffiliate(link),
+          title: movie.title,
+          poster_path: movie.poster_path,
+          backdrop_path: movie.backdrop_path,
+          vote_average: movie.vote_average,
+          release_date: movie.release_date,
+          release_year: movie.release_date
+            ? Number(movie.release_date.substring(0, 4))
+            : null,
+          imdb_id: movie.imdb_id || null,
+        }),
+      });
+
       const result = await res.json();
 
       if (!res.ok) {
@@ -189,12 +203,54 @@ export default function AdminPage() {
         return;
       }
 
-      setMessage("✅ Film ajouté avec affiche automatiquement !");
+      setMessage("✅ Film ajouté automatiquement avec TMDB !");
       setId("");
       setLink("");
     } catch {
       setMessage("❌ Erreur lors de l'ajout du film.");
     }
+  };
+
+  const saveManualDownload = async () => {
+    if (!manualTitle || !manualYear || !manualPoster || !manualLink) {
+      setMessage("❌ Remplis au minimum : titre, année, affiche et lien.");
+      return;
+    }
+
+    setMessage("Ajout manuel du film en cours...");
+
+    const res = await fetch("/api/downloads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        link: addAffiliate(manualLink),
+        title: manualTitle,
+        poster_path: manualPoster,
+        backdrop_path: manualBackdrop || manualPoster,
+        vote_average: manualVote ? Number(manualVote) : null,
+        release_date: `${manualYear}-01-01`,
+        release_year: Number(manualYear),
+        imdb_id: manualImdb ? cleanImdb(manualImdb) : null,
+      }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      setMessage("❌ Erreur : " + result.error);
+      return;
+    }
+
+    setMessage("✅ Film ajouté manuellement !");
+    setManualTitle("");
+    setManualYear("");
+    setManualPoster("");
+    setManualBackdrop("");
+    setManualVote("");
+    setManualImdb("");
+    setManualLink("");
   };
 
   const updateAllMovies = async () => {
@@ -227,6 +283,10 @@ export default function AdminPage() {
             backdrop_path: tmdb.backdrop_path,
             vote_average: tmdb.vote_average,
             release_date: tmdb.release_date,
+            release_year: tmdb.release_date
+              ? Number(tmdb.release_date.substring(0, 4))
+              : null,
+            imdb_id: tmdb.imdb_id || null,
           })
           .eq("id", movie.id);
       } catch {
@@ -301,7 +361,10 @@ export default function AdminPage() {
       </section>
 
       <section style={cardStyle}>
-        <h2>🎬 Ajouter / modifier un lien</h2>
+        <h2>🎬 Ajout automatique TMDB</h2>
+        <p style={subText}>
+          Utilise ton système actuel : ID TMDB + lien. L’affiliation reste automatique.
+        </p>
 
         <input
           value={id}
@@ -319,7 +382,7 @@ export default function AdminPage() {
 
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <button onClick={saveDownload} style={btnBlue}>
-            💾 Enregistrer le lien
+            💾 Enregistrer avec TMDB
           </button>
 
           <button onClick={updateAllMovies} style={btnPurple}>
@@ -328,6 +391,68 @@ export default function AdminPage() {
         </div>
 
         {message && <p style={{ marginTop: "16px" }}>{message}</p>}
+      </section>
+
+      <section style={cardStyle}>
+        <h2>✍️ Ajout manuel</h2>
+        <p style={subText}>
+          À utiliser seulement si TMDB ne trouve pas le film. IMDb est optionnel.
+        </p>
+
+        <input
+          value={manualTitle}
+          onChange={(e) => setManualTitle(e.target.value)}
+          placeholder="Titre du film"
+          style={inputStyle}
+        />
+
+        <div style={twoColumns}>
+          <input
+            value={manualYear}
+            onChange={(e) => setManualYear(e.target.value)}
+            placeholder="Année ex: 2026"
+            style={inputStyle}
+          />
+
+          <input
+            value={manualVote}
+            onChange={(e) => setManualVote(e.target.value)}
+            placeholder="Note ex: 7.5"
+            style={inputStyle}
+          />
+        </div>
+
+        <input
+          value={manualPoster}
+          onChange={(e) => setManualPoster(e.target.value)}
+          placeholder="URL affiche / poster"
+          style={inputStyle}
+        />
+
+        <input
+          value={manualBackdrop}
+          onChange={(e) => setManualBackdrop(e.target.value)}
+          placeholder="URL image de fond optionnelle"
+          style={inputStyle}
+        />
+
+        <input
+          value={manualImdb}
+          onChange={(e) => setManualImdb(e.target.value)}
+          placeholder="ID IMDb optionnel ex: tt0111161"
+          style={inputStyle}
+        />
+
+        <input
+          value={manualLink}
+          onChange={(e) => setManualLink(e.target.value)}
+          placeholder="Lien de téléchargement"
+          style={inputStyle}
+        />
+
+        <button onClick={saveManualDownload} style={btnGreen}>
+          ✅ Enregistrer manuellement
+        </button>
       </section>
 
       <section style={cardStyle}>
@@ -426,7 +551,10 @@ export default function AdminPage() {
                       </p>
 
                       <p style={presenceText}>
-                        ⏱️ {connected ? "Actif maintenant" : seenAgo(presence?.last_seen)}
+                        ⏱️{" "}
+                        {connected
+                          ? "Actif maintenant"
+                          : seenAgo(presence?.last_seen)}
                       </p>
                     </div>
                   </div>
@@ -467,7 +595,10 @@ export default function AdminPage() {
                     )}
 
                     {!isCreator && (
-                      <button style={btnRed} onClick={() => deleteProfile(member.id)}>
+                      <button
+                        style={btnRed}
+                        onClick={() => deleteProfile(member.id)}
+                      >
                         🗑 Supprimer
                       </button>
                     )}
@@ -522,7 +653,7 @@ const titleStyle: React.CSSProperties = {
 
 const subText: React.CSSProperties = {
   color: "#9ca3af",
-  margin: "8px 0 0",
+  margin: "8px 0 14px",
 };
 
 const counterStyle: React.CSSProperties = {
@@ -544,6 +675,12 @@ const cardStyle: React.CSSProperties = {
   background: "rgba(20,20,25,0.78)",
   border: "1px solid rgba(255,255,255,0.12)",
   boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+};
+
+const twoColumns: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: "12px",
 };
 
 const memberHeader: React.CSSProperties = {
