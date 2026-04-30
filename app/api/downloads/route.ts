@@ -12,29 +12,44 @@ export async function POST(req: Request) {
       vote_average,
       release_date,
       release_year,
+      imdb_id,
     } = await req.json();
 
-    if (!id || !link) {
+    if (!link) {
       return NextResponse.json(
-        { error: "ID ou lien manquant" },
+        { error: "Lien manquant" },
         { status: 400 }
       );
     }
+
+    if (!id && !title) {
+      return NextResponse.json(
+        { error: "ID TMDB ou titre manuel obligatoire" },
+        { status: 400 }
+      );
+    }
+
+    const finalId = id ? Number(id) : Date.now();
 
     const finalReleaseYear =
       release_year ||
       (release_date ? Number(String(release_date).substring(0, 4)) : null);
 
+    const cleanImdbId = imdb_id
+      ? String(imdb_id).match(/tt\d+/)?.[0] || imdb_id
+      : null;
+
     const { error } = await supabase.from("downloads").upsert(
       {
-        id: Number(id),
+        id: finalId,
         link,
-        title,
-        poster_path,
-        backdrop_path,
-        vote_average,
-        release_date,
+        title: title || "Film sans titre",
+        poster_path: poster_path || null,
+        backdrop_path: backdrop_path || null,
+        vote_average: vote_average || null,
+        release_date: release_date || null,
         release_year: finalReleaseYear,
+        imdb_id: cleanImdbId,
       },
       { onConflict: "id" }
     );
