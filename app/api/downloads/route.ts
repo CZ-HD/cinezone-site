@@ -11,6 +11,7 @@ export async function POST(req: Request) {
       backdrop_path,
       vote_average,
       release_date,
+      release_year,
     } = await req.json();
 
     if (!id || !link) {
@@ -19,6 +20,10 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const finalReleaseYear =
+      release_year ||
+      (release_date ? Number(String(release_date).substring(0, 4)) : null);
 
     const { error } = await supabase.from("downloads").upsert(
       {
@@ -29,6 +34,7 @@ export async function POST(req: Request) {
         backdrop_path,
         vote_average,
         release_date,
+        release_year: finalReleaseYear,
       },
       { onConflict: "id" }
     );
