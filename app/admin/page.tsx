@@ -20,6 +20,16 @@ type Profile = {
   created_at?: string;
 };
 
+type Presence = {
+  user_id: string;
+  email?: string;
+  username?: string;
+  avatar?: string;
+  role?: string;
+  current_page?: string;
+  last_seen?: string;
+};
+
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -29,59 +39,22 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [presences, setPresences] = useState<Presence[]>([]);
   const [memberCount, setMemberCount] = useState(0);
   const [searchMember, setSearchMember] = useState("");
-  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
 
   useEffect(() => {
     checkAdmin();
   }, []);
 
   useEffect(() => {
-  if (!isAdmin) return;
+    if (!isAdmin) return;
 
-  let channel: any;
+    loadPresence();
+    const timer = setInterval(loadPresence, 15000);
 
-  async function startPresence() {
-    const { data } = await supabase.auth.getUser();
-    const currentUser = data.user;
-
-    if (!currentUser) return;
-
-    channel = supabase.channel("site-presence", {
-      config: {
-        presence: {
-          key: currentUser.id,
-        },
-      },
-    });
-
-    channel
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-
-        const ids = Object.values(state)
-          .flat()
-          .map((item: any) => item.user_id);
-
-        setOnlineUserIds([...new Set(ids)]);
-      })
-      .subscribe(async (status: string) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({
-            user_id: currentUser.id,
-            email: currentUser.email || "",
-          });
-        }
-      });
-  }
-
-  startPresence();
-
-  return () => {
-    if (channel) supabase.removeChannel(channel);
-  };
-}, [isAdmin]);
+    return () => clearInterval(timer);
+  }, [isAdmin]);
 
   const addAffiliate = (url: string) => {
     const affiliate = "af=5257374";
@@ -135,6 +108,40 @@ export default function AdminPage() {
 
     setProfiles(data || []);
     setMemberCount(count || 0);
+  };
+
+  const loadPresence = async () => {
+    const { data } = await supabase.from("user_presence").select("*");
+    setPresences(data || []);
+  };
+
+  const getPresence = (userId: string) =>
+    presences.find((presence) => presence.user_id === userId);
+
+  const isOnline = (userId: string) => {
+    const presence = getPresence(userId);
+    if (!presence?.last_seen) return false;
+
+    return Date.now() - new Date(presence.last_seen).getTime() < 60000;
+  };
+
+  const seenAgo = (lastSeen?: string) => {
+    if (!lastSeen) return "Jamais vu";
+
+    const seconds = Math.floor(
+      (Date.now() - new Date(lastSeen).getTime()) / 1000
+    );
+
+    if (seconds < 60) return "Vu à l’instant";
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `Vu il y a ${minutes} min`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `Vu il y a ${hours} h`;
+
+    const days = Math.floor(hours / 24);
+    return `Vu il y a ${days} j`;
   };
 
   const saveDownload = async () => {
@@ -191,7 +198,9 @@ export default function AdminPage() {
   const updateAllMovies = async () => {
     setMessage("🔄 Mise à jour des affiches en cours...");
 
-    const { data: movies, error } = await supabase.from("downloads").select("id");
+    const { data: movies, error } = await supabase
+      .from("downloads")
+      .select("id");
 
     if (error || !movies) {
       setMessage("❌ Aucun film trouvé.");
@@ -227,7 +236,10 @@ export default function AdminPage() {
   };
 
   const updateUser = async (userId: string, values: Partial<Profile>) => {
-    const { error } = await supabase.from("profiles").update(values).eq("id", userId);
+    const { error } = await supabase
+      .from("profiles")
+      .update(values)
+      .eq("id", userId);
 
     if (error) {
       alert(error.message);
@@ -252,6 +264,7 @@ export default function AdminPage() {
 
   const filteredProfiles = profiles.filter((profile) => {
     const q = searchMember.toLowerCase();
+
     return (
       (profile.email || "").toLowerCase().includes(q) ||
       (profile.username || "").toLowerCase().includes(q) ||
@@ -320,7 +333,7 @@ export default function AdminPage() {
           <div>
             <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
             <p style={subText}>
-              Tous les comptes créés sont affichés ici, même s’ils ne vont jamais dans le chat.
+              Statut réel, page actuelle et dernière activité.
             </p>
           </div>
 
@@ -337,6 +350,8 @@ export default function AdminPage() {
         ) : (
           <div style={memberGrid}>
             {filteredProfiles.map((member) => {
+              const presence = getPresence(member.id);
+              const connected = isOnline(member.id);
               const isCreator = member.email === CREATOR_EMAIL;
               const isMemberAdmin = member.role === "admin";
               const isApproved = member.status === "approved";
@@ -348,7 +363,12 @@ export default function AdminPage() {
                     <img
                       src={member.avatar || DEFAULT_AVATAR}
                       alt="avatar"
-                      style={avatarStyle}
+                      style={{
+                        ...avatarStyle,
+                        border: connected
+                          ? "2px solid rgba(34,197,94,0.9)"
+                          : "2px solid rgba(255,80,80,0.55)",
+                      }}
                     />
 
                     <div style={{ flex: 1 }}>
@@ -369,7 +389,9 @@ export default function AdminPage() {
                         )}
                       </div>
 
-                      <p style={emailText}>{member.email || "Email non stocké"}</p>
+                      <p style={emailText}>
+                        {member.email || presence?.email || "Email non stocké"}
+                      </p>
 
                       <div style={statusRow}>
                         <span style={rolePill}>{member.role || "user"}</span>
@@ -387,10 +409,23 @@ export default function AdminPage() {
                           {member.status || "pending"}
                         </span>
 
-                        <span style={statusTextPill}>
-  {onlineUserIds.includes(member.id) ? "🟢 En ligne" : "⚫ Hors ligne"}
-</span>
+                        <span
+                          style={{
+                            ...statusTextPill,
+                            color: connected ? "#86efac" : "#ffabab",
+                          }}
+                        >
+                          {connected ? "🟢 Connecté" : "🔴 Hors ligne"}
+                        </span>
                       </div>
+
+                      <p style={presenceText}>
+                        👀 Page : {presence?.current_page || "inconnue"}
+                      </p>
+
+                      <p style={presenceText}>
+                        ⏱️ {connected ? "Actif maintenant" : seenAgo(presence?.last_seen)}
+                      </p>
                     </div>
                   </div>
 
@@ -551,7 +586,6 @@ const avatarStyle: React.CSSProperties = {
   height: "52px",
   borderRadius: "50%",
   objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.55)",
   boxShadow: "0 0 18px rgba(0,198,255,0.28)",
 };
 
@@ -566,6 +600,12 @@ const emailText: React.CSSProperties = {
   color: "#9ca3af",
   fontSize: "13px",
   margin: "6px 0",
+};
+
+const presenceText: React.CSSProperties = {
+  color: "#8b98aa",
+  fontSize: "12px",
+  margin: "7px 0 0",
 };
 
 const statusRow: React.CSSProperties = {
