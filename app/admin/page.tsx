@@ -40,22 +40,46 @@ export default function AdminPage() {
   useEffect(() => {
   if (!isAdmin) return;
 
-  const channel = supabase.channel("site-presence");
+  let channel: any;
 
-  channel
-    .on("presence", { event: "sync" }, () => {
-      const state = channel.presenceState();
+  async function startPresence() {
+    const { data } = await supabase.auth.getUser();
+    const currentUser = data.user;
 
-      const ids = Object.values(state)
-        .flat()
-        .map((item: any) => item.user_id);
+    if (!currentUser) return;
 
-      setOnlineUserIds([...new Set(ids)]);
-    })
-    .subscribe();
+    channel = supabase.channel("site-presence", {
+      config: {
+        presence: {
+          key: currentUser.id,
+        },
+      },
+    });
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+
+        const ids = Object.values(state)
+          .flat()
+          .map((item: any) => item.user_id);
+
+        setOnlineUserIds([...new Set(ids)]);
+      })
+      .subscribe(async (status: string) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({
+            user_id: currentUser.id,
+            email: currentUser.email || "",
+          });
+        }
+      });
+  }
+
+  startPresence();
 
   return () => {
-    supabase.removeChannel(channel);
+    if (channel) supabase.removeChannel(channel);
   };
 }, [isAdmin]);
 
