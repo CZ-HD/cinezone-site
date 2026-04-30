@@ -48,7 +48,7 @@ export default function Home() {
 
     const timer = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % trending.length);
-    }, 25000);
+    }, 120000);
 
     return () => clearInterval(timer);
   }, [trending]);
