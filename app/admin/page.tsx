@@ -165,26 +165,23 @@ export default function AdminPage() {
       const movie = await movieRes.json();
 
       const res = await fetch("/api/downloads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        172 body: JSON.stringify({
-173   id: Number(id),
-174   link: addAffiliate(link),
-175   title: movie.title,
-176   poster_path: movie.poster_path,
-177   backdrop_path: movie.backdrop_path,
-178   vote_average: movie.vote_average,
-179   release_date: movie.release_date,
-
-180   release_year: movie.release_date
-181     ? Number(movie.release_date.substring(0, 4))
-182     : null,
-
-183 }),
-      });
-
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    id: Number(id),
+    link: addAffiliate(link),
+    title: movie.title,
+    poster_path: movie.poster_path,
+    backdrop_path: movie.backdrop_path,
+    vote_average: movie.vote_average,
+    release_date: movie.release_date,
+    release_year: movie.release_date
+      ? Number(movie.release_date.substring(0, 4))
+      : null,
+  }),
+});
       const result = await res.json();
 
       if (!res.ok) {
