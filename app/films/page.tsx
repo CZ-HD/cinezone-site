@@ -23,7 +23,11 @@ export default function FilmsPage() {
   const [itemsPerPage, setItemsPerPage] = useState(100);
 
   const years = useMemo(
-    () => Array.from({ length: END_YEAR - START_YEAR + 1 }, (_, i) => START_YEAR + i),
+    () =>
+      Array.from(
+        { length: END_YEAR - START_YEAR + 1 },
+        (_, i) => START_YEAR + i
+      ),
     []
   );
 
@@ -89,13 +93,18 @@ export default function FilmsPage() {
   const getMovieYear = (movie: any) => {
     const year =
       movie.release_year ||
-      (movie.release_date ? Number(String(movie.release_date).substring(0, 4)) : null);
+      (movie.release_date
+        ? Number(String(movie.release_date).substring(0, 4))
+        : null);
 
     return Number.isFinite(Number(year)) ? Number(year) : null;
   };
 
   const filteredMovies = movies.filter((movie) => {
-    const titleMatch = (movie.title || "").toLowerCase().includes(search.toLowerCase());
+    const titleMatch = (movie.title || "")
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
     const year = getMovieYear(movie);
 
     if (!titleMatch) return false;
@@ -104,7 +113,10 @@ export default function FilmsPage() {
     return year >= minYear && year <= maxYear;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredMovies.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredMovies.length / itemsPerPage)
+  );
 
   const paginatedMovies = filteredMovies.slice(
     (currentPage - 1) * itemsPerPage,
@@ -132,8 +144,13 @@ export default function FilmsPage() {
           style={inputStyle}
         />
 
-        <div style={filterBox}>
-          <strong>🎛️ Filtre année</strong>
+        <aside style={filterBox}>
+          <div style={filterHeader}>
+            <span>🎛️ Filtre année</span>
+            <small style={{ color: "#94a3b8" }}>
+              {minYear} - {maxYear}
+            </small>
+          </div>
 
           <div style={filterRow}>
             <label style={labelStyle}>
@@ -141,7 +158,13 @@ export default function FilmsPage() {
               <select
                 value={minYear}
                 onChange={(e) => {
-                  setMinYear(Number(e.target.value));
+                  const value = Number(e.target.value);
+                  setMinYear(value);
+
+                  if (value > maxYear) {
+                    setMaxYear(value);
+                  }
+
                   setCurrentPage(1);
                 }}
                 style={selectStyle}
@@ -159,7 +182,13 @@ export default function FilmsPage() {
               <select
                 value={maxYear}
                 onChange={(e) => {
-                  setMaxYear(Number(e.target.value));
+                  const value = Number(e.target.value);
+                  setMaxYear(value);
+
+                  if (value < minYear) {
+                    setMinYear(value);
+                  }
+
                   setCurrentPage(1);
                 }}
                 style={selectStyle}
@@ -176,7 +205,7 @@ export default function FilmsPage() {
               Effacer
             </button>
           </div>
-        </div>
+        </aside>
       </div>
 
       {loading ? (
@@ -264,7 +293,9 @@ function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
               {movie.title || `Film ${movie.id}`}
             </h3>
 
-            <p style={{ opacity: 0.75, margin: "4px 0" }}>ID TMDB : {movie.id}</p>
+            <p style={{ opacity: 0.75, margin: "4px 0" }}>
+              ID TMDB : {movie.id}
+            </p>
 
             {movie.vote_average && (
               <p style={{ opacity: 0.75 }}>⭐ {movie.vote_average} / 10</p>
@@ -356,6 +387,7 @@ const topBarStyle: React.CSSProperties = {
   gap: "18px",
   flexWrap: "wrap",
   margin: "20px 0 30px",
+  justifyContent: "space-between",
 };
 
 const inputStyle: React.CSSProperties = {
@@ -371,12 +403,26 @@ const inputStyle: React.CSSProperties = {
 };
 
 const filterBox: React.CSSProperties = {
-  padding: "14px",
-  borderRadius: "16px",
-  background: "rgba(255,255,255,0.055)",
-  border: "1px solid rgba(0,198,255,0.22)",
+  marginLeft: "auto",
+  minWidth: "300px",
+  padding: "16px",
+  borderRadius: "18px",
+  background:
+    "linear-gradient(180deg, rgba(15,23,42,0.94), rgba(2,6,23,0.94))",
+  border: "1px solid rgba(0,198,255,0.32)",
+  boxShadow: "0 18px 45px rgba(0,0,0,0.55)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
   display: "grid",
   gap: "12px",
+};
+
+const filterHeader: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "12px",
+  fontWeight: 900,
 };
 
 const filterRow: React.CSSProperties = {
@@ -397,7 +443,7 @@ const clearBtn: React.CSSProperties = {
   padding: "10px 14px",
   borderRadius: "10px",
   border: "1px solid rgba(255,255,255,0.16)",
-  background: "rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.1)",
   color: "#fff",
   cursor: "pointer",
   fontWeight: 800,
