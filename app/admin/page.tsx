@@ -31,10 +31,33 @@ export default function AdminPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [memberCount, setMemberCount] = useState(0);
   const [searchMember, setSearchMember] = useState("");
+  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
 
   useEffect(() => {
     checkAdmin();
   }, []);
+
+  useEffect(() => {
+  if (!isAdmin) return;
+
+  const channel = supabase.channel("site-presence");
+
+  channel
+    .on("presence", { event: "sync" }, () => {
+      const state = channel.presenceState();
+
+      const ids = Object.values(state)
+        .flat()
+        .map((item: any) => item.user_id);
+
+      setOnlineUserIds([...new Set(ids)]);
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [isAdmin]);
 
   const addAffiliate = (url: string) => {
     const affiliate = "af=5257374";
