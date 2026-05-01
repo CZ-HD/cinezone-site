@@ -115,13 +115,15 @@ export default function RootLayout({
               alignItems: "center",
             }}
           >
-            {navLinks.map(([label, href]) => (
-              <Link key={href} href={href} style={navLinkStyle}>
-                {label}
-              </Link>
-            ))}
-
             <MenuDropdown />
+
+{navLinks.map(([label, href]) => (
+  <Link key={href} href={href} style={navLinkStyle}>
+    {label}
+  </Link>
+))}
+
+<ChatNavLink />
 
             <ChatNavLink />
 
