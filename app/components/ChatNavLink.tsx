@@ -8,14 +8,27 @@ import { supabase } from "@/lib/supabase";
 export default function ChatNavLink() {
   const pathname = usePathname();
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cinezone_chat_unread");
+    setHasNewMessage(saved === "true");
+
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id || null);
+    });
+  }, []);
 
   useEffect(() => {
     if (pathname === "/chat") {
       setHasNewMessage(false);
+      localStorage.setItem("cinezone_chat_unread", "false");
     }
+  }, [pathname]);
 
+  useEffect(() => {
     const channel = supabase
-      .channel("chat-notification")
+      .channel("chat-nav-notification")
       .on(
         "postgres_changes",
         {
@@ -23,9 +36,14 @@ export default function ChatNavLink() {
           schema: "public",
           table: "messages",
         },
-        () => {
+        (payload) => {
+          const msg: any = payload.new;
+
+          if (msg.user_id === currentUserId) return;
+
           if (pathname !== "/chat") {
             setHasNewMessage(true);
+            localStorage.setItem("cinezone_chat_unread", "true");
           }
         }
       )
@@ -34,13 +52,19 @@ export default function ChatNavLink() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [pathname]);
+  }, [pathname, currentUserId]);
 
   return (
-    <Link href="/chat" style={linkStyle} onClick={() => setHasNewMessage(false)}>
+    <Link
+      href="/chat"
+      style={linkStyle}
+      onClick={() => {
+        setHasNewMessage(false);
+        localStorage.setItem("cinezone_chat_unread", "false");
+      }}
+    >
       <span style={{ position: "relative", display: "inline-flex" }}>
         💬 Chat
-
         {hasNewMessage && <span style={redDotStyle} />}
       </span>
     </Link>
@@ -63,12 +87,13 @@ const linkStyle: React.CSSProperties = {
 
 const redDotStyle: React.CSSProperties = {
   position: "absolute",
-  top: "-8px",
-  right: "-12px",
-  width: "11px",
-  height: "11px",
+  top: "-10px",
+  right: "-14px",
+  width: "14px",
+  height: "14px",
   borderRadius: "50%",
-  background: "#ff1744",
-  boxShadow: "0 0 12px #ff1744",
+  background: "#ff0033",
+  boxShadow: "0 0 0 4px rgba(255,0,51,0.25), 0 0 18px #ff0033",
   border: "2px solid #02050a",
+  zIndex: 999,
 };
