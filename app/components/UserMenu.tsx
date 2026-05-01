@@ -53,13 +53,57 @@ export default function UserMenu() {
   };
 
   const saveProfile = async () => {
-    if (!user) return;
+  if (!user) return;
+
+  const newUsername = username || user.email;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      username: newUsername,
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  // ✅ MAJ instant UI
+  setProfile((prev: any) => ({
+    ...prev,
+    username: newUsername,
+  }));
+
+  setShowEdit(false);
+};
+
+  const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!user || !e.target.files?.[0]) return;
+
+  try {
+    setUploading(true);
+
+    const file = e.target.files[0];
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/avatar.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+      alert(uploadError.message);
+      return;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+
+    const newAvatar = data.publicUrl;
 
     const { error } = await supabase
       .from("profiles")
-      .update({
-        username: username || user.email,
-      })
+      .update({ avatar: newAvatar })
       .eq("id", user.id);
 
     if (error) {
@@ -67,46 +111,16 @@ export default function UserMenu() {
       return;
     }
 
-    await loadUser();
-    setShowEdit(false);
-  };
+    // ✅ MAJ instant UI
+    setProfile((prev: any) => ({
+      ...prev,
+      avatar: newAvatar,
+    }));
 
-  const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !e.target.files?.[0]) return;
-
-    try {
-      setUploading(true);
-
-      const file = e.target.files[0];
-      const ext = file.name.split(".").pop();
-      const path = `${user.id}/avatar.${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(path, file, { upsert: true });
-
-      if (uploadError) {
-        alert(uploadError.message);
-        return;
-      }
-
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ avatar: data.publicUrl })
-        .eq("id", user.id);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      await loadUser();
-    } finally {
-      setUploading(false);
-    }
-  };
+  } finally {
+    setUploading(false);
+  }
+};
 
   const logout = async () => {
     await supabase.auth.signOut();
