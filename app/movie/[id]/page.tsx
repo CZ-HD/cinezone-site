@@ -90,50 +90,56 @@ export default async function MoviePage({ params }: any) {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div style={{ position: "relative", height: "65vh", overflow: "hidden" }}>
-        {(movie.backdrop_path || movie.poster_path) && (
-          <img
-            src={
-              movie.backdrop_path
-                ? imageUrl(movie.backdrop_path, "original")
-                : imageUrl(movie.poster_path, "original")
-            }
-            alt={movie.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              filter: "brightness(0.35) blur(4px)",
-            }}
-          />
-        )}
+      <div style={{ position: "relative", height: "75vh", overflow: "hidden" }}>
+  {(movie.backdrop_path || movie.poster_path) && (
+    <img
+      src={
+        movie.backdrop_path
+          ? imageUrl(movie.backdrop_path, "original")
+          : imageUrl(movie.poster_path, "original")
+      }
+      alt={movie.title}
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        filter: "brightness(0.6) contrast(1.1)",
+        transform: "scale(1.05)",
+      }}
+    />
+  )}
 
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(to top, #000 20%, rgba(0,0,0,0.45), transparent)",
-          }}
-        />
+  {/* 🔥 Dégradé stylé (important) */}
+  <div
+    style={{
+      position: "absolute",
+      inset: 0,
+      background: `
+        linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.4) 60%, transparent 100%),
+        linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)
+      `,
+    }}
+  />
 
-        <Link
-          href="/films"
-          style={{
-            position: "absolute",
-            top: "24px",
-            left: "24px",
-            color: "#fff",
-            background: "rgba(0,0,0,0.7)",
-            padding: "10px 16px",
-            borderRadius: "999px",
-            textDecoration: "none",
-            fontWeight: "bold",
-          }}
-        >
-          ← Retour
-        </Link>
-      </div>
+  {/* Bouton retour */}
+  <Link
+    href="/films"
+    style={{
+      position: "absolute",
+      top: "24px",
+      left: "24px",
+      color: "#fff",
+      background: "rgba(0,0,0,0.7)",
+      padding: "10px 16px",
+      borderRadius: "999px",
+      textDecoration: "none",
+      fontWeight: "bold",
+      backdropFilter: "blur(6px)",
+    }}
+  >
+    ← Retour
+  </Link>
+</div>
 
       <section
         style={{
