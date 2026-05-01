@@ -704,7 +704,7 @@ const deletePinnedMessage = async () => {
                 📌 Désépingler
               </button>
 
-              <button style={pinnedDeleteBtn} onClick={deletePinnedMessage}>
+              <button style={pinnedDeleteBtn} onClick={() => deleteMessage(pinnedMessage.id)}>
                 🗑 Supprimer
               </button>
             </>
@@ -733,7 +733,7 @@ const deletePinnedMessage = async () => {
         style={pinnedTextarea}
       />
     ) : (
-      <p style={pinnedText}>{pinnedMessage.content}</p>
+      <p style={pinnedText}>{pinnedMessage?.content}</p>
     )}
   </div>
 )}
