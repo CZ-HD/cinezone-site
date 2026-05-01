@@ -512,37 +512,52 @@ const deletePinnedMessage = async () => {
   };
 
   const togglePin = async (messageId: string) => {
-    if (!isAdmin) return;
+  if (!isAdmin) return;
 
-    const target = messages.find((m) => m.id === messageId);
-    if (!target) return;
+  const target = messages.find((m) => m.id === messageId);
+  if (!target) return;
 
-    const shouldPin = !target.pinned;
+  const shouldPin = !target.pinned;
 
-    if (shouldPin) {
-      await supabase.from("messages").update({ pinned: false }).neq("id", messageId);
-    }
+  if (shouldPin) {
+    await supabase.from("messages").update({ pinned: false }).neq("id", messageId);
+  }
 
-    const { error } = await supabase
-      .from("messages")
-      .update({ pinned: shouldPin })
-      .eq("id", messageId);
+  const { error } = await supabase
+    .from("messages")
+    .update({ pinned: shouldPin })
+    .eq("id", messageId);
 
-    if (error) alert("Erreur épinglage : " + error.message);
-  };
+  if (error) alert("Erreur épinglage : " + error.message);
+};
 
-  const deleteMessage = async (messageId: string) => {
-    if (!isAdmin) return;
-    if (!confirm("Supprimer ce message ?")) return;
+const updatePinnedMessage = async () => {
+  if (!isAdmin || !pinnedMessage) return;
 
-    const { error } = await supabase
-      .from("messages")
-      .delete()
-      .eq("id", messageId);
+  const { error } = await supabase
+    .from("messages")
+    .update({ content: pinnedEditText })
+    .eq("id", pinnedMessage.id);
 
-    if (error) alert("Erreur suppression : " + error.message);
-  };
+  if (error) {
+    alert("Erreur modification : " + error.message);
+    return;
+  }
 
+  setEditingPinned(false);
+};
+  
+const deleteMessage = async (messageId: string) => {
+  if (!isAdmin) return;
+  if (!confirm("Supprimer ce message ?")) return;
+
+  const { error } = await supabase
+    .from("messages")
+    .delete()
+    .eq("id", messageId);
+
+  if (error) alert("Erreur suppression : " + error.message);
+};
   const getMessageReactions = (messageId: string) =>
     reactions.filter((r) => r.message_id === messageId);
 
