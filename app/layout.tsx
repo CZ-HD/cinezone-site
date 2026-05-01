@@ -7,6 +7,7 @@ import ChatNavLink from "./components/ChatNavLink";
 import MenuDropdown from "./components/MenuDropdown";
 import PresenceTracker from "./components/PresenceTracker";
 import "./globals.css";
+import UserMenu from "./components/UserMenu";
 
 export const metadata: Metadata = {
   title: "CineZone",
