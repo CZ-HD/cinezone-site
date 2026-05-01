@@ -53,57 +53,13 @@ export default function UserMenu() {
   };
 
   const saveProfile = async () => {
-  if (!user) return;
+    if (!user) return;
 
-  const newUsername = username || user.email;
-
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      username: newUsername,
-    })
-    .eq("id", user.id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  // ✅ MAJ instant UI
-  setProfile((prev: any) => ({
-    ...prev,
-    username: newUsername,
-  }));
-
-  setShowEdit(false);
-};
-
-  const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (!user || !e.target.files?.[0]) return;
-
-  try {
-    setUploading(true);
-
-    const file = e.target.files[0];
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(path, file, { upsert: true });
-
-    if (uploadError) {
-      alert(uploadError.message);
-      return;
-    }
-
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-
-    const newAvatar = data.publicUrl;
+    const newUsername = username || user.email;
 
     const { error } = await supabase
       .from("profiles")
-      .update({ avatar: newAvatar })
+      .update({ username: newUsername })
       .eq("id", user.id);
 
     if (error) {
@@ -111,16 +67,56 @@ export default function UserMenu() {
       return;
     }
 
-    // ✅ MAJ instant UI
     setProfile((prev: any) => ({
       ...prev,
-      avatar: newAvatar,
+      username: newUsername,
     }));
 
-  } finally {
-    setUploading(false);
-  }
-};
+    setShowEdit(false);
+  };
+
+  const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !e.target.files?.[0]) return;
+
+    try {
+      setUploading(true);
+
+      const file = e.target.files[0];
+      const ext = file.name.split(".").pop();
+
+      // Important : nom unique pour éviter le cache navigateur
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) {
+        alert(uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const newAvatar = data.publicUrl;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar: newAvatar })
+        .eq("id", user.id);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      setProfile((prev: any) => ({
+        ...prev,
+        avatar: newAvatar,
+      }));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -298,8 +294,12 @@ const overlay: React.CSSProperties = {
   background: "rgba(0,0,0,0.72)",
   zIndex: 99999,
   display: "flex",
-  alignItems: "center",
+  alignItems: "flex-start",
   justifyContent: "center",
+  paddingTop: "110px",
+  paddingLeft: "20px",
+  paddingRight: "20px",
+  overflowY: "auto",
 };
 
 const modal: React.CSSProperties = {
@@ -313,6 +313,7 @@ const modal: React.CSSProperties = {
   color: "#fff",
   position: "relative",
   boxShadow: "0 30px 90px rgba(0,0,0,0.85)",
+  marginBottom: "60px",
 };
 
 const closeBtn: React.CSSProperties = {
