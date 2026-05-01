@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
+const CREATOR_EMAIL = "blackph4tom@gmail.com";
 const START_YEAR = 1900;
 const END_YEAR = 2027;
 
@@ -15,6 +16,7 @@ export default function FilmsPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [tmdbLoading, setTmdbLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [minYear, setMinYear] = useState(START_YEAR);
   const [maxYear, setMaxYear] = useState(END_YEAR);
@@ -33,6 +35,7 @@ export default function FilmsPage() {
 
   useEffect(() => {
     loadMovies();
+    checkAdmin();
   }, []);
 
   useEffect(() => {
@@ -42,6 +45,28 @@ export default function FilmsPage() {
 
     return () => clearTimeout(timer);
   }, [search]);
+
+  const checkAdmin = async () => {
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
+
+    if (!user) return;
+
+    if (user.email === CREATOR_EMAIL) {
+      setIsAdmin(true);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role,status")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role === "admin" && profile?.status === "approved") {
+      setIsAdmin(true);
+    }
+  };
 
   const loadMovies = async () => {
     setLoading(true);
@@ -124,6 +149,7 @@ export default function FilmsPage() {
   );
 
   const resetFilters = () => {
+    setSearch("");
     setMinYear(START_YEAR);
     setMaxYear(END_YEAR);
     setCurrentPage(1);
@@ -161,9 +187,7 @@ export default function FilmsPage() {
                   const value = Number(e.target.value);
                   setMinYear(value);
 
-                  if (value > maxYear) {
-                    setMaxYear(value);
-                  }
+                  if (value > maxYear) setMaxYear(value);
 
                   setCurrentPage(1);
                 }}
@@ -185,9 +209,7 @@ export default function FilmsPage() {
                   const value = Number(e.target.value);
                   setMaxYear(value);
 
-                  if (value < minYear) {
-                    setMinYear(value);
-                  }
+                  if (value < minYear) setMinYear(value);
 
                   setCurrentPage(1);
                 }}
@@ -222,7 +244,7 @@ export default function FilmsPage() {
               <p style={{ color: "#aaa" }}>Aucun film trouvé pour ce filtre.</p>
             ) : (
               <>
-                <MovieGrid movies={paginatedMovies} local />
+                <MovieGrid movies={paginatedMovies} local isAdmin={isAdmin} />
 
                 <Pagination
                   currentPage={currentPage}
@@ -248,7 +270,7 @@ export default function FilmsPage() {
               {tmdbResults.length === 0 && !tmdbLoading ? (
                 <p style={{ color: "#aaa" }}>Aucun résultat TMDB trouvé.</p>
               ) : (
-                <MovieGrid movies={tmdbResults} local={false} />
+                <MovieGrid movies={tmdbResults} local={false} isAdmin={isAdmin} />
               )}
             </section>
           )}
@@ -258,7 +280,15 @@ export default function FilmsPage() {
   );
 }
 
-function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
+function MovieGrid({
+  movies,
+  local,
+  isAdmin,
+}: {
+  movies: any[];
+  local: boolean;
+  isAdmin: boolean;
+}) {
   const getYear = (movie: any) =>
     movie.release_year ||
     (movie.release_date ? String(movie.release_date).substring(0, 4) : "");
@@ -279,12 +309,12 @@ function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
 
               <img
                 src={
-  movie.poster_path
-    ? movie.poster_path.startsWith("http")
-      ? movie.poster_path
-      : `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : "https://via.placeholder.com/300x450?text=No+Image"
-}
+                  movie.poster_path
+                    ? movie.poster_path.startsWith("http")
+                      ? movie.poster_path
+                      : `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : "https://via.placeholder.com/300x450?text=No+Image"
+                }
                 alt={movie.title || "Film"}
                 style={posterStyle}
                 loading="lazy"
@@ -295,9 +325,11 @@ function MovieGrid({ movies, local }: { movies: any[]; local: boolean }) {
               {movie.title || `Film ${movie.id}`}
             </h3>
 
-            <p style={{ opacity: 0.75, margin: "4px 0" }}>
-              ID TMDB : {movie.id}
-            </p>
+            {isAdmin && (
+              <p style={{ opacity: 0.45, margin: "4px 0", fontSize: "12px" }}>
+                🛠 ID : {movie.id}
+              </p>
+            )}
 
             {movie.vote_average && (
               <p style={{ opacity: 0.75 }}>⭐ {movie.vote_average} / 10</p>
