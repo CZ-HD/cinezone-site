@@ -78,18 +78,20 @@ export default async function MoviePage({ params }: any) {
       }}
     >
       <div style={{ position: "relative", height: "65vh", overflow: "hidden" }}>
-        {movie.backdrop_path ? (
-          <img
-  src={imageUrl(movie.poster_path)}
-  alt={movie.title}
-  style={{
-    width: "220px",
-    height: "330px",
-    objectFit: "cover",
-    borderRadius: "16px",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.8)",
-  }}
-/>
+        {(movie.backdrop_path || movie.poster_path) && (
+  <img
+    src={`https://image.tmdb.org/t/p/original${
+      movie.backdrop_path || movie.poster_path
+    }`}
+    alt={movie.title}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      filter: "brightness(0.35) blur(4px)",
+    }}
+  />
+)}
         ) : (
           <div style={{ height: "100%", background: "#111" }} />
         )}
