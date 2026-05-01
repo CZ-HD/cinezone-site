@@ -3,8 +3,9 @@ import Link from "next/link";
 import AuthButton from "./components/AuthButton";
 import AuthGuard from "./components/AuthGuard";
 import AdminButton from "./components/AdminButton";
-import "./globals.css";
+import ChatNavLink from "./components/ChatNavLink";
 import PresenceTracker from "./components/PresenceTracker";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CineZone",
@@ -27,7 +28,6 @@ export default function RootLayout({
     ...(showSeries ? [["Séries", "/series"]] : []),
     ["⭐ Favoris", "/favoris"],
     ["🎬 Demande film", "/demande-film"],
-    ["💬 Chat", "/chat"],
   ];
 
   return (
@@ -42,7 +42,8 @@ export default function RootLayout({
           fontFamily: "Arial, sans-serif",
         }}
       >
-    <PresenceTracker />
+        <PresenceTracker />
+
         <header
           style={{
             position: "fixed",
@@ -116,26 +117,12 @@ export default function RootLayout({
             }}
           >
             {navLinks.map(([label, href]) => (
-              <Link
-                key={href}
-                href={href}
-                style={{
-                  color: "#fff",
-                  textDecoration: "none",
-                  fontSize: "14px",
-                  fontWeight: 800,
-                  padding: "10px 18px",
-                  borderRadius: "999px",
-                  background:
-                    "linear-gradient(135deg, rgba(0,198,255,0.16), rgba(6,20,40,0.72), rgba(255,255,255,0.05))",
-                  border: "1px solid rgba(0,198,255,0.28)",
-                  boxShadow:
-                    "inset 0 1px 0 rgba(255,255,255,0.1), 0 0 16px rgba(0,140,255,0.2)",
-                }}
-              >
+              <Link key={href} href={href} style={navLinkStyle}>
                 {label}
               </Link>
             ))}
+
+            <ChatNavLink />
 
             <AdminButton />
             <AuthButton />
@@ -175,6 +162,20 @@ export default function RootLayout({
     </html>
   );
 }
+
+const navLinkStyle: React.CSSProperties = {
+  color: "#fff",
+  textDecoration: "none",
+  fontSize: "14px",
+  fontWeight: 800,
+  padding: "10px 18px",
+  borderRadius: "999px",
+  background:
+    "linear-gradient(135deg, rgba(0,198,255,0.16), rgba(6,20,40,0.72), rgba(255,255,255,0.05))",
+  border: "1px solid rgba(0,198,255,0.28)",
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,0.1), 0 0 16px rgba(0,140,255,0.2)",
+};
 
 const footerStyle: React.CSSProperties = {
   padding: "45px 20px 28px",
