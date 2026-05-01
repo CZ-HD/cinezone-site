@@ -133,9 +133,9 @@ export default async function MoviePage({ params }: any) {
               <DownloadButton movieId={Number(params.id)} />
             </div>
 
-            {movie.release_date && <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>}
-
-            {movie.release_date && <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>}
+            {movie.release_date && (
+  <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>
+)}
 
 {/* IMDb caché */}
 
