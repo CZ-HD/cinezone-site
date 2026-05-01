@@ -8,8 +8,7 @@ const DEFAULT_AVATAR =
 
 export default function UserMenu() {
   const [open, setOpen] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [username, setUsername] = useState("");
@@ -72,7 +71,7 @@ export default function UserMenu() {
       username: newUsername,
     }));
 
-    setShowEdit(false);
+    setEditing(false);
   };
 
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,8 +82,6 @@ export default function UserMenu() {
 
       const file = e.target.files[0];
       const ext = file.name.split(".").pop();
-
-      // Important : nom unique pour éviter le cache navigateur
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
@@ -126,111 +123,76 @@ export default function UserMenu() {
   if (!user || !profile) return null;
 
   return (
-    <>
-      <div ref={ref} style={{ position: "relative" }}>
-        <button onClick={() => setOpen(!open)} style={userBtn}>
-          <img src={profile.avatar || DEFAULT_AVATAR} alt="avatar" style={avatar} />
-          <span>{profile.username}</span>
-          <span>▾</span>
-        </button>
+    <div ref={ref} style={{ position: "relative" }}>
+      <button onClick={() => setOpen(!open)} style={userBtn}>
+        <img src={profile.avatar || DEFAULT_AVATAR} alt="avatar" style={avatarSmall} />
+        <span>{profile.username}</span>
+        <span>▾</span>
+      </button>
 
-        {open && (
-          <div style={dropdown}>
-            <button
-              style={itemBtn}
-              onClick={() => {
-                setShowProfile(true);
-                setOpen(false);
-              }}
-            >
-              👤 Profil
-            </button>
+      {open && (
+        <div style={dropdown}>
+          <div style={profileTop}>
+            <img src={profile.avatar || DEFAULT_AVATAR} alt="avatar" style={avatarBig} />
 
-            <button
-              style={itemBtn}
-              onClick={() => {
-                setShowEdit(true);
-                setOpen(false);
-              }}
-            >
-              🖊️ Modifier
-            </button>
+            <div>
+              <strong>{profile.username}</strong>
+              <p style={muted}>{user.email}</p>
 
-            <button style={logoutBtn} onClick={logout}>
-              🚪 Déconnexion
-            </button>
-          </div>
-        )}
-      </div>
-
-      {showProfile && (
-        <div style={overlay}>
-          <div style={modal}>
-            <button style={closeBtn} onClick={() => setShowProfile(false)}>
-              ✕
-            </button>
-
-            <h2 style={modalTitle}>👤 Mon profil</h2>
-
-            <div style={profileCard}>
-              <img src={profile.avatar || DEFAULT_AVATAR} style={bigAvatar} />
-
-              <div>
-                <h3 style={{ margin: "0 0 6px" }}>{profile.username}</h3>
-                <p style={muted}>{user.email}</p>
-
-                <span style={profile.role === "admin" ? adminBadge : userBadge}>
-                  {profile.role === "admin" ? "ADMIN" : "USER"}
-                </span>
-              </div>
+              <span style={profile.role === "admin" ? adminBadge : userBadge}>
+                {profile.role === "admin" ? "ADMIN" : "USER"}
+              </span>
             </div>
           </div>
-        </div>
-      )}
 
-      {showEdit && (
-        <div style={overlay}>
-          <div style={modal}>
-            <button style={closeBtn} onClick={() => setShowEdit(false)}>
-              ✕
-            </button>
+          {!editing ? (
+            <>
+              <button style={itemBtn} onClick={() => setEditing(true)}>
+                🖊️ Modifier profil
+              </button>
 
-            <h2 style={modalTitle}>🖊️ Modifier mon profil</h2>
+              <button style={logoutBtn} onClick={logout}>
+                🚪 Déconnexion
+              </button>
+            </>
+          ) : (
+            <div style={editBox}>
+              <label style={labelStyle}>Avatar</label>
 
-            <div style={editGrid}>
-              <div>
-                <img src={profile.avatar || DEFAULT_AVATAR} style={bigAvatar} />
-
-                <label style={uploadBtn}>
-                  📷 Changer avatar
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={uploadAvatar}
-                    style={{ display: "none" }}
-                  />
-                </label>
-
-                {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
-              </div>
-
-              <div>
-                <label style={labelStyle}>Pseudo</label>
+              <label style={uploadBtn}>
+                📷 Changer avatar
                 <input
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  style={inputStyle}
+                  type="file"
+                  accept="image/*"
+                  onChange={uploadAvatar}
+                  style={{ display: "none" }}
                 />
+              </label>
 
+              {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
+
+              <label style={labelStyle}>Pseudo</label>
+
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                style={inputStyle}
+              />
+
+              <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
                 <button onClick={saveProfile} style={saveBtn}>
                   💾 Sauvegarder
                 </button>
+
+                <button onClick={() => setEditing(false)} style={cancelBtn}>
+                  Annuler
+                </button>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -246,28 +208,48 @@ const userBtn: React.CSSProperties = {
     "linear-gradient(135deg, rgba(0,198,255,0.18), rgba(6,20,40,0.8))",
   cursor: "pointer",
   fontWeight: 900,
-  boxShadow: "0 0 18px rgba(0,198,255,0.18)",
 };
 
-const avatar: React.CSSProperties = {
+const avatarSmall: React.CSSProperties = {
   width: "30px",
   height: "30px",
   borderRadius: "50%",
   objectFit: "cover",
-  border: "1px solid rgba(0,198,255,0.7)",
 };
 
 const dropdown: React.CSSProperties = {
   position: "absolute",
-  top: "50px",
+  top: "52px",
   right: 0,
-  minWidth: "210px",
-  padding: "10px",
-  borderRadius: "16px",
+  width: "340px",
+  padding: "16px",
+  borderRadius: "18px",
   background: "rgba(8,13,22,0.98)",
-  border: "1px solid rgba(0,198,255,0.25)",
+  border: "1px solid rgba(0,198,255,0.3)",
   boxShadow: "0 22px 70px rgba(0,0,0,0.85)",
-  zIndex: 9999,
+  zIndex: 999999,
+};
+
+const profileTop: React.CSSProperties = {
+  display: "flex",
+  gap: "14px",
+  alignItems: "center",
+  paddingBottom: "14px",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  marginBottom: "12px",
+};
+
+const avatarBig: React.CSSProperties = {
+  width: "70px",
+  height: "70px",
+  borderRadius: "50%",
+  objectFit: "cover",
+};
+
+const muted: React.CSSProperties = {
+  color: "#9ca3af",
+  margin: "4px 0 8px",
+  fontSize: "13px",
 };
 
 const itemBtn: React.CSSProperties = {
@@ -280,7 +262,6 @@ const itemBtn: React.CSSProperties = {
   textAlign: "left",
   cursor: "pointer",
   fontWeight: 900,
-  fontSize: "15px",
 };
 
 const logoutBtn: React.CSSProperties = {
@@ -288,98 +269,29 @@ const logoutBtn: React.CSSProperties = {
   color: "#ffb3b3",
 };
 
-const overlay: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(0,0,0,0.72)",
-  zIndex: 999999,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "90px 20px 30px",
-  overflowY: "auto",
-};
-
-const modal: React.CSSProperties = {
-  width: "620px",
-  maxWidth: "92vw",
-  maxHeight: "78vh",
-  overflowY: "auto",
-  padding: "26px",
-  borderRadius: "22px",
-  background:
-    "linear-gradient(180deg, rgba(15,23,42,0.98), rgba(8,13,22,0.98))",
-  border: "1px solid rgba(0,198,255,0.25)",
-  color: "#fff",
-  position: "relative",
-  boxShadow: "0 30px 90px rgba(0,0,0,0.85)",
-};
-
-const closeBtn: React.CSSProperties = {
-  position: "absolute",
-  top: "14px",
-  right: "14px",
-  background: "transparent",
-  border: "none",
-  color: "#fff",
-  fontSize: "22px",
-  cursor: "pointer",
-};
-
-const modalTitle: React.CSSProperties = {
-  marginTop: 0,
-  marginBottom: "22px",
-};
-
-const profileCard: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "22px",
-};
-
-const editGrid: React.CSSProperties = {
+const editBox: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "180px 1fr",
-  gap: "26px",
-  alignItems: "center",
-};
-
-const bigAvatar: React.CSSProperties = {
-  width: "150px",
-  height: "150px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  display: "block",
-  boxShadow: "0 0 28px rgba(0,198,255,0.25)",
-  border: "2px solid rgba(0,198,255,0.25)",
-};
-
-const muted: React.CSSProperties = {
-  color: "#9ca3af",
-  margin: "0 0 12px",
+  gap: "8px",
 };
 
 const labelStyle: React.CSSProperties = {
-  display: "block",
-  marginBottom: "8px",
   color: "#cbd5e1",
   fontWeight: 800,
+  fontSize: "13px",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "14px",
-  borderRadius: "12px",
+  padding: "12px",
+  borderRadius: "10px",
   border: "1px solid rgba(255,255,255,0.16)",
   background: "#0b0f18",
   color: "#fff",
-  fontSize: "16px",
   boxSizing: "border-box",
 };
 
 const uploadBtn: React.CSSProperties = {
   display: "inline-block",
-  marginTop: "14px",
   padding: "10px 12px",
   borderRadius: "12px",
   background: "rgba(0,198,255,0.12)",
@@ -389,11 +301,20 @@ const uploadBtn: React.CSSProperties = {
 };
 
 const saveBtn: React.CSSProperties = {
-  marginTop: "18px",
-  padding: "13px 18px",
-  borderRadius: "13px",
+  padding: "10px 12px",
+  borderRadius: "10px",
   border: "none",
   background: "linear-gradient(135deg, #00c6ff, #0072ff)",
+  color: "#fff",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const cancelBtn: React.CSSProperties = {
+  padding: "10px 12px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "rgba(255,255,255,0.08)",
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
@@ -403,9 +324,9 @@ const userBadge: React.CSSProperties = {
   display: "inline-block",
   background: "#3b82f6",
   color: "#fff",
-  padding: "4px 9px",
+  padding: "3px 8px",
   borderRadius: "999px",
-  fontSize: "11px",
+  fontSize: "10px",
   fontWeight: 900,
 };
 
@@ -413,8 +334,8 @@ const adminBadge: React.CSSProperties = {
   display: "inline-block",
   background: "linear-gradient(135deg, #ffe58a, #ffb300)",
   color: "#000",
-  padding: "4px 9px",
+  padding: "3px 8px",
   borderRadius: "999px",
-  fontSize: "11px",
+  fontSize: "10px",
   fontWeight: 900,
 };
