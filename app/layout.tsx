@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import AuthButton from "./components/AuthButton";
 import AuthGuard from "./components/AuthGuard";
 import AdminButton from "./components/AdminButton";
 import ChatNavLink from "./components/ChatNavLink";
 import MenuDropdown from "./components/MenuDropdown";
 import PresenceTracker from "./components/PresenceTracker";
-import "./globals.css";
 import UserMenu from "./components/UserMenu";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CineZone",
@@ -44,91 +43,28 @@ export default function RootLayout({
       >
         <PresenceTracker />
 
-        <header
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 100,
-            height: "76px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "0 34px",
-            background:
-              "linear-gradient(180deg, rgba(3,10,22,0.96), rgba(0,0,0,0.78))",
-            backdropFilter: "blur(18px)",
-            borderBottom: "1px solid rgba(0,198,255,0.25)",
-            boxShadow:
-              "0 12px 45px rgba(0,0,0,0.85), 0 0 28px rgba(0,120,255,0.15)",
-          }}
-        >
-          <Link
-            href="/"
-            style={{
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "14px",
-                background:
-                  "linear-gradient(135deg, #00c6ff 0%, #0072ff 50%, #001f4d 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontWeight: 950,
-                fontSize: "18px",
-                boxShadow:
-                  "0 0 25px rgba(0,198,255,0.45), inset 0 1px 0 rgba(255,255,255,0.2)",
-              }}
-            >
-              CZ
-            </div>
+        <header style={headerStyle}>
+          <Link href="/" style={logoLinkStyle}>
+            <div style={logoBoxStyle}>CZ</div>
 
-            <span
-              style={{
-                fontWeight: 950,
-                fontSize: "28px",
-                letterSpacing: "-0.8px",
-                background:
-                  "linear-gradient(135deg, #ffffff 0%, #b6e0ff 40%, #00c6ff 70%, #0072ff 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                filter: "drop-shadow(0 0 12px rgba(0,198,255,0.35))",
-              }}
-            >
-              CineZone
-            </span>
+            <span style={logoTextStyle}>CineZone</span>
           </Link>
 
-          <nav
-  style={{
-    display: "flex",
-    gap: "12px",
-    alignItems: "center",
-  }}
->
-  <MenuDropdown />
+          <nav style={navStyle}>
+            <MenuDropdown />
 
-  {navLinks.map(([label, href]) => (
-    <Link key={href} href={href} style={navLinkStyle}>
-      {label}
-    </Link>
-  ))}
+            {navLinks.map(([label, href]) => (
+              <Link key={href} href={href} style={navLinkStyle}>
+                {label}
+              </Link>
+            ))}
 
-  <ChatNavLink />
+            <ChatNavLink />
 
-  <AdminButton />
-  <AuthButton />
-</nav>
+            <AdminButton />
+
+            <UserMenu />
+          </nav>
         </header>
 
         <AuthGuard>
@@ -164,6 +100,65 @@ export default function RootLayout({
     </html>
   );
 }
+
+const headerStyle: React.CSSProperties = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 100,
+  height: "76px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "0 34px",
+  background:
+    "linear-gradient(180deg, rgba(3,10,22,0.96), rgba(0,0,0,0.78))",
+  backdropFilter: "blur(18px)",
+  borderBottom: "1px solid rgba(0,198,255,0.25)",
+  boxShadow:
+    "0 12px 45px rgba(0,0,0,0.85), 0 0 28px rgba(0,120,255,0.15)",
+};
+
+const logoLinkStyle: React.CSSProperties = {
+  textDecoration: "none",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+};
+
+const logoBoxStyle: React.CSSProperties = {
+  width: "44px",
+  height: "44px",
+  borderRadius: "14px",
+  background:
+    "linear-gradient(135deg, #00c6ff 0%, #0072ff 50%, #001f4d 100%)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#fff",
+  fontWeight: 950,
+  fontSize: "18px",
+  boxShadow:
+    "0 0 25px rgba(0,198,255,0.45), inset 0 1px 0 rgba(255,255,255,0.2)",
+};
+
+const logoTextStyle: React.CSSProperties = {
+  fontWeight: 950,
+  fontSize: "28px",
+  letterSpacing: "-0.8px",
+  background:
+    "linear-gradient(135deg, #ffffff 0%, #b6e0ff 40%, #00c6ff 70%, #0072ff 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  filter: "drop-shadow(0 0 12px rgba(0,198,255,0.35))",
+};
+
+const navStyle: React.CSSProperties = {
+  display: "flex",
+  gap: "12px",
+  alignItems: "center",
+};
 
 const navLinkStyle: React.CSSProperties = {
   color: "#fff",
