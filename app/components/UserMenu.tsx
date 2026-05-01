@@ -292,19 +292,19 @@ const overlay: React.CSSProperties = {
   position: "fixed",
   inset: 0,
   background: "rgba(0,0,0,0.72)",
-  zIndex: 99999,
+  zIndex: 999999,
   display: "flex",
-  alignItems: "flex-start",
+  alignItems: "center",
   justifyContent: "center",
-  paddingTop: "110px",
-  paddingLeft: "20px",
-  paddingRight: "20px",
+  padding: "90px 20px 30px",
   overflowY: "auto",
 };
 
 const modal: React.CSSProperties = {
   width: "620px",
   maxWidth: "92vw",
+  maxHeight: "78vh",
+  overflowY: "auto",
   padding: "26px",
   borderRadius: "22px",
   background:
@@ -313,7 +313,6 @@ const modal: React.CSSProperties = {
   color: "#fff",
   position: "relative",
   boxShadow: "0 30px 90px rgba(0,0,0,0.85)",
-  marginBottom: "60px",
 };
 
 const closeBtn: React.CSSProperties = {
