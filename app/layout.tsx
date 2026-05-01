@@ -4,6 +4,7 @@ import AuthButton from "./components/AuthButton";
 import AuthGuard from "./components/AuthGuard";
 import AdminButton from "./components/AdminButton";
 import ChatNavLink from "./components/ChatNavLink";
+import MenuDropdown from "./components/MenuDropdown";
 import PresenceTracker from "./components/PresenceTracker";
 import "./globals.css";
 
@@ -23,10 +24,8 @@ export default function RootLayout({
   const showSeries = false;
 
   const navLinks = [
-    ["Accueil", "/"],
     ["Films", "/films"],
     ...(showSeries ? [["Séries", "/series"]] : []),
-    ["⭐ Favoris", "/favoris"],
     ["🎬 Demande film", "/demande-film"],
   ];
 
@@ -121,6 +120,8 @@ export default function RootLayout({
                 {label}
               </Link>
             ))}
+
+            <MenuDropdown />
 
             <ChatNavLink />
 
