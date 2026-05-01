@@ -70,6 +70,8 @@ export default function ChatPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [editingPinned, setEditingPinned] = useState(false);
+  const [pinnedEditText, setPinnedEditText] = useState("");
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<Record<string, any>>({});
@@ -434,6 +436,36 @@ export default function ChatPage() {
   const toggleReaction = async (messageId: string, emoji: string) => {
     if (!user) return;
 
+    const updatePinnedMessage = async () => {
+  if (!isAdmin || !pinnedMessage) return;
+
+  const { error } = await supabase
+    .from("messages")
+    .update({ content: pinnedEditText })
+    .eq("id", pinnedMessage.id);
+
+  if (error) {
+    alert("Erreur modification : " + error.message);
+    return;
+  }
+
+  setEditingPinned(false);
+};
+
+const deletePinnedMessage = async () => {
+  if (!isAdmin || !pinnedMessage) return;
+  if (!confirm("Supprimer le message épinglé ?")) return;
+
+  const { error } = await supabase
+    .from("messages")
+    .delete()
+    .eq("id", pinnedMessage.id);
+
+  if (error) {
+    alert("Erreur suppression : " + error.message);
+  }
+};
+
     const pulseKey = `${messageId}-${emoji}`;
     setReactionPulse(pulseKey);
     setTimeout(() => setReactionPulse(null), 220);
@@ -642,11 +674,69 @@ export default function ChatPage() {
           </div>
 
           {pinnedMessage && (
-            <div style={pinnedBox}>
-              <strong>📌 Message épinglé</strong>
-              <p style={{ margin: "8px 0 0" }}>{pinnedMessage.content}</p>
-            </div>
+  <div style={pinnedBox}>
+    <div style={pinnedHeader}>
+      <div>
+        <strong>📌 Message épinglé</strong>
+        <p style={pinnedAuthor}>
+          {pinnedMessage.username || pinnedMessage.email || "Admin CineZone"}
+        </p>
+      </div>
+
+      {isAdmin && (
+        <div style={pinnedActions}>
+          {!editingPinned ? (
+            <>
+              <button
+                style={pinnedEditBtn}
+                onClick={() => {
+                  setPinnedEditText(pinnedMessage.content);
+                  setEditingPinned(true);
+                }}
+              >
+                ✏️ Modifier
+              </button>
+
+              <button
+                style={pinnedUnpinBtn}
+                onClick={() => togglePin(pinnedMessage.id)}
+              >
+                📌 Désépingler
+              </button>
+
+              <button style={pinnedDeleteBtn} onClick={deletePinnedMessage}>
+                🗑 Supprimer
+              </button>
+            </>
+          ) : (
+            <>
+              <button style={pinnedSaveBtn} onClick={updatePinnedMessage}>
+                💾 Sauver
+              </button>
+
+              <button
+                style={pinnedCancelBtn}
+                onClick={() => setEditingPinned(false)}
+              >
+                Annuler
+              </button>
+            </>
           )}
+        </div>
+      )}
+    </div>
+
+    {editingPinned ? (
+      <textarea
+        value={pinnedEditText}
+        onChange={(e) => setPinnedEditText(e.target.value)}
+        style={pinnedTextarea}
+      />
+    ) : (
+      <p style={pinnedText}>{pinnedMessage.content}</p>
+    )}
+  </div>
+)}
 
           <div style={messagesBox}>
             {messages.length === 0 ? (
@@ -1301,4 +1391,92 @@ const soundBtn: React.CSSProperties = {
   background: "rgba(255,255,255,0.08)",
   fontWeight: "bold",
   cursor: "pointer",
+};
+
+const pinnedHeader: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "12px",
+  alignItems: "flex-start",
+};
+
+const pinnedAuthor: React.CSSProperties = {
+  margin: "4px 0 0",
+  color: "#facc15",
+  fontSize: "12px",
+  fontWeight: 800,
+};
+
+const pinnedText: React.CSSProperties = {
+  margin: "12px 0 0",
+  whiteSpace: "pre-line",
+  lineHeight: 1.55,
+  color: "#fff",
+};
+
+const pinnedActions: React.CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  flexWrap: "wrap",
+};
+
+const pinnedEditBtn: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "10px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(0,198,255,0.12)",
+  color: "#67e8f9",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const pinnedUnpinBtn: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,215,100,0.45)",
+  background: "rgba(255,215,100,0.14)",
+  color: "#fde68a",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const pinnedDeleteBtn: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,90,90,0.45)",
+  background: "rgba(255,70,70,0.16)",
+  color: "#ffb3b3",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const pinnedSaveBtn: React.CSSProperties = {
+  ...pinnedEditBtn,
+  background: "linear-gradient(135deg, #00c6ff, #0072ff)",
+  color: "#fff",
+};
+
+const pinnedCancelBtn: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#fff",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const pinnedTextarea: React.CSSProperties = {
+  width: "100%",
+  minHeight: "130px",
+  marginTop: "12px",
+  padding: "12px",
+  borderRadius: "12px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "#0b0f18",
+  color: "#fff",
+  outline: "none",
+  resize: "vertical",
+  lineHeight: 1.5,
+  boxSizing: "border-box",
 };
