@@ -109,27 +109,25 @@ export default function RootLayout({
           </Link>
 
           <nav
-            style={{
-              display: "flex",
-              gap: "12px",
-              alignItems: "center",
-            }}
-          >
-            <MenuDropdown />
+  style={{
+    display: "flex",
+    gap: "12px",
+    alignItems: "center",
+  }}
+>
+  <MenuDropdown />
 
-{navLinks.map(([label, href]) => (
-  <Link key={href} href={href} style={navLinkStyle}>
-    {label}
-  </Link>
-))}
+  {navLinks.map(([label, href]) => (
+    <Link key={href} href={href} style={navLinkStyle}>
+      {label}
+    </Link>
+  ))}
 
-<ChatNavLink />
+  <ChatNavLink />
 
-            <ChatNavLink />
-
-            <AdminButton />
-            <AuthButton />
-          </nav>
+  <AdminButton />
+  <AuthButton />
+</nav>
         </header>
 
         <AuthGuard>
