@@ -108,6 +108,11 @@ export default function UserMenu() {
     }
   };
 
+  const logout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
+
   if (!user || !profile) return null;
 
   return (
@@ -140,6 +145,10 @@ export default function UserMenu() {
             >
               🖊️ Modifier
             </button>
+
+            <button style={logoutBtn} onClick={logout}>
+              🚪 Déconnexion
+            </button>
           </div>
         )}
       </div>
@@ -151,13 +160,20 @@ export default function UserMenu() {
               ✕
             </button>
 
-            <h2>👤 Profil</h2>
+            <h2 style={modalTitle}>👤 Mon profil</h2>
 
-            <img src={profile.avatar || DEFAULT_AVATAR} style={bigAvatar} />
+            <div style={profileCard}>
+              <img src={profile.avatar || DEFAULT_AVATAR} style={bigAvatar} />
 
-            <h3>{profile.username}</h3>
-            <p style={{ color: "#9ca3af" }}>{user.email}</p>
-            <p>Rôle : {profile.role}</p>
+              <div>
+                <h3 style={{ margin: "0 0 6px" }}>{profile.username}</h3>
+                <p style={muted}>{user.email}</p>
+
+                <span style={profile.role === "admin" ? adminBadge : userBadge}>
+                  {profile.role === "admin" ? "ADMIN" : "USER"}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -169,24 +185,38 @@ export default function UserMenu() {
               ✕
             </button>
 
-            <h2>🖊️ Modifier mon profil</h2>
+            <h2 style={modalTitle}>🖊️ Modifier mon profil</h2>
 
-            <img src={profile.avatar || DEFAULT_AVATAR} style={bigAvatar} />
+            <div style={editGrid}>
+              <div>
+                <img src={profile.avatar || DEFAULT_AVATAR} style={bigAvatar} />
 
-            <label style={labelStyle}>Avatar</label>
-            <input type="file" accept="image/*" onChange={uploadAvatar} />
-            {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
+                <label style={uploadBtn}>
+                  📷 Changer avatar
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={uploadAvatar}
+                    style={{ display: "none" }}
+                  />
+                </label>
 
-            <label style={labelStyle}>Pseudo</label>
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              style={inputStyle}
-            />
+                {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
+              </div>
 
-            <button onClick={saveProfile} style={saveBtn}>
-              💾 Sauvegarder
-            </button>
+              <div>
+                <label style={labelStyle}>Pseudo</label>
+                <input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  style={inputStyle}
+                />
+
+                <button onClick={saveProfile} style={saveBtn}>
+                  💾 Sauvegarder
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -197,32 +227,36 @@ export default function UserMenu() {
 const userBtn: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: "8px",
+  gap: "9px",
   color: "#fff",
-  padding: "8px 12px",
+  padding: "8px 13px",
   borderRadius: "999px",
-  border: "1px solid rgba(0,198,255,0.28)",
-  background: "rgba(0,198,255,0.12)",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background:
+    "linear-gradient(135deg, rgba(0,198,255,0.18), rgba(6,20,40,0.8))",
   cursor: "pointer",
-  fontWeight: 800,
+  fontWeight: 900,
+  boxShadow: "0 0 18px rgba(0,198,255,0.18)",
 };
 
 const avatar: React.CSSProperties = {
-  width: "28px",
-  height: "28px",
+  width: "30px",
+  height: "30px",
   borderRadius: "50%",
   objectFit: "cover",
+  border: "1px solid rgba(0,198,255,0.7)",
 };
 
 const dropdown: React.CSSProperties = {
   position: "absolute",
-  top: "48px",
+  top: "50px",
   right: 0,
-  minWidth: "180px",
+  minWidth: "210px",
   padding: "10px",
-  borderRadius: "14px",
-  background: "#111827",
-  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: "16px",
+  background: "rgba(8,13,22,0.98)",
+  border: "1px solid rgba(0,198,255,0.25)",
+  boxShadow: "0 22px 70px rgba(0,0,0,0.85)",
   zIndex: 9999,
 };
 
@@ -230,11 +264,18 @@ const itemBtn: React.CSSProperties = {
   width: "100%",
   padding: "12px",
   border: "none",
+  borderRadius: "12px",
   background: "transparent",
   color: "#fff",
   textAlign: "left",
   cursor: "pointer",
-  fontWeight: 800,
+  fontWeight: 900,
+  fontSize: "15px",
+};
+
+const logoutBtn: React.CSSProperties = {
+  ...itemBtn,
+  color: "#ffb3b3",
 };
 
 const overlay: React.CSSProperties = {
@@ -248,14 +289,16 @@ const overlay: React.CSSProperties = {
 };
 
 const modal: React.CSSProperties = {
-  width: "520px",
+  width: "620px",
   maxWidth: "92vw",
-  padding: "24px",
-  borderRadius: "18px",
-  background: "#111827",
-  border: "1px solid rgba(255,255,255,0.14)",
+  padding: "26px",
+  borderRadius: "22px",
+  background:
+    "linear-gradient(180deg, rgba(15,23,42,0.98), rgba(8,13,22,0.98))",
+  border: "1px solid rgba(0,198,255,0.25)",
   color: "#fff",
   position: "relative",
+  boxShadow: "0 30px 90px rgba(0,0,0,0.85)",
 };
 
 const closeBtn: React.CSSProperties = {
@@ -265,42 +308,99 @@ const closeBtn: React.CSSProperties = {
   background: "transparent",
   border: "none",
   color: "#fff",
-  fontSize: "20px",
+  fontSize: "22px",
   cursor: "pointer",
 };
 
+const modalTitle: React.CSSProperties = {
+  marginTop: 0,
+  marginBottom: "22px",
+};
+
+const profileCard: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "22px",
+};
+
+const editGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "180px 1fr",
+  gap: "26px",
+  alignItems: "center",
+};
+
 const bigAvatar: React.CSSProperties = {
-  width: "130px",
-  height: "130px",
+  width: "150px",
+  height: "150px",
   borderRadius: "50%",
   objectFit: "cover",
   display: "block",
-  margin: "18px auto",
+  boxShadow: "0 0 28px rgba(0,198,255,0.25)",
+  border: "2px solid rgba(0,198,255,0.25)",
+};
+
+const muted: React.CSSProperties = {
+  color: "#9ca3af",
+  margin: "0 0 12px",
 };
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  marginTop: "14px",
-  marginBottom: "6px",
+  marginBottom: "8px",
   color: "#cbd5e1",
+  fontWeight: 800,
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "12px",
-  borderRadius: "10px",
+  padding: "14px",
+  borderRadius: "12px",
   border: "1px solid rgba(255,255,255,0.16)",
   background: "#0b0f18",
   color: "#fff",
+  fontSize: "16px",
+  boxSizing: "border-box",
+};
+
+const uploadBtn: React.CSSProperties = {
+  display: "inline-block",
+  marginTop: "14px",
+  padding: "10px 12px",
+  borderRadius: "12px",
+  background: "rgba(0,198,255,0.12)",
+  border: "1px solid rgba(0,198,255,0.35)",
+  cursor: "pointer",
+  fontWeight: 900,
 };
 
 const saveBtn: React.CSSProperties = {
   marginTop: "18px",
-  padding: "12px 18px",
-  borderRadius: "12px",
+  padding: "13px 18px",
+  borderRadius: "13px",
   border: "none",
   background: "linear-gradient(135deg, #00c6ff, #0072ff)",
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
+};
+
+const userBadge: React.CSSProperties = {
+  display: "inline-block",
+  background: "#3b82f6",
+  color: "#fff",
+  padding: "4px 9px",
+  borderRadius: "999px",
+  fontSize: "11px",
+  fontWeight: 900,
+};
+
+const adminBadge: React.CSSProperties = {
+  display: "inline-block",
+  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
+  color: "#000",
+  padding: "4px 9px",
+  borderRadius: "999px",
+  fontSize: "11px",
+  fontWeight: 900,
 };
