@@ -20,6 +20,7 @@ type Message = {
   content: string;
   created_at: string;
   pinned?: boolean;
+  reply_to?: string | null;
 };
 
 type Profile = {
@@ -68,6 +69,7 @@ export default function ChatPage() {
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<Record<string, any>>({});
@@ -92,7 +94,7 @@ export default function ChatPage() {
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + 0.12);
     } catch {
-      // Son bloque par le navigateur.
+      // Son bloqué par le navigateur.
     }
   };
 
@@ -418,11 +420,15 @@ export default function ChatPage() {
       status_text: freshProfile?.status_text || "🟢 En ligne",
       content: message,
       pinned: false,
+      reply_to: replyTo?.id || null,
     });
 
     if (error) {
       alert("Erreur message : " + error.message);
+      return;
     }
+
+    setReplyTo(null);
   };
 
   const toggleReaction = async (messageId: string, emoji: string) => {
@@ -507,6 +513,11 @@ export default function ChatPage() {
 
   const getMessageReactions = (messageId: string) =>
     reactions.filter((r) => r.message_id === messageId);
+
+  const getReplyMessage = (replyId?: string | null) => {
+    if (!replyId) return null;
+    return messages.find((m) => m.id === replyId) || null;
+  };
 
   if (loading) {
     return (
@@ -654,6 +665,7 @@ export default function ChatPage() {
                 const nameColor =
                   msg.role === "admin" ? "gold" : msg.role_color || "#dbeafe";
                 const msgReactions = getMessageReactions(msg.id);
+                const repliedMessage = getReplyMessage(msg.reply_to);
 
                 return (
                   <div
@@ -708,6 +720,20 @@ export default function ChatPage() {
                         </div>
                       </div>
 
+                      {msg.reply_to && (
+                        <div style={replyPreviewBox}>
+                          <strong>
+                            ↩️ Réponse à{" "}
+                            {repliedMessage?.username ||
+                              repliedMessage?.email ||
+                              "message supprimé"}
+                          </strong>
+                          <p style={{ margin: "5px 0 0" }}>
+                            {repliedMessage?.content || "Message supprimé"}
+                          </p>
+                        </div>
+                      )}
+
                       <div style={messageText}>{msg.content}</div>
 
                       <div style={reactionRow}>
@@ -746,17 +772,23 @@ export default function ChatPage() {
                         })}
                       </div>
 
-                      {isAdmin && (
-                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                          <button onClick={() => togglePin(msg.id)} style={pinBtn}>
-                            {msg.pinned ? "📌 Désépingler" : "📌 Épingler"}
-                          </button>
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                        <button onClick={() => setReplyTo(msg)} style={replyBtn}>
+                          ↩️ Répondre
+                        </button>
 
-                          <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
-                            🗑 Supprimer
-                          </button>
-                        </div>
-                      )}
+                        {isAdmin && (
+                          <>
+                            <button onClick={() => togglePin(msg.id)} style={pinBtn}>
+                              {msg.pinned ? "📌 Désépingler" : "📌 Épingler"}
+                            </button>
+
+                            <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
+                              🗑 Supprimer
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -773,6 +805,19 @@ export default function ChatPage() {
             </div>
           )}
 
+          {replyTo && (
+            <div style={replyBar}>
+              <span>
+                ↩️ Réponse à <strong>{replyTo.username || replyTo.email}</strong> :{" "}
+                {replyTo.content}
+              </span>
+
+              <button onClick={() => setReplyTo(null)} style={cancelReplyBtn}>
+                ✖
+              </button>
+            </div>
+          )}
+
           <div style={inputBox}>
             <input
               value={text}
@@ -783,7 +828,11 @@ export default function ChatPage() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") sendMessage();
               }}
-              placeholder="Écris ton message..."
+              placeholder={
+                replyTo
+                  ? `Répondre à ${replyTo.username || replyTo.email}...`
+                  : "Écris ton message..."
+              }
               style={inputStyle}
             />
 
@@ -1072,6 +1121,16 @@ const otherMessageBox: React.CSSProperties = {
   color: "#f2f7ff",
 };
 
+const replyPreviewBox: React.CSSProperties = {
+  marginTop: "10px",
+  padding: "8px 10px",
+  borderRadius: "10px",
+  background: "rgba(0,0,0,0.28)",
+  borderLeft: "3px solid #00c6ff",
+  color: "#cbd5e1",
+  fontSize: "12px",
+};
+
 const messageText: React.CSSProperties = {
   marginTop: "10px",
   lineHeight: 1.55,
@@ -1138,6 +1197,18 @@ const adminBadge: React.CSSProperties = {
   boxShadow: "0 0 12px rgba(255,215,100,0.55)",
 };
 
+const replyBtn: React.CSSProperties = {
+  marginTop: "12px",
+  background: "rgba(0,198,255,0.12)",
+  color: "#67e8f9",
+  border: "1px solid rgba(0,198,255,0.35)",
+  borderRadius: "10px",
+  padding: "7px 10px",
+  cursor: "pointer",
+  fontSize: "12px",
+  fontWeight: "bold",
+};
+
 const pinBtn: React.CSSProperties = {
   marginTop: "12px",
   background: "rgba(255,215,100,0.16)",
@@ -1160,6 +1231,27 @@ const deleteBtn: React.CSSProperties = {
   cursor: "pointer",
   fontSize: "12px",
   fontWeight: "bold",
+};
+
+const replyBar: React.CSSProperties = {
+  padding: "10px 16px",
+  background: "rgba(0,198,255,0.1)",
+  borderTop: "1px solid rgba(0,198,255,0.25)",
+  color: "#dbeafe",
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "12px",
+  alignItems: "center",
+  fontSize: "13px",
+};
+
+const cancelReplyBtn: React.CSSProperties = {
+  border: "none",
+  background: "rgba(255,60,60,0.2)",
+  color: "#fff",
+  borderRadius: "8px",
+  padding: "5px 8px",
+  cursor: "pointer",
 };
 
 const inputBox: React.CSSProperties = {
