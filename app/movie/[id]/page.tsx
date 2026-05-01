@@ -135,19 +135,13 @@ export default async function MoviePage({ params }: any) {
 
             {movie.release_date && <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>}
 
-            {movie.imdb_id && (
-              <p>
-                IMDb :{" "}
-                <a
-                  href={`https://www.imdb.com/title/${movie.imdb_id}`}
-                  target="_blank"
-                  style={{ color: "#00c6ff" }}
-                >
-                  {movie.imdb_id}
-                </a>
-              </p>
-            )}
+            {movie.release_date && <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>}
 
+{/* IMDb caché */}
+
+<p style={{ color: "#ddd", lineHeight: 1.6 }}>
+  {movie.overview || "Pas de résumé disponible."}
+</p>
             <p style={{ color: "#ddd", lineHeight: 1.6 }}>
               {movie.overview || "Pas de résumé disponible."}
             </p>
