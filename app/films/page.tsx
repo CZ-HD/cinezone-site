@@ -236,9 +236,9 @@ export default function FilmsPage() {
         <>
           <section>
             <h2 style={sectionTitle}>
-              🍿 Catalogue CineZone — {filteredMovies.length} film
-              {filteredMovies.length > 1 ? "s" : ""}
-            </h2>
+  🍿 Catalogue CineZone
+  {isAdmin && ` — ${filteredMovies.length} film${filteredMovies.length > 1 ? "s" : ""}`}
+</h2>
 
             {filteredMovies.length === 0 ? (
               <p style={{ color: "#aaa" }}>Aucun film trouvé pour ce filtre.</p>
