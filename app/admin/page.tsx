@@ -454,12 +454,31 @@ if (line.includes("|")) {
           Utilise ton système actuel : ID TMDB + lien. L’affiliation reste automatique.
         </p>
 
-        <input
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-          placeholder="ID TMDB du film"
-          style={inputStyle}
-        />
+        <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
+  <input
+    value={id}
+    onChange={(e) => setId(e.target.value)}
+    placeholder="ID TMDB du film"
+    style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+  />
+
+  <button
+    type="button"
+    onClick={async () => {
+      const text = await navigator.clipboard.readText();
+      const found = text.match(/\/movie\/(\d+)/) || text.match(/^(\d+)/);
+
+      if (found) {
+        setId(found[1]);
+      } else {
+        alert("Aucun ID TMDB trouvé");
+      }
+    }}
+    style={copyIdBtn}
+  >
+    📋
+  </button>
+</div>
 
         <input
           value={link}
@@ -1000,4 +1019,16 @@ const btnGold: React.CSSProperties = {
 const btnRed: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(135deg, #ff1744, #b00020)",
+};
+
+const copyIdBtn: React.CSSProperties = {
+  width: "52px",
+  height: "48px",
+  borderRadius: "12px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(0,198,255,0.16)",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: "bold",
+  fontSize: "20px",
 };
