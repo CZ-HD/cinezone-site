@@ -163,7 +163,11 @@ export default function ChatPage() {
         (payload) => {
           const newMessage = payload.new as Message;
 
-          setMessages((prev) => [...prev, newMessage]);
+          setMessages((prev) =>
+  prev.some((m) => m.id === newMessage.id)
+    ? prev
+    : [...prev, newMessage]
+);
 
           if (newMessage.user_id !== user?.id) {
             setHasNewMessage(true);
@@ -454,18 +458,20 @@ export default function ChatPage() {
   };
 
   const sendMessage = async () => {
-    if (!text.trim() || !user) return;
+  if (!text.trim() || !user) return;
 
-    const message = text.trim();
-    setText("");
+  const message = text.trim();
+  setText("");
 
-    const { data: freshProfile } = await supabase
-      .from("profiles")
-      .select("username, avatar, role, role_color, status_text")
-      .eq("id", user.id)
-      .single();
+  const { data: freshProfile } = await supabase
+    .from("profiles")
+    .select("username, avatar, role, role_color, status_text")
+    .eq("id", user.id)
+    .single();
 
-    const { error } = await supabase.from("messages").insert({
+  const { data: insertedMessage, error } = await supabase
+    .from("messages")
+    .insert({
       user_id: user.id,
       email: user.email,
       username: freshProfile?.username || user.email,
@@ -476,15 +482,25 @@ export default function ChatPage() {
       content: message,
       pinned: false,
       reply_to: replyTo?.id || null,
-    });
+    })
+    .select("*")
+    .single();
 
-    if (error) {
-      alert("Erreur message : " + error.message);
-      return;
-    }
+  if (error) {
+    alert("Erreur message : " + error.message);
+    return;
+  }
 
-    setReplyTo(null);
-  };
+  if (insertedMessage) {
+    setMessages((prev) =>
+      prev.some((m) => m.id === insertedMessage.id)
+        ? prev
+        : [...prev, insertedMessage]
+    );
+  }
+
+  setReplyTo(null);
+};
 
   const toggleReaction = async (messageId: string, emoji: string) => {
     if (!user) return;
@@ -535,16 +551,21 @@ export default function ChatPage() {
   };
 
   const deleteMessage = async (messageId: string) => {
-    if (!isAdmin) return;
-    if (!confirm("Supprimer ce message ?")) return;
+  if (!isAdmin) return;
+  if (!confirm("Supprimer ce message ?")) return;
 
-    const { error } = await supabase
-      .from("messages")
-      .delete()
-      .eq("id", messageId);
+  const { error } = await supabase
+    .from("messages")
+    .delete()
+    .eq("id", messageId);
 
-    if (error) alert("Erreur suppression : " + error.message);
-  };
+  if (error) {
+    alert("Erreur suppression : " + error.message);
+    return;
+  }
+
+  setMessages((prev) => prev.filter((m) => m.id !== messageId));
+};
 
   const getMessageReactions = (messageId: string) =>
     reactions.filter((r) => r.message_id === messageId);
@@ -911,8 +932,11 @@ export default function ChatPage() {
                 sendTyping();
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") sendMessage();
-              }}
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
+  }
+}}
               placeholder={
                 replyTo
                   ? `Répondre à ${replyTo.username || replyTo.email}...`
