@@ -19,7 +19,6 @@ type Message = {
   status_text?: string;
   content: string;
   created_at: string;
-  pinned?: boolean;
   reply_to?: string | null;
 };
 
@@ -70,8 +69,10 @@ export default function ChatPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
-  const [editingPinned, setEditingPinned] = useState(false);
-  const [pinnedEditText, setPinnedEditText] = useState("");
+
+  const [announcement, setAnnouncement] = useState("");
+  const [editingAnnouncement, setEditingAnnouncement] = useState(false);
+  const [announcementText, setAnnouncementText] = useState("");
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<Record<string, any>>({});
@@ -95,9 +96,7 @@ export default function ChatPage() {
 
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + 0.12);
-    } catch {
-      // Son bloqué par le navigateur.
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -141,6 +140,16 @@ export default function ChatPage() {
         .select("*");
 
       setReactions(reacts || []);
+
+      const { data: announcementData } = await supabase
+        .from("chat_announcement")
+        .select("content")
+        .eq("id", 1)
+        .maybeSingle();
+
+      setAnnouncement(announcementData?.content || "");
+      setAnnouncementText(announcementData?.content || "");
+
       setLoading(false);
     }
 
@@ -211,6 +220,15 @@ export default function ChatPage() {
         (payload) => {
           const deleted = payload.old as Reaction;
           setReactions((prev) => prev.filter((r) => r.id !== deleted.id));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "chat_announcement" },
+        (payload) => {
+          const updated = payload.new as { content?: string };
+          setAnnouncement(updated.content || "");
+          setAnnouncementText(updated.content || "");
         }
       )
       .subscribe();
@@ -313,7 +331,6 @@ export default function ChatPage() {
 
   const onlineUserIds = onlineMembers.map((member) => member.user_id);
   const isAdmin = profile?.role === "admin";
-  const pinnedMessage = messages.find((m) => m.pinned);
 
   const sendTyping = async () => {
     if (!user || !profile) return;
@@ -326,6 +343,42 @@ export default function ChatPage() {
         username: profile.username || user.email || "Quelqu’un",
       },
     });
+  };
+
+  const saveAnnouncement = async () => {
+    if (!isAdmin) return;
+
+    const { error } = await supabase
+      .from("chat_announcement")
+      .update({ content: announcementText })
+      .eq("id", 1);
+
+    if (error) {
+      alert("Erreur annonce : " + error.message);
+      return;
+    }
+
+    setAnnouncement(announcementText);
+    setEditingAnnouncement(false);
+  };
+
+  const clearAnnouncement = async () => {
+    if (!isAdmin) return;
+    if (!confirm("Effacer l’annonce du chat ?")) return;
+
+    const { error } = await supabase
+      .from("chat_announcement")
+      .update({ content: "" })
+      .eq("id", 1);
+
+    if (error) {
+      alert("Erreur suppression annonce : " + error.message);
+      return;
+    }
+
+    setAnnouncement("");
+    setAnnouncementText("");
+    setEditingAnnouncement(false);
   };
 
   const saveProfile = async () => {
@@ -367,7 +420,7 @@ export default function ChatPage() {
 
       const file = e.target.files[0];
       const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}/avatar.${fileExt}`;
+      const filePath = `${user.id}/avatar-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -436,36 +489,6 @@ export default function ChatPage() {
   const toggleReaction = async (messageId: string, emoji: string) => {
     if (!user) return;
 
-    const updatePinnedMessage = async () => {
-  if (!isAdmin || !pinnedMessage) return;
-
-  const { error } = await supabase
-    .from("messages")
-    .update({ content: pinnedEditText })
-    .eq("id", pinnedMessage.id);
-
-  if (error) {
-    alert("Erreur modification : " + error.message);
-    return;
-  }
-
-  setEditingPinned(false);
-};
-
-const deletePinnedMessage = async () => {
-  if (!isAdmin || !pinnedMessage) return;
-  if (!confirm("Supprimer le message épinglé ?")) return;
-
-  const { error } = await supabase
-    .from("messages")
-    .delete()
-    .eq("id", pinnedMessage.id);
-
-  if (error) {
-    alert("Erreur suppression : " + error.message);
-  }
-};
-
     const pulseKey = `${messageId}-${emoji}`;
     setReactionPulse(pulseKey);
     setTimeout(() => setReactionPulse(null), 220);
@@ -511,53 +534,18 @@ const deletePinnedMessage = async () => {
     }
   };
 
-  const togglePin = async (messageId: string) => {
-  if (!isAdmin) return;
+  const deleteMessage = async (messageId: string) => {
+    if (!isAdmin) return;
+    if (!confirm("Supprimer ce message ?")) return;
 
-  const target = messages.find((m) => m.id === messageId);
-  if (!target) return;
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", messageId);
 
-  const shouldPin = !target.pinned;
+    if (error) alert("Erreur suppression : " + error.message);
+  };
 
-  if (shouldPin) {
-    await supabase.from("messages").update({ pinned: false }).neq("id", messageId);
-  }
-
-  const { error } = await supabase
-    .from("messages")
-    .update({ pinned: shouldPin })
-    .eq("id", messageId);
-
-  if (error) alert("Erreur épinglage : " + error.message);
-};
-
-const updatePinnedMessage = async () => {
-  if (!isAdmin || !pinnedMessage) return;
-
-  const { error } = await supabase
-    .from("messages")
-    .update({ content: pinnedEditText })
-    .eq("id", pinnedMessage.id);
-
-  if (error) {
-    alert("Erreur modification : " + error.message);
-    return;
-  }
-
-  setEditingPinned(false);
-};
-  
-const deleteMessage = async (messageId: string) => {
-  if (!isAdmin) return;
-  if (!confirm("Supprimer ce message ?")) return;
-
-  const { error } = await supabase
-    .from("messages")
-    .delete()
-    .eq("id", messageId);
-
-  if (error) alert("Erreur suppression : " + error.message);
-};
   const getMessageReactions = (messageId: string) =>
     reactions.filter((r) => r.message_id === messageId);
 
@@ -688,70 +676,69 @@ const deleteMessage = async (messageId: string) => {
             )}
           </div>
 
-          {pinnedMessage && (
-  <div style={pinnedBox}>
-    <div style={pinnedHeader}>
-      <div>
-        <strong>📌 Message épinglé</strong>
-        <p style={pinnedAuthor}>
-          {pinnedMessage.username || pinnedMessage.email || "Admin CineZone"}
-        </p>
-      </div>
+          {(announcement || isAdmin) && (
+            <div style={announcementBox}>
+              <div style={announcementHeader}>
+                <div>
+                  <strong>📌 Annonce Admin</strong>
+                  <p style={announcementSub}>Message officiel du chat CineZone</p>
+                </div>
 
-      {isAdmin && (
-        <div style={pinnedActions}>
-          {!editingPinned ? (
-            <>
-              <button
-                style={pinnedEditBtn}
-                onClick={() => {
-                  setPinnedEditText(pinnedMessage.content);
-                  setEditingPinned(true);
-                }}
-              >
-                ✏️ Modifier
-              </button>
+                {isAdmin && (
+                  <div style={announcementActions}>
+                    {!editingAnnouncement ? (
+                      <>
+                        <button
+                          style={announcementEditBtn}
+                          onClick={() => {
+                            setAnnouncementText(announcement);
+                            setEditingAnnouncement(true);
+                          }}
+                        >
+                          ✏️ Modifier
+                        </button>
 
-              <button
-                style={pinnedUnpinBtn}
-                onClick={() => togglePin(pinnedMessage.id)}
-              >
-                📌 Désépingler
-              </button>
+                        {announcement && (
+                          <button
+                            style={announcementDeleteBtn}
+                            onClick={clearAnnouncement}
+                          >
+                            🗑 Effacer
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <button style={announcementSaveBtn} onClick={saveAnnouncement}>
+                          💾 Sauver
+                        </button>
 
-              <button style={pinnedDeleteBtn} onClick={() => deleteMessage(pinnedMessage.id)}>
-                🗑 Supprimer
-              </button>
-            </>
-          ) : (
-            <>
-              <button style={pinnedSaveBtn} onClick={updatePinnedMessage}>
-                💾 Sauver
-              </button>
+                        <button
+                          style={announcementCancelBtn}
+                          onClick={() => setEditingAnnouncement(false)}
+                        >
+                          Annuler
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
 
-              <button
-                style={pinnedCancelBtn}
-                onClick={() => setEditingPinned(false)}
-              >
-                Annuler
-              </button>
-            </>
+              {editingAnnouncement ? (
+                <textarea
+                  value={announcementText}
+                  onChange={(e) => setAnnouncementText(e.target.value)}
+                  placeholder="Écris l’annonce admin du chat..."
+                  style={announcementTextarea}
+                />
+              ) : (
+                <p style={announcementTextStyle}>
+                  {announcement || "Aucune annonce pour le moment."}
+                </p>
+              )}
+            </div>
           )}
-        </div>
-      )}
-    </div>
-
-    {editingPinned ? (
-      <textarea
-        value={pinnedEditText}
-        onChange={(e) => setPinnedEditText(e.target.value)}
-        style={pinnedTextarea}
-      />
-    ) : (
-      <p style={pinnedText}>{pinnedMessage?.content}</p>
-    )}
-  </div>
-)}
 
           <div style={messagesBox}>
             {messages.length === 0 ? (
@@ -803,7 +790,6 @@ const deleteMessage = async (messageId: string) => {
                           >
                             {name}
                             {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
-                            {msg.pinned && <span style={pinnedBadge}>ÉPINGLÉ</span>}
                           </div>
 
                           <div
@@ -883,15 +869,9 @@ const deleteMessage = async (messageId: string) => {
                         </button>
 
                         {isAdmin && (
-                          <>
-                            <button onClick={() => togglePin(msg.id)} style={pinBtn}>
-                              {msg.pinned ? "📌 Désépingler" : "📌 Épingler"}
-                            </button>
-
-                            <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
-                              🗑 Supprimer
-                            </button>
-                          </>
+                          <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
+                            🗑 Supprimer
+                          </button>
                         )}
                       </div>
                     </div>
@@ -1070,22 +1050,89 @@ const newMessageBadge: React.CSSProperties = {
   boxShadow: "0 0 22px rgba(255,60,60,0.45)",
 };
 
-const pinnedBox: React.CSSProperties = {
-  padding: "12px 18px",
+const announcementBox: React.CSSProperties = {
+  padding: "16px 18px",
   background:
-    "linear-gradient(135deg, rgba(255,215,100,0.22), rgba(255,165,0,0.08))",
-  borderBottom: "1px solid rgba(255,215,100,0.35)",
+    "linear-gradient(135deg, rgba(0,198,255,0.18), rgba(255,215,100,0.1), rgba(0,0,0,0.35))",
+  borderBottom: "1px solid rgba(0,198,255,0.25)",
   color: "#fff",
 };
 
-const pinnedBadge: React.CSSProperties = {
-  color: "#000",
-  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
-  fontSize: "9px",
+const announcementHeader: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "12px",
+  alignItems: "flex-start",
+};
+
+const announcementSub: React.CSSProperties = {
+  margin: "4px 0 0",
+  color: "#facc15",
+  fontSize: "12px",
+  fontWeight: 800,
+};
+
+const announcementTextStyle: React.CSSProperties = {
+  margin: "12px 0 0",
+  whiteSpace: "pre-line",
+  lineHeight: 1.55,
+};
+
+const announcementActions: React.CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  flexWrap: "wrap",
+};
+
+const announcementEditBtn: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "10px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(0,198,255,0.12)",
+  color: "#67e8f9",
   fontWeight: 900,
-  marginLeft: "7px",
-  padding: "3px 7px",
-  borderRadius: "999px",
+  cursor: "pointer",
+};
+
+const announcementDeleteBtn: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,90,90,0.45)",
+  background: "rgba(255,70,70,0.16)",
+  color: "#ffb3b3",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const announcementSaveBtn: React.CSSProperties = {
+  ...announcementEditBtn,
+  background: "linear-gradient(135deg, #00c6ff, #0072ff)",
+  color: "#fff",
+};
+
+const announcementCancelBtn: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#fff",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const announcementTextarea: React.CSSProperties = {
+  width: "100%",
+  minHeight: "140px",
+  marginTop: "12px",
+  padding: "12px",
+  borderRadius: "12px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "#0b0f18",
+  color: "#fff",
+  outline: "none",
+  resize: "vertical",
+  lineHeight: 1.5,
+  boxSizing: "border-box",
 };
 
 const typingBox: React.CSSProperties = {
@@ -1314,18 +1361,6 @@ const replyBtn: React.CSSProperties = {
   fontWeight: "bold",
 };
 
-const pinBtn: React.CSSProperties = {
-  marginTop: "12px",
-  background: "rgba(255,215,100,0.16)",
-  color: "#ffe58a",
-  border: "1px solid rgba(255,215,100,0.45)",
-  borderRadius: "10px",
-  padding: "7px 10px",
-  cursor: "pointer",
-  fontSize: "12px",
-  fontWeight: "bold",
-};
-
 const deleteBtn: React.CSSProperties = {
   marginTop: "12px",
   background: "rgba(255,70,70,0.16)",
@@ -1406,92 +1441,4 @@ const soundBtn: React.CSSProperties = {
   background: "rgba(255,255,255,0.08)",
   fontWeight: "bold",
   cursor: "pointer",
-};
-
-const pinnedHeader: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: "12px",
-  alignItems: "flex-start",
-};
-
-const pinnedAuthor: React.CSSProperties = {
-  margin: "4px 0 0",
-  color: "#facc15",
-  fontSize: "12px",
-  fontWeight: 800,
-};
-
-const pinnedText: React.CSSProperties = {
-  margin: "12px 0 0",
-  whiteSpace: "pre-line",
-  lineHeight: 1.55,
-  color: "#fff",
-};
-
-const pinnedActions: React.CSSProperties = {
-  display: "flex",
-  gap: "8px",
-  flexWrap: "wrap",
-};
-
-const pinnedEditBtn: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "10px",
-  border: "1px solid rgba(0,198,255,0.35)",
-  background: "rgba(0,198,255,0.12)",
-  color: "#67e8f9",
-  fontWeight: 900,
-  cursor: "pointer",
-};
-
-const pinnedUnpinBtn: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "10px",
-  border: "1px solid rgba(255,215,100,0.45)",
-  background: "rgba(255,215,100,0.14)",
-  color: "#fde68a",
-  fontWeight: 900,
-  cursor: "pointer",
-};
-
-const pinnedDeleteBtn: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "10px",
-  border: "1px solid rgba(255,90,90,0.45)",
-  background: "rgba(255,70,70,0.16)",
-  color: "#ffb3b3",
-  fontWeight: 900,
-  cursor: "pointer",
-};
-
-const pinnedSaveBtn: React.CSSProperties = {
-  ...pinnedEditBtn,
-  background: "linear-gradient(135deg, #00c6ff, #0072ff)",
-  color: "#fff",
-};
-
-const pinnedCancelBtn: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "10px",
-  border: "1px solid rgba(255,255,255,0.16)",
-  background: "rgba(255,255,255,0.08)",
-  color: "#fff",
-  fontWeight: 900,
-  cursor: "pointer",
-};
-
-const pinnedTextarea: React.CSSProperties = {
-  width: "100%",
-  minHeight: "130px",
-  marginTop: "12px",
-  padding: "12px",
-  borderRadius: "12px",
-  border: "1px solid rgba(0,198,255,0.35)",
-  background: "#0b0f18",
-  color: "#fff",
-  outline: "none",
-  resize: "vertical",
-  lineHeight: 1.5,
-  boxSizing: "border-box",
 };
