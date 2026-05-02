@@ -326,20 +326,31 @@ function MovieGrid({
             </h3>
 
             {isAdmin && (
-              <p style={{ opacity: 0.45, margin: "4px 0", fontSize: "12px" }}>
-                🛠 ID : {movie.id}
-              </p>
-            )}
+  <div style={{ display: "flex", alignItems: "center", gap: "6px", margin: "4px 0" }}>
+    <span style={{ opacity: 0.45, fontSize: "12px" }}>
+      🎬 ID : {movie.id}
+    </span>
 
-            {movie.vote_average && (
-              <p style={{ opacity: 0.75 }}>⭐ {movie.vote_average} / 10</p>
-            )}
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigator.clipboard.writeText(String(movie.id));
+      }}
+      style={{
+        border: "none",
+        background: "rgba(0,198,255,0.2)",
+        color: "#00c6ff",
+        borderRadius: "6px",
+        cursor: "pointer",
+        padding: "2px 6px",
+        fontSize: "12px",
+      }}
+    >
+      📋
+    </button>
+  </div>
+)}
 
 function Pagination({
   currentPage,
