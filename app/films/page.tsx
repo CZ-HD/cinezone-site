@@ -284,20 +284,19 @@ function MovieGrid({
   movies,
   local,
   isAdmin,
-}: {
+}: 
   movies: any[];
   local: boolean;
   isAdmin: boolean;
-}) {
+}) 
   const getYear = (movie: any) => {
-    return (
-      movie.release_year ||
-      (movie.release_date ? String(movie.release_date).substring(0, 4) : "")
-    );
-  };
+  if (movie.release_year) return movie.release_year;
+  if (movie.release_date) return String(movie.release_date).substring(0, 4);
+  return "";
+};
 
-  return (
-    <div style={gridStyle}>
+return (
+  <div style={gridStyle}>
       {movies.map((movie) => {
         const year = getYear(movie);
 
