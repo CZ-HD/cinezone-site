@@ -272,14 +272,13 @@ export default function AdminPage() {
         });
 
         if (res.ok) {
-          success++;
-        } else {
-          errors++;
-        }
-      } catch {
-        errors++;
-      }
-    }
+  success++;
+} else {
+  errors++;
+
+  const result = await res.json();
+  console.log("Erreur ajout bulk :", tmdbId, result);
+}
 
     setBulkLoading(false);
     setBulkInput("");
