@@ -38,6 +38,9 @@ export default function AdminPage() {
   const [link, setLink] = useState("");
   const [message, setMessage] = useState("");
 
+  const [bulkInput, setBulkInput] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
+
   const [manualTitle, setManualTitle] = useState("");
   const [manualYear, setManualYear] = useState("");
   const [manualPoster, setManualPoster] = useState("");
@@ -211,6 +214,80 @@ export default function AdminPage() {
     }
   };
 
+  const saveBulkDownloads = async () => {
+    if (!bulkInput.trim()) {
+      setMessage("❌ Ajoute au moins une ligne.");
+      return;
+    }
+
+    setBulkLoading(true);
+    setMessage("📦 Ajout multiple en cours...");
+
+    const lines = bulkInput
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    let success = 0;
+    let errors = 0;
+
+    for (const line of lines) {
+      const [tmdbId, downloadLink] = line.split("|").map((v) => v.trim());
+
+      if (!tmdbId || !downloadLink) {
+        errors++;
+        continue;
+      }
+
+      try {
+        const movieRes = await fetch(
+          `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${API_KEY}&language=fr-FR`
+        );
+
+        if (!movieRes.ok) {
+          errors++;
+          continue;
+        }
+
+        const movie = await movieRes.json();
+
+        const res = await fetch("/api/downloads", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: Number(tmdbId),
+            link: addAffiliate(downloadLink),
+            title: movie.title,
+            poster_path: movie.poster_path,
+            backdrop_path: movie.backdrop_path,
+            vote_average: movie.vote_average,
+            release_date: movie.release_date,
+            release_year: movie.release_date
+              ? Number(movie.release_date.substring(0, 4))
+              : null,
+            imdb_id: movie.imdb_id || null,
+          }),
+        });
+
+        if (res.ok) {
+          success++;
+        } else {
+          errors++;
+        }
+      } catch {
+        errors++;
+      }
+    }
+
+    setBulkLoading(false);
+    setBulkInput("");
+    setMessage(
+      `✅ Ajout terminé : ${success} film(s) ajouté(s), ${errors} erreur(s).`
+    );
+  };
+
   const saveManualDownload = async () => {
     if (!manualTitle || !manualYear || !manualPoster || !manualLink) {
       setMessage("❌ Remplis au minimum : titre, année, affiche et lien.");
@@ -363,7 +440,8 @@ export default function AdminPage() {
       <section style={cardStyle}>
         <h2>🎬 Ajout automatique TMDB</h2>
         <p style={subText}>
-          Utilise ton système actuel : ID TMDB + lien. L’affiliation reste automatique.
+          Utilise ton système actuel : ID TMDB + lien. L’affiliation reste
+          automatique.
         </p>
 
         <input
@@ -394,9 +472,38 @@ export default function AdminPage() {
       </section>
 
       <section style={cardStyle}>
+        <h2>📦 Ajout multiple TMDB</h2>
+        <p style={subText}>
+          Format : ID TMDB | lien de téléchargement. Un film par ligne.
+        </p>
+
+        <textarea
+          value={bulkInput}
+          onChange={(e) => setBulkInput(e.target.value)}
+          placeholder={`12345 | https://lien-film-1.com
+67890 | https://lien-film-2.com
+11223 | https://lien-film-3.com`}
+          style={textareaStyle}
+        />
+
+        <button
+          onClick={saveBulkDownloads}
+          style={{
+            ...btnBlue,
+            opacity: bulkLoading ? 0.6 : 1,
+            cursor: bulkLoading ? "not-allowed" : "pointer",
+          }}
+          disabled={bulkLoading}
+        >
+          {bulkLoading ? "📦 Ajout en cours..." : "📦 Ajouter plusieurs films"}
+        </button>
+      </section>
+
+      <section style={cardStyle}>
         <h2>✍️ Ajout manuel</h2>
         <p style={subText}>
-          À utiliser seulement si TMDB ne trouve pas le film. IMDb est optionnel.
+          À utiliser seulement si TMDB ne trouve pas le film. IMDb est
+          optionnel.
         </p>
 
         <input
@@ -510,7 +617,9 @@ export default function AdminPage() {
                           {member.username || "Utilisateur"}
                         </strong>
 
-                        {isCreator && <span style={creatorBadge}>CRÉATEUR</span>}
+                        {isCreator && (
+                          <span style={creatorBadge}>CRÉATEUR</span>
+                        )}
                         {isMemberAdmin && !isCreator && (
                           <span style={adminBadge}>ADMIN</span>
                         )}
@@ -569,14 +678,18 @@ export default function AdminPage() {
                   <div style={buttonRow}>
                     <button
                       style={btnGreen}
-                      onClick={() => updateUser(member.id, { status: "approved" })}
+                      onClick={() =>
+                        updateUser(member.id, { status: "approved" })
+                      }
                     >
                       ✅ Valider
                     </button>
 
                     <button
                       style={btnOrange}
-                      onClick={() => updateUser(member.id, { status: "blocked" })}
+                      onClick={() =>
+                        updateUser(member.id, { status: "blocked" })
+                      }
                     >
                       🚫 Bannir
                     </button>
@@ -681,6 +794,19 @@ const twoColumns: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: "12px",
+};
+
+const textareaStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: "150px",
+  padding: "14px",
+  marginBottom: "14px",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.15)",
+  background: "#111",
+  color: "#fff",
+  boxSizing: "border-box",
+  resize: "vertical",
 };
 
 const memberHeader: React.CSSProperties = {
