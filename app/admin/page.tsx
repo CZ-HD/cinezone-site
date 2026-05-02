@@ -283,9 +283,8 @@ export default function AdminPage() {
     setBulkLoading(false);
     setBulkInput("");
     setMessage(
-      `✅ Ajout terminé : ${success} film(s) ajouté(s), ${errors} erreur(s).`
-    );
-  };
+  `✅ Ajout terminé : ${success} film(s) ajouté(s), ${errors} erreur(s).`
+);
 
   const saveManualDownload = async () => {
     if (!manualTitle || !manualYear || !manualPoster || !manualLink) {
