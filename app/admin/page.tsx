@@ -272,19 +272,21 @@ export default function AdminPage() {
         });
 
         if (res.ok) {
-  success++;
-} else {
-  errors++;
-
-  const result = await res.json();
-  console.log("Erreur ajout bulk :", tmdbId, result);
-}
+          success++;
+        } else {
+          errors++;
+        }
+      } catch {
+        errors++;
+      }
+    }
 
     setBulkLoading(false);
     setBulkInput("");
     setMessage(
-  `✅ Ajout terminé : ${success} film(s) ajouté(s), ${errors} erreur(s).`
-);
+      `✅ Ajout terminé : ${success} film(s) ajouté(s), ${errors} erreur(s).`
+    );
+  };
 
   const saveManualDownload = async () => {
     if (!manualTitle || !manualYear || !manualPoster || !manualLink) {
@@ -438,8 +440,7 @@ export default function AdminPage() {
       <section style={cardStyle}>
         <h2>🎬 Ajout automatique TMDB</h2>
         <p style={subText}>
-          Utilise ton système actuel : ID TMDB + lien. L’affiliation reste
-          automatique.
+          Utilise ton système actuel : ID TMDB + lien. L’affiliation reste automatique.
         </p>
 
         <input
@@ -500,8 +501,7 @@ export default function AdminPage() {
       <section style={cardStyle}>
         <h2>✍️ Ajout manuel</h2>
         <p style={subText}>
-          À utiliser seulement si TMDB ne trouve pas le film. IMDb est
-          optionnel.
+          À utiliser seulement si TMDB ne trouve pas le film. IMDb est optionnel.
         </p>
 
         <input
@@ -564,9 +564,7 @@ export default function AdminPage() {
         <div style={memberHeader}>
           <div>
             <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
-            <p style={subText}>
-              Statut réel, page actuelle et dernière activité.
-            </p>
+            <p style={subText}>Statut réel, page actuelle et dernière activité.</p>
           </div>
 
           <input
@@ -615,9 +613,7 @@ export default function AdminPage() {
                           {member.username || "Utilisateur"}
                         </strong>
 
-                        {isCreator && (
-                          <span style={creatorBadge}>CRÉATEUR</span>
-                        )}
+                        {isCreator && <span style={creatorBadge}>CRÉATEUR</span>}
                         {isMemberAdmin && !isCreator && (
                           <span style={adminBadge}>ADMIN</span>
                         )}
@@ -676,18 +672,14 @@ export default function AdminPage() {
                   <div style={buttonRow}>
                     <button
                       style={btnGreen}
-                      onClick={() =>
-                        updateUser(member.id, { status: "approved" })
-                      }
+                      onClick={() => updateUser(member.id, { status: "approved" })}
                     >
                       ✅ Valider
                     </button>
 
                     <button
                       style={btnOrange}
-                      onClick={() =>
-                        updateUser(member.id, { status: "blocked" })
-                      }
+                      onClick={() => updateUser(member.id, { status: "blocked" })}
                     >
                       🚫 Bannir
                     </button>
@@ -706,10 +698,7 @@ export default function AdminPage() {
                     )}
 
                     {!isCreator && (
-                      <button
-                        style={btnRed}
-                        onClick={() => deleteProfile(member.id)}
-                      >
+                      <button style={btnRed} onClick={() => deleteProfile(member.id)}>
                         🗑 Supprimer
                       </button>
                     )}
@@ -726,8 +715,7 @@ export default function AdminPage() {
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  background:
-    "radial-gradient(circle at top, rgba(0,120,255,0.2), #000 62%)",
+  background: "radial-gradient(circle at top, rgba(0,120,255,0.2), #000 62%)",
   color: "#fff",
   padding: "34px",
   fontFamily: "Arial, sans-serif",
@@ -972,33 +960,33 @@ const baseBtn: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const btnBlue = {
+const btnBlue: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(135deg, #00c6ff, #0072ff)",
 };
 
-const btnPurple = {
+const btnPurple: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(135deg, #8e2de2, #4a00e0)",
 };
 
-const btnGreen = {
+const btnGreen: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(135deg, #00c853, #009624)",
 };
 
-const btnOrange = {
+const btnOrange: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(135deg, #ff9800, #e65100)",
 };
 
-const btnGold = {
+const btnGold: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(135deg, #ffd76a, #b8860b)",
   color: "#111",
 };
 
-const btnRed = {
+const btnRed: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(135deg, #ff1744, #b00020)",
 };
