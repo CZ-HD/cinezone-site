@@ -232,7 +232,18 @@ export default function AdminPage() {
     let errors = 0;
 
     for (const line of lines) {
-      const [tmdbId, downloadLink] = line.split("|").map((v) => v.trim());
+     let tmdbId = "";
+let downloadLink = "";
+
+if (line.includes("|")) {
+  const parts = line.split("|");
+  tmdbId = parts[0]?.trim();
+  downloadLink = parts[1]?.trim();
+} else {
+  const parts = line.trim().split(/\s+/);
+  tmdbId = parts[0];
+  downloadLink = parts.slice(1).join(" ");
+}
 
       if (!tmdbId || !downloadLink) {
         errors++;
