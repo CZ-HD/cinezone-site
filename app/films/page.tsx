@@ -289,17 +289,20 @@ function MovieGrid({
   local: boolean;
   isAdmin: boolean;
 }) {
-  const getYear = (movie: Movie) =>
-  movie.release_year ||
-  (movie.release_date ? String(movie.release_date).substring(0, 4) : "");
-
-return (
-  <div style={gridStyle}>
-    {movies.map((movie) => {
-  const year = getYear(movie);
+  const getYear = (movie: any) => {
+    return (
+      movie.release_year ||
+      (movie.release_date ? String(movie.release_date).substring(0, 4) : "")
+    );
+  };
 
   return (
-    <Link
+    <div style={gridStyle}>
+      {movies.map((movie) => {
+        const year = getYear(movie);
+
+        return (
+          <Link
             key={movie.id}
             href={local ? `/movie/${movie.id}` : `/admin?tmdb=${movie.id}`}
             style={{ color: "#fff", textDecoration: "none" }}
