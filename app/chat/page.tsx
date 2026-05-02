@@ -21,6 +21,7 @@ type Message = {
   created_at: string;
   pinned?: boolean;
   reply_to?: string | null;
+  image_url?: string | null;
 };
 
 type Profile = {
@@ -65,6 +66,7 @@ export default function ChatPage() {
   const [editUsername, setEditUsername] = useState("");
   const [editStatus, setEditStatus] = useState("🟢 En ligne");
   const [uploading, setUploading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [onlineMembers, setOnlineMembers] = useState<OnlineMember[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -187,7 +189,6 @@ export default function ChatPage() {
         { event: "UPDATE", schema: "public", table: "messages" },
         (payload) => {
           const updated = payload.new as Message;
-
           setMessages((prev) =>
             prev.map((m) => (m.id === updated.id ? updated : m))
           );
@@ -198,7 +199,6 @@ export default function ChatPage() {
         { event: "DELETE", schema: "public", table: "messages" },
         (payload) => {
           const deleted = payload.old as Message;
-
           setMessages((prev) => prev.filter((m) => m.id !== deleted.id));
         }
       )
@@ -229,7 +229,6 @@ export default function ChatPage() {
         { event: "DELETE", schema: "public", table: "message_reactions" },
         (payload) => {
           const deleted = payload.old as Reaction;
-
           setReactions((prev) => prev.filter((r) => r.id !== deleted.id));
         }
       )
@@ -238,14 +237,11 @@ export default function ChatPage() {
         { event: "UPDATE", schema: "public", table: "chat_announcement" },
         (payload) => {
           const updated = payload.new as { content?: string };
-
           setAnnouncement(updated.content || "");
           setAnnouncementText(updated.content || "");
         }
       )
-      .subscribe((status) => {
-        console.log("Realtime chat status:", status);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -467,6 +463,82 @@ export default function ChatPage() {
     }
   };
 
+  const uploadChatImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !profile || !e.target.files?.[0]) return;
+
+    try {
+      setImageUploading(true);
+
+      const file = e.target.files[0];
+
+      if (!file.type.startsWith("image/")) {
+        alert("Choisis une image.");
+        return;
+      }
+
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("chat-images")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        alert("Erreur image : " + uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("chat-images")
+        .getPublicUrl(filePath);
+
+      const imageUrl = data.publicUrl;
+
+      const { data: freshProfile } = await supabase
+        .from("profiles")
+        .select("username, avatar, role, role_color, status_text")
+        .eq("id", user.id)
+        .single();
+
+      const { data: insertedMessage, error } = await supabase
+        .from("messages")
+        .insert({
+          user_id: user.id,
+          email: user.email,
+          username: freshProfile?.username || user.email,
+          avatar: freshProfile?.avatar || DEFAULT_AVATAR,
+          role: freshProfile?.role || "user",
+          role_color: freshProfile?.role_color || "#00c6ff",
+          status_text: freshProfile?.status_text || "🟢 En ligne",
+          content: text.trim(),
+          image_url: imageUrl,
+          pinned: false,
+          reply_to: replyTo?.id || null,
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        alert("Erreur message image : " + error.message);
+        return;
+      }
+
+      if (insertedMessage) {
+        setMessages((prev) =>
+          prev.some((m) => m.id === insertedMessage.id)
+            ? prev
+            : [...prev, insertedMessage]
+        );
+      }
+
+      setText("");
+      setReplyTo(null);
+      e.target.value = "";
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   const sendMessage = async () => {
     if (!text.trim() || !user) return;
 
@@ -490,6 +562,7 @@ export default function ChatPage() {
         role_color: freshProfile?.role_color || "#00c6ff",
         status_text: freshProfile?.status_text || "🟢 En ligne",
         content: message,
+        image_url: null,
         pinned: false,
         reply_to: replyTo?.id || null,
       })
@@ -885,7 +958,21 @@ export default function ChatPage() {
                         </div>
                       )}
 
-                      <div style={messageText}>{msg.content}</div>
+                      {msg.content && <div style={messageText}>{msg.content}</div>}
+
+                      {msg.image_url && (
+                        <a
+                          href={msg.image_url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <img
+                            src={msg.image_url}
+                            alt="image chat"
+                            style={chatImageStyle}
+                          />
+                        </a>
+                      )}
 
                       <div style={reactionRow}>
                         {REACTION_EMOJIS.map((emoji) => {
@@ -932,7 +1019,11 @@ export default function ChatPage() {
                       </div>
 
                       <div
-                        style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          flexWrap: "wrap",
+                        }}
                       >
                         <button onClick={() => setReplyTo(msg)} style={replyBtn}>
                           ↩️ Répondre
@@ -967,7 +1058,7 @@ export default function ChatPage() {
             <div style={replyBar}>
               <span>
                 ↩️ Réponse à <strong>{replyTo.username || replyTo.email}</strong>{" "}
-                : {replyTo.content}
+                : {replyTo.content || "image"}
               </span>
 
               <button onClick={() => setReplyTo(null)} style={cancelReplyBtn}>
@@ -996,6 +1087,17 @@ export default function ChatPage() {
               }
               style={inputStyle}
             />
+
+            <label style={imageUploadBtn}>
+              {imageUploading ? "⏳" : "📎"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={uploadChatImage}
+                style={{ display: "none" }}
+                disabled={imageUploading}
+              />
+            </label>
 
             <button onClick={sendMessage} style={btnStyle}>
               Envoyer
@@ -1368,6 +1470,19 @@ const messageText: React.CSSProperties = {
   fontSize: "15px",
   color: "#fff",
   wordBreak: "break-word",
+  whiteSpace: "pre-line",
+};
+
+const chatImageStyle: React.CSSProperties = {
+  marginTop: "10px",
+  maxWidth: "280px",
+  maxHeight: "280px",
+  borderRadius: "16px",
+  objectFit: "cover",
+  border: "1px solid rgba(255,255,255,0.18)",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+  cursor: "zoom-in",
+  display: "block",
 };
 
 const reactionRow: React.CSSProperties = {
@@ -1489,6 +1604,21 @@ const inputStyle: React.CSSProperties = {
   background: "#0b0f18",
   color: "#fff",
   outline: "none",
+};
+
+const imageUploadBtn: React.CSSProperties = {
+  width: "50px",
+  minWidth: "50px",
+  borderRadius: "14px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(0,198,255,0.12)",
+  color: "#fff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  fontSize: "20px",
+  fontWeight: 900,
 };
 
 const btnStyle: React.CSSProperties = {
