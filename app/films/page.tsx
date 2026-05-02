@@ -296,12 +296,10 @@ function MovieGrid({
 return (
   <div style={gridStyle}>
     {movies.map((movie) => {
-      const year = getYear(movie);
+  const year = getYear(movie);
 
-      return (
-
-        return (
-          <Link
+  return (
+    <Link
             key={movie.id}
             href={local ? `/movie/${movie.id}` : `/admin?tmdb=${movie.id}`}
             style={{ color: "#fff", textDecoration: "none" }}
