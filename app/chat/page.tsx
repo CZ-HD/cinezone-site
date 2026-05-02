@@ -19,6 +19,7 @@ type Message = {
   status_text?: string;
   content: string;
   created_at: string;
+  pinned?: boolean;
   reply_to?: string | null;
 };
 
@@ -76,9 +77,15 @@ export default function ChatPage() {
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<Record<string, any>>({});
+  const userIdRef = useRef<string | null>(null);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
   const playNotificationSound = () => {
-    if (!soundEnabled) return;
+    if (!soundEnabledRef.current) return;
 
     try {
       const AudioContext =
@@ -108,6 +115,7 @@ export default function ChatPage() {
         return;
       }
 
+      userIdRef.current = data.user.id;
       setUser(data.user);
 
       const { data: profileData } = await supabase
@@ -156,20 +164,19 @@ export default function ChatPage() {
     init();
 
     const channel = supabase
-      .channel("chat-room")
+      .channel("chat-room-global")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
           const newMessage = payload.new as Message;
 
-          setMessages((prev) =>
-  prev.some((m) => m.id === newMessage.id)
-    ? prev
-    : [...prev, newMessage]
-);
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newMessage.id)) return prev;
+            return [...prev, newMessage];
+          });
 
-          if (newMessage.user_id !== user?.id) {
+          if (newMessage.user_id !== userIdRef.current) {
             setHasNewMessage(true);
             playNotificationSound();
           }
@@ -180,6 +187,7 @@ export default function ChatPage() {
         { event: "UPDATE", schema: "public", table: "messages" },
         (payload) => {
           const updated = payload.new as Message;
+
           setMessages((prev) =>
             prev.map((m) => (m.id === updated.id ? updated : m))
           );
@@ -190,6 +198,7 @@ export default function ChatPage() {
         { event: "DELETE", schema: "public", table: "messages" },
         (payload) => {
           const deleted = payload.old as Message;
+
           setMessages((prev) => prev.filter((m) => m.id !== deleted.id));
         }
       )
@@ -200,7 +209,7 @@ export default function ChatPage() {
           const newReaction = payload.new as Reaction;
 
           setReactions((prev) => {
-            const withoutTemp = prev.filter(
+            const clean = prev.filter(
               (r) =>
                 !(
                   r.id.startsWith("temp-") &&
@@ -210,11 +219,8 @@ export default function ChatPage() {
                 )
             );
 
-            if (withoutTemp.some((r) => r.id === newReaction.id)) {
-              return withoutTemp;
-            }
-
-            return [...withoutTemp, newReaction];
+            if (clean.some((r) => r.id === newReaction.id)) return clean;
+            return [...clean, newReaction];
           });
         }
       )
@@ -223,6 +229,7 @@ export default function ChatPage() {
         { event: "DELETE", schema: "public", table: "message_reactions" },
         (payload) => {
           const deleted = payload.old as Reaction;
+
           setReactions((prev) => prev.filter((r) => r.id !== deleted.id));
         }
       )
@@ -231,16 +238,19 @@ export default function ChatPage() {
         { event: "UPDATE", schema: "public", table: "chat_announcement" },
         (payload) => {
           const updated = payload.new as { content?: string };
+
           setAnnouncement(updated.content || "");
           setAnnouncementText(updated.content || "");
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Realtime chat status:", status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [soundEnabled, user?.id]);
+  }, []);
 
   useEffect(() => {
     if (!user || !profile) return;
@@ -458,49 +468,49 @@ export default function ChatPage() {
   };
 
   const sendMessage = async () => {
-  if (!text.trim() || !user) return;
+    if (!text.trim() || !user) return;
 
-  const message = text.trim();
-  setText("");
+    const message = text.trim();
+    setText("");
 
-  const { data: freshProfile } = await supabase
-    .from("profiles")
-    .select("username, avatar, role, role_color, status_text")
-    .eq("id", user.id)
-    .single();
+    const { data: freshProfile } = await supabase
+      .from("profiles")
+      .select("username, avatar, role, role_color, status_text")
+      .eq("id", user.id)
+      .single();
 
-  const { data: insertedMessage, error } = await supabase
-    .from("messages")
-    .insert({
-      user_id: user.id,
-      email: user.email,
-      username: freshProfile?.username || user.email,
-      avatar: freshProfile?.avatar || DEFAULT_AVATAR,
-      role: freshProfile?.role || "user",
-      role_color: freshProfile?.role_color || "#00c6ff",
-      status_text: freshProfile?.status_text || "🟢 En ligne",
-      content: message,
-      pinned: false,
-      reply_to: replyTo?.id || null,
-    })
-    .select("*")
-    .single();
+    const { data: insertedMessage, error } = await supabase
+      .from("messages")
+      .insert({
+        user_id: user.id,
+        email: user.email,
+        username: freshProfile?.username || user.email,
+        avatar: freshProfile?.avatar || DEFAULT_AVATAR,
+        role: freshProfile?.role || "user",
+        role_color: freshProfile?.role_color || "#00c6ff",
+        status_text: freshProfile?.status_text || "🟢 En ligne",
+        content: message,
+        pinned: false,
+        reply_to: replyTo?.id || null,
+      })
+      .select("*")
+      .single();
 
-  if (error) {
-    alert("Erreur message : " + error.message);
-    return;
-  }
+    if (error) {
+      alert("Erreur message : " + error.message);
+      return;
+    }
 
-  if (insertedMessage) {
-    setMessages((prev) =>
-      prev.some((m) => m.id === insertedMessage.id)
-        ? prev
-        : [...prev, insertedMessage]
-    );
-  }
+    if (insertedMessage) {
+      setMessages((prev) =>
+        prev.some((m) => m.id === insertedMessage.id)
+          ? prev
+          : [...prev, insertedMessage]
+      );
+    }
 
-  setReplyTo(null);
-};
+    setReplyTo(null);
+  };
 
   const toggleReaction = async (messageId: string, emoji: string) => {
     if (!user) return;
@@ -551,21 +561,21 @@ export default function ChatPage() {
   };
 
   const deleteMessage = async (messageId: string) => {
-  if (!isAdmin) return;
-  if (!confirm("Supprimer ce message ?")) return;
+    if (!isAdmin) return;
+    if (!confirm("Supprimer ce message ?")) return;
 
-  const { error } = await supabase
-    .from("messages")
-    .delete()
-    .eq("id", messageId);
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", messageId);
 
-  if (error) {
-    alert("Erreur suppression : " + error.message);
-    return;
-  }
+    if (error) {
+      alert("Erreur suppression : " + error.message);
+      return;
+    }
 
-  setMessages((prev) => prev.filter((m) => m.id !== messageId));
-};
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  };
 
   const getMessageReactions = (messageId: string) =>
     reactions.filter((r) => r.message_id === messageId);
@@ -603,15 +613,27 @@ export default function ChatPage() {
           )}
 
           <div style={headerStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "12px",
+              }}
+            >
               <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
 
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                <button onClick={() => setSoundEnabled(!soundEnabled)} style={soundBtn}>
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  style={soundBtn}
+                >
                   {soundEnabled ? "🔊 Son ON" : "🔇 Son OFF"}
                 </button>
 
-                <button onClick={() => setShowProfile(!showProfile)} style={profileBtn}>
+                <button
+                  onClick={() => setShowProfile(!showProfile)}
+                  style={profileBtn}
+                >
                   ⚙️ Mon profil
                 </button>
               </div>
@@ -636,7 +658,9 @@ export default function ChatPage() {
                   Connecté :{" "}
                   <span
                     style={{
-                      color: isAdmin ? "gold" : profile?.role_color || "#00c6ff",
+                      color: isAdmin
+                        ? "gold"
+                        : profile?.role_color || "#00c6ff",
                     }}
                   >
                     {displayName}
@@ -684,9 +708,13 @@ export default function ChatPage() {
                   <option value="🟢 En ligne">🟢 En ligne</option>
                   <option value="🔴 Hors ligne">🔴 Hors ligne</option>
                   <option value="⛔ Occupé">⛔ Occupé</option>
-                  <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
+                  <option value="🎬 Je regarde un film">
+                    🎬 Je regarde un film
+                  </option>
                   {isAdmin && (
-                    <option value="👑 Admin disponible">👑 Admin disponible</option>
+                    <option value="👑 Admin disponible">
+                      👑 Admin disponible
+                    </option>
                   )}
                 </select>
 
@@ -702,7 +730,9 @@ export default function ChatPage() {
               <div style={announcementHeader}>
                 <div>
                   <strong>📌 Annonce Admin</strong>
-                  <p style={announcementSub}>Message officiel du chat CineZone</p>
+                  <p style={announcementSub}>
+                    Message officiel du chat CineZone
+                  </p>
                 </div>
 
                 {isAdmin && (
@@ -730,7 +760,10 @@ export default function ChatPage() {
                       </>
                     ) : (
                       <>
-                        <button style={announcementSaveBtn} onClick={saveAnnouncement}>
+                        <button
+                          style={announcementSaveBtn}
+                          onClick={saveAnnouncement}
+                        >
                           💾 Sauver
                         </button>
 
@@ -772,7 +805,9 @@ export default function ChatPage() {
                 const name = isMe
                   ? displayName
                   : msg.username || msg.email || "Utilisateur";
-                const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
+                const msgAvatar = isMe
+                  ? avatarUrl
+                  : msg.avatar || DEFAULT_AVATAR;
                 const userIsOnline = onlineUserIds.includes(msg.user_id);
                 const isStatusOffline = msg.status_text === "🔴 Hors ligne";
                 const nameColor =
@@ -796,7 +831,9 @@ export default function ChatPage() {
                           <span
                             style={{
                               ...onlineDotSmall,
-                              background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+                              background: isStatusOffline
+                                ? "#ff5c5c"
+                                : "#4cff9b",
                             }}
                           />
                         </div>
@@ -810,7 +847,9 @@ export default function ChatPage() {
                             }}
                           >
                             {name}
-                            {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                            {msg.role === "admin" && (
+                              <span style={adminBadge}>ADMIN</span>
+                            )}
                           </div>
 
                           <div
@@ -850,7 +889,9 @@ export default function ChatPage() {
 
                       <div style={reactionRow}>
                         {REACTION_EMOJIS.map((emoji) => {
-                          const count = msgReactions.filter((r) => r.emoji === emoji).length;
+                          const count = msgReactions.filter(
+                            (r) => r.emoji === emoji
+                          ).length;
                           const active = msgReactions.some(
                             (r) => r.emoji === emoji && r.user_id === user?.id
                           );
@@ -875,22 +916,33 @@ export default function ChatPage() {
                                     : "none",
                               }}
                             >
-                              <span style={active ? reactionEmojiActive : reactionEmoji}>
+                              <span
+                                style={
+                                  active ? reactionEmojiActive : reactionEmoji
+                                }
+                              >
                                 {emoji}
                               </span>
-                              {count > 0 && <span style={reactionCount}>{count}</span>}
+                              {count > 0 && (
+                                <span style={reactionCount}>{count}</span>
+                              )}
                             </button>
                           );
                         })}
                       </div>
 
-                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      <div
+                        style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
+                      >
                         <button onClick={() => setReplyTo(msg)} style={replyBtn}>
                           ↩️ Répondre
                         </button>
 
                         {isAdmin && (
-                          <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
+                          <button
+                            onClick={() => deleteMessage(msg.id)}
+                            style={deleteBtn}
+                          >
                             🗑 Supprimer
                           </button>
                         )}
@@ -914,8 +966,8 @@ export default function ChatPage() {
           {replyTo && (
             <div style={replyBar}>
               <span>
-                ↩️ Réponse à <strong>{replyTo.username || replyTo.email}</strong> :{" "}
-                {replyTo.content}
+                ↩️ Réponse à <strong>{replyTo.username || replyTo.email}</strong>{" "}
+                : {replyTo.content}
               </span>
 
               <button onClick={() => setReplyTo(null)} style={cancelReplyBtn}>
@@ -932,11 +984,11 @@ export default function ChatPage() {
                 sendTyping();
               }}
               onKeyDown={(e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage();
-  }
-}}
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
               placeholder={
                 replyTo
                   ? `Répondre à ${replyTo.username || replyTo.email}...`
@@ -955,7 +1007,8 @@ export default function ChatPage() {
           <h2 style={{ margin: 0, fontSize: "18px" }}>🟢 En ligne</h2>
 
           <p style={{ color: "#9ca3af", marginTop: "6px" }}>
-            {onlineMembers.length} membre{onlineMembers.length > 1 ? "s" : ""} connecté
+            {onlineMembers.length} membre
+            {onlineMembers.length > 1 ? "s" : ""} connecté
             {onlineMembers.length > 1 ? "s" : ""}
           </p>
 
@@ -991,7 +1044,9 @@ export default function ChatPage() {
                       }}
                     >
                       {member.username || "Utilisateur"}
-                      {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                      {member.role === "admin" && (
+                        <span style={adminBadge}>ADMIN</span>
+                      )}
                     </p>
                     <p
                       style={{
