@@ -138,10 +138,7 @@ export default function FilmsPage() {
     return year >= minYear && year <= maxYear;
   });
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredMovies.length / itemsPerPage)
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredMovies.length / itemsPerPage));
 
   const paginatedMovies = filteredMovies.slice(
     (currentPage - 1) * itemsPerPage,
@@ -186,9 +183,7 @@ export default function FilmsPage() {
                 onChange={(e) => {
                   const value = Number(e.target.value);
                   setMinYear(value);
-
                   if (value > maxYear) setMaxYear(value);
-
                   setCurrentPage(1);
                 }}
                 style={selectStyle}
@@ -208,9 +203,7 @@ export default function FilmsPage() {
                 onChange={(e) => {
                   const value = Number(e.target.value);
                   setMaxYear(value);
-
                   if (value < minYear) setMinYear(value);
-
                   setCurrentPage(1);
                 }}
                 style={selectStyle}
@@ -236,9 +229,12 @@ export default function FilmsPage() {
         <>
           <section>
             <h2 style={sectionTitle}>
-  🍿 Catalogue CineZone
-  {isAdmin && ` — ${filteredMovies.length} film${filteredMovies.length > 1 ? "s" : ""}`}
-</h2>
+              🍿 Catalogue CineZone
+              {isAdmin &&
+                ` — ${filteredMovies.length} film${
+                  filteredMovies.length > 1 ? "s" : ""
+                }`}
+            </h2>
 
             {filteredMovies.length === 0 ? (
               <p style={{ color: "#aaa" }}>Aucun film trouvé pour ce filtre.</p>
@@ -284,19 +280,19 @@ function MovieGrid({
   movies,
   local,
   isAdmin,
-}: 
+}: {
   movies: any[];
   local: boolean;
   isAdmin: boolean;
-}) 
+}) {
   const getYear = (movie: any) => {
-  if (movie.release_year) return movie.release_year;
-  if (movie.release_date) return String(movie.release_date).substring(0, 4);
-  return "";
-};
+    if (movie.release_year) return movie.release_year;
+    if (movie.release_date) return String(movie.release_date).substring(0, 4);
+    return "";
+  };
 
-return (
-  <div style={gridStyle}>
+  return (
+    <div style={gridStyle}>
       {movies.map((movie) => {
         const year = getYear(movie);
 
@@ -325,38 +321,44 @@ return (
 
             <h3 style={{ fontSize: "15px", marginTop: "12px" }}>
               {movie.title || `Film ${movie.id}`}
-            {isAdmin && (
-  <div style={{ display: "flex", alignItems: "center", gap: "6px", margin: "4px 0" }}>
-    <span style={{ opacity: 0.45, fontSize: "12px" }}>
-      🎬 ID : {movie.id}
-    </span>
+            </h3>
 
-    <button
-      type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigator.clipboard.writeText(String(movie.id));
-      }}
-      style={{
-        border: "none",
-        background: "rgba(0,198,255,0.2)",
-        color: "#00c6ff",
-        borderRadius: "6px",
-        cursor: "pointer",
-        padding: "2px 6px",
-        fontSize: "12px",
-      }}
-    >
-      📋
-    </button>
-  </div>
-)}
-    >
-      📋
-    </button>
-  </div>
-)}
+            {isAdmin && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  margin: "4px 0",
+                }}
+              >
+                <span style={{ opacity: 0.45, fontSize: "12px" }}>
+                  🎬 ID : {movie.id}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(String(movie.id));
+                  }}
+                  style={copyIdBtn}
+                >
+                  📋
+                </button>
+              </div>
+            )}
+
+            <p style={{ margin: "4px 0", color: "#facc15" }}>
+              ⭐ {movie.vote_average || 0} / 10
+            </p>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
 
 function Pagination({
   currentPage,
@@ -535,6 +537,16 @@ const posterStyle: React.CSSProperties = {
   objectFit: "cover",
   borderRadius: "16px",
   boxShadow: "0 18px 45px rgba(0,0,0,0.55)",
+};
+
+const copyIdBtn: React.CSSProperties = {
+  border: "none",
+  background: "rgba(0,198,255,0.2)",
+  color: "#00c6ff",
+  borderRadius: "6px",
+  cursor: "pointer",
+  padding: "2px 6px",
+  fontSize: "12px",
 };
 
 const paginationStyle: React.CSSProperties = {
