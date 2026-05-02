@@ -289,14 +289,16 @@ function MovieGrid({
   local: boolean;
   isAdmin: boolean;
 }) {
-  const getYear = (movie: any) =>
-    movie.release_year ||
-    (movie.release_date ? String(movie.release_date).substring(0, 4) : "");
+  const getYear = (movie: Movie) =>
+  movie.release_year ||
+  (movie.release_date ? String(movie.release_date).substring(0, 4) : "");
 
-  return (
-    <div style={gridStyle}>
-      {movies.map((movie) => {
-        const year = getYear(movie);
+return (
+  <div style={gridStyle}>
+    {movies.map((movie) => {
+      const year = getYear(movie);
+
+      return (
 
         return (
           <Link
@@ -323,8 +325,6 @@ function MovieGrid({
 
             <h3 style={{ fontSize: "15px", marginTop: "12px" }}>
               {movie.title || `Film ${movie.id}`}
-            </h3>
-
             {isAdmin && (
   <div style={{ display: "flex", alignItems: "center", gap: "6px", margin: "4px 0" }}>
     <span style={{ opacity: 0.45, fontSize: "12px" }}>
@@ -332,6 +332,7 @@ function MovieGrid({
     </span>
 
     <button
+      type="button"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -346,6 +347,11 @@ function MovieGrid({
         padding: "2px 6px",
         fontSize: "12px",
       }}
+    >
+      📋
+    </button>
+  </div>
+)}
     >
       📋
     </button>
