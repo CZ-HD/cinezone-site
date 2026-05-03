@@ -1174,39 +1174,27 @@ export default function ChatPage() {
 }
 
 const pageStyle: React.CSSProperties = {
-  minHeight: "calc(100vh - 56px)",
-
-  background: `
-  /* glow rose très localisé (petit) */
-  radial-gradient(circle at 10% 60%, rgba(255, 0, 120, 0.18), transparent 35%),
-
-  /* glow bleu puissant (droite) */
-  radial-gradient(circle at 95% 50%, rgba(0, 170, 255, 0.45), transparent 50%),
-
-  /* halo bleu doux */
-  radial-gradient(circle at 80% 80%, rgba(0, 200, 255, 0.25), transparent 55%),
-
-  /* centre assombri (IMPORTANT) */
-  radial-gradient(circle at 50% 50%, rgba(0,0,0,0.85), transparent 70%),
-
-  /* overlay sombre global */
-  linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)),
-
-  /* image */
-  url('/chat-bg.jpg')
-`,
-backgroundSize: "cover",
-backgroundPosition: "center",
-backgroundRepeat: "no-repeat",
-
+  minHeight: "100vh",
+  backgroundImage: `
+    linear-gradient(
+      90deg,
+      rgba(15,0,12,0.88) 0%,
+      rgba(0,0,0,0.72) 35%,
+      rgba(0,20,40,0.58) 70%,
+      rgba(0,30,55,0.50) 100%
+    ),
+    url("/Tchat.jpg")
+  `,
+  backgroundSize: "cover",
+  backgroundPosition: "center center",
+  backgroundRepeat: "no-repeat",
+  backgroundAttachment: "fixed",
   color: "#fff",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  padding: "70px 24px 32px",
+  padding: "24px",
   fontFamily: "Arial, sans-serif",
-  position: "relative",
-  overflow: "hidden",
 };
 
 const chatLayout: React.CSSProperties = {
@@ -1216,18 +1204,18 @@ const chatLayout: React.CSSProperties = {
   gridTemplateColumns: "1fr 280px",
   gap: "18px",
   alignItems: "stretch",
+  transform: "translateX(-70px)",
 };
 
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(4, 10, 22, 0.82)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  border: "1px solid rgba(0,198,255,0.38)",
-  borderRadius: "24px",
-  boxShadow:
-    "0 25px 90px rgba(0,0,0,0.92), 0 0 80px rgba(255,0,140,0.22), 0 0 100px rgba(0,198,255,0.18)",
+ background: "rgba(5,10,18,0.76)",
+backdropFilter: "blur(10px)",
+WebkitBackdropFilter: "blur(10px)",
+border: "1px solid rgba(0,198,255,0.36)",
+boxShadow:
+  "0 25px 90px rgba(0,0,0,0.85), 0 0 35px rgba(0,198,255,0.15)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
@@ -1238,12 +1226,12 @@ const onlinePanel: React.CSSProperties = {
   height: "78vh",
   padding: "20px",
   borderRadius: "24px",
-  background: "rgba(4, 10, 22, 0.82)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  border: "1px solid rgba(0,198,255,0.38)",
-  boxShadow:
-    "0 25px 90px rgba(0,0,0,0.88), 0 0 90px rgba(0,198,255,0.2)",
+  background: "rgba(5,10,18,0.76)",
+backdropFilter: "blur(10px)",
+WebkitBackdropFilter: "blur(10px)",
+border: "1px solid rgba(0,198,255,0.36)",
+boxShadow:
+  "0 25px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.12)",
   overflowY: "auto",
 };
 
