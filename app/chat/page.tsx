@@ -1176,26 +1176,13 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "calc(100vh - 56px)",
   background: `
-    /* glow gauche intense */
-    radial-gradient(circle at 10% 40%, rgba(255, 0, 120, 0.35), transparent 35%),
-
-    /* glow droite intense */
-    radial-gradient(circle at 90% 40%, rgba(0, 170, 255, 0.35), transparent 35%),
-
-    /* glow bas gauche */
-    radial-gradient(circle at 20% 90%, rgba(255, 0, 180, 0.25), transparent 40%),
-
-    /* glow bas droite */
-    radial-gradient(circle at 80% 90%, rgba(0, 200, 255, 0.25), transparent 40%),
-
-    /* effet halo centre sombre */
-    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.85), transparent 65%),
-
-    /* légère texture lumineuse */
-    radial-gradient(circle at 50% 100%, rgba(0, 150, 255, 0.15), transparent 60%),
-
-    /* base gradient profond */
-    linear-gradient(135deg, #020617 0%, #040a1f 40%, #001a2f 100%)
+    radial-gradient(circle at 0% 45%, rgba(255, 0, 140, 0.65), transparent 34%),
+    radial-gradient(circle at 100% 45%, rgba(0, 200, 255, 0.65), transparent 34%),
+    radial-gradient(circle at 18% 100%, rgba(255, 0, 170, 0.42), transparent 42%),
+    radial-gradient(circle at 82% 100%, rgba(0, 220, 255, 0.42), transparent 42%),
+    radial-gradient(circle at 50% 100%, rgba(0, 140, 255, 0.32), transparent 55%),
+    radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0.88), transparent 62%),
+    linear-gradient(135deg, #020617 0%, #070018 42%, #001d34 100%)
   `,
   color: "#fff",
   display: "flex",
@@ -1219,17 +1206,30 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(8,13,22,0.72)",
-  backdropFilter: "blur(8px)",
-  WebkitBackdropFilter: "blur(8px)",
-  border: "1px solid rgba(0,198,255,0.32)",
+  background: "rgba(4, 10, 22, 0.82)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(0,198,255,0.38)",
   borderRadius: "24px",
   boxShadow:
-    "0 25px 90px rgba(0,0,0,0.85), 0 0 55px rgba(0,198,255,0.14)",
+    "0 25px 90px rgba(0,0,0,0.92), 0 0 80px rgba(255,0,140,0.22), 0 0 100px rgba(0,198,255,0.18)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
   position: "relative",
+};
+
+const onlinePanel: React.CSSProperties = {
+  height: "78vh",
+  padding: "20px",
+  borderRadius: "24px",
+  background: "rgba(4, 10, 22, 0.82)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(0,198,255,0.38)",
+  boxShadow:
+    "0 25px 90px rgba(0,0,0,0.88), 0 0 90px rgba(0,198,255,0.2)",
+  overflowY: "auto",
 };
 
 const newMessageBadge: React.CSSProperties = {
@@ -1250,8 +1250,8 @@ const newMessageBadge: React.CSSProperties = {
 const announcementBox: React.CSSProperties = {
   padding: "16px 18px",
   background:
-    "linear-gradient(135deg, rgba(0,198,255,0.18), rgba(255,215,100,0.1), rgba(0,0,0,0.35))",
-  borderBottom: "1px solid rgba(0,198,255,0.25)",
+    "linear-gradient(135deg, rgba(255,0,140,0.12), rgba(0,198,255,0.16), rgba(0,0,0,0.38))",
+  borderBottom: "1px solid rgba(0,198,255,0.3)",
   color: "#fff",
 };
 
@@ -1284,8 +1284,8 @@ const announcementActions: React.CSSProperties = {
 const announcementEditBtn: React.CSSProperties = {
   padding: "7px 10px",
   borderRadius: "10px",
-  border: "1px solid rgba(0,198,255,0.35)",
-  background: "rgba(0,198,255,0.12)",
+  border: "1px solid rgba(0,198,255,0.45)",
+  background: "rgba(0,198,255,0.16)",
   color: "#67e8f9",
   fontWeight: 900,
   cursor: "pointer",
@@ -1340,34 +1340,21 @@ const typingBox: React.CSSProperties = {
   background: "rgba(0,198,255,0.06)",
 };
 
-const onlinePanel: React.CSSProperties = {
-  height: "78vh",
-  padding: "20px",
-  borderRadius: "24px",
-  background: "rgba(8,13,22,0.72)",
-  backdropFilter: "blur(8px)",
-  WebkitBackdropFilter: "blur(8px)",
-  border: "1px solid rgba(0,198,255,0.32)",
-  boxShadow:
-    "0 25px 90px rgba(0,0,0,0.75), 0 0 45px rgba(0,198,255,0.12)",
-  overflowY: "auto",
-};
-
 const onlineMemberCard: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: "10px",
   padding: "10px",
   borderRadius: "16px",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.07)",
+  border: "1px solid rgba(255,255,255,0.12)",
 };
 
 const headerStyle: React.CSSProperties = {
   padding: "20px",
   borderBottom: "1px solid rgba(255,255,255,0.1)",
   background:
-    "linear-gradient(135deg, rgba(0,198,255,0.16), rgba(255,215,100,0.06))",
+    "linear-gradient(135deg, rgba(0,198,255,0.18), rgba(255,0,140,0.08))",
 };
 
 const connectedBox: React.CSSProperties = {
@@ -1389,7 +1376,7 @@ const avatarSmall: React.CSSProperties = {
   borderRadius: "50%",
   objectFit: "cover",
   border: "2px solid rgba(0,198,255,0.8)",
-  boxShadow: "0 0 18px rgba(0,198,255,0.65)",
+  boxShadow: "0 0 18px rgba(0,198,255,0.75)",
 };
 
 const onlineDot: React.CSSProperties = {
@@ -1416,6 +1403,8 @@ const messagesBox: React.CSSProperties = {
   flex: 1,
   padding: "22px",
   overflowY: "auto",
+  background:
+    "radial-gradient(circle at 50% 50%, rgba(255,0,140,0.05), transparent 45%)",
 };
 
 const messageHeader: React.CSSProperties = {
@@ -1436,7 +1425,7 @@ const avatarMsg: React.CSSProperties = {
   borderRadius: "50%",
   objectFit: "cover",
   border: "2px solid rgba(0,198,255,0.75)",
-  boxShadow: "0 0 14px rgba(0,198,255,0.5)",
+  boxShadow: "0 0 14px rgba(0,198,255,0.55)",
 };
 
 const onlineDotSmall: React.CSSProperties = {
@@ -1456,7 +1445,7 @@ const myMessageBox: React.CSSProperties = {
   background:
     "linear-gradient(135deg, rgba(0,150,255,0.95), rgba(0,85,210,0.95))",
   border: "1px solid rgba(130,220,255,0.55)",
-  boxShadow: "0 0 26px rgba(0,140,255,0.35)",
+  boxShadow: "0 0 26px rgba(0,140,255,0.4)",
   color: "#fff",
 };
 
@@ -1609,7 +1598,7 @@ const inputBox: React.CSSProperties = {
   gap: "10px",
   padding: "16px",
   borderTop: "1px solid rgba(255,255,255,0.1)",
-  background: "rgba(0,0,0,0.4)",
+  background: "rgba(0,0,0,0.46)",
 };
 
 const inputStyle: React.CSSProperties = {
@@ -1626,8 +1615,8 @@ const imageUploadBtn: React.CSSProperties = {
   width: "50px",
   minWidth: "50px",
   borderRadius: "14px",
-  border: "1px solid rgba(0,198,255,0.35)",
-  background: "rgba(0,198,255,0.12)",
+  border: "1px solid rgba(0,198,255,0.45)",
+  background: "rgba(0,198,255,0.14)",
   color: "#fff",
   display: "flex",
   alignItems: "center",
@@ -1645,15 +1634,15 @@ const btnStyle: React.CSSProperties = {
   fontWeight: "bold",
   cursor: "pointer",
   background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
-  boxShadow: "0 10px 30px rgba(0,114,255,0.35)",
+  boxShadow: "0 10px 30px rgba(0,114,255,0.45)",
 };
 
 const profileBtn: React.CSSProperties = {
   padding: "10px 14px",
   borderRadius: "999px",
-  border: "1px solid rgba(0,198,255,0.35)",
+  border: "1px solid rgba(0,198,255,0.45)",
   color: "#fff",
-  background: "rgba(0,198,255,0.12)",
+  background: "rgba(0,198,255,0.14)",
   fontWeight: "bold",
   cursor: "pointer",
 };
