@@ -891,14 +891,14 @@ export default function ChatPage() {
   }}
 >
   <div style={avatarWrapSmall}>
-    <img src={msgAvatar} alt="avatar" style={avatarMsg} />
-    <span
-      style={{
-        ...onlineDotSmall,
-        background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
-      }}
-    />
-  </div>
+  <img src={msgAvatar} alt="avatar" style={avatarMsg} />
+  <span
+    style={{
+      ...onlineDotSmall,
+      background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+    }}
+  />
+</div>
 
   <div
     style={{
