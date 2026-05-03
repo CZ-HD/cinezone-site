@@ -874,175 +874,153 @@ export default function ChatPage() {
               </p>
             ) : (
               messages.map((msg) => {
-                const isMe = msg.user_id === user?.id;
-                const name = isMe
-                  ? displayName
-                  : msg.username || msg.email || "Utilisateur";
-                const msgAvatar = isMe
-                  ? avatarUrl
-                  : msg.avatar || DEFAULT_AVATAR;
-                const userIsOnline = onlineUserIds.includes(msg.user_id);
-                const isStatusOffline = msg.status_text === "🔴 Hors ligne";
-                const nameColor =
-                  msg.role === "admin" ? "gold" : msg.role_color || "#dbeafe";
-                const msgReactions = getMessageReactions(msg.id);
-                const repliedMessage = getReplyMessage(msg.reply_to);
+  const isMe = msg.user_id === user?.id;
+  const name = isMe
+    ? displayName
+    : msg.username || msg.email || "Utilisateur";
+  const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
+  const userIsOnline = onlineUserIds.includes(msg.user_id);
+  const isStatusOffline = msg.status_text === "🔴 Hors ligne";
+  const nameColor =
+    msg.role === "admin" ? "gold" : msg.role_color || "#00c6ff";
+  const msgReactions = getMessageReactions(msg.id);
+  const repliedMessage = getReplyMessage(msg.reply_to);
 
-                return (
-                  <div
-                    key={msg.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: isMe ? "flex-end" : "flex-start",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <div style={isMe ? myMessageBox : otherMessageBox}>
-                      <div style={messageHeader}>
-                        <div style={avatarWrapSmall}>
-                          <img src={msgAvatar} alt="avatar" style={avatarMsg} />
-                          <span
-                            style={{
-                              ...onlineDotSmall,
-                              background: isStatusOffline
-                                ? "#ff5c5c"
-                                : "#4cff9b",
-                            }}
-                          />
-                        </div>
+  return (
+    <div
+      key={msg.id}
+      style={{
+        display: "flex",
+        justifyContent: isMe ? "flex-end" : "flex-start",
+        marginBottom: "18px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          alignItems: "flex-start",
+          maxWidth: "76%",
+          flexDirection: isMe ? "row-reverse" : "row",
+        }}
+      >
+        <div style={avatarWrapSmall}>
+          <img src={msgAvatar} alt="avatar" style={avatarMsg} />
+          <span
+            style={{
+              ...onlineDotSmall,
+              background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+            }}
+          />
+        </div>
 
-                        <div>
-                          <div
-                            style={{
-                              fontSize: "14px",
-                              color: isMe ? "#fff" : nameColor,
-                              fontWeight: 900,
-                            }}
-                          >
-                            {name}
-                            {msg.role === "admin" && (
-                              <span style={adminBadge}>ADMIN</span>
-                            )}
-                          </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: isMe ? "flex-end" : "flex-start",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "13px",
+              fontWeight: 900,
+              color: isMe ? "#fff" : nameColor,
+              marginBottom: "4px",
+            }}
+          >
+            {name}
+            {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+            <span
+              style={{
+                marginLeft: "8px",
+                fontSize: "11px",
+                color: isStatusOffline
+                  ? "#ff7777"
+                  : userIsOnline
+                  ? "#4cff9b"
+                  : "#ff7777",
+                fontWeight: 700,
+              }}
+            >
+              {isStatusOffline
+                ? "🔴 Hors ligne"
+                : userIsOnline
+                ? "🟢 En ligne"
+                : "🔴 Hors ligne"}
+            </span>
+          </div>
 
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              color: isStatusOffline
-                                ? "#ff7777"
-                                : userIsOnline
-                                ? "#4cff9b"
-                                : "#ff7777",
-                            }}
-                          >
-                            {isStatusOffline
-                              ? "🔴 Hors ligne"
-                              : userIsOnline
-                              ? "🟢 En ligne"
-                              : "🔴 Hors ligne"}
-                          </div>
-                        </div>
-                      </div>
+          {msg.reply_to && (
+            <div style={replyPreviewBox}>
+              <strong>
+                ↩️ Réponse à{" "}
+                {repliedMessage?.username ||
+                  repliedMessage?.email ||
+                  "message supprimé"}
+              </strong>
+              <p style={{ margin: "5px 0 0" }}>
+                {repliedMessage?.content || "Message supprimé"}
+              </p>
+            </div>
+          )}
 
-                      {msg.reply_to && (
-                        <div style={replyPreviewBox}>
-                          <strong>
-                            ↩️ Réponse à{" "}
-                            {repliedMessage?.username ||
-                              repliedMessage?.email ||
-                              "message supprimé"}
-                          </strong>
-                          <p style={{ margin: "5px 0 0" }}>
-                            {repliedMessage?.content || "Message supprimé"}
-                          </p>
-                        </div>
-                      )}
+          {msg.content && <div style={messageBubble}>{msg.content}</div>}
 
-                      {msg.content && <div style={messageText}>{msg.content}</div>}
+          {msg.image_url && (
+            <a href={msg.image_url} target="_blank" rel="noreferrer">
+              <img src={msg.image_url} alt="image chat" style={chatImageStyle} />
+            </a>
+          )}
 
-                      {msg.image_url && (
-                        <a
-                          href={msg.image_url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <img
-                            src={msg.image_url}
-                            alt="image chat"
-                            style={chatImageStyle}
-                          />
-                        </a>
-                      )}
+          <div style={reactionRow}>
+            {REACTION_EMOJIS.map((emoji) => {
+              const count = msgReactions.filter((r) => r.emoji === emoji).length;
+              const active = msgReactions.some(
+                (r) => r.emoji === emoji && r.user_id === user?.id
+              );
 
-                      <div style={reactionRow}>
-                        {REACTION_EMOJIS.map((emoji) => {
-                          const count = msgReactions.filter(
-                            (r) => r.emoji === emoji
-                          ).length;
-                          const active = msgReactions.some(
-                            (r) => r.emoji === emoji && r.user_id === user?.id
-                          );
+              return (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => toggleReaction(msg.id, emoji)}
+                  style={{
+                    ...reactionBtn,
+                    ...(active ? reactionBtnActive : {}),
+                    transform:
+                      reactionPulse === `${msg.id}-${emoji}`
+                        ? "scale(1.4)"
+                        : active
+                        ? "scale(1.08)"
+                        : "scale(1)",
+                  }}
+                >
+                  <span style={active ? reactionEmojiActive : reactionEmoji}>
+                    {emoji}
+                  </span>
+                  {count > 0 && <span style={reactionCount}>{count}</span>}
+                </button>
+              );
+            })}
+          </div>
 
-                          return (
-                            <button
-                              key={emoji}
-                              type="button"
-                              onClick={() => toggleReaction(msg.id, emoji)}
-                              style={{
-                                ...reactionBtn,
-                                ...(active ? reactionBtnActive : {}),
-                                transform:
-                                  reactionPulse === `${msg.id}-${emoji}`
-                                    ? "scale(1.55) rotate(-8deg)"
-                                    : active
-                                    ? "scale(1.15)"
-                                    : "scale(1)",
-                                filter:
-                                  reactionPulse === `${msg.id}-${emoji}`
-                                    ? "drop-shadow(0 0 14px #00c6ff)"
-                                    : "none",
-                              }}
-                            >
-                              <span
-                                style={
-                                  active ? reactionEmojiActive : reactionEmoji
-                                }
-                              >
-                                {emoji}
-                              </span>
-                              {count > 0 && (
-                                <span style={reactionCount}>{count}</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
+          <div style={messageActions}>
+            <button onClick={() => setReplyTo(msg)} style={replyBtn}>
+              ↩️ Répondre
+            </button>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <button onClick={() => setReplyTo(msg)} style={replyBtn}>
-                          ↩️ Répondre
-                        </button>
-
-                        {isAdmin && (
-                          <button
-                            onClick={() => deleteMessage(msg.id)}
-                            style={deleteBtn}
-                          >
-                            🗑 Supprimer
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+            {isAdmin && (
+              <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
+                🗑 Supprimer
+              </button>
             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+})
 
             <div ref={bottomRef} />
           </div>
@@ -1658,4 +1636,25 @@ const soundBtn: React.CSSProperties = {
   background: "rgba(255,255,255,0.08)",
   fontWeight: "bold",
   cursor: "pointer",
+};
+
+const messageBubble: React.CSSProperties = {
+  display: "inline-block",
+  maxWidth: "100%",
+  padding: "10px 14px",
+  borderRadius: "16px",
+  background: "rgba(255,255,255,0.07)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  color: "#fff",
+  lineHeight: 1.45,
+  fontSize: "15px",
+  wordBreak: "break-word",
+  whiteSpace: "pre-line",
+};
+
+const messageActions: React.CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  marginTop: "8px",
+  flexWrap: "wrap",
 };
