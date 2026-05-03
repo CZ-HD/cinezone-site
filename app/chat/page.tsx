@@ -663,7 +663,6 @@ export default function ChatPage() {
       <main style={pageStyle}>
         <p>Chargement du chat...</p>
           </main>
-  </>
   );
 }
 
@@ -671,8 +670,7 @@ export default function ChatPage() {
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
     return (
-  <>
-    <main style={pageStyle}>
+  <main style={pageStyle}>
       <div style={chatLayout}>
         <div style={chatBox}>
           {hasNewMessage && (
