@@ -1441,23 +1441,26 @@ const onlineDotSmall: React.CSSProperties = {
 };
 
 const myMessageBox: React.CSSProperties = {
-  maxWidth: "78%",
-  padding: "14px 16px",
-  borderRadius: "20px 20px 5px 20px",
-  background:
-    "linear-gradient(135deg, rgba(0,150,255,0.95), rgba(0,85,210,0.95))",
-  border: "1px solid rgba(130,220,255,0.55)",
-  boxShadow: "0 0 26px rgba(0,140,255,0.4)",
+  maxWidth: "72%",
+  padding: "12px 14px",
+  borderRadius: "14px",
+  background: "rgba(0,150,255,0.12)",
+  border: "1px solid rgba(0,198,255,0.32)",
+  boxShadow: "0 8px 26px rgba(0,0,0,0.35)",
+  backdropFilter: "blur(10px)",
+  WebkitBackdropFilter: "blur(10px)",
   color: "#fff",
 };
 
 const otherMessageBox: React.CSSProperties = {
-  maxWidth: "78%",
-  padding: "14px 16px",
-  borderRadius: "20px 20px 20px 5px",
-  background: "rgba(18,26,40,0.95)",
-  border: "1px solid rgba(255,255,255,0.14)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
+  maxWidth: "72%",
+  padding: "12px 14px",
+  borderRadius: "14px",
+  background: "rgba(255,255,255,0.045)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 8px 26px rgba(0,0,0,0.32)",
+  backdropFilter: "blur(10px)",
+  WebkitBackdropFilter: "blur(10px)",
   color: "#f2f7ff",
 };
 
