@@ -881,32 +881,33 @@ export default function ChatPage() {
                       marginBottom: "18px",
                     }}
                   >
-    <div
-  style={{
-    display: "flex",
-    gap: "10px",
-    alignItems: "flex-start",
-    maxWidth: "76%",
-    flexDirection: isMe ? "row-reverse" : "row",
-  }}
->
-  <div style={avatarWrapSmall}>
-  <img src={msgAvatar} alt="avatar" style={avatarMsg} />
-  <span
-    style={{
-      ...onlineDotSmall,
-      background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
-    }}
-  />
-</div>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        alignItems: "flex-start",
+                        maxWidth: "76%",
+                        flexDirection: isMe ? "row-reverse" : "row",
+                      }}
+                    >
+                      <div style={avatarWrapSmall}>
+                        <img src={msgAvatar} alt="avatar" style={avatarMsg} />
+                        <span
+                          style={{
+                            ...onlineDotSmall,
+                            background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+                          }}
+                        />
+                      </div>
 
-<div
-  style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: isMe ? "flex-end" : "flex-start",
-  }}
->               
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: isMe ? "flex-end" : "flex-start",
+                        }}
+                      >
+                        <div
                           style={{
                             fontSize: "13px",
                             fontWeight: 900,
@@ -1637,8 +1638,9 @@ const soundBtn: React.CSSProperties = {
 
 const messageBubble: React.CSSProperties = {
   display: "inline-block",
-  padding: "9px 13px",
-  borderRadius: "14px",
+  maxWidth: "100%",
+  padding: "10px 14px",
+  borderRadius: "16px",
   background: "rgba(255,255,255,0.07)",
   border: "1px solid rgba(255,255,255,0.10)",
   color: "#fff",
