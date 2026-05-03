@@ -1175,14 +1175,11 @@ export default function ChatPage() {
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  backgroundImage: `
+  background: `
     radial-gradient(circle at 80% 50%, rgba(0,150,255,0.15), transparent 60%),
-    linear-gradient(to right, rgba(0,0,0,0.9) 30%, rgba(0,0,0,0.5)),
-    url("/chat-bg.jpg")
+    radial-gradient(circle at 15% 20%, rgba(255,0,120,0.10), transparent 45%),
+    #05080f
   `,
-  backgroundSize: "cover",
-  backgroundPosition: "right center",
-  backgroundRepeat: "no-repeat",
   color: "#fff",
   display: "flex",
   justifyContent: "center",
@@ -1203,15 +1200,12 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(8,13,22,0.75)",
-backdropFilter: "blur(14px)",
-WebkitBackdropFilter: "blur(14px)",
-border: "1px solid rgba(255,255,255,0.08)",
-boxShadow: `
-  0 30px 120px rgba(0,0,0,0.9),
-  0 0 40px rgba(0,180,255,0.15),
-  0 0 20px rgba(255,0,120,0.08)
-`,
+  background: "rgba(255,255,255,0.05)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  border: "1px solid rgba(0,198,255,0.22)",
+  boxShadow:
+  "0 25px 80px rgba(0,0,0,0.65), 0 0 35px rgba(0,150,255,0.12)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
@@ -1222,12 +1216,12 @@ const onlinePanel: React.CSSProperties = {
   height: "78vh",
   padding: "20px",
   borderRadius: "24px",
-  background: "rgba(5,10,18,0.88)",
-backdropFilter: "blur(8px)",
-WebkitBackdropFilter: "blur(8px)",
-border: "1px solid rgba(0,198,255,0.36)",
+  background: "rgba(255,255,255,0.05)",
+backdropFilter: "blur(20px)",
+WebkitBackdropFilter: "blur(20px)",
+border: "1px solid rgba(0,198,255,0.22)",
 boxShadow:
-  "0 25px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.12)",
+  "0 25px 80px rgba(0,0,0,0.55), 0 0 30px rgba(0,150,255,0.10)",
   overflowY: "auto",
 };
 
@@ -1604,8 +1598,8 @@ const inputStyle: React.CSSProperties = {
   flex: 1,
   padding: "14px",
   borderRadius: "14px",
-  border: "1px solid rgba(255,255,255,0.16)",
-  background: "#0b0f18",
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.05)",
   color: "#fff",
   outline: "none",
 };
