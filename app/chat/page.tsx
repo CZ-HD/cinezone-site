@@ -1175,20 +1175,22 @@ export default function ChatPage() {
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  backgroundImage: `
-    linear-gradient(rgba(0,0,0,0.48), rgba(0,0,0,0.72)),
-    url('/Tchat.jpg')
+  background: `
+    radial-gradient(circle at 12% 28%, rgba(255, 0, 120, 0.22), transparent 42%),
+    radial-gradient(circle at 88% 26%, rgba(0, 170, 255, 0.22), transparent 42%),
+    radial-gradient(circle at 18% 82%, rgba(255, 0, 170, 0.16), transparent 46%),
+    radial-gradient(circle at 84% 82%, rgba(0, 220, 255, 0.16), transparent 46%),
+    radial-gradient(circle at 50% 50%, rgba(0, 80, 255, 0.07), transparent 58%),
+    linear-gradient(135deg, #020617 0%, #050b18 45%, #020617 100%)
   `,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  backgroundAttachment: "fixed",
   color: "#fff",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   padding: "24px",
   fontFamily: "Arial, sans-serif",
+  position: "relative",
+  overflow: "hidden",
 };
 
 const chatLayout: React.CSSProperties = {
