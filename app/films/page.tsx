@@ -415,8 +415,9 @@ function Pagination({
       </div>
 
       <div style={pageInfoStyle}>
-        Page {currentPage} sur {totalPages} — {totalItems} films
-      </div>
+  Page {currentPage} sur {totalPages}
+  {isAdmin && ` — ${totalItems} films`}
+</div>
 
       <div style={buttonsWrapperStyle}>
         <button
