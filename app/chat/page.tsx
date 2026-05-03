@@ -1413,6 +1413,7 @@ const messageHeader: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: "10px",
+  opacity: 0.85,
 };
 
 const avatarWrapSmall: React.CSSProperties = {
@@ -1442,22 +1443,22 @@ const onlineDotSmall: React.CSSProperties = {
 
 const myMessageBox: React.CSSProperties = {
   maxWidth: "68%",
-  padding: "12px 14px",
-  borderRadius: "18px 18px 6px 18px",
-  background: "linear-gradient(135deg, rgba(0,120,255,0.22), rgba(0,198,255,0.10))",
-  border: "1px solid rgba(0,198,255,0.28)",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+  padding: "10px 12px",
+  borderRadius: "14px",
+  background: "rgba(0,150,255,0.10)",
+  border: "1px solid rgba(0,198,255,0.25)",
+  backdropFilter: "blur(8px)",
   color: "#fff",
 };
 
 const otherMessageBox: React.CSSProperties = {
   maxWidth: "68%",
-  padding: "12px 14px",
-  borderRadius: "18px 18px 18px 6px",
-  background: "rgba(255,255,255,0.055)",
-  border: "1px solid rgba(255,255,255,0.10)",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.30)",
-  color: "#f2f7ff",
+  padding: "10px 12px",
+  borderRadius: "14px",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  backdropFilter: "blur(8px)",
+  color: "#ddd",
 };
 
 const replyPreviewBox: React.CSSProperties = {
@@ -1494,13 +1495,14 @@ const chatImageStyle: React.CSSProperties = {
 const reactionRow: React.CSSProperties = {
   display: "flex",
   gap: "5px",
-  marginTop: "10px",
+marginTop: "8px",
   flexWrap: "wrap",
 };
 
 const reactionBtn: React.CSSProperties = {
-  minWidth: "30px",
   height: "26px",
+minWidth: "28px",
+fontSize: "12px",
   padding: "3px 7px",
   borderRadius: "999px",
   border: "1px solid rgba(255,255,255,0.12)",
