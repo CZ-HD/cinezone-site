@@ -1177,24 +1177,27 @@ const pageStyle: React.CSSProperties = {
   minHeight: "calc(100vh - 56px)",
 
   background: `
-  /* rose très léger (gauche) */
-  radial-gradient(circle at 5% 70%, rgba(255, 0, 120, 0.12), transparent 40%),
+  /* glow rose très localisé (petit) */
+  radial-gradient(circle at 10% 60%, rgba(255, 0, 120, 0.18), transparent 35%),
 
-  /* glow bleu principal (droite) */
-  radial-gradient(circle at 90% 50%, rgba(0, 170, 255, 0.35), transparent 45%),
+  /* glow bleu puissant (droite) */
+  radial-gradient(circle at 95% 50%, rgba(0, 170, 255, 0.45), transparent 50%),
 
-  /* glow bleu secondaire */
-  radial-gradient(circle at 70% 80%, rgba(0, 200, 255, 0.18), transparent 50%),
+  /* halo bleu doux */
+  radial-gradient(circle at 80% 80%, rgba(0, 200, 255, 0.25), transparent 55%),
 
-  /* assombrissement global */
-  linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.88)),
+  /* centre assombri (IMPORTANT) */
+  radial-gradient(circle at 50% 50%, rgba(0,0,0,0.85), transparent 70%),
+
+  /* overlay sombre global */
+  linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)),
 
   /* image */
   url('/chat-bg.jpg')
 `,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
+backgroundSize: "cover",
+backgroundPosition: "center",
+backgroundRepeat: "no-repeat",
 
   color: "#fff",
   display: "flex",
