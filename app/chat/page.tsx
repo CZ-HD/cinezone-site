@@ -658,11 +658,11 @@ export default function ChatPage() {
     return messages.find((m) => m.id === replyId) || null;
   };
 
-  if (loading) {
+    if (loading) {
     return (
-      <main style={pageStyle}>
+      <div style={pageStyle}>
         <p>Chargement du chat...</p>
-      </main>
+      </div>
     );
   }
 
@@ -670,7 +670,7 @@ export default function ChatPage() {
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
   return (
-    <main style={pageStyle}>
+    <div style={pageStyle}>>
       <div style={chatLayout}>
         <div style={chatBox}>
           {hasNewMessage && (
@@ -687,12 +687,12 @@ export default function ChatPage() {
 
           <div style={headerStyle}>
             <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "12px",
-              }}
-            >
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    gap: "12px",
+  }}
+>
               <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
 
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -716,13 +716,14 @@ export default function ChatPage() {
               <div style={avatarWrap}>
                 <img src={avatarUrl} alt="avatar" style={avatarSmall} />
                 <span
-                  style={{
-                    ...onlineDot,
-                    background:
-                      profile?.status_text === "🔴 Hors ligne"
-                        ? "#ff5c5c"
-                        : "#4cff9b",
-                  }}
+  style={{
+    ...onlineDot,
+    background:
+      profile?.status_text === "🔴 Hors ligne"
+        ? "#ff5c5c"
+        : "#4cff9b",
+  }}
+/>
                 />
               </div>
 
