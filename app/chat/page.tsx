@@ -1176,15 +1176,13 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   backgroundImage: `
-    radial-gradient(circle at 20% 50%, rgba(255,0,120,0.35), transparent 40%),
-    radial-gradient(circle at 80% 50%, rgba(0,180,255,0.35), transparent 40%),
-    linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95)),
+    radial-gradient(circle at 80% 50%, rgba(0,150,255,0.15), transparent 60%),
+    linear-gradient(to right, rgba(0,0,0,0.9) 30%, rgba(0,0,0,0.5)),
     url("/chat-bg.jpg")
   `,
   backgroundSize: "cover",
-  backgroundPosition: "center right",
+  backgroundPosition: "right center",
   backgroundRepeat: "no-repeat",
-  backgroundAttachment: "fixed",
   color: "#fff",
   display: "flex",
   justifyContent: "center",
