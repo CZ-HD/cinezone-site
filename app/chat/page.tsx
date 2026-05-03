@@ -662,14 +662,16 @@ export default function ChatPage() {
     return (
       <main style={pageStyle}>
         <p>Chargement du chat...</p>
-      </main>
-    );
-  }
+          </main>
+  </>
+  );
+}
 
   const displayName = profile?.username || user?.email || "Utilisateur";
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
     return (
+  <>
     <main style={pageStyle}>
       <div style={chatLayout}>
         <div style={chatBox}>
