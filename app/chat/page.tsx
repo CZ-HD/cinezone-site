@@ -653,26 +653,26 @@ export default function ChatPage() {
   const getMessageReactions = (messageId: string) =>
     reactions.filter((r) => r.message_id === messageId);
 
-  const getReplyMessage = (replyId?: string | null) => {
+    const getReplyMessage = (replyId?: string | null) => {
     if (!replyId) return null;
     return messages.find((m) => m.id === replyId) || null;
   };
 
     if (loading) {
     return (
-      <div style={pageStyle}>
+      <main style={pageStyle}>
         <p>Chargement du chat...</p>
-      </div>
+      </main>
     );
   }
 
   const displayName = profile?.username || user?.email || "Utilisateur";
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
-  return (
-     <div style={pageStyle}>
-    <div style={chatLayout}>
-      <div style={chatBox}>
+    return (
+    <main style={pageStyle}>
+      <div style={chatLayout}>
+        <div style={chatBox}>
           {hasNewMessage && (
             <button
               onClick={() => {
