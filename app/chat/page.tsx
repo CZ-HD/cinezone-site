@@ -1640,9 +1640,9 @@ const soundBtn: React.CSSProperties = {
 const messageBubble: React.CSSProperties = {
   display: "inline-block",
   padding: "9px 13px",
-  borderRadius: "15px",
-  background: "rgba(255,255,255,0.08)",
-  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: "14px",
+  background: "rgba(255,255,255,0.07)",
+  border: "1px solid rgba(255,255,255,0.10)",
   color: "#fff",
   lineHeight: 1.45,
   fontSize: "15px",
