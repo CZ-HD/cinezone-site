@@ -1237,11 +1237,18 @@ const newMessageBadge: React.CSSProperties = {
 };
 
 const announcementBox: React.CSSProperties = {
+  margin: "16px",
   padding: "16px 18px",
+  borderRadius: "18px",
   background:
-    "linear-gradient(135deg, rgba(255,0,140,0.12), rgba(0,198,255,0.16), rgba(0,0,0,0.38))",
-  borderBottom: "1px solid rgba(0,198,255,0.3)",
-  color: "#fff",
+    "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(130,0,255,0.08), rgba(0,0,0,0.28))",
+  border: "1px solid rgba(0,198,255,0.28)",
+  borderLeft: "4px solid #00c6ff",
+  boxShadow:
+    "0 0 24px rgba(0,198,255,0.14), inset 0 1px 0 rgba(255,255,255,0.06)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  color: "#e6faff",
 };
 
 const announcementHeader: React.CSSProperties = {
@@ -1249,13 +1256,15 @@ const announcementHeader: React.CSSProperties = {
   justifyContent: "space-between",
   gap: "12px",
   alignItems: "flex-start",
+  marginBottom: "8px",
 };
 
 const announcementSub: React.CSSProperties = {
   margin: "4px 0 0",
-  color: "#facc15",
+  color: "#00c6ff",
   fontSize: "12px",
-  fontWeight: 800,
+  fontWeight: 900,
+  textShadow: "0 0 10px rgba(0,198,255,0.45)",
 };
 
 const announcementTextStyle: React.CSSProperties = {
