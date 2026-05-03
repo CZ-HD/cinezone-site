@@ -1174,20 +1174,34 @@ export default function ChatPage() {
 }
 
 const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
+  minHeight: "calc(100vh - 56px)",
   background: `
-    radial-gradient(circle at 12% 28%, rgba(255, 0, 120, 0.22), transparent 42%),
-    radial-gradient(circle at 88% 26%, rgba(0, 170, 255, 0.22), transparent 42%),
-    radial-gradient(circle at 18% 82%, rgba(255, 0, 170, 0.16), transparent 46%),
-    radial-gradient(circle at 84% 82%, rgba(0, 220, 255, 0.16), transparent 46%),
-    radial-gradient(circle at 50% 50%, rgba(0, 80, 255, 0.07), transparent 58%),
-    linear-gradient(135deg, #020617 0%, #050b18 45%, #020617 100%)
+    /* glow gauche intense */
+    radial-gradient(circle at 10% 40%, rgba(255, 0, 120, 0.35), transparent 35%),
+
+    /* glow droite intense */
+    radial-gradient(circle at 90% 40%, rgba(0, 170, 255, 0.35), transparent 35%),
+
+    /* glow bas gauche */
+    radial-gradient(circle at 20% 90%, rgba(255, 0, 180, 0.25), transparent 40%),
+
+    /* glow bas droite */
+    radial-gradient(circle at 80% 90%, rgba(0, 200, 255, 0.25), transparent 40%),
+
+    /* effet halo centre sombre */
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.85), transparent 65%),
+
+    /* légère texture lumineuse */
+    radial-gradient(circle at 50% 100%, rgba(0, 150, 255, 0.15), transparent 60%),
+
+    /* base gradient profond */
+    linear-gradient(135deg, #020617 0%, #040a1f 40%, #001a2f 100%)
   `,
   color: "#fff",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  padding: "24px",
+  padding: "70px 24px 32px",
   fontFamily: "Arial, sans-serif",
   position: "relative",
   overflow: "hidden",
