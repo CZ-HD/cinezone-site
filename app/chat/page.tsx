@@ -159,7 +159,6 @@ export default function ChatPage() {
 
       setAnnouncement(announcementData?.content || "");
       setAnnouncementText(announcementData?.content || "");
-
       setLoading(false);
     }
 
@@ -211,12 +210,10 @@ export default function ChatPage() {
           setReactions((prev) => {
             const clean = prev.filter(
               (r) =>
-                !(
-                  r.id.startsWith("temp-") &&
+                !(r.id.startsWith("temp-") &&
                   r.message_id === newReaction.message_id &&
                   r.user_id === newReaction.user_id &&
-                  r.emoji === newReaction.emoji
-                )
+                  r.emoji === newReaction.emoji)
             );
 
             if (clean.some((r) => r.id === newReaction.id)) return clean;
@@ -653,24 +650,24 @@ export default function ChatPage() {
   const getMessageReactions = (messageId: string) =>
     reactions.filter((r) => r.message_id === messageId);
 
-    const getReplyMessage = (replyId?: string | null) => {
+  const getReplyMessage = (replyId?: string | null) => {
     if (!replyId) return null;
     return messages.find((m) => m.id === replyId) || null;
   };
 
-    if (loading) {
+  if (loading) {
     return (
       <main style={pageStyle}>
         <p>Chargement du chat...</p>
-          </main>
-  );
-}
+      </main>
+    );
+  }
 
   const displayName = profile?.username || user?.email || "Utilisateur";
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
-    return (
-  <main style={pageStyle}>
+  return (
+    <main style={pageStyle}>
       <div style={chatLayout}>
         <div style={chatBox}>
           {hasNewMessage && (
@@ -687,12 +684,12 @@ export default function ChatPage() {
 
           <div style={headerStyle}>
             <div
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "12px",
-  }}
->
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "12px",
+              }}
+            >
               <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
 
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -716,14 +713,13 @@ export default function ChatPage() {
               <div style={avatarWrap}>
                 <img src={avatarUrl} alt="avatar" style={avatarSmall} />
                 <span
-  style={{
-    ...onlineDot,
-    background:
-      profile?.status_text === "🔴 Hors ligne"
-        ? "#ff5c5c"
-        : "#4cff9b",
-  }}
-/>
+                  style={{
+                    ...onlineDot,
+                    background:
+                      profile?.status_text === "🔴 Hors ligne"
+                        ? "#ff5c5c"
+                        : "#4cff9b",
+                  }}
                 />
               </div>
 
@@ -732,9 +728,7 @@ export default function ChatPage() {
                   Connecté :{" "}
                   <span
                     style={{
-                      color: isAdmin
-                        ? "gold"
-                        : profile?.role_color || "#00c6ff",
+                      color: isAdmin ? "gold" : profile?.role_color || "#00c6ff",
                     }}
                   >
                     {displayName}
@@ -782,13 +776,9 @@ export default function ChatPage() {
                   <option value="🟢 En ligne">🟢 En ligne</option>
                   <option value="🔴 Hors ligne">🔴 Hors ligne</option>
                   <option value="⛔ Occupé">⛔ Occupé</option>
-                  <option value="🎬 Je regarde un film">
-                    🎬 Je regarde un film
-                  </option>
+                  <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
                   {isAdmin && (
-                    <option value="👑 Admin disponible">
-                      👑 Admin disponible
-                    </option>
+                    <option value="👑 Admin disponible">👑 Admin disponible</option>
                   )}
                 </select>
 
@@ -804,9 +794,7 @@ export default function ChatPage() {
               <div style={announcementHeader}>
                 <div>
                   <strong>📌 Annonce Admin</strong>
-                  <p style={announcementSub}>
-                    Message officiel du chat CineZone
-                  </p>
+                  <p style={announcementSub}>Message officiel du chat CineZone</p>
                 </div>
 
                 {isAdmin && (
@@ -834,10 +822,7 @@ export default function ChatPage() {
                       </>
                     ) : (
                       <>
-                        <button
-                          style={announcementSaveBtn}
-                          onClick={saveAnnouncement}
-                        >
+                        <button style={announcementSaveBtn} onClick={saveAnnouncement}>
                           💾 Sauver
                         </button>
 
@@ -875,153 +860,167 @@ export default function ChatPage() {
               </p>
             ) : (
               messages.map((msg) => {
-  const isMe = msg.user_id === user?.id;
-  const name = isMe
-    ? displayName
-    : msg.username || msg.email || "Utilisateur";
-  const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
-  const userIsOnline = onlineUserIds.includes(msg.user_id);
-  const isStatusOffline = msg.status_text === "🔴 Hors ligne";
-  const nameColor =
-    msg.role === "admin" ? "gold" : msg.role_color || "#00c6ff";
-  const msgReactions = getMessageReactions(msg.id);
-  const repliedMessage = getReplyMessage(msg.reply_to);
+                const isMe = msg.user_id === user?.id;
+                const name = isMe
+                  ? displayName
+                  : msg.username || msg.email || "Utilisateur";
+                const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
+                const userIsOnline = onlineUserIds.includes(msg.user_id);
+                const isStatusOffline = msg.status_text === "🔴 Hors ligne";
+                const nameColor =
+                  msg.role === "admin" ? "gold" : msg.role_color || "#00c6ff";
+                const msgReactions = getMessageReactions(msg.id);
+                const repliedMessage = getReplyMessage(msg.reply_to);
 
-  return (
-    <div
-      key={msg.id}
-      style={{
-        display: "flex",
-        justifyContent: isMe ? "flex-end" : "flex-start",
-        marginBottom: "18px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          alignItems: "flex-start",
-          maxWidth: "76%",
-          flexDirection: isMe ? "row-reverse" : "row",
-        }}
-      >
-        <div style={avatarWrapSmall}>
-          <img src={msgAvatar} alt="avatar" style={avatarMsg} />
-          <span
-            style={{
-              ...onlineDotSmall,
-              background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
-            }}
-          />
-        </div>
+                return (
+                  <div
+                    key={msg.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: isMe ? "flex-end" : "flex-start",
+                      marginBottom: "18px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        alignItems: "flex-start",
+                        maxWidth: "76%",
+                        flexDirection: isMe ? "row-reverse" : "row",
+                      }}
+                    >
+                      <div style={avatarWrapSmall}>
+                        <img src={msgAvatar} alt="avatar" style={avatarMsg} />
+                        <span
+                          style={{
+                            ...onlineDotSmall,
+                            background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+                          }}
+                        />
+                      </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: isMe ? "flex-end" : "flex-start",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "13px",
-              fontWeight: 900,
-              color: isMe ? "#fff" : nameColor,
-              marginBottom: "4px",
-            }}
-          >
-            {name}
-            {msg.role === "admin" && <span style={adminBadge}>ADMIN</span>}
-            <span
-              style={{
-                marginLeft: "8px",
-                fontSize: "11px",
-                color: isStatusOffline
-                  ? "#ff7777"
-                  : userIsOnline
-                  ? "#4cff9b"
-                  : "#ff7777",
-                fontWeight: 700,
-              }}
-            >
-              {isStatusOffline
-                ? "🔴 Hors ligne"
-                : userIsOnline
-                ? "🟢 En ligne"
-                : "🔴 Hors ligne"}
-            </span>
-          </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: isMe ? "flex-end" : "flex-start",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: 900,
+                            color: isMe ? "#fff" : nameColor,
+                            marginBottom: "4px",
+                          }}
+                        >
+                          {name}
+                          {msg.role === "admin" && (
+                            <span style={adminBadge}>ADMIN</span>
+                          )}
+                          <span
+                            style={{
+                              marginLeft: "8px",
+                              fontSize: "11px",
+                              color: isStatusOffline
+                                ? "#ff7777"
+                                : userIsOnline
+                                ? "#4cff9b"
+                                : "#ff7777",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {isStatusOffline
+                              ? "🔴 Hors ligne"
+                              : userIsOnline
+                              ? "🟢 En ligne"
+                              : "🔴 Hors ligne"}
+                          </span>
+                        </div>
 
-          {msg.reply_to && (
-            <div style={replyPreviewBox}>
-              <strong>
-                ↩️ Réponse à{" "}
-                {repliedMessage?.username ||
-                  repliedMessage?.email ||
-                  "message supprimé"}
-              </strong>
-              <p style={{ margin: "5px 0 0" }}>
-                {repliedMessage?.content || "Message supprimé"}
-              </p>
-            </div>
-          )}
+                        {msg.reply_to && (
+                          <div style={replyPreviewBox}>
+                            <strong>
+                              ↩️ Réponse à{" "}
+                              {repliedMessage?.username ||
+                                repliedMessage?.email ||
+                                "message supprimé"}
+                            </strong>
+                            <p style={{ margin: "5px 0 0" }}>
+                              {repliedMessage?.content || "Message supprimé"}
+                            </p>
+                          </div>
+                        )}
 
-          {msg.content && <div style={messageBubble}>{msg.content}</div>}
+                        {msg.content && <div style={messageBubble}>{msg.content}</div>}
 
-          {msg.image_url && (
-            <a href={msg.image_url} target="_blank" rel="noreferrer">
-              <img src={msg.image_url} alt="image chat" style={chatImageStyle} />
-            </a>
-          )}
+                        {msg.image_url && (
+                          <a href={msg.image_url} target="_blank" rel="noreferrer">
+                            <img
+                              src={msg.image_url}
+                              alt="image chat"
+                              style={chatImageStyle}
+                            />
+                          </a>
+                        )}
 
-          <div style={reactionRow}>
-            {REACTION_EMOJIS.map((emoji) => {
-              const count = msgReactions.filter((r) => r.emoji === emoji).length;
-              const active = msgReactions.some(
-                (r) => r.emoji === emoji && r.user_id === user?.id
-              );
+                        <div style={reactionRow}>
+                          {REACTION_EMOJIS.map((emoji) => {
+                            const count = msgReactions.filter(
+                              (r) => r.emoji === emoji
+                            ).length;
+                            const active = msgReactions.some(
+                              (r) => r.emoji === emoji && r.user_id === user?.id
+                            );
 
-              return (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => toggleReaction(msg.id, emoji)}
-                  style={{
-                    ...reactionBtn,
-                    ...(active ? reactionBtnActive : {}),
-                    transform:
-                      reactionPulse === `${msg.id}-${emoji}`
-                        ? "scale(1.4)"
-                        : active
-                        ? "scale(1.08)"
-                        : "scale(1)",
-                  }}
-                >
-                  <span style={active ? reactionEmojiActive : reactionEmoji}>
-                    {emoji}
-                  </span>
-                  {count > 0 && <span style={reactionCount}>{count}</span>}
-                </button>
-              );
-            })}
-          </div>
+                            return (
+                              <button
+                                key={emoji}
+                                type="button"
+                                onClick={() => toggleReaction(msg.id, emoji)}
+                                style={{
+                                  ...reactionBtn,
+                                  ...(active ? reactionBtnActive : {}),
+                                  transform:
+                                    reactionPulse === `${msg.id}-${emoji}`
+                                      ? "scale(1.4)"
+                                      : active
+                                      ? "scale(1.08)"
+                                      : "scale(1)",
+                                }}
+                              >
+                                <span
+                                  style={active ? reactionEmojiActive : reactionEmoji}
+                                >
+                                  {emoji}
+                                </span>
+                                {count > 0 && <span style={reactionCount}>{count}</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
 
-          <div style={messageActions}>
-            <button onClick={() => setReplyTo(msg)} style={replyBtn}>
-              ↩️ Répondre
-            </button>
+                        <div style={messageActions}>
+                          <button onClick={() => setReplyTo(msg)} style={replyBtn}>
+                            ↩️ Répondre
+                          </button>
 
-            {isAdmin && (
-              <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
-                🗑 Supprimer
-              </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => deleteMessage(msg.id)}
+                              style={deleteBtn}
+                            >
+                              🗑 Supprimer
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
             )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-})
 
             <div ref={bottomRef} />
           </div>
@@ -1125,9 +1124,7 @@ export default function ChatPage() {
                       }}
                     >
                       {member.username || "Utilisateur"}
-                      {member.role === "admin" && (
-                        <span style={adminBadge}>ADMIN</span>
-                      )}
+                      {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
                     </p>
                     <p
                       style={{
@@ -1153,15 +1150,25 @@ export default function ChatPage() {
 }
 
 const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background:
-    "radial-gradient(circle at 20% 20%, rgba(120,0,255,0.25), transparent 35%), radial-gradient(circle at 80% 30%, rgba(0,198,255,0.22), transparent 35%), linear-gradient(135deg, #02030a 0%, #06111f 45%, #000 100%)",
+  minHeight: "calc(100vh - 56px)",
+  background: `
+    radial-gradient(circle at 5% 70%, rgba(255, 0, 120, 0.10), transparent 42%),
+    radial-gradient(circle at 90% 50%, rgba(0, 170, 255, 0.24), transparent 48%),
+    radial-gradient(circle at 72% 82%, rgba(0, 200, 255, 0.14), transparent 54%),
+    linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.86)),
+    url('/chat-bg.jpg')
+  `,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
   color: "#fff",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  padding: "24px",
+  padding: "70px 24px 32px",
   fontFamily: "Arial, sans-serif",
+  position: "relative",
+  overflow: "hidden",
 };
 
 const chatLayout: React.CSSProperties = {
@@ -1176,12 +1183,10 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background:
-    "linear-gradient(180deg, rgba(8,13,25,0.94), rgba(3,6,12,0.96))",
+  background: "linear-gradient(180deg, rgba(8,13,25,0.94), rgba(3,6,12,0.96))",
   border: "1px solid rgba(0,198,255,0.35)",
   borderRadius: "26px",
-  boxShadow:
-    "0 30px 90px rgba(0,0,0,0.85), 0 0 35px rgba(0,198,255,0.18)",
+  boxShadow: "0 30px 90px rgba(0,0,0,0.85), 0 0 35px rgba(0,198,255,0.18)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
@@ -1192,11 +1197,9 @@ const onlinePanel: React.CSSProperties = {
   height: "78vh",
   padding: "20px",
   borderRadius: "26px",
-  background:
-    "linear-gradient(180deg, rgba(8,13,25,0.94), rgba(3,6,12,0.96))",
+  background: "linear-gradient(180deg, rgba(8,13,25,0.94), rgba(3,6,12,0.96))",
   border: "1px solid rgba(0,198,255,0.35)",
-  boxShadow:
-    "0 30px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.14)",
+  boxShadow: "0 30px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.14)",
   overflowY: "auto",
 };
 
@@ -1219,12 +1222,10 @@ const announcementBox: React.CSSProperties = {
   margin: "12px 16px",
   padding: "14px 16px",
   borderRadius: "18px",
-  background:
-    "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(130,0,255,0.08), rgba(0,0,0,0.28))",
+  background: "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(130,0,255,0.08), rgba(0,0,0,0.28))",
   border: "1px solid rgba(0,198,255,0.28)",
   borderLeft: "4px solid #00c6ff",
-  boxShadow:
-    "0 0 24px rgba(0,198,255,0.14), inset 0 1px 0 rgba(255,255,255,0.06)",
+  boxShadow: "0 0 24px rgba(0,198,255,0.14), inset 0 1px 0 rgba(255,255,255,0.06)",
   backdropFilter: "blur(12px)",
   WebkitBackdropFilter: "blur(12px)",
   color: "#e6faff",
@@ -1325,8 +1326,7 @@ const onlineMemberCard: React.CSSProperties = {
   gap: "10px",
   padding: "10px",
   borderRadius: "16px",
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(0,198,255,0.05))",
+  background: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(0,198,255,0.05))",
   border: "1px solid rgba(255,255,255,0.12)",
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
 };
@@ -1334,8 +1334,7 @@ const onlineMemberCard: React.CSSProperties = {
 const headerStyle: React.CSSProperties = {
   padding: "20px",
   borderBottom: "1px solid rgba(0,198,255,0.18)",
-  background:
-    "linear-gradient(135deg, rgba(0,198,255,0.14), rgba(130,0,255,0.12), rgba(0,0,0,0.2))",
+  background: "linear-gradient(135deg, rgba(0,198,255,0.14), rgba(130,0,255,0.12), rgba(0,0,0,0.2))",
 };
 
 const connectedBox: React.CSSProperties = {
@@ -1384,8 +1383,7 @@ const messagesBox: React.CSSProperties = {
   flex: 1,
   padding: "22px",
   overflowY: "auto",
-  background:
-    "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.38))",
+  background: "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.38))",
 };
 
 const messageHeader: React.CSSProperties = {
@@ -1474,14 +1472,14 @@ const chatImageStyle: React.CSSProperties = {
 const reactionRow: React.CSSProperties = {
   display: "flex",
   gap: "5px",
-marginTop: "8px",
+  marginTop: "8px",
   flexWrap: "wrap",
 };
 
 const reactionBtn: React.CSSProperties = {
   height: "26px",
-minWidth: "28px",
-fontSize: "12px",
+  minWidth: "28px",
+  fontSize: "12px",
   padding: "3px 7px",
   borderRadius: "999px",
   border: "1px solid rgba(255,255,255,0.12)",
@@ -1492,8 +1490,7 @@ fontSize: "12px",
   alignItems: "center",
   justifyContent: "center",
   gap: "4px",
-  transition:
-    "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
+  transition: "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
   position: "relative",
   zIndex: 10,
 };
