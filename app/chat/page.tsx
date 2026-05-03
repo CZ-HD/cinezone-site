@@ -72,6 +72,7 @@ export default function ChatPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
 
   const [announcement, setAnnouncement] = useState("");
   const [editingAnnouncement, setEditingAnnouncement] = useState(false);
@@ -871,10 +872,16 @@ export default function ChatPage() {
                   msg.role === "admin" ? "gold" : msg.role_color || "#00c6ff";
                 const msgReactions = getMessageReactions(msg.id);
                 const repliedMessage = getReplyMessage(msg.reply_to);
+                const time = new Date(msg.created_at).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
 
                 return (
                   <div
                     key={msg.id}
+                    onMouseEnter={() => setHoveredMessageId(msg.id)}
+                    onMouseLeave={() => setHoveredMessageId(null)}
                     style={{
                       display: "flex",
                       justifyContent: isMe ? "flex-end" : "flex-start",
@@ -909,26 +916,24 @@ export default function ChatPage() {
                       >
                         <div
                           style={{
-                            fontSize: "13px",
-                            fontWeight: 900,
-                            color: isMe ? "#fff" : nameColor,
-                            marginBottom: "4px",
+                            ...messageMeta,
+                            justifyContent: isMe ? "flex-end" : "flex-start",
+                            textAlign: isMe ? "right" : "left",
                           }}
                         >
-                          {name}
+                          <span style={{ color: nameColor, fontWeight: 900 }}>
+                            {name}
+                          </span>
                           {msg.role === "admin" && (
                             <span style={adminBadge}>ADMIN</span>
                           )}
                           <span
                             style={{
-                              marginLeft: "8px",
-                              fontSize: "11px",
                               color: isStatusOffline
                                 ? "#ff7777"
                                 : userIsOnline
                                 ? "#4cff9b"
                                 : "#ff7777",
-                              fontWeight: 700,
                             }}
                           >
                             {isStatusOffline
@@ -937,35 +942,43 @@ export default function ChatPage() {
                               ? "🟢 En ligne"
                               : "🔴 Hors ligne"}
                           </span>
+                          <span style={{ color: "#7f8ea3" }}>{time}</span>
                         </div>
 
-                        {msg.reply_to && (
-                          <div style={replyPreviewBox}>
-                            <strong>
-                              ↩️ Réponse à{" "}
-                              {repliedMessage?.username ||
-                                repliedMessage?.email ||
-                                "message supprimé"}
-                            </strong>
-                            <p style={{ margin: "5px 0 0" }}>
-                              {repliedMessage?.content || "Message supprimé"}
-                            </p>
-                          </div>
-                        )}
+                        <div style={isMe ? myBubble : otherBubble}>
+                          {msg.reply_to && (
+                            <div style={replyPreviewBoxClean}>
+                              <strong>
+                                Réponse à{" "}
+                                {repliedMessage?.username ||
+                                  repliedMessage?.email ||
+                                  "message supprimé"}
+                              </strong>
+                              <p style={{ margin: "6px 0 0" }}>
+                                {repliedMessage?.content || "Message supprimé"}
+                              </p>
+                            </div>
+                          )}
 
-                        {msg.content && <div style={messageBubble}>{msg.content}</div>}
+                          {msg.content && <div>{msg.content}</div>}
 
-                        {msg.image_url && (
-                          <a href={msg.image_url} target="_blank" rel="noreferrer">
-                            <img
-                              src={msg.image_url}
-                              alt="image chat"
-                              style={chatImageStyle}
-                            />
-                          </a>
-                        )}
+                          {msg.image_url && (
+                            <a href={msg.image_url} target="_blank" rel="noreferrer">
+                              <img
+                                src={msg.image_url}
+                                alt="image chat"
+                                style={chatImageStyle}
+                              />
+                            </a>
+                          )}
+                        </div>
 
-                        <div style={reactionRow}>
+                        <div
+                          style={{
+                            ...reactionRow,
+                            justifyContent: isMe ? "flex-end" : "flex-start",
+                          }}
+                        >
                           {REACTION_EMOJIS.map((emoji) => {
                             const count = msgReactions.filter(
                               (r) => r.emoji === emoji
@@ -973,6 +986,10 @@ export default function ChatPage() {
                             const active = msgReactions.some(
                               (r) => r.emoji === emoji && r.user_id === user?.id
                             );
+
+                            if (count === 0 && !active && hoveredMessageId !== msg.id) {
+                              return null;
+                            }
 
                             return (
                               <button
@@ -982,6 +999,10 @@ export default function ChatPage() {
                                 style={{
                                   ...reactionBtn,
                                   ...(active ? reactionBtnActive : {}),
+                                  opacity:
+                                    count === 0 && hoveredMessageId === msg.id
+                                      ? 0.55
+                                      : 1,
                                   transform:
                                     reactionPulse === `${msg.id}-${emoji}`
                                       ? "scale(1.4)"
@@ -1001,7 +1022,15 @@ export default function ChatPage() {
                           })}
                         </div>
 
-                        <div style={messageActions}>
+                        <div
+                          style={{
+                            ...messageActions,
+                            justifyContent: isMe ? "flex-end" : "flex-start",
+                            opacity: hoveredMessageId === msg.id ? 1 : 0,
+                            pointerEvents:
+                              hoveredMessageId === msg.id ? "auto" : "none",
+                          }}
+                        >
                           <button onClick={() => setReplyTo(msg)} style={replyBtn}>
                             ↩️ Répondre
                           </button>
@@ -1438,6 +1467,43 @@ const otherMessageBox: React.CSSProperties = {
   color: "#ddd",
 };
 
+const messageMeta: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "7px",
+  marginBottom: "5px",
+  fontSize: "13px",
+  flexWrap: "wrap",
+};
+
+const myBubble: React.CSSProperties = {
+  maxWidth: "100%",
+  padding: "12px 15px",
+  borderRadius: "18px 18px 6px 18px",
+  background: "linear-gradient(135deg, rgba(0,105,210,0.45), rgba(0,45,110,0.5))",
+  border: "1px solid rgba(0,198,255,0.38)",
+  color: "#fff",
+  lineHeight: 1.45,
+  fontSize: "15px",
+  wordBreak: "break-word",
+  whiteSpace: "pre-line",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.28)",
+};
+
+const otherBubble: React.CSSProperties = {
+  maxWidth: "100%",
+  padding: "12px 15px",
+  borderRadius: "18px 18px 18px 6px",
+  background: "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.045))",
+  border: "1px solid rgba(255,255,255,0.12)",
+  color: "#fff",
+  lineHeight: 1.45,
+  fontSize: "15px",
+  wordBreak: "break-word",
+  whiteSpace: "pre-line",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
+};
+
 const replyPreviewBox: React.CSSProperties = {
   marginTop: "10px",
   padding: "8px 10px",
@@ -1446,6 +1512,16 @@ const replyPreviewBox: React.CSSProperties = {
   borderLeft: "3px solid #00c6ff",
   color: "#cbd5e1",
   fontSize: "12px",
+};
+
+const replyPreviewBoxClean: React.CSSProperties = {
+  marginBottom: "10px",
+  padding: "8px 10px",
+  borderLeft: "3px solid rgba(0,198,255,0.65)",
+  color: "#9fb3c8",
+  fontSize: "13px",
+  background: "rgba(0,0,0,0.18)",
+  borderRadius: "10px",
 };
 
 const messageText: React.CSSProperties = {
@@ -1472,7 +1548,7 @@ const chatImageStyle: React.CSSProperties = {
 const reactionRow: React.CSSProperties = {
   display: "flex",
   gap: "5px",
-  marginTop: "8px",
+  marginTop: "7px",
   flexWrap: "wrap",
 };
 
@@ -1653,6 +1729,7 @@ const messageBubble: React.CSSProperties = {
 const messageActions: React.CSSProperties = {
   display: "flex",
   gap: "8px",
-  marginTop: "8px",
+  marginTop: "7px",
   flexWrap: "wrap",
+  transition: "opacity 0.16s ease",
 };
