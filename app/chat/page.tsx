@@ -1176,13 +1176,7 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   backgroundImage: `
-    linear-gradient(
-      90deg,
-      rgba(15,0,12,0.88) 0%,
-      rgba(0,0,0,0.72) 35%,
-      rgba(0,20,40,0.58) 70%,
-      rgba(0,30,55,0.50) 100%
-    ),
+    linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.82)),
     url("/chat-bg.jpg")
   `,
   backgroundSize: "cover",
@@ -1204,18 +1198,17 @@ const chatLayout: React.CSSProperties = {
   gridTemplateColumns: "1fr 280px",
   gap: "18px",
   alignItems: "stretch",
-  transform: "translateX(-70px)",
 };
 
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
- background: "rgba(5,10,18,0.76)",
-backdropFilter: "blur(10px)",
-WebkitBackdropFilter: "blur(10px)",
-border: "1px solid rgba(0,198,255,0.36)",
-boxShadow:
-  "0 25px 90px rgba(0,0,0,0.85), 0 0 35px rgba(0,198,255,0.15)",
+  background: "rgba(5,10,18,0.88)",
+  backdropFilter: "blur(8px)",
+  WebkitBackdropFilter: "blur(8px)",
+  border: "1px solid rgba(0,198,255,0.28)",
+  borderRadius: "24px",
+  boxShadow: "0 25px 80px rgba(0,0,0,0.78)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
@@ -1226,9 +1219,9 @@ const onlinePanel: React.CSSProperties = {
   height: "78vh",
   padding: "20px",
   borderRadius: "24px",
-  background: "rgba(5,10,18,0.76)",
-backdropFilter: "blur(10px)",
-WebkitBackdropFilter: "blur(10px)",
+  background: "rgba(5,10,18,0.88)",
+backdropFilter: "blur(8px)",
+WebkitBackdropFilter: "blur(8px)",
 border: "1px solid rgba(0,198,255,0.36)",
 boxShadow:
   "0 25px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.12)",
