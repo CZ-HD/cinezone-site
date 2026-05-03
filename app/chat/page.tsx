@@ -1183,7 +1183,7 @@ const pageStyle: React.CSSProperties = {
       rgba(0,20,40,0.58) 70%,
       rgba(0,30,55,0.50) 100%
     ),
-    url("/Tchat.jpg")
+    url("/chat-bg.jpg")
   `,
   backgroundSize: "cover",
   backgroundPosition: "center center",
