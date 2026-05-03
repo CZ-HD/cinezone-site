@@ -882,23 +882,24 @@ export default function ChatPage() {
                     }}
                   >
                     <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "flex-start",
-                        maxWidth: "76%",
-                        flexDirection: isMe ? "row-reverse" : "row",
-                      }}
-                    >
-                      <div style={avatarWrapSmall}>
-                        <img src={msgAvatar} alt="avatar" style={avatarMsg} />
-                        <span
-                          style={{
-                            ...onlineDotSmall,
-                            background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
-                          }}
-                        />
-                      </div>
+  style={{
+    display: "flex",
+    gap: "10px",
+    alignItems: "flex-start",
+    maxWidth: "70%",
+  }}
+>
+                      {!isMe && (
+  <div style={avatarWrapSmall}>
+    <img src={msgAvatar} alt="avatar" style={avatarMsg} />
+    <span
+      style={{
+        ...onlineDotSmall,
+        background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+      }}
+    />
+  </div>
+)}
 
                       <div
                         style={{
