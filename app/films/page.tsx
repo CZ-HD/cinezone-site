@@ -240,6 +240,19 @@ export default function FilmsPage() {
               <p style={{ color: "#aaa" }}>Aucun film trouvé pour ce filtre.</p>
             ) : (
               <>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={filteredMovies.length}
+                  variant="top"
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={(value) => {
+                    setItemsPerPage(value);
+                    setCurrentPage(1);
+                  }}
+                />
+
                 <MovieGrid movies={paginatedMovies} local isAdmin={isAdmin} />
 
                 <Pagination
@@ -247,6 +260,7 @@ export default function FilmsPage() {
                   totalPages={totalPages}
                   itemsPerPage={itemsPerPage}
                   totalItems={filteredMovies.length}
+                  variant="bottom"
                   onPageChange={setCurrentPage}
                   onItemsPerPageChange={(value) => {
                     setItemsPerPage(value);
@@ -365,6 +379,7 @@ function Pagination({
   totalPages,
   itemsPerPage,
   totalItems,
+  variant = "bottom",
   onPageChange,
   onItemsPerPageChange,
 }: {
@@ -372,11 +387,17 @@ function Pagination({
   totalPages: number;
   itemsPerPage: number;
   totalItems: number;
+  variant?: "top" | "bottom";
   onPageChange: (page: number) => void;
   onItemsPerPageChange: (value: number) => void;
 }) {
   return (
-    <div style={paginationStyle}>
+    <div
+      style={{
+        ...paginationStyle,
+        ...(variant === "top" ? paginationTopStyle : paginationBottomStyle),
+      }}
+    >
       <div style={selectWrapperStyle}>
         <span style={{ color: "#cbd5e1" }}>Éléments par page</span>
 
@@ -550,14 +571,23 @@ const copyIdBtn: React.CSSProperties = {
 };
 
 const paginationStyle: React.CSSProperties = {
-  marginTop: "36px",
-  paddingTop: "22px",
-  borderTop: "1px solid rgba(0,198,255,0.22)",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   gap: "18px",
   flexWrap: "wrap",
+};
+
+const paginationTopStyle: React.CSSProperties = {
+  margin: "0 0 28px",
+  paddingBottom: "18px",
+  borderBottom: "1px solid rgba(0,198,255,0.22)",
+};
+
+const paginationBottomStyle: React.CSSProperties = {
+  marginTop: "36px",
+  paddingTop: "22px",
+  borderTop: "1px solid rgba(0,198,255,0.22)",
 };
 
 const selectWrapperStyle: React.CSSProperties = {
