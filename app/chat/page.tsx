@@ -900,13 +900,13 @@ export default function ChatPage() {
   />
 </div>
 
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: isMe ? "flex-end" : "flex-start",
-    }}
-  >                
+<div
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: isMe ? "flex-end" : "flex-start",
+  }}
+>               
                           style={{
                             fontSize: "13px",
                             fontWeight: 900,
