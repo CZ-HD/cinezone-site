@@ -987,9 +987,7 @@ export default function ChatPage() {
                               (r) => r.emoji === emoji && r.user_id === user?.id
                             );
 
-                            if (count === 0 && !active && hoveredMessageId !== msg.id) {
-                              return null;
-                            }
+                            if (count === 0) return null;
 
                             return (
                               <button
@@ -997,50 +995,46 @@ export default function ChatPage() {
                                 type="button"
                                 onClick={() => toggleReaction(msg.id, emoji)}
                                 style={{
-                                  ...reactionBtn,
-                                  ...(active ? reactionBtnActive : {}),
-                                  opacity:
-                                    count === 0 && hoveredMessageId === msg.id
-                                      ? 0.55
-                                      : 1,
+                                  ...reactionPill,
+                                  ...(active ? reactionPillActive : {}),
                                   transform:
                                     reactionPulse === `${msg.id}-${emoji}`
-                                      ? "scale(1.4)"
-                                      : active
-                                      ? "scale(1.08)"
+                                      ? "scale(1.18)"
                                       : "scale(1)",
                                 }}
                               >
-                                <span
-                                  style={active ? reactionEmojiActive : reactionEmoji}
-                                >
-                                  {emoji}
-                                </span>
-                                {count > 0 && <span style={reactionCount}>{count}</span>}
+                                <span>{emoji}</span>
+                                <span style={reactionCount}>{count}</span>
                               </button>
                             );
                           })}
-                        </div>
 
-                        <div
-                          style={{
-                            ...messageActions,
-                            justifyContent: isMe ? "flex-end" : "flex-start",
-                            opacity: hoveredMessageId === msg.id ? 1 : 0,
-                            pointerEvents:
-                              hoveredMessageId === msg.id ? "auto" : "none",
-                          }}
-                        >
-                          <button onClick={() => setReplyTo(msg)} style={replyBtn}>
-                            ↩️ Répondre
+                          <button
+                            type="button"
+                            onClick={() => setReplyTo(msg)}
+                            title="Répondre"
+                            style={reactionIconBtn}
+                          >
+                            ↩️
                           </button>
 
-                          {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => toggleReaction(msg.id, "👍")}
+                            title="Ajouter une réaction"
+                            style={reactionIconBtn}
+                          >
+                            ☺️
+                          </button>
+
+                          {isAdmin && hoveredMessageId === msg.id && (
                             <button
+                              type="button"
                               onClick={() => deleteMessage(msg.id)}
-                              style={deleteBtn}
+                              title="Supprimer"
+                              style={reactionDeleteIconBtn}
                             >
-                              🗑 Supprimer
+                              🗑
                             </button>
                           )}
                         </div>
@@ -1547,7 +1541,8 @@ const chatImageStyle: React.CSSProperties = {
 
 const reactionRow: React.CSSProperties = {
   display: "flex",
-  gap: "5px",
+  alignItems: "center",
+  gap: "6px",
   marginTop: "7px",
   flexWrap: "wrap",
 };
@@ -1575,6 +1570,51 @@ const reactionBtnActive: React.CSSProperties = {
   background: "rgba(0,198,255,0.2)",
   border: "1px solid rgba(0,198,255,0.75)",
   boxShadow: "0 0 16px rgba(0,198,255,0.55)",
+};
+
+const reactionPill: React.CSSProperties = {
+  minWidth: "34px",
+  height: "25px",
+  padding: "3px 8px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(255,255,255,0.075)",
+  color: "#dbeafe",
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "5px",
+  fontSize: "13px",
+  lineHeight: 1,
+  transition: "transform 0.18s ease, box-shadow 0.18s ease, border 0.18s ease",
+};
+
+const reactionPillActive: React.CSSProperties = {
+  background: "rgba(0,198,255,0.18)",
+  border: "1px solid rgba(0,198,255,0.52)",
+  boxShadow: "0 0 14px rgba(0,198,255,0.34)",
+};
+
+const reactionIconBtn: React.CSSProperties = {
+  width: "27px",
+  height: "27px",
+  borderRadius: "50%",
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(255,255,255,0.055)",
+  color: "#9fb3c8",
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "13px",
+};
+
+const reactionDeleteIconBtn: React.CSSProperties = {
+  ...reactionIconBtn,
+  color: "#ff9b9b",
+  background: "rgba(255,70,70,0.10)",
+  border: "1px solid rgba(255,90,90,0.24)",
 };
 
 const reactionEmoji: React.CSSProperties = {
