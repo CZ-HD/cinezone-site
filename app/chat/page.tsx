@@ -1176,11 +1176,16 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   backgroundImage: `
-    linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.82)),
+    linear-gradient(90deg,
+      rgba(255, 0, 120, 0.35) 0%,
+      rgba(0, 0, 0, 0.85) 35%,
+      rgba(0, 0, 0, 0.85) 65%,
+      rgba(0, 180, 255, 0.35) 100%
+    ),
     url("/chat-bg.jpg")
   `,
   backgroundSize: "cover",
-  backgroundPosition: "center center",
+  backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
   backgroundAttachment: "fixed",
   color: "#fff",
@@ -1203,8 +1208,8 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(5,10,18,0.88)",
-  backdropFilter: "blur(8px)",
+  background: "rgba(5,10,18,0.82)",
+  backdropFilter: "blur(10px)",
   WebkitBackdropFilter: "blur(8px)",
   border: "1px solid rgba(0,198,255,0.28)",
   borderRadius: "24px",
