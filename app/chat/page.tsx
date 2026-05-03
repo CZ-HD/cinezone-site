@@ -1176,16 +1176,13 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   backgroundImage: `
-    linear-gradient(90deg,
-      rgba(255, 0, 120, 0.35) 0%,
-      rgba(0, 0, 0, 0.85) 35%,
-      rgba(0, 0, 0, 0.85) 65%,
-      rgba(0, 180, 255, 0.35) 100%
-    ),
+    radial-gradient(circle at 20% 50%, rgba(255,0,120,0.35), transparent 40%),
+    radial-gradient(circle at 80% 50%, rgba(0,180,255,0.35), transparent 40%),
+    linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.95)),
     url("/chat-bg.jpg")
   `,
   backgroundSize: "cover",
-  backgroundPosition: "center",
+  backgroundPosition: "center right",
   backgroundRepeat: "no-repeat",
   backgroundAttachment: "fixed",
   color: "#fff",
@@ -1208,12 +1205,15 @@ const chatLayout: React.CSSProperties = {
 const chatBox: React.CSSProperties = {
   width: "100%",
   height: "78vh",
-  background: "rgba(5,10,18,0.82)",
-  backdropFilter: "blur(10px)",
-  WebkitBackdropFilter: "blur(8px)",
-  border: "1px solid rgba(0,198,255,0.28)",
-  borderRadius: "24px",
-  boxShadow: "0 25px 80px rgba(0,0,0,0.78)",
+  background: "rgba(8,13,22,0.75)",
+backdropFilter: "blur(14px)",
+WebkitBackdropFilter: "blur(14px)",
+border: "1px solid rgba(255,255,255,0.08)",
+boxShadow: `
+  0 30px 120px rgba(0,0,0,0.9),
+  0 0 40px rgba(0,180,255,0.15),
+  0 0 20px rgba(255,0,120,0.08)
+`,
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
