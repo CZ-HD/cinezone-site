@@ -1237,8 +1237,8 @@ const newMessageBadge: React.CSSProperties = {
 };
 
 const announcementBox: React.CSSProperties = {
-  margin: "16px",
-  padding: "16px 18px",
+  margin: "12px 16px",
+  padding: "14px 16px",
   borderRadius: "18px",
   background:
     "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(130,0,255,0.08), rgba(0,0,0,0.28))",
@@ -1268,9 +1268,11 @@ const announcementSub: React.CSSProperties = {
 };
 
 const announcementTextStyle: React.CSSProperties = {
-  margin: "12px 0 0",
+  margin: "10px 0 0",
   whiteSpace: "pre-line",
-  lineHeight: 1.55,
+  lineHeight: 1.45,
+  fontSize: "14px",
+  color: "#eef8ff",
 };
 
 const announcementActions: React.CSSProperties = {
