@@ -568,6 +568,7 @@ const copyIdBtn: React.CSSProperties = {
 
 const paginationStyle: React.CSSProperties = {
   marginTop: "36px",
+  marginBottom: "32px",
   paddingTop: "22px",
   borderTop: "1px solid rgba(0,198,255,0.22)",
   display: "flex",
