@@ -240,9 +240,22 @@ export default function FilmsPage() {
               <p style={{ color: "#aaa" }}>Aucun film trouvé pour ce filtre.</p>
             ) : (
               <>
-                <MovieGrid movies={paginatedMovies} local isAdmin={isAdmin} />
-
                 <Pagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  itemsPerPage={itemsPerPage}
+  totalItems={filteredMovies.length}
+  isAdmin={isAdmin}
+  onPageChange={setCurrentPage}
+  onItemsPerPageChange={(value) => {
+    setItemsPerPage(value);
+    setCurrentPage(1);
+  }}
+/>
+
+<MovieGrid movies={paginatedMovies} local isAdmin={isAdmin} />
+
+<Pagination
   currentPage={currentPage}
   totalPages={totalPages}
   itemsPerPage={itemsPerPage}
