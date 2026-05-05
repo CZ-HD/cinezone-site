@@ -243,16 +243,17 @@ export default function FilmsPage() {
                 <MovieGrid movies={paginatedMovies} local isAdmin={isAdmin} />
 
                 <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  itemsPerPage={itemsPerPage}
-                  totalItems={filteredMovies.length}
-                  onPageChange={setCurrentPage}
-                  onItemsPerPageChange={(value) => {
-                    setItemsPerPage(value);
-                    setCurrentPage(1);
-                  }}
-                />
+  currentPage={currentPage}
+  totalPages={totalPages}
+  itemsPerPage={itemsPerPage}
+  totalItems={filteredMovies.length}
+  isAdmin={isAdmin}
+  onPageChange={setCurrentPage}
+  onItemsPerPageChange={(value) => {
+    setItemsPerPage(value);
+    setCurrentPage(1);
+  }}
+/>
               </>
             )}
           </section>
@@ -365,6 +366,7 @@ function Pagination({
   totalPages,
   itemsPerPage,
   totalItems,
+  isAdmin,
   onPageChange,
   onItemsPerPageChange,
 }: {
@@ -372,6 +374,7 @@ function Pagination({
   totalPages: number;
   itemsPerPage: number;
   totalItems: number;
+  isAdmin: boolean;
   onPageChange: (page: number) => void;
   onItemsPerPageChange: (value: number) => void;
 }) {
@@ -394,7 +397,8 @@ function Pagination({
       </div>
 
       <div style={pageInfoStyle}>
-        Page {currentPage} sur {totalPages} — {totalItems} films
+        Page {currentPage} sur {totalPages}
+{isAdmin && ` — ${totalItems} films`}
       </div>
 
       <div style={buttonsWrapperStyle}>
