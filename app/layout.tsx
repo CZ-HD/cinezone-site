@@ -11,11 +11,33 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CineZone HD",
   description: "Films gratuits et catalogue CineZone HD",
+
   icons: {
-    icon: "/icon.svg",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
+
   verification: {
     google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
+  },
+
+  openGraph: {
+    title: "CineZone HD",
+    description:
+      "Plateforme communautaire gratuite pour les passionnés de cinéma.",
+    url: "https://cinezone-hd.fr",
+    siteName: "CineZone HD",
+    images: [
+      {
+        url: "/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "CineZone HD",
+      },
+    ],
+    locale: "fr_FR",
+    type: "website",
   },
 };
 
