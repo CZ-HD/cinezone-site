@@ -9,10 +9,13 @@ import UserMenu from "./components/UserMenu";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CineZone",
-  description: "Films et séries",
+  title: "CineZone HD",
+  description: "Films gratuits et catalogue CineZone HD",
   icons: {
     icon: "/icon.svg",
+  },
+  verification: {
+    google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
   },
 };
 
