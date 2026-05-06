@@ -93,9 +93,7 @@ export default function RootLayout({
             </div>
 
             <p style={footerLegal}>
-              Made with ❤️ by CineZone — 2026. Aucun contenu vidéo n’est hébergé
-              sur nos serveurs. Les liens proposés redirigent vers des services
-              externes.
+              Made with ❤️ by CineZone — 2026. 
             </p>
           </footer>
         </AuthGuard>
