@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "Films gratuits et catalogue CineZone HD",
 
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
