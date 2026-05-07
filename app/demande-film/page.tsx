@@ -298,8 +298,9 @@ export default function DemandeFilmPage() {
                             </p>
                           </div>
 
-                          <span style={statusBadge}>En attente</span>
-                        </div>
+                          <span style={d.admin_reply ? repliedBadge : statusBadge}>
+  {d.admin_reply ? "Répondu" : "En attente"}
+</span>
 
                         <p style={commentText}>{d.commentaire}</p>
 
@@ -618,4 +619,14 @@ const emptyStyle: React.CSSProperties = {
   color: "#94a3b8",
   borderRadius: "18px",
   border: "1px dashed rgba(255,255,255,0.16)",
+};
+
+const repliedBadge: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: "999px",
+  background: "rgba(34,197,94,0.15)",
+  border: "1px solid rgba(34,197,94,0.35)",
+  color: "#86efac",
+  fontSize: "12px",
+  fontWeight: 900,
 };
