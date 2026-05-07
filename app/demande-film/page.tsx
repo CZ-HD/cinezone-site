@@ -43,16 +43,22 @@ export default function DemandeFilmPage() {
 
     setUser(data.user);
 
-    const isCreator =
-  data.user.email &&
-  CREATOR_EMAILS.includes(data.user.email);
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role,status")
+      .eq("id", data.user.id)
+      .single();
 
-if (
-  isCreator ||
-  (profile?.role === "admin" && profile?.status === "approved")
-) {
-  setIsAdmin(true);
-}
+    const isCreator =
+      data.user.email &&
+      CREATOR_EMAILS.includes(data.user.email);
+
+    if (
+      isCreator ||
+      (profile?.role === "admin" && profile?.status === "approved")
+    ) {
+      setIsAdmin(true);
+    }
 
     loadDemandes();
   }
@@ -155,19 +161,19 @@ if (
   }
 
   async function supprimerDemande(id: string) {
-  if (!isAdmin) return;
+    if (!isAdmin) return;
 
-  if (!confirm("Supprimer cette demande ?")) {
-    return;
+    if (!confirm("Supprimer cette demande ?")) {
+      return;
+    }
+
+    await supabase
+      .from("demandes_films")
+      .delete()
+      .eq("id", id);
+
+    loadDemandes();
   }
-
-  await supabase
-    .from("demandes_films")
-    .delete()
-    .eq("id", id);
-
-  loadDemandes();
-}
 
   return (
     <main style={pageStyle}>
