@@ -154,12 +154,19 @@ export default function DemandeFilmPage() {
   }
 
   async function supprimerDemande(id: string) {
-    if (!isAdmin) return;
-    if (!confirm("Supprimer cette demande ?")) return;
+  if (!isAdmin) return;
 
-    await supabase.from("demandes_films").delete().eq("id", id);
-    loadDemandes();
+  if (!confirm("Supprimer cette demande ?")) {
+    return;
   }
+
+  await supabase
+    .from("demandes_films")
+    .delete()
+    .eq("id", id);
+
+  loadDemandes();
+}
 
   return (
     <main style={pageStyle}>
