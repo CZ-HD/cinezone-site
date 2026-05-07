@@ -615,7 +615,7 @@ if (line.includes("|")) {
             {filteredProfiles.map((member) => {
               const presence = getPresence(member.id);
               const connected = isOnline(member.id);
-              const isCreator = member.email === CREATOR_EMAIL;
+              const isCreator = !!member.email && CREATOR_EMAILS.includes(member.email);
               const isMemberAdmin = member.role === "admin";
               const isApproved = member.status === "approved";
               const isBlocked = member.status === "blocked";
