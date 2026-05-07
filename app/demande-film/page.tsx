@@ -639,5 +639,3 @@ const emptyStyle: React.CSSProperties = {
   borderRadius: "18px",
   border: "1px dashed rgba(255,255,255,0.16)",
 };
-
-}
