@@ -34,11 +34,15 @@ export default function RegisterPage() {
 
     if (user) {
       const { error: profileError } = await supabase.from("profiles").insert({
-        id: user.id,
-        email: user.email,
-        role: "user",
-        status: "pending",
-      });
+  id: user.id,
+  email: user.email,
+  role: "user",
+  status: "pending",
+  username: null,
+  avatar: null,
+  status_text: "🔴 Hors ligne",
+  role_color: null,
+});
 
       if (profileError) {
         setMessage("❌ Profil non créé : " + profileError.message);
