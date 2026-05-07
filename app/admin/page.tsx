@@ -629,7 +629,7 @@ if (line.includes("|")) {
                 <article key={member.id} style={memberCardStyle}>
                   <div style={memberTop}>
                     <img
-                      src={member.avatar || DEFAULT_AVATAR}
+                      src={member.avatar || "/favicon.ico"}
                       alt="avatar"
                       style={{
                         ...avatarStyle,
