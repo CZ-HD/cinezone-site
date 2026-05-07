@@ -62,13 +62,18 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!isAdmin) return;
+  if (!isAdmin) return;
 
+  loadPresence();
+  loadUsers();
+
+  const timer = setInterval(() => {
     loadPresence();
-    const timer = setInterval(loadPresence, 15000);
+    loadUsers();
+  }, 15000);
 
-    return () => clearInterval(timer);
-  }, [isAdmin]);
+  return () => clearInterval(timer);
+}, [isAdmin]);
 
   const addAffiliate = (url: string) => {
     const affiliate = "af=5257374";
