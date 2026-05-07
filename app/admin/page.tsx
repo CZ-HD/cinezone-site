@@ -621,7 +621,7 @@ if (line.includes("|")) {
                 <article key={member.id} style={memberCardStyle}>
                   <div style={memberTop}>
                     <img
-                      src={member.avatar || DEFAULT_AVATAR}
+                      src={member.avatar || "/favicon.ico"}
                       alt="avatar"
                       style={{
                         ...avatarStyle,
@@ -640,7 +640,7 @@ if (line.includes("|")) {
                               : member.role_color || "#00c6ff",
                           }}
                         >
-                          {member.username || "Utilisateur"}
+                          {member.username || "Nouveau membre"}
                         </strong>
 
                         {isCreator && <span style={creatorBadge}>CRÉATEUR</span>}
