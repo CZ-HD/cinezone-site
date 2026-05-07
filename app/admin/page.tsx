@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const CREATOR_EMAILS = [
   "blackph4tom@gmail.com",
-  "lafootueuseedu54@hotmail.fr",
+  "lafooteusedu54@hotmail.fr",
 ];
 const DEFAULT_AVATAR =
   "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/Boss.png";
