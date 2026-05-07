@@ -629,15 +629,15 @@ if (line.includes("|")) {
                 <article key={member.id} style={memberCardStyle}>
                   <div style={memberTop}>
                     <img
-                      src={member.avatar || "/favicon.ico"}
+                      src={member.avatar || DEFAULT_AVATAR}
                       alt="avatar"
                       style={{
                         ...avatarStyle,
                         border: connected
                           ? "2px solid rgba(34,197,94,0.9)"
                           : "2px solid rgba(255,80,80,0.55)",
-                      }}
-                    />
+                     }}
+                   />
 
                     <div style={{ flex: 1 }}>
                       <div style={nameRow}>
