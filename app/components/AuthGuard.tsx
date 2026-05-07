@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-const CREATOR_EMAIL = "blackph4tom@gmail.com";
+const CREATOR_EMAILS = [
+  "blackph4tom@gmail.com",
+  "lafooteusedu54@hotmail.fr",
+];
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -37,11 +40,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // ✅ Ton compte créateur passe toujours
-      if (user.email === CREATOR_EMAIL) {
-        setAllowed(true);
-        return;
-      }
+      // ✅ Les comptes créateurs passent toujours
+if (user.email && CREATOR_EMAILS.includes(user.email)) {
+  setAllowed(true);
+  return;
+}
 
       const { data: profile } = await supabase
         .from("profiles")
