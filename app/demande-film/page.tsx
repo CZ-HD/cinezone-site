@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const CREATOR_EMAIL = "blackph4tom@gmail.com";
+const CREATOR_EMAILS = [
+  "blackph4tom@gmail.com",
+  "lafooteusedu54@hotmail.fr",
+];
 
 export default function DemandeFilmPage() {
   const [user, setUser] = useState<any>(null);
@@ -40,18 +43,16 @@ export default function DemandeFilmPage() {
 
     setUser(data.user);
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role,status")
-      .eq("id", data.user.id)
-      .single();
+    const isCreator =
+  data.user.email &&
+  CREATOR_EMAILS.includes(data.user.email);
 
-    if (
-      data.user.email === CREATOR_EMAIL ||
-      (profile?.role === "admin" && profile?.status === "approved")
-    ) {
-      setIsAdmin(true);
-    }
+if (
+  isCreator ||
+  (profile?.role === "admin" && profile?.status === "approved")
+) {
+  setIsAdmin(true);
+}
 
     loadDemandes();
   }
