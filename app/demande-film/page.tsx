@@ -23,6 +23,9 @@ export default function DemandeFilmPage() {
   const [editCodec, setEditCodec] = useState("H264");
   const [editCommentaire, setEditCommentaire] = useState("");
 
+  const [replyId, setReplyId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+
   useEffect(() => {
     init();
   }, []);
@@ -124,6 +127,32 @@ export default function DemandeFilmPage() {
     loadDemandes();
   }
 
+  async function envoyerReponse(id: string) {
+    if (!isAdmin) return;
+
+    if (!replyText.trim()) {
+      alert("Écris une réponse avant d’envoyer.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("demandes_films")
+      .update({
+        admin_reply: replyText.trim(),
+        admin_reply_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+
+    if (error) {
+      alert("Erreur réponse : " + error.message);
+      return;
+    }
+
+    setReplyId(null);
+    setReplyText("");
+    loadDemandes();
+  }
+
   async function supprimerDemande(id: string) {
     if (!isAdmin) return;
     if (!confirm("Supprimer cette demande ?")) return;
@@ -207,19 +236,10 @@ export default function DemandeFilmPage() {
         </section>
 
         <section style={cardStyle}>
-          <div style={listHeader}>
-            <div>
-              <h2 style={sectionTitle}>📋 Demandes envoyées</h2>
-              <p style={smallText}>
-                Les membres peuvent modifier leurs demandes. Les admins peuvent
-                supprimer.
-              </p>
-            </div>
-          </div>
+          <h2 style={sectionTitle}>📋 Demandes envoyées</h2>
 
           {demandes.length === 0 ? (
             <div style={emptyStyle}>
-              <div style={{ fontSize: "38px" }}>🎞️</div>
               <p>Aucune demande pour le moment.</p>
             </div>
           ) : (
@@ -287,6 +307,45 @@ export default function DemandeFilmPage() {
                           Demandé par : <strong>{d.email}</strong>
                         </p>
 
+                        {d.admin_reply && (
+                          <div style={replyBox}>
+                            <strong style={{ color: "#67e8f9" }}>
+                              💬 Réponse admin :
+                            </strong>
+                            <p style={{ margin: "8px 0 0", color: "#e5e7eb" }}>
+                              {d.admin_reply}
+                            </p>
+                          </div>
+                        )}
+
+                        {isAdmin && replyId === d.id && (
+                          <div style={{ marginTop: "12px" }}>
+                            <textarea
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              placeholder="Écrire une réponse au membre..."
+                              rows={3}
+                              style={textareaStyle}
+                            />
+
+                            <div style={buttonRow}>
+                              <button
+                                onClick={() => envoyerReponse(d.id)}
+                                style={btnBlue}
+                              >
+                                📩 Envoyer la réponse
+                              </button>
+
+                              <button
+                                onClick={() => setReplyId(null)}
+                                style={btnGray}
+                              >
+                                Annuler
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         <div style={buttonRow}>
                           {canEdit && (
                             <button onClick={() => startEdit(d)} style={btnBlue}>
@@ -295,12 +354,24 @@ export default function DemandeFilmPage() {
                           )}
 
                           {isAdmin && (
-                            <button
-                              onClick={() => supprimerDemande(d.id)}
-                              style={btnRed}
-                            >
-                              🗑 Supprimer
-                            </button>
+                            <>
+                              <button
+                                onClick={() => {
+                                  setReplyId(d.id);
+                                  setReplyText(d.admin_reply || "");
+                                }}
+                                style={btnBlue}
+                              >
+                                💬 Répondre
+                              </button>
+
+                              <button
+                                onClick={() => supprimerDemande(d.id)}
+                                style={btnRed}
+                              >
+                                🗑 Supprimer
+                              </button>
+                            </>
                           )}
                         </div>
                       </>
@@ -420,6 +491,7 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.12)",
   outline: "none",
   boxSizing: "border-box",
+  marginBottom: "10px",
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -437,7 +509,6 @@ const buttonStyle: React.CSSProperties = {
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
-  boxShadow: "0 12px 35px rgba(0,114,255,0.35)",
 };
 
 const messageStyle: React.CSSProperties = {
@@ -445,21 +516,10 @@ const messageStyle: React.CSSProperties = {
   color: "#cbd5e1",
 };
 
-const listHeader: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "18px",
-};
-
-const smallText: React.CSSProperties = {
-  color: "#94a3b8",
-  margin: "8px 0 0",
-};
-
 const listStyle: React.CSSProperties = {
   display: "grid",
   gap: "14px",
+  marginTop: "18px",
 };
 
 const demandeCard: React.CSSProperties = {
@@ -505,6 +565,14 @@ const statusBadge: React.CSSProperties = {
   color: "#fde68a",
   fontSize: "12px",
   fontWeight: 900,
+};
+
+const replyBox: React.CSSProperties = {
+  marginTop: "12px",
+  padding: "12px",
+  borderRadius: "14px",
+  background: "rgba(0,198,255,0.10)",
+  border: "1px solid rgba(0,198,255,0.30)",
 };
 
 const buttonRow: React.CSSProperties = {
