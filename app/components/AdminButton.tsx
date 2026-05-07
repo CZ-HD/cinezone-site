@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-const CREATOR_EMAIL = "blackph4tom@gmail.com";
+const CREATOR_EMAILS = [
+  "blackph4tom@gmail.com",
+  "lafooteusedu54@hotmail.fr",
+];
 
 export default function AdminButton() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -18,7 +21,7 @@ export default function AdminButton() {
 
       if (!user) return;
 
-      if (user.email === CREATOR_EMAIL) {
+      if (user.email && CREATOR_EMAILS.includes(user.email)) {
         setIsAdmin(true);
         await loadCounts();
         return;
