@@ -6,7 +6,10 @@ import { supabase } from "@/lib/supabase";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
-const CREATOR_EMAIL = "blackph4tom@gmail.com";
+const CREATOR_EMAILS = [
+  "blackph4tom@gmail.com",
+  "lafooteusedu54@hotmail.fr",
+];
 const START_YEAR = 1900;
 const END_YEAR = 2027;
 
@@ -52,7 +55,7 @@ export default function FilmsPage() {
 
     if (!user) return;
 
-    if (user.email === CREATOR_EMAIL) {
+    if (user.email && CREATOR_EMAILS.includes(user.email)) {
       setIsAdmin(true);
       return;
     }
