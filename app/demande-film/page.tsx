@@ -283,6 +283,7 @@ export default function DemandeFilmPage() {
                           <button onClick={sauvegarderModification} style={btnBlue}>
                             💾 Sauvegarder
                           </button>
+
                           <button onClick={() => setEditId(null)} style={btnGray}>
                             Annuler
                           </button>
@@ -299,8 +300,9 @@ export default function DemandeFilmPage() {
                           </div>
 
                           <span style={d.admin_reply ? repliedBadge : statusBadge}>
-  {d.admin_reply ? "Répondu" : "En attente"}
-</span>
+                            {d.admin_reply ? "Répondu" : "En attente"}
+                          </span>
+                        </div>
 
                         <p style={commentText}>{d.commentaire}</p>
 
@@ -568,6 +570,16 @@ const statusBadge: React.CSSProperties = {
   fontWeight: 900,
 };
 
+const repliedBadge: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: "999px",
+  background: "rgba(34,197,94,0.15)",
+  border: "1px solid rgba(34,197,94,0.35)",
+  color: "#86efac",
+  fontSize: "12px",
+  fontWeight: 900,
+};
+
 const replyBox: React.CSSProperties = {
   marginTop: "12px",
   padding: "12px",
@@ -619,14 +631,4 @@ const emptyStyle: React.CSSProperties = {
   color: "#94a3b8",
   borderRadius: "18px",
   border: "1px dashed rgba(255,255,255,0.16)",
-};
-
-const repliedBadge: React.CSSProperties = {
-  padding: "6px 10px",
-  borderRadius: "999px",
-  background: "rgba(34,197,94,0.15)",
-  border: "1px solid rgba(34,197,94,0.35)",
-  color: "#86efac",
-  fontSize: "12px",
-  fontWeight: 900,
 };
