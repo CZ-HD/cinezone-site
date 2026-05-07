@@ -91,7 +91,7 @@ export default function AdminPage() {
       return;
     }
 
-    if (user.email === CREATOR_EMAIL) {
+    if (user.email && CREATOR_EMAILS.includes(user.email)) {
       setIsAdmin(true);
       setLoading(false);
       loadUsers();
