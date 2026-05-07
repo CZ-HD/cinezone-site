@@ -149,11 +149,11 @@ export default function DemandeFilmPage() {
     }
 
     setReplyId(null);
-    setReplyText("");
-    loadDemandes();
-  }
+setReplyText("");
+loadDemandes();
+}
 
-  async function supprimerDemande(id: string) {
+async function supprimerDemande(id: string) {
   if (!isAdmin) return;
 
   if (!confirm("Supprimer cette demande ?")) {
