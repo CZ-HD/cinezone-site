@@ -153,18 +153,22 @@ const marqueeContainer: React.CSSProperties = {
   width: "100%",
   overflow: "hidden",
   whiteSpace: "nowrap",
-  background: "rgba(0,198,255,0.12)",
-  borderTop: "1px solid rgba(0,198,255,0.18)",
-  padding: "8px 0",
+  background:
+    "linear-gradient(90deg, rgba(0,198,255,0.22), rgba(0,114,255,0.18), rgba(0,198,255,0.22))",
+  borderTop: "1px solid rgba(0,198,255,0.35)",
+  borderBottom: "1px solid rgba(0,198,255,0.25)",
+  padding: "12px 0",
   color: "#67e8f9",
   fontWeight: 900,
-  fontSize: "14px",
+  fontSize: "17px",
+  textShadow: "0 0 10px rgba(0,198,255,0.7)",
+  boxShadow: "0 0 18px rgba(0,198,255,0.18)",
 };
 
 const marqueeText: React.CSSProperties = {
   display: "inline-block",
   paddingLeft: "100%",
-  animation: "marquee 28s linear infinite",
+  animation: "marquee 55s linear infinite",
 };
 
 const logoLinkStyle: React.CSSProperties = {
