@@ -12,11 +12,11 @@ export const metadata: Metadata = {
   title: "CineZone HD",
   description: "Films gratuits et catalogue CineZone HD",
 
-icons: {
-  icon: "/download.svg",
-  shortcut: "/download.svg",
-  apple: "/apple-touch-icon.png",
-},
+  icons: {
+    icon: "/download.svg",
+    shortcut: "/download.svg",
+    apple: "/apple-touch-icon.png",
+  },
 
   verification: {
     google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
@@ -69,31 +69,36 @@ export default function RootLayout({
         <PresenceTracker />
 
         <header style={headerStyle}>
-          <Link href="/" style={logoLinkStyle}>
-            <div style={logoBoxStyle}>CZ</div>
+          <div style={topHeaderStyle}>
+            <Link href="/" style={logoLinkStyle}>
+              <div style={logoBoxStyle}>CZ</div>
+              <span style={logoTextStyle}>CineZone</span>
+            </Link>
 
-            <span style={logoTextStyle}>CineZone</span>
-          </Link>
+            <nav style={navStyle}>
+              <MenuDropdown />
 
-          <nav style={navStyle}>
-            <MenuDropdown />
+              {navLinks.map(([label, href]) => (
+                <Link key={href} href={href} style={navLinkStyle}>
+                  {label}
+                </Link>
+              ))}
 
-            {navLinks.map(([label, href]) => (
-              <Link key={href} href={href} style={navLinkStyle}>
-                {label}
-              </Link>
-            ))}
+              <ChatNavLink />
+              <AdminButton />
+              <UserMenu />
+            </nav>
+          </div>
 
-            <ChatNavLink />
-
-            <AdminButton />
-
-            <UserMenu />
-          </nav>
+          <div style={marqueeContainer}>
+            <div style={marqueeText}>
+              👋 Bonjour et bienvenue sur CineZone HD ! Merci de prendre quelques secondes pour choisir un pseudo et un avatar dans votre profil afin que le staff puisse vous notifier et répondre plus facilement à vos demandes. Merci 🎭🔔
+            </div>
+          </div>
         </header>
 
         <AuthGuard>
-          <div style={{ paddingTop: "76px" }}>{children}</div>
+          <div style={{ paddingTop: "112px" }}>{children}</div>
 
           <footer style={footerStyle}>
             <h2 style={footerTitle}>CineZone HD</h2>
@@ -114,9 +119,7 @@ export default function RootLayout({
               </Link>
             </div>
 
-            <p style={footerLegal}>
-              Made with ❤️ by CineZone — 2026. 
-            </p>
+            <p style={footerLegal}>Made with ❤️ by CineZone — 2026.</p>
           </footer>
         </AuthGuard>
       </body>
@@ -130,17 +133,38 @@ const headerStyle: React.CSSProperties = {
   left: 0,
   right: 0,
   zIndex: 100,
-  height: "76px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "0 34px",
   background:
     "linear-gradient(180deg, rgba(3,10,22,0.96), rgba(0,0,0,0.78))",
   backdropFilter: "blur(18px)",
   borderBottom: "1px solid rgba(0,198,255,0.25)",
   boxShadow:
     "0 12px 45px rgba(0,0,0,0.85), 0 0 28px rgba(0,120,255,0.15)",
+};
+
+const topHeaderStyle: React.CSSProperties = {
+  height: "76px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "0 34px",
+};
+
+const marqueeContainer: React.CSSProperties = {
+  width: "100%",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  background: "rgba(0,198,255,0.12)",
+  borderTop: "1px solid rgba(0,198,255,0.18)",
+  padding: "8px 0",
+  color: "#67e8f9",
+  fontWeight: 900,
+  fontSize: "14px",
+};
+
+const marqueeText: React.CSSProperties = {
+  display: "inline-block",
+  paddingLeft: "100%",
+  animation: "marquee 28s linear infinite",
 };
 
 const logoLinkStyle: React.CSSProperties = {
