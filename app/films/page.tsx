@@ -141,18 +141,29 @@ const searchTmdb = async (query: string) => {
     return Number.isFinite(Number(year)) ? Number(year) : null;
   };
 
-  const filteredMovies = movies.filter((movie) => {
-    const titleMatch = (movie.title || "")
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  const cleanText = (value: string) => {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, " ")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
 
-    const year = getMovieYear(movie);
+const filteredMovies = movies.filter((movie) => {
+  const title = cleanText(movie.title || "");
+  const query = cleanText(search);
+  const year = getMovieYear(movie);
 
-    if (!titleMatch) return false;
-    if (!year) return false;
+  const titleMatch = !query || title.includes(query);
 
-    return year >= minYear && year <= maxYear;
-  });
+  if (!titleMatch) return false;
+  if (!year) return false;
+
+  return year >= minYear && year <= maxYear;
+});
 
   const totalPages = Math.max(1, Math.ceil(filteredMovies.length / itemsPerPage));
 
