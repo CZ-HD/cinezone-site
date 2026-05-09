@@ -122,11 +122,11 @@ export default function Home() {
       )}
 
       <section style={quickCards}>
-        <QuickCard icon="🔥" title="Tendances" text="Les films les plus regardés" />
-        <QuickCard icon="🆕" title="Nouveautés" text="Les derniers ajouts" />
-        <QuickCard icon="🎬" title="Films" text="Explorer le catalogue" />
-        <QuickCard icon="💬" title="Chat" text="Communauté CineZone" />
-      </section>
+  <QuickCard href="/films" icon="🔥" title="Tendances" text="Les films populaires" />
+  <QuickCard href="/films" icon="🆕" title="Nouveautés" text="Les derniers ajouts" />
+  <QuickCard href="/films" icon="🎬" title="Films" text="Accéder au catalogue" />
+  <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
+</section>
 
       <div style={contentStyle}>
         <Row title="🔥 Tendances" movies={trending} />
@@ -140,15 +140,15 @@ export default function Home() {
   );
 }
 
-function QuickCard({ icon, title, text }: any) {
+function QuickCard({ href, icon, title, text }: any) {
   return (
-    <div style={quickCard}>
+    <Link href={href} style={quickCard}>
       <div style={quickIcon}>{icon}</div>
       <div>
         <strong>{title}</strong>
         <p>{text}</p>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -308,6 +308,8 @@ const quickCard: React.CSSProperties = {
   border: "1px solid rgba(0,198,255,0.18)",
   backdropFilter: "blur(14px)",
   boxShadow: "0 20px 55px rgba(0,0,0,0.45)",
+  color: "#fff",
+  textDecoration: "none",
 };
 
 const quickIcon: React.CSSProperties = {
