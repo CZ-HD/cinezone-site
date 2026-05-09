@@ -99,10 +99,9 @@ export default function Home() {
               {hero.overview || "Aucune description disponible pour ce film."}
             </p>
 
-            <div style={buttonRow}>
-              <Link href={`/movie/${hero.id}`} style={primaryBtn}>
-                ▶ Voir le film
-              </Link>
+            <Link href={`/movie/${hero.id}`} style={primaryBtn}>
+  🎬 Accéder au film
+</Link>
 
               <Link href="/films" style={secondaryBtn}>
                 Explorer le catalogue
