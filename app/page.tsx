@@ -99,9 +99,10 @@ export default function Home() {
               {hero.overview || "Aucune description disponible pour ce film."}
             </p>
 
-            <Link href={`/movie/${hero.id}`} style={primaryBtn}>
-  🎬 Accéder au film
-</Link>
+            <div style={buttonRow}>
+              <Link href={`/movie/${hero.id}`} style={primaryBtn}>
+                🎬 Accéder au film
+              </Link>
 
               <Link href="/films" style={secondaryBtn}>
                 Explorer le catalogue
@@ -121,11 +122,11 @@ export default function Home() {
       )}
 
       <section style={quickCards}>
-  <QuickCard href="/films" icon="🔥" title="Tendances" text="Les films populaires" />
-  <QuickCard href="/films" icon="🆕" title="Nouveautés" text="Les derniers ajouts" />
-  <QuickCard href="/films" icon="🎬" title="Films" text="Accéder au catalogue" />
-  <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
-</section>
+        <QuickCard href="/films" icon="🔥" title="Tendances" text="Les films populaires" />
+        <QuickCard href="/films" icon="🆕" title="Nouveautés" text="Les derniers ajouts" />
+        <QuickCard href="/films" icon="🎬" title="Films" text="Accéder au catalogue" />
+        <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
+      </section>
 
       <div style={contentStyle}>
         <Row title="🔥 Tendances" movies={trending} />
@@ -145,7 +146,7 @@ function QuickCard({ href, icon, title, text }: any) {
       <div style={quickIcon}>{icon}</div>
       <div>
         <strong>{title}</strong>
-        <p>{text}</p>
+        <p style={{ margin: "5px 0 0", color: "#cbd5e1" }}>{text}</p>
       </div>
     </Link>
   );
@@ -350,7 +351,6 @@ const movieCard: React.CSSProperties = {
   overflow: "hidden",
   background: "rgba(255,255,255,0.05)",
   border: "1px solid rgba(255,255,255,0.08)",
-  transition: "transform 0.25s ease, box-shadow 0.25s ease",
 };
 
 const posterStyle: React.CSSProperties = {
