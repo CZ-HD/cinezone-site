@@ -60,15 +60,15 @@ export default function FilmsPage() {
       return;
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role,status")
-      .eq("id", user.id)
-      .maybeSingle();
+  const { data: profile } = await supabase
+  .from("profiles")
+  .select("role,status")
+  .eq("id", user.id)
+  .maybeSingle();
 
-    if (profile?.role === "admin" && profile?.status === "approved") {
-      setIsAdmin(true);
-    }
+if (profile?.role === "admin" && profile?.status === "approved") {
+  setIsAdmin(true);
+}
   };
 
   const loadMovies = async () => {
@@ -89,20 +89,33 @@ export default function FilmsPage() {
     setLoading(false);
   };
 
-  const searchTmdb = async (query: string) => {
-    if (query.trim().length < 2) {
-      setTmdbResults([]);
-      return;
-    }
+  const cleanSearch = (value: string) => {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, " ")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
 
-    setTmdbLoading(true);
+const searchTmdb = async (query: string) => {
+  if (query.trim().length < 2) {
+    setTmdbResults([]);
+    return;
+  }
 
-    try {
-      const res = await fetch(
-        `${BASE_URL}/search/movie?api_key=${API_KEY}&language=fr-FR&query=${encodeURIComponent(
-          query
-        )}`
-      );
+  setTmdbLoading(true);
+
+  try {
+    const cleanedQuery = cleanSearch(query);
+
+    const res = await fetch(
+      `${BASE_URL}/search/movie?api_key=${API_KEY}&language=fr-FR&query=${encodeURIComponent(
+        cleanedQuery
+      )}`
+    );
 
       if (!res.ok) {
         setTmdbResults([]);
