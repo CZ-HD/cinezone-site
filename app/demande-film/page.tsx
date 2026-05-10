@@ -8,11 +8,14 @@ const CREATOR_EMAILS = [
   "lafooteusedu54@hotmail.fr",
 ];
 
+type RequestFilter = "all" | "pending" | "replied";
+
 export default function DemandeFilmPage() {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [demandes, setDemandes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<RequestFilter>("all");
 
   const [tmdbLink, setTmdbLink] = useState("");
   const [annee, setAnnee] = useState("");
@@ -49,13 +52,9 @@ export default function DemandeFilmPage() {
       .eq("id", data.user.id)
       .single();
 
-    const isCreator =
-      data.user.email && CREATOR_EMAILS.includes(data.user.email);
+    const isCreator = data.user.email && CREATOR_EMAILS.includes(data.user.email);
 
-    if (
-      isCreator ||
-      (profile?.role === "admin" && profile?.status === "approved")
-    ) {
+    if (isCreator || (profile?.role === "admin" && profile?.status === "approved")) {
       setIsAdmin(true);
     }
 
@@ -162,37 +161,32 @@ export default function DemandeFilmPage() {
   async function supprimerDemande(id: string) {
     if (!isAdmin) return;
 
-    if (!confirm("Supprimer cette demande ?")) {
-      return;
-    }
+    if (!confirm("Supprimer cette demande ?")) return;
 
     await supabase.from("demandes_films").delete().eq("id", id);
-
     loadDemandes();
   }
 
   const waitingCount = demandes.filter((d) => !d.admin_reply).length;
   const repliedCount = demandes.filter((d) => d.admin_reply).length;
 
+  const filteredDemandes = demandes.filter((d) => {
+    if (filter === "pending") return !d.admin_reply;
+    if (filter === "replied") return !!d.admin_reply;
+    return true;
+  });
+
   return (
     <main style={pageStyle}>
-      <div style={pageGlowOne} />
-      <div style={pageGlowTwo} />
-
       <div style={containerStyle}>
         <section style={heroStyle}>
+          <div style={heroOverlay} />
           <div style={heroContent}>
             <span style={badgeStyle}>🎬 CineZone Request</span>
             <h1 style={heroTitle}>Demande de film</h1>
             <p style={heroText}>
-              Propose un film à ajouter sur CineZone. Plus ta demande est claire,
-              plus elle sera facile à traiter.
+              Propose un film à ajouter sur CineZone HD.
             </p>
-
-            <div style={heroStatsRow}>
-              <span style={miniStat}>🟡 {waitingCount} en attente</span>
-              <span style={miniStat}>🟢 {repliedCount} répondues</span>
-            </div>
           </div>
 
           <div style={statsBox}>
@@ -202,24 +196,39 @@ export default function DemandeFilmPage() {
         </section>
 
         <section style={cardStyle}>
-          <div style={cardHeaderRow}>
-            <div>
-              <h2 style={sectionTitle}>🚀 Nouvelle demande</h2>
-              <p style={sectionSubText}>Lien TMDB, année, codec et précision demandée.</p>
+          <h2 style={sectionTitle}>🚀 Nouvelle demande</h2>
+
+          <div style={tmdbRow}>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Lien ou ID TMDB</label>
+              <div style={inputWithIcon}>
+                <span style={inputIcon}>🔗</span>
+                <input
+                  value={tmdbLink}
+                  onChange={(e) => setTmdbLink(e.target.value)}
+                  placeholder="Ex : https://www.themoviedb.org/movie/12345 ou 12345"
+                  style={inputInside}
+                />
+              </div>
             </div>
+
+            <button
+              type="button"
+              style={pasteButton}
+              onClick={async () => {
+                try {
+                  const text = await navigator.clipboard.readText();
+                  setTmdbLink(text);
+                } catch {
+                  alert("Impossible de lire le presse-papiers.");
+                }
+              }}
+            >
+              📋 Coller le lien
+            </button>
           </div>
 
           <div style={formGrid}>
-            <div>
-              <label style={labelStyle}>Lien ou ID TMDB</label>
-              <input
-                value={tmdbLink}
-                onChange={(e) => setTmdbLink(e.target.value)}
-                placeholder="Ex: https://www.themoviedb.org/movie/12345"
-                style={inputStyle}
-              />
-            </div>
-
             <div>
               <label style={labelStyle}>Année</label>
               <input
@@ -241,182 +250,197 @@ export default function DemandeFilmPage() {
                 <option>H265</option>
               </select>
             </div>
+
+            <div>
+              <label style={labelStyle}>Langue</label>
+              <select style={inputStyle} defaultValue="VF / VOSTFR">
+                <option>VF / VOSTFR</option>
+                <option>VF</option>
+                <option>VOSTFR</option>
+              </select>
+            </div>
           </div>
 
           <div style={{ marginTop: "14px" }}>
             <label style={labelStyle}>Commentaire</label>
-            <textarea
-              value={commentaire}
-              onChange={(e) => setCommentaire(e.target.value)}
-              placeholder="Qualité souhaitée, version, langue, remarque..."
-              rows={5}
-              style={textareaStyle}
-            />
+            <div style={textareaWithIcon}>
+              <span style={textareaIcon}>✎</span>
+              <textarea
+                value={commentaire}
+                onChange={(e) => setCommentaire(e.target.value)}
+                placeholder="Qualité souhaitée, version, langue, remarque..."
+                rows={5}
+                style={textareaInside}
+              />
+            </div>
           </div>
 
           <button onClick={envoyerDemande} disabled={loading} style={buttonStyle}>
             {loading ? "Envoi en cours..." : "🚀 Envoyer la demande"}
           </button>
 
-          <p style={helpText}>ℹ️ Une demande précise a plus de chances d’être acceptée.</p>
-
+          <p style={helpText}>ⓘ Plus votre demande est précise, plus elle a de chances d’être acceptée !</p>
           {message && <p style={messageStyle}>{message}</p>}
         </section>
 
         <section style={cardStyle}>
-          <div style={cardHeaderRow}>
-            <div>
-              <h2 style={sectionTitle}>📋 Demandes envoyées</h2>
-              <p style={sectionSubText}>Suivi des demandes et réponses administrateur.</p>
-            </div>
+          <h2 style={sectionTitle}>📋 Demandes envoyées</h2>
+
+          <div style={filterRow}>
+            <button
+              onClick={() => setFilter("all")}
+              style={filter === "all" ? filterBtnActive : filterBtn}
+            >
+              Toutes <strong>{demandes.length}</strong>
+            </button>
+            <button
+              onClick={() => setFilter("pending")}
+              style={filter === "pending" ? filterBtnActive : filterBtn}
+            >
+              🏆 En attente <strong>{waitingCount}</strong>
+            </button>
+            <button
+              onClick={() => setFilter("replied")}
+              style={filter === "replied" ? filterBtnActive : filterBtn}
+            >
+              ✅ Répondues <strong>{repliedCount}</strong>
+            </button>
           </div>
 
-          {demandes.length === 0 ? (
+          {filteredDemandes.length === 0 ? (
             <div style={emptyStyle}>
               <p>Aucune demande pour le moment.</p>
             </div>
           ) : (
             <div style={listStyle}>
-              {demandes.map((d) => {
+              {filteredDemandes.map((d) => {
                 const canEdit = d.user_id === user?.id;
 
                 return (
-                  <article key={d.id} style={demandeCard}>
-                    {editId === d.id ? (
-                      <>
-                        <input
-                          value={editTmdbLink}
-                          onChange={(e) => setEditTmdbLink(e.target.value)}
-                          style={inputStyle}
-                        />
+                  <article key={d.id} style={movieRequestCard}>
+                    <div style={fakePoster}>
+                      <span>🎬</span>
+                    </div>
 
-                        <input
-                          value={editAnnee}
-                          onChange={(e) => setEditAnnee(e.target.value)}
-                          style={inputStyle}
-                        />
+                    <div style={requestContent}>
+                      {editId === d.id ? (
+                        <>
+                          <input
+                            value={editTmdbLink}
+                            onChange={(e) => setEditTmdbLink(e.target.value)}
+                            style={inputStyle}
+                          />
 
-                        <select
-                          value={editCodec}
-                          onChange={(e) => setEditCodec(e.target.value)}
-                          style={inputStyle}
-                        >
-                          <option>H264</option>
-                          <option>H265</option>
-                        </select>
+                          <input
+                            value={editAnnee}
+                            onChange={(e) => setEditAnnee(e.target.value)}
+                            style={inputStyle}
+                          />
 
-                        <textarea
-                          value={editCommentaire}
-                          onChange={(e) => setEditCommentaire(e.target.value)}
-                          rows={4}
-                          style={textareaStyle}
-                        />
+                          <select
+                            value={editCodec}
+                            onChange={(e) => setEditCodec(e.target.value)}
+                            style={inputStyle}
+                          >
+                            <option>H264</option>
+                            <option>H265</option>
+                          </select>
 
-                        <div style={buttonRow}>
-                          <button onClick={sauvegarderModification} style={btnBlue}>
-                            💾 Sauvegarder
-                          </button>
+                          <textarea
+                            value={editCommentaire}
+                            onChange={(e) => setEditCommentaire(e.target.value)}
+                            rows={4}
+                            style={textareaStyle}
+                          />
 
-                          <button onClick={() => setEditId(null)} style={btnGray}>
-                            Annuler
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div style={demandeTop}>
-                          <div style={{ minWidth: 0 }}>
-                            <h3 style={demandeTitle}>{d.tmdb_link}</h3>
-                            <div style={metaRow}>
-                              <span style={metaPill}>📅 {d.annee}</span>
-                              <span style={metaPill}>🎞️ {d.codec}</span>
-                              <span style={metaPill}>🗓️ {formatDate(d.created_at)}</span>
-                            </div>
-                          </div>
-
-                          <span style={d.admin_reply ? repliedBadge : statusBadge}>
-                            {d.admin_reply ? "Répondu" : "En attente"}
-                          </span>
-                        </div>
-
-                        <div style={commentBox}>
-                          <strong style={boxLabel}>💭 Commentaire membre</strong>
-                          <p style={commentText}>{d.commentaire}</p>
-                        </div>
-
-                        <p style={authorText}>
-                          Demandé par : <strong>{d.email}</strong>
-                        </p>
-
-                        {d.admin_reply && (
-                          <div style={replyBox}>
-                            <strong style={{ color: "#67e8f9" }}>
-                              💬 Réponse admin
-                            </strong>
-                            <p style={{ margin: "8px 0 0", color: "#e5e7eb", lineHeight: 1.6 }}>
-                              {d.admin_reply}
-                            </p>
-                          </div>
-                        )}
-
-                        {isAdmin && replyId === d.id && (
-                          <div style={replyEditorBox}>
-                            <textarea
-                              value={replyText}
-                              onChange={(e) => setReplyText(e.target.value)}
-                              placeholder="Écrire une réponse au membre..."
-                              rows={3}
-                              style={textareaStyle}
-                            />
-
-                            <div style={buttonRow}>
-                              <button
-                                onClick={() => envoyerReponse(d.id)}
-                                style={btnBlue}
-                              >
-                                📩 Envoyer la réponse
-                              </button>
-
-                              <button
-                                onClick={() => setReplyId(null)}
-                                style={btnGray}
-                              >
-                                Annuler
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        <div style={buttonRow}>
-                          {canEdit && (
-                            <button onClick={() => startEdit(d)} style={btnBlue}>
-                              ✏️ Modifier
+                          <div style={buttonRow}>
+                            <button onClick={sauvegarderModification} style={btnBlue}>
+                              💾 Sauvegarder
                             </button>
+                            <button onClick={() => setEditId(null)} style={btnGray}>
+                              Annuler
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div style={requestTop}>
+                            <div>
+                              <h3 style={demandeTitle}>{cleanTitle(d.tmdb_link)}</h3>
+                              <p style={tmdbText}>{d.tmdb_link}</p>
+                            </div>
+
+                            <span style={d.admin_reply ? repliedBadge : statusBadge}>
+                              {d.admin_reply ? "✅ Répondu" : "🕒 En attente"}
+                            </span>
+                          </div>
+
+                          <div style={infoGrid}>
+                            <div style={infoBox}>📅<span>Demandé le</span><strong>{formatDate(d.created_at)}</strong></div>
+                            <div style={infoBox}>🎞️<span>Codec</span><strong>{d.codec}</strong></div>
+                            <div style={infoBox}>🌐<span>Langue</span><strong>VF/VOSTFR</strong></div>
+                            <div style={infoBox}>💬<span>Commentaire</span><strong>{d.commentaire}</strong></div>
+                          </div>
+
+                          <p style={authorText}>Demandé par : <strong>{d.email}</strong></p>
+
+                          {d.admin_reply && (
+                            <div style={replyBox}>
+                              <strong style={{ color: "#67e8f9" }}>💬 Réponse admin</strong>
+                              <p style={{ margin: "8px 0 0", color: "#e5e7eb", lineHeight: 1.6 }}>
+                                {d.admin_reply}
+                              </p>
+                            </div>
                           )}
 
-                          {isAdmin && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  setReplyId(d.id);
-                                  setReplyText(d.admin_reply || "");
-                                }}
-                                style={btnBlue}
-                              >
-                                💬 Répondre
-                              </button>
+                          {isAdmin && replyId === d.id && (
+                            <div style={replyEditorBox}>
+                              <textarea
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="Écrire une réponse au membre..."
+                                rows={3}
+                                style={textareaStyle}
+                              />
 
-                              <button
-                                onClick={() => supprimerDemande(d.id)}
-                                style={btnRed}
-                              >
-                                🗑 Supprimer
-                              </button>
-                            </>
+                              <div style={buttonRow}>
+                                <button onClick={() => envoyerReponse(d.id)} style={btnBlue}>
+                                  📩 Envoyer la réponse
+                                </button>
+                                <button onClick={() => setReplyId(null)} style={btnGray}>
+                                  Annuler
+                                </button>
+                              </div>
+                            </div>
                           )}
-                        </div>
-                      </>
-                    )}
+
+                          <div style={buttonRow}>
+                            {canEdit && (
+                              <button onClick={() => startEdit(d)} style={btnBlue}>
+                                ✏️ Modifier
+                              </button>
+                            )}
+
+                            {isAdmin && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setReplyId(d.id);
+                                    setReplyText(d.admin_reply || "");
+                                  }}
+                                  style={btnBlue}
+                                >
+                                  💬 Répondre
+                                </button>
+                                <button onClick={() => supprimerDemande(d.id)} style={btnRed}>
+                                  🗑 Supprimer
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </article>
                 );
               })}
@@ -433,6 +457,19 @@ function formatDate(value?: string) {
   return new Date(value).toLocaleDateString("fr-FR");
 }
 
+function cleanTitle(value?: string) {
+  if (!value) return "Film demandé";
+  const match = value.match(/\/movie\/(\d+)-?([^?/]*)/);
+  if (match?.[2]) {
+    return match[2]
+      .split("-")
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+  return "Film demandé";
+}
+
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   padding: "60px 30px",
@@ -447,77 +484,61 @@ const pageStyle: React.CSSProperties = {
   backgroundAttachment: "fixed",
   color: "#fff",
   fontFamily: "Arial, sans-serif",
-  position: "relative",
-  overflow: "hidden",
-};
-
-const pageGlowOne: React.CSSProperties = {
-  position: "fixed",
-  width: "420px",
-  height: "420px",
-  borderRadius: "50%",
-  background: "rgba(0,198,255,0.12)",
-  filter: "blur(80px)",
-  top: "-120px",
-  left: "-140px",
-  pointerEvents: "none",
-};
-
-const pageGlowTwo: React.CSSProperties = {
-  position: "fixed",
-  width: "420px",
-  height: "420px",
-  borderRadius: "50%",
-  background: "rgba(92,0,255,0.14)",
-  filter: "blur(90px)",
-  bottom: "-120px",
-  right: "-140px",
-  pointerEvents: "none",
 };
 
 const containerStyle: React.CSSProperties = {
   maxWidth: "980px",
   margin: "0 auto",
-  position: "relative",
-  zIndex: 2,
 };
 
 const heroStyle: React.CSSProperties = {
-  padding: "36px",
-  borderRadius: "30px",
+  position: "relative",
+  overflow: "hidden",
+  padding: "34px",
+  borderRadius: "28px",
   marginBottom: "28px",
-  background:
-    "linear-gradient(135deg, rgba(5,10,18,0.84), rgba(8,16,32,0.74))",
+  minHeight: "140px",
+  background: `
+    linear-gradient(90deg, rgba(0,0,0,0.86), rgba(0,0,0,0.42)),
+    url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba")
+  `,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
   border: "1px solid rgba(0,198,255,0.35)",
-  boxShadow: "0 0 70px rgba(0,198,255,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
+  boxShadow: "0 0 60px rgba(0,198,255,0.15)",
   display: "flex",
   justifyContent: "space-between",
   gap: "20px",
   alignItems: "center",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+};
+
+const heroOverlay: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  background: "radial-gradient(circle at 65% 50%, rgba(0,198,255,0.16), transparent 38%)",
+  pointerEvents: "none",
 };
 
 const heroContent: React.CSSProperties = {
-  maxWidth: "720px",
+  position: "relative",
+  zIndex: 2,
 };
 
 const badgeStyle: React.CSSProperties = {
   display: "inline-block",
   padding: "9px 16px",
   borderRadius: "999px",
-  background: "rgba(0,198,255,0.13)",
-  border: "1px solid rgba(0,198,255,0.38)",
+  background: "rgba(0,198,255,0.12)",
+  border: "1px solid rgba(0,198,255,0.32)",
   color: "#67e8f9",
   fontWeight: 900,
   marginBottom: "14px",
-  boxShadow: "0 0 20px rgba(0,198,255,0.16)",
 };
 
 const heroTitle: React.CSSProperties = {
-  fontSize: "44px",
+  fontSize: "42px",
   margin: 0,
-  letterSpacing: "-0.04em",
+  textShadow: "0 0 24px rgba(0,198,255,0.42)",
 };
 
 const heroText: React.CSSProperties = {
@@ -526,68 +547,45 @@ const heroText: React.CSSProperties = {
   lineHeight: 1.6,
 };
 
-const heroStatsRow: React.CSSProperties = {
-  display: "flex",
-  gap: "10px",
-  flexWrap: "wrap",
-  marginTop: "16px",
-};
-
-const miniStat: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "999px",
-  background: "rgba(255,255,255,0.07)",
-  border: "1px solid rgba(255,255,255,0.11)",
-  color: "#dbeafe",
-  fontSize: "12px",
-  fontWeight: 800,
-};
-
 const statsBox: React.CSSProperties = {
-  minWidth: "124px",
+  position: "relative",
+  zIndex: 2,
+  minWidth: "120px",
   padding: "18px",
-  borderRadius: "22px",
+  borderRadius: "20px",
   textAlign: "center",
-  background: "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
-  border: "1px solid rgba(255,255,255,0.13)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(255,255,255,0.18)",
 };
 
 const cardStyle: React.CSSProperties = {
-  padding: "28px",
-  borderRadius: "26px",
-  background:
-    "linear-gradient(180deg, rgba(10,15,25,0.86), rgba(5,10,18,0.88))",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  padding: "26px",
+  borderRadius: "24px",
+  background: "rgba(10,15,25,0.86)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
   marginBottom: "25px",
   border: "1px solid rgba(0,198,255,0.25)",
-  boxShadow: "0 24px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.04)",
-};
-
-const cardHeaderRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: "14px",
-  alignItems: "flex-start",
+  boxShadow: "0 20px 70px rgba(0,0,0,0.6)",
 };
 
 const sectionTitle: React.CSSProperties = {
   margin: 0,
-  fontSize: "23px",
+  fontSize: "22px",
 };
 
-const sectionSubText: React.CSSProperties = {
-  margin: "7px 0 0",
-  color: "#8ea0b6",
-  fontSize: "13px",
+const tmdbRow: React.CSSProperties = {
+  display: "flex",
+  gap: "14px",
+  alignItems: "flex-end",
+  marginTop: "18px",
 };
 
 const formGrid: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1fr 150px 160px",
+  gridTemplateColumns: "1fr 1fr 1fr",
   gap: "14px",
-  marginTop: "20px",
+  marginTop: "18px",
 };
 
 const labelStyle: React.CSSProperties = {
@@ -601,14 +599,72 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "15px",
-  borderRadius: "16px",
-  background: "rgba(5,10,18,0.92)",
+  borderRadius: "14px",
+  background: "#0b0f18",
   color: "#fff",
-  border: "1px solid rgba(255,255,255,0.13)",
+  border: "1px solid rgba(255,255,255,0.12)",
   outline: "none",
   boxSizing: "border-box",
   marginBottom: "10px",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+};
+
+const inputWithIcon: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  padding: "0 14px",
+  borderRadius: "14px",
+  background: "#0b0f18",
+  border: "1px solid rgba(255,255,255,0.14)",
+};
+
+const inputIcon: React.CSSProperties = {
+  opacity: 0.8,
+};
+
+const inputInside: React.CSSProperties = {
+  flex: 1,
+  padding: "15px 0",
+  background: "transparent",
+  border: "none",
+  outline: "none",
+  color: "#fff",
+  fontSize: "15px",
+};
+
+const pasteButton: React.CSSProperties = {
+  padding: "15px 22px",
+  borderRadius: "12px",
+  background: "rgba(80,40,255,0.12)",
+  border: "1px solid rgba(130,80,255,0.8)",
+  color: "#fff",
+  fontWeight: 900,
+  cursor: "pointer",
+  marginBottom: "10px",
+};
+
+const textareaWithIcon: React.CSSProperties = {
+  display: "flex",
+  gap: "12px",
+  padding: "12px 14px",
+  borderRadius: "14px",
+  background: "#0b0f18",
+  border: "1px solid rgba(255,255,255,0.12)",
+};
+
+const textareaIcon: React.CSSProperties = {
+  paddingTop: "5px",
+  opacity: 0.8,
+};
+
+const textareaInside: React.CSSProperties = {
+  flex: 1,
+  background: "transparent",
+  border: "none",
+  outline: "none",
+  color: "#fff",
+  resize: "vertical",
+  fontFamily: "Arial, sans-serif",
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -620,20 +676,20 @@ const buttonStyle: React.CSSProperties = {
   width: "100%",
   marginTop: "18px",
   padding: "16px",
-  borderRadius: "16px",
-  background: "linear-gradient(135deg,#00c6ff,#0072ff,#3a00ff)",
+  borderRadius: "14px",
+  background: "linear-gradient(135deg,#00c6ff,#0072ff,#3a00ff,#d946ef)",
   border: "none",
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
-  boxShadow: "0 14px 34px rgba(0,114,255,0.35), 0 0 22px rgba(0,198,255,0.20)",
+  boxShadow: "0 0 30px rgba(0,198,255,0.32)",
 };
 
 const helpText: React.CSSProperties = {
-  color: "#8ea0b6",
-  fontSize: "13px",
   textAlign: "center",
-  margin: "12px 0 0",
+  color: "#9ca3af",
+  fontSize: "13px",
+  marginTop: "12px",
 };
 
 const messageStyle: React.CSSProperties = {
@@ -641,22 +697,61 @@ const messageStyle: React.CSSProperties = {
   color: "#cbd5e1",
 };
 
+const filterRow: React.CSSProperties = {
+  display: "flex",
+  gap: "12px",
+  flexWrap: "wrap",
+  marginTop: "20px",
+  marginBottom: "18px",
+};
+
+const filterBtn: React.CSSProperties = {
+  padding: "10px 18px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.04)",
+  color: "#d1d5db",
+  cursor: "pointer",
+};
+
+const filterBtnActive: React.CSSProperties = {
+  ...filterBtn,
+  background: "linear-gradient(135deg,#00c6ff,#0072ff)",
+  color: "#fff",
+  boxShadow: "0 0 18px rgba(0,198,255,0.35)",
+};
+
 const listStyle: React.CSSProperties = {
   display: "grid",
-  gap: "16px",
-  marginTop: "20px",
+  gap: "14px",
+  marginTop: "18px",
 };
 
-const demandeCard: React.CSSProperties = {
-  padding: "20px",
-  borderRadius: "20px",
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.075), rgba(255,255,255,0.038))",
-  border: "1px solid rgba(255,255,255,0.11)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 34px rgba(0,0,0,0.28)",
+const movieRequestCard: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "108px 1fr",
+  gap: "14px",
+  padding: "14px",
+  borderRadius: "18px",
+  background: "linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035))",
+  border: "1px solid rgba(255,255,255,0.12)",
 };
 
-const demandeTop: React.CSSProperties = {
+const fakePoster: React.CSSProperties = {
+  minHeight: "138px",
+  borderRadius: "12px",
+  background: "linear-gradient(135deg, rgba(0,198,255,0.28), rgba(80,40,255,0.28), rgba(0,0,0,0.5))",
+  border: "1px solid rgba(0,198,255,0.25)",
+  display: "grid",
+  placeItems: "center",
+  fontSize: "34px",
+};
+
+const requestContent: React.CSSProperties = {
+  minWidth: 0,
+};
+
+const requestTop: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   gap: "14px",
@@ -665,45 +760,32 @@ const demandeTop: React.CSSProperties = {
 
 const demandeTitle: React.CSSProperties = {
   margin: 0,
-  fontSize: "17px",
+  fontSize: "20px",
   wordBreak: "break-word",
-  color: "#fff",
 };
 
-const metaRow: React.CSSProperties = {
-  display: "flex",
-  gap: "8px",
-  flexWrap: "wrap",
-  marginTop: "10px",
-};
-
-const metaPill: React.CSSProperties = {
-  padding: "6px 9px",
-  borderRadius: "999px",
-  background: "rgba(0,198,255,0.10)",
-  border: "1px solid rgba(0,198,255,0.20)",
-  color: "#93c5fd",
-  fontSize: "12px",
-  fontWeight: 800,
-};
-
-const commentBox: React.CSSProperties = {
-  marginTop: "14px",
-  padding: "13px",
-  borderRadius: "16px",
-  background: "rgba(0,0,0,0.20)",
-  border: "1px solid rgba(255,255,255,0.08)",
-};
-
-const boxLabel: React.CSSProperties = {
-  color: "#cbd5e1",
+const tmdbText: React.CSSProperties = {
+  margin: "5px 0 0",
+  color: "#00c6ff",
   fontSize: "13px",
+  wordBreak: "break-word",
 };
 
-const commentText: React.CSSProperties = {
+const infoGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+  gap: "10px",
+  marginTop: "16px",
+};
+
+const infoBox: React.CSSProperties = {
+  padding: "10px",
+  borderRadius: "12px",
+  background: "rgba(0,0,0,0.22)",
+  border: "1px solid rgba(255,255,255,0.07)",
+  display: "grid",
+  gap: "4px",
   color: "#e5e7eb",
-  lineHeight: 1.6,
-  margin: "8px 0 0",
 };
 
 const authorText: React.CSSProperties = {
@@ -712,7 +794,7 @@ const authorText: React.CSSProperties = {
 };
 
 const statusBadge: React.CSSProperties = {
-  padding: "7px 11px",
+  padding: "7px 12px",
   borderRadius: "999px",
   background: "rgba(255,215,0,0.15)",
   border: "1px solid rgba(255,215,0,0.35)",
@@ -723,7 +805,7 @@ const statusBadge: React.CSSProperties = {
 };
 
 const repliedBadge: React.CSSProperties = {
-  padding: "7px 11px",
+  padding: "7px 12px",
   borderRadius: "999px",
   background: "rgba(34,197,94,0.15)",
   border: "1px solid rgba(34,197,94,0.35)",
@@ -734,20 +816,15 @@ const repliedBadge: React.CSSProperties = {
 };
 
 const replyBox: React.CSSProperties = {
-  marginTop: "14px",
-  padding: "14px",
-  borderRadius: "16px",
-  background: "linear-gradient(135deg, rgba(0,198,255,0.13), rgba(0,114,255,0.08))",
-  border: "1px solid rgba(0,198,255,0.32)",
-  boxShadow: "0 0 22px rgba(0,198,255,0.10)",
+  marginTop: "12px",
+  padding: "12px",
+  borderRadius: "14px",
+  background: "rgba(0,198,255,0.10)",
+  border: "1px solid rgba(0,198,255,0.30)",
 };
 
 const replyEditorBox: React.CSSProperties = {
-  marginTop: "14px",
-  padding: "14px",
-  borderRadius: "16px",
-  background: "rgba(0,0,0,0.24)",
-  border: "1px solid rgba(255,255,255,0.09)",
+  marginTop: "12px",
 };
 
 const buttonRow: React.CSSProperties = {
@@ -760,8 +837,8 @@ const buttonRow: React.CSSProperties = {
 const btnBlue: React.CSSProperties = {
   background: "rgba(0,198,255,0.16)",
   border: "1px solid rgba(0,198,255,0.45)",
-  padding: "10px 14px",
-  borderRadius: "12px",
+  padding: "9px 13px",
+  borderRadius: "10px",
   color: "#67e8f9",
   cursor: "pointer",
   fontWeight: 900,
@@ -770,8 +847,8 @@ const btnBlue: React.CSSProperties = {
 const btnGray: React.CSSProperties = {
   background: "rgba(255,255,255,0.08)",
   border: "1px solid rgba(255,255,255,0.16)",
-  padding: "10px 14px",
-  borderRadius: "12px",
+  padding: "9px 13px",
+  borderRadius: "10px",
   color: "#e5e7eb",
   cursor: "pointer",
   fontWeight: 900,
@@ -780,19 +857,17 @@ const btnGray: React.CSSProperties = {
 const btnRed: React.CSSProperties = {
   background: "rgba(255,40,40,0.16)",
   border: "1px solid rgba(255,80,80,0.45)",
-  padding: "10px 14px",
-  borderRadius: "12px",
+  padding: "9px 13px",
+  borderRadius: "10px",
   color: "#ffabab",
   cursor: "pointer",
   fontWeight: 900,
 };
 
 const emptyStyle: React.CSSProperties = {
-  padding: "38px",
+  padding: "35px",
   textAlign: "center",
   color: "#94a3b8",
-  borderRadius: "20px",
+  borderRadius: "18px",
   border: "1px dashed rgba(255,255,255,0.16)",
-  marginTop: "20px",
-  background: "rgba(255,255,255,0.035)",
 };
