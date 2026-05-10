@@ -612,144 +612,247 @@ if (line.includes("|")) {
             style={searchInput}
           />
         </div>
-
+<div
+  style={{
+    display: "grid",
+    gridTemplateColumns:
+      "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+    padding: "18px 14px",
+    background: "rgba(255,255,255,0.04)",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    fontWeight: 800,
+    color: "#dbeafe",
+    gap: "12px",
+  }}
+>
+  <div>Membre</div>
+  <div>Rôle</div>
+  <div>Statut</div>
+  <div>Page actuelle</div>
+  <div>Dernière activité</div>
+  <div>Inscrit le</div>
+  <div>Actions</div>
+</div>
         {filteredProfiles.length === 0 ? (
-          <p style={{ color: "#aaa" }}>Aucun membre trouvé.</p>
-        ) : (
-          <div style={memberGrid}>
-            {filteredProfiles.map((member) => {
-              const presence = getPresence(member.id);
-              const connected = isOnline(member.id);
-              const isCreator = !!member.email && CREATOR_EMAILS.includes(member.email);
-              const isMemberAdmin = member.role === "admin";
-              const isApproved = member.status === "approved";
-              const isBlocked = member.status === "blocked";
+  <p style={{ color: "#aaa" }}>Aucun membre trouvé.</p>
+) : (
+  <div style={memberGrid}>
+    {filteredProfiles.map((member) => {
+      const presence = getPresence(member.id);
+      const connected = isOnline(member.id);
+      const isCreator =
+        !!member.email && CREATOR_EMAILS.includes(member.email);
 
-              return (
-                <article key={member.id} style={memberCardStyle}>
-                  <div style={memberTop}>
-                    <img
-                      src={member.avatar || "/favicon.ico"}
-                      alt="avatar"
-                      style={{
-                        ...avatarStyle,
-                        border: connected
-                          ? "2px solid rgba(34,197,94,0.9)"
-                          : "2px solid rgba(255,80,80,0.55)",
-                     }}
-                   />
+      const isMemberAdmin = member.role === "admin";
+      const isApproved = member.status === "approved";
+      const isBlocked = member.status === "blocked";
 
-                    <div style={{ flex: 1 }}>
-                      <div style={nameRow}>
-                        <strong
-                          style={{
-                            color: isMemberAdmin
-                              ? "gold"
-                              : member.role_color || "#00c6ff",
-                          }}
-                        >
-                          {member.username || "Nouveau membre"}
-                        </strong>
+      return (
+        <div
+          key={member.id}
+          style={{
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            padding: "18px 14px",
+            display: "grid",
+            gridTemplateColumns:
+              "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          {/* MEMBRE */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <img
+              src={member.avatar || "/favicon.ico"}
+              alt="avatar"
+              style={{
+                width: "54px",
+                height: "54px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: connected
+                  ? "2px solid #22c55e"
+                  : "2px solid rgba(255,255,255,0.15)",
+              }}
+            />
 
-                        {isCreator && <span style={creatorBadge}>CRÉATEUR</span>}
-                        {isMemberAdmin && !isCreator && (
-                          <span style={adminBadge}>ADMIN</span>
-                        )}
-                      </div>
+            <div>
+              <div
+                style={{
+                  fontWeight: 800,
+                  color: "#00d2ff",
+                  fontSize: "18px",
+                }}
+              >
+                {member.username || "Nouveau membre"}
+              </div>
 
-                      <p style={emailText}>
-                        {member.email || presence?.email || "Email non stocké"}
-                      </p>
-
-                      <div style={statusRow}>
-                        <span style={rolePill}>{member.role || "user"}</span>
-
-                        <span
-                          style={{
-                            ...statusPill,
-                            ...(isApproved
-                              ? approvedPill
-                              : isBlocked
-                              ? blockedPill
-                              : pendingPill),
-                          }}
-                        >
-                          {member.status || "pending"}
-                        </span>
-
-                        <span
-                          style={{
-                            ...statusTextPill,
-                            color: connected ? "#86efac" : "#ffabab",
-                          }}
-                        >
-                          {connected ? "🟢 Connecté" : "🔴 Hors ligne"}
-                        </span>
-                      </div>
-
-                      <p style={presenceText}>
-                        👀 Page : {presence?.current_page || "inconnue"}
-                      </p>
-
-                      <p style={presenceText}>
-                        ⏱️{" "}
-                        {connected
-                          ? "Actif maintenant"
-                          : seenAgo(presence?.last_seen)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p style={dateText}>
-                    Inscrit le :{" "}
-                    {member.created_at
-                      ? new Date(member.created_at).toLocaleDateString("fr-FR")
-                      : "date inconnue"}
-                  </p>
-
-                  <div style={buttonRow}>
-                    <button
-                      style={btnGreen}
-                      onClick={() => updateUser(member.id, { status: "approved" })}
-                    >
-                      ✅ Valider
-                    </button>
-
-                    <button
-                      style={btnOrange}
-                      onClick={() => updateUser(member.id, { status: "blocked" })}
-                    >
-                      🚫 Bannir
-                    </button>
-
-                    {!isCreator && (
-                      <button
-                        style={btnGold}
-                        onClick={() =>
-                          updateUser(member.id, {
-                            role: isMemberAdmin ? "user" : "admin",
-                          })
-                        }
-                      >
-                        👑 {isMemberAdmin ? "Retirer admin" : "Admin"}
-                      </button>
-                    )}
-
-                    {!isCreator && (
-                      <button style={btnRed} onClick={() => deleteProfile(member.id)}>
-                        🗑 Supprimer
-                      </button>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+              <div
+                style={{
+                  color: "#9ca3af",
+                  fontSize: "13px",
+                  marginTop: "4px",
+                }}
+              >
+                {member.email}
+              </div>
+            </div>
           </div>
-        )}
-      </section>
-    </main>
-  );
-}
+
+          {/* ROLE */}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <span style={rolePill}>
+              {member.role || "user"}
+            </span>
+
+            {isCreator && (
+              <span style={creatorBadge}>CRÉATEUR</span>
+            )}
+          </div>
+
+          {/* STATUS */}
+          <div>
+            <span
+              style={{
+                padding: "7px 12px",
+                borderRadius: "999px",
+                fontWeight: 700,
+                fontSize: "13px",
+                background: connected
+                  ? "rgba(34,197,94,0.18)"
+                  : "rgba(255,80,80,0.14)",
+                color: connected ? "#4ade80" : "#ff9b9b",
+              }}
+            >
+              {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
+            </span>
+          </div>
+
+          {/* PAGE */}
+          <div
+            style={{
+              color: "#d1d5db",
+              fontSize: "14px",
+            }}
+          >
+            {presence?.current_page || "/"}
+          </div>
+
+          {/* ACTIVITÉ */}
+          <div
+            style={{
+              color: connected ? "#4ade80" : "#cbd5e1",
+              fontSize: "14px",
+              fontWeight: 600,
+            }}
+          >
+            {connected
+              ? "Actif maintenant"
+              : seenAgo(presence?.last_seen)}
+          </div>
+
+          {/* DATE */}
+          <div
+            style={{
+              color: "#cbd5e1",
+              fontSize: "14px",
+            }}
+          >
+            {member.created_at
+              ? new Date(member.created_at).toLocaleDateString("fr-FR")
+              : "-"}
+          </div>
+
+          {/* ACTIONS */}
+          <div style={{ position: "relative" }}>
+            <details>
+              <summary
+                style={{
+                  cursor: "pointer",
+                  listStyle: "none",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "12px",
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: "20px",
+                }}
+              >
+                ⋮
+              </summary>
+
+              <div
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "50px",
+                  width: "180px",
+                  background: "#060b16",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "16px",
+                  padding: "10px",
+                  zIndex: 50,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                }}
+              >
+                <button
+                  style={btnGreen}
+                  onClick={() =>
+                    updateUser(member.id, {
+                      status: "approved",
+                    })
+                  }
+                >
+                  ✅ Valider
+                </button>
+
+                <button
+                  style={btnOrange}
+                  onClick={() =>
+                    updateUser(member.id, {
+                      status: "blocked",
+                    })
+                  }
+                >
+                  🚫 Bannir
+                </button>
+
+                {!isCreator && (
+                  <button
+                    style={btnGold}
+                    onClick={() =>
+                      updateUser(member.id, {
+                        role: isMemberAdmin
+                          ? "user"
+                          : "admin",
+                      })
+                    }
+                  >
+                    👑 Admin
+                  </button>
+                )}
+
+                {!isCreator && (
+                  <button
+                    style={btnRed}
+                    onClick={() => deleteProfile(member.id)}
+                  >
+                    🗑 Supprimer
+                  </button>
+                )}
+              </div>
+            </details>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+)}
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
@@ -853,9 +956,11 @@ const searchInput: React.CSSProperties = {
 };
 
 const memberGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(330px, 1fr))",
-  gap: "16px",
+  width: "100%",
+  borderRadius: "22px",
+  overflow: "hidden",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(10,15,25,0.72)",
 };
 
 const memberCardStyle: React.CSSProperties = {
