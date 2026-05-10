@@ -215,14 +215,30 @@ export default function DemandeFilmPage() {
             <button
               type="button"
               style={pasteButton}
-              onClick={async () => {
-                try {
-                  const text = await navigator.clipboard.readText();
-                  setTmdbLink(text);
-                } catch {
-                  alert("Impossible de lire le presse-papiers.");
-                }
-              }}
+              <button
+  style={pasteBtn}
+  onClick={async () => {
+    try {
+      if (!navigator.clipboard) {
+        alert("Le collage automatique n'est pas supporté.");
+        return;
+      }
+
+      const text = await navigator.clipboard.readText();
+
+      if (!text) {
+        alert("Aucun lien trouvé.");
+        return;
+      }
+
+      setTmdbLink(text);
+    } catch {
+      alert("Impossible de lire le presse-papiers.");
+    }
+  }}
+>
+  📋 Coller le lien
+</button>
             >
               📋 Coller le lien
             </button>
