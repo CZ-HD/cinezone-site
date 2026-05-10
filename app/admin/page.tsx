@@ -711,22 +711,47 @@ if (line.includes("|")) {
           </div>
 
           {/* STATUS */}
-          <div>
-            <span
-              style={{
-                padding: "7px 12px",
-                borderRadius: "999px",
-                fontWeight: 700,
-                fontSize: "13px",
-                background: connected
-                  ? "rgba(34,197,94,0.18)"
-                  : "rgba(255,80,80,0.14)",
-                color: connected ? "#4ade80" : "#ff9b9b",
-              }}
-            >
-              {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
-            </span>
-          </div>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+  <span
+    style={{
+      padding: "6px 12px",
+      borderRadius: "999px",
+      fontWeight: 700,
+      fontSize: "12px",
+      width: "fit-content",
+      background:
+        member.status === "approved"
+          ? "rgba(34,197,94,0.18)"
+          : member.status === "blocked"
+          ? "rgba(255,80,80,0.18)"
+          : "rgba(255,215,0,0.18)",
+      color:
+        member.status === "approved"
+          ? "#4ade80"
+          : member.status === "blocked"
+          ? "#ff9b9b"
+          : "#facc15",
+    }}
+  >
+    {member.status || "pending"}
+  </span>
+
+  <span
+    style={{
+      padding: "6px 12px",
+      borderRadius: "999px",
+      fontWeight: 700,
+      fontSize: "12px",
+      width: "fit-content",
+      background: connected
+        ? "rgba(34,197,94,0.18)"
+        : "rgba(255,80,80,0.14)",
+      color: connected ? "#4ade80" : "#ff9b9b",
+    }}
+  >
+    {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
+  </span>
+</div>
 
           {/* PAGE */}
           <div
