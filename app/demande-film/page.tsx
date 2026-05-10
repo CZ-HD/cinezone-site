@@ -52,9 +52,13 @@ export default function DemandeFilmPage() {
       .eq("id", data.user.id)
       .single();
 
-    const isCreator = data.user.email && CREATOR_EMAILS.includes(data.user.email);
+    const isCreator =
+      data.user.email && CREATOR_EMAILS.includes(data.user.email);
 
-    if (isCreator || (profile?.role === "admin" && profile?.status === "approved")) {
+    if (
+      isCreator ||
+      (profile?.role === "admin" && profile?.status === "approved")
+    ) {
       setIsAdmin(true);
     }
 
@@ -168,7 +172,7 @@ export default function DemandeFilmPage() {
   }
 
   const waitingCount = demandes.filter((d) => !d.admin_reply).length;
-  const repliedCount = demandes.filter((d) => d.admin_reply).length;
+  const repliedCount = demandes.filter((d) => !!d.admin_reply).length;
 
   const filteredDemandes = demandes.filter((d) => {
     if (filter === "pending") return !d.admin_reply;
@@ -184,9 +188,7 @@ export default function DemandeFilmPage() {
           <div style={heroContent}>
             <span style={badgeStyle}>🎬 CineZone Request</span>
             <h1 style={heroTitle}>Demande de film</h1>
-            <p style={heroText}>
-              Propose un film à ajouter sur CineZone HD.
-            </p>
+            <p style={heroText}>Propose un film à ajouter sur CineZone HD.</p>
           </div>
 
           <div style={statsBox}>
@@ -215,30 +217,25 @@ export default function DemandeFilmPage() {
             <button
               type="button"
               style={pasteButton}
-              <button
-  style={pasteBtn}
-  onClick={async () => {
-    try {
-      if (!navigator.clipboard) {
-        alert("Le collage automatique n'est pas supporté.");
-        return;
-      }
+              onClick={async () => {
+                try {
+                  if (!navigator.clipboard) {
+                    alert("Le collage automatique n'est pas supporté.");
+                    return;
+                  }
 
-      const text = await navigator.clipboard.readText();
+                  const text = await navigator.clipboard.readText();
 
-      if (!text) {
-        alert("Aucun lien trouvé.");
-        return;
-      }
+                  if (!text) {
+                    alert("Aucun lien trouvé.");
+                    return;
+                  }
 
-      setTmdbLink(text);
-    } catch {
-      alert("Impossible de lire le presse-papiers.");
-    }
-  }}
->
-  📋 Coller le lien
-</button>
+                  setTmdbLink(text);
+                } catch {
+                  alert("Impossible de lire le presse-papiers.");
+                }
+              }}
             >
               📋 Coller le lien
             </button>
@@ -295,7 +292,9 @@ export default function DemandeFilmPage() {
             {loading ? "Envoi en cours..." : "🚀 Envoyer la demande"}
           </button>
 
-          <p style={helpText}>ⓘ Plus votre demande est précise, plus elle a de chances d’être acceptée !</p>
+          <p style={helpText}>
+            ⓘ Plus votre demande est précise, plus elle a de chances d’être acceptée !
+          </p>
           {message && <p style={messageStyle}>{message}</p>}
         </section>
 
@@ -392,18 +391,40 @@ export default function DemandeFilmPage() {
                           </div>
 
                           <div style={infoGrid}>
-                            <div style={infoBox}>📅<span>Demandé le</span><strong>{formatDate(d.created_at)}</strong></div>
-                            <div style={infoBox}>🎞️<span>Codec</span><strong>{d.codec}</strong></div>
-                            <div style={infoBox}>🌐<span>Langue</span><strong>VF/VOSTFR</strong></div>
-                            <div style={infoBox}>💬<span>Commentaire</span><strong>{d.commentaire}</strong></div>
+                            <div style={infoBox}>
+                              📅<span>Demandé le</span>
+                              <strong>{formatDate(d.created_at)}</strong>
+                            </div>
+                            <div style={infoBox}>
+                              🎞️<span>Codec</span>
+                              <strong>{d.codec}</strong>
+                            </div>
+                            <div style={infoBox}>
+                              🌐<span>Langue</span>
+                              <strong>VF/VOSTFR</strong>
+                            </div>
+                            <div style={infoBox}>
+                              💬<span>Commentaire</span>
+                              <strong>{d.commentaire}</strong>
+                            </div>
                           </div>
 
-                          <p style={authorText}>Demandé par : <strong>{d.email}</strong></p>
+                          <p style={authorText}>
+                            Demandé par : <strong>{d.email}</strong>
+                          </p>
 
                           {d.admin_reply && (
                             <div style={replyBox}>
-                              <strong style={{ color: "#67e8f9" }}>💬 Réponse admin</strong>
-                              <p style={{ margin: "8px 0 0", color: "#e5e7eb", lineHeight: 1.6 }}>
+                              <strong style={{ color: "#67e8f9" }}>
+                                💬 Réponse admin
+                              </strong>
+                              <p
+                                style={{
+                                  margin: "8px 0 0",
+                                  color: "#e5e7eb",
+                                  lineHeight: 1.6,
+                                }}
+                              >
                                 {d.admin_reply}
                               </p>
                             </div>
@@ -420,10 +441,16 @@ export default function DemandeFilmPage() {
                               />
 
                               <div style={buttonRow}>
-                                <button onClick={() => envoyerReponse(d.id)} style={btnBlue}>
+                                <button
+                                  onClick={() => envoyerReponse(d.id)}
+                                  style={btnBlue}
+                                >
                                   📩 Envoyer la réponse
                                 </button>
-                                <button onClick={() => setReplyId(null)} style={btnGray}>
+                                <button
+                                  onClick={() => setReplyId(null)}
+                                  style={btnGray}
+                                >
                                   Annuler
                                 </button>
                               </div>
@@ -448,7 +475,10 @@ export default function DemandeFilmPage() {
                                 >
                                   💬 Répondre
                                 </button>
-                                <button onClick={() => supprimerDemande(d.id)} style={btnRed}>
+                                <button
+                                  onClick={() => supprimerDemande(d.id)}
+                                  style={btnRed}
+                                >
                                   🗑 Supprimer
                                 </button>
                               </>
@@ -531,7 +561,8 @@ const heroStyle: React.CSSProperties = {
 const heroOverlay: React.CSSProperties = {
   position: "absolute",
   inset: 0,
-  background: "radial-gradient(circle at 65% 50%, rgba(0,198,255,0.16), transparent 38%)",
+  background:
+    "radial-gradient(circle at 65% 50%, rgba(0,198,255,0.16), transparent 38%)",
   pointerEvents: "none",
 };
 
@@ -749,14 +780,16 @@ const movieRequestCard: React.CSSProperties = {
   gap: "14px",
   padding: "14px",
   borderRadius: "18px",
-  background: "linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035))",
+  background:
+    "linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035))",
   border: "1px solid rgba(255,255,255,0.12)",
 };
 
 const fakePoster: React.CSSProperties = {
   minHeight: "138px",
   borderRadius: "12px",
-  background: "linear-gradient(135deg, rgba(0,198,255,0.28), rgba(80,40,255,0.28), rgba(0,0,0,0.5))",
+  background:
+    "linear-gradient(135deg, rgba(0,198,255,0.28), rgba(80,40,255,0.28), rgba(0,0,0,0.5))",
   border: "1px solid rgba(0,198,255,0.25)",
   display: "grid",
   placeItems: "center",
