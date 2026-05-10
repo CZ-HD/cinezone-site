@@ -67,8 +67,8 @@ export default function Home() {
           style={{
             ...heroStyle,
             backgroundImage: `
-              linear-gradient(to bottom, rgba(0,0,0,0.55), #000 96%),
-              linear-gradient(90deg, rgba(0,0,0,0.92), rgba(0,0,0,0.25), rgba(0,0,0,0.92)),
+              linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.72) 34%, rgba(0,0,0,0.25) 65%, rgba(0,0,0,0.78) 100%),
+              linear-gradient(to top, #000 0%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.35) 100%),
               url(${IMG}/original${hero.backdrop_path})
             `,
           }}
@@ -84,33 +84,29 @@ export default function Home() {
             ‹
           </button>
 
-          <div style={centerHeroContent}>
-            <MiniChat />
+          <div style={heroContent}>
+            <span style={badge}>🔥 FILM EN VEDETTE</span>
 
-            <div style={featuredCard}>
-              <span style={badge}>🔥 FILM EN VEDETTE</span>
+            <h1 style={heroTitle}>{hero.title}</h1>
 
-              <h1 style={heroTitle}>{hero.title}</h1>
+            <div style={metaRow}>
+              <span>⭐ {hero.vote_average?.toFixed(1)} / 10</span>
+              <span>🎬 {hero.release_date?.slice(0, 4) || "N/A"}</span>
+              <span style={qualityBadge}>HD</span>
+            </div>
 
-              <p style={heroText}>
-                {hero.overview || "Aucune description disponible pour ce film."}
-              </p>
+            <p style={heroText}>
+              {hero.overview || "Aucune description disponible pour ce film."}
+            </p>
 
-              <div style={metaRow}>
-                <span>⭐ {hero.vote_average?.toFixed(1)} / 10</span>
-                <span>🎬 {hero.release_date?.slice(0, 4) || "N/A"}</span>
-                <span style={qualityBadge}>HD</span>
-              </div>
+            <div style={buttonRow}>
+              <Link href={`/movie/${hero.id}`} style={primaryBtn}>
+                🎬 Accéder au film
+              </Link>
 
-              <div style={buttonRow}>
-                <Link href={`/movie/${hero.id}`} style={primaryBtn}>
-                  🎬 Accéder au film
-                </Link>
-
-                <Link href="/films" style={secondaryBtn}>
-                  Explorer le catalogue
-                </Link>
-              </div>
+              <Link href="/films" style={secondaryBtn}>
+                Explorer le catalogue
+              </Link>
             </div>
           </div>
 
@@ -129,7 +125,7 @@ export default function Home() {
         <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
         <QuickCard href="#nouveautes" icon="🆕" title="Nouveautés" text="Voir les derniers ajouts" />
         <QuickCard href="/films" icon="🎬" title="Catalogue" text="Accéder à tous les films" />
-        <QuickCard href="/chat" icon="💬" title="Chat" text="Ouvrir le chat complet" />
+        <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
       </section>
 
       <div style={contentStyle}>
@@ -142,38 +138,6 @@ export default function Home() {
         <Row title="❤️ Romance" movies={romance} />
       </div>
     </main>
-  );
-}
-
-function MiniChat() {
-  return (
-    <div style={chatBox}>
-      <div style={chatHeader}>
-        <strong>💬 Chat CineZone</strong>
-        <span style={onlineBadge}>● En direct</span>
-      </div>
-
-      <div style={chatMessages}>
-        <div style={chatMessage}>
-          <span style={avatar}>V</span>
-          <p><strong>Vadrox</strong> Bienvenue sur CineZone HD 🎬</p>
-        </div>
-
-        <div style={chatMessage}>
-          <span style={avatar}>A</span>
-          <p><strong>Athéna</strong> Pensez à choisir un pseudo et avatar 🔔</p>
-        </div>
-
-        <div style={chatMessage}>
-          <span style={avatar}>M</span>
-          <p><strong>Membre</strong> Merci pour les ajouts films 🙏</p>
-        </div>
-      </div>
-
-      <Link href="/chat" style={chatButton}>
-        Ouvrir le chat complet
-      </Link>
-    </div>
   );
 }
 
@@ -227,131 +191,45 @@ const pageStyle: React.CSSProperties = {
 
 const heroStyle: React.CSSProperties = {
   position: "relative",
-  minHeight: "82vh",
+  minHeight: "78vh",
   backgroundSize: "cover",
   backgroundPosition: "center",
   display: "flex",
   alignItems: "center",
-  justifyContent: "center",
   padding: "70px 90px",
 };
 
-const centerHeroContent: React.CSSProperties = {
-  width: "min(760px, 92vw)",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "18px",
+const heroContent: React.CSSProperties = {
+  maxWidth: "620px",
   zIndex: 2,
-};
-
-const chatBox: React.CSSProperties = {
-  width: "100%",
-  maxWidth: "720px",
-  padding: "18px",
-  borderRadius: "24px",
-  background: "rgba(5,10,18,0.48)",
-  border: "1px solid rgba(0,198,255,0.22)",
-  backdropFilter: "blur(18px)",
-  WebkitBackdropFilter: "blur(18px)",
-  boxShadow:
-    "0 25px 80px rgba(0,0,0,0.55), 0 0 35px rgba(0,198,255,0.12)",
-};
-
-const chatHeader: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "12px",
-};
-
-const onlineBadge: React.CSSProperties = {
-  color: "#86efac",
-  fontSize: "13px",
-  fontWeight: 900,
-};
-
-const chatMessages: React.CSSProperties = {
-  display: "grid",
-  gap: "9px",
-};
-
-const chatMessage: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "10px",
-  padding: "9px 12px",
-  borderRadius: "14px",
-  background: "rgba(255,255,255,0.06)",
-  color: "#e5e7eb",
-  fontSize: "14px",
-};
-
-const avatar: React.CSSProperties = {
-  width: "30px",
-  height: "30px",
-  borderRadius: "50%",
-  display: "grid",
-  placeItems: "center",
-  background: "linear-gradient(135deg,#00c6ff,#0072ff)",
-  fontWeight: 900,
-};
-
-const chatButton: React.CSSProperties = {
-  display: "inline-block",
-  marginTop: "13px",
-  color: "#67e8f9",
-  textDecoration: "none",
-  fontWeight: 900,
-};
-
-const featuredCard: React.CSSProperties = {
-  width: "100%",
-  maxWidth: "720px",
-  padding: "24px",
-  borderRadius: "24px",
-  background: "rgba(0,0,0,0.52)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
-  textAlign: "center",
-  boxShadow: "0 25px 80px rgba(0,0,0,0.55)",
 };
 
 const badge: React.CSSProperties = {
   display: "inline-block",
-  padding: "7px 13px",
+  padding: "8px 14px",
   borderRadius: "999px",
   background: "rgba(0,198,255,0.18)",
   border: "1px solid rgba(0,198,255,0.45)",
   color: "#67e8f9",
   fontWeight: 900,
-  marginBottom: "12px",
+  marginBottom: "18px",
+  boxShadow: "0 0 18px rgba(0,198,255,0.25)",
 };
 
 const heroTitle: React.CSSProperties = {
-  fontSize: "42px",
-  lineHeight: 1.08,
-  margin: "0 0 12px",
+  fontSize: "64px",
+  lineHeight: 1,
+  margin: "0 0 16px",
   fontWeight: 950,
   textShadow: "0 0 28px rgba(0,0,0,0.85)",
 };
 
-const heroText: React.CSSProperties = {
-  color: "#d1d5db",
-  lineHeight: 1.6,
-  fontSize: "15px",
-  maxWidth: "650px",
-  margin: "0 auto 14px",
-};
-
 const metaRow: React.CSSProperties = {
   display: "flex",
-  gap: "12px",
+  gap: "14px",
   alignItems: "center",
-  justifyContent: "center",
   color: "#dbeafe",
-  marginBottom: "16px",
+  marginBottom: "18px",
   fontWeight: 800,
   flexWrap: "wrap",
 };
@@ -363,15 +241,21 @@ const qualityBadge: React.CSSProperties = {
   color: "#67e8f9",
 };
 
+const heroText: React.CSSProperties = {
+  color: "#d1d5db",
+  lineHeight: 1.7,
+  fontSize: "17px",
+};
+
 const buttonRow: React.CSSProperties = {
   display: "flex",
-  gap: "12px",
-  justifyContent: "center",
+  gap: "14px",
+  marginTop: "26px",
   flexWrap: "wrap",
 };
 
 const primaryBtn: React.CSSProperties = {
-  padding: "13px 22px",
+  padding: "14px 24px",
   borderRadius: "13px",
   background: "linear-gradient(135deg,#00c6ff,#0072ff,#3a00ff)",
   color: "#fff",
@@ -381,7 +265,7 @@ const primaryBtn: React.CSSProperties = {
 };
 
 const secondaryBtn: React.CSSProperties = {
-  padding: "13px 22px",
+  padding: "14px 24px",
   borderRadius: "13px",
   background: "rgba(255,255,255,0.08)",
   border: "1px solid rgba(255,255,255,0.18)",
@@ -410,9 +294,10 @@ const quickCards: React.CSSProperties = {
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: "16px",
   padding: "0 40px",
-  marginTop: "-55px",
+  marginTop: "-65px",
   position: "relative",
   zIndex: 4,
+  scrollMarginTop: "120px",
 };
 
 const quickCard: React.CSSProperties = {
