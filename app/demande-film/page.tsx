@@ -50,8 +50,7 @@ export default function DemandeFilmPage() {
       .single();
 
     const isCreator =
-      data.user.email &&
-      CREATOR_EMAILS.includes(data.user.email);
+      data.user.email && CREATOR_EMAILS.includes(data.user.email);
 
     if (
       isCreator ||
@@ -167,25 +166,33 @@ export default function DemandeFilmPage() {
       return;
     }
 
-    await supabase
-      .from("demandes_films")
-      .delete()
-      .eq("id", id);
+    await supabase.from("demandes_films").delete().eq("id", id);
 
     loadDemandes();
   }
 
+  const waitingCount = demandes.filter((d) => !d.admin_reply).length;
+  const repliedCount = demandes.filter((d) => d.admin_reply).length;
+
   return (
     <main style={pageStyle}>
+      <div style={pageGlowOne} />
+      <div style={pageGlowTwo} />
+
       <div style={containerStyle}>
         <section style={heroStyle}>
-          <div>
+          <div style={heroContent}>
             <span style={badgeStyle}>🎬 CineZone Request</span>
             <h1 style={heroTitle}>Demande de film</h1>
             <p style={heroText}>
-              Propose un film à ajouter sur CineZone. Merci de remplir une
-              demande claire, complète et facile à traiter.
+              Propose un film à ajouter sur CineZone. Plus ta demande est claire,
+              plus elle sera facile à traiter.
             </p>
+
+            <div style={heroStatsRow}>
+              <span style={miniStat}>🟡 {waitingCount} en attente</span>
+              <span style={miniStat}>🟢 {repliedCount} répondues</span>
+            </div>
           </div>
 
           <div style={statsBox}>
@@ -195,7 +202,12 @@ export default function DemandeFilmPage() {
         </section>
 
         <section style={cardStyle}>
-          <h2 style={sectionTitle}>🚀 Nouvelle demande</h2>
+          <div style={cardHeaderRow}>
+            <div>
+              <h2 style={sectionTitle}>🚀 Nouvelle demande</h2>
+              <p style={sectionSubText}>Lien TMDB, année, codec et précision demandée.</p>
+            </div>
+          </div>
 
           <div style={formGrid}>
             <div>
@@ -246,11 +258,18 @@ export default function DemandeFilmPage() {
             {loading ? "Envoi en cours..." : "🚀 Envoyer la demande"}
           </button>
 
+          <p style={helpText}>ℹ️ Une demande précise a plus de chances d’être acceptée.</p>
+
           {message && <p style={messageStyle}>{message}</p>}
         </section>
 
         <section style={cardStyle}>
-          <h2 style={sectionTitle}>📋 Demandes envoyées</h2>
+          <div style={cardHeaderRow}>
+            <div>
+              <h2 style={sectionTitle}>📋 Demandes envoyées</h2>
+              <p style={sectionSubText}>Suivi des demandes et réponses administrateur.</p>
+            </div>
+          </div>
 
           {demandes.length === 0 ? (
             <div style={emptyStyle}>
@@ -306,11 +325,13 @@ export default function DemandeFilmPage() {
                     ) : (
                       <>
                         <div style={demandeTop}>
-                          <div>
+                          <div style={{ minWidth: 0 }}>
                             <h3 style={demandeTitle}>{d.tmdb_link}</h3>
-                            <p style={metaText}>
-                              📅 {d.annee} · 🎞️ {d.codec}
-                            </p>
+                            <div style={metaRow}>
+                              <span style={metaPill}>📅 {d.annee}</span>
+                              <span style={metaPill}>🎞️ {d.codec}</span>
+                              <span style={metaPill}>🗓️ {formatDate(d.created_at)}</span>
+                            </div>
                           </div>
 
                           <span style={d.admin_reply ? repliedBadge : statusBadge}>
@@ -318,7 +339,10 @@ export default function DemandeFilmPage() {
                           </span>
                         </div>
 
-                        <p style={commentText}>{d.commentaire}</p>
+                        <div style={commentBox}>
+                          <strong style={boxLabel}>💭 Commentaire membre</strong>
+                          <p style={commentText}>{d.commentaire}</p>
+                        </div>
 
                         <p style={authorText}>
                           Demandé par : <strong>{d.email}</strong>
@@ -327,16 +351,16 @@ export default function DemandeFilmPage() {
                         {d.admin_reply && (
                           <div style={replyBox}>
                             <strong style={{ color: "#67e8f9" }}>
-                              💬 Réponse admin :
+                              💬 Réponse admin
                             </strong>
-                            <p style={{ margin: "8px 0 0", color: "#e5e7eb" }}>
+                            <p style={{ margin: "8px 0 0", color: "#e5e7eb", lineHeight: 1.6 }}>
                               {d.admin_reply}
                             </p>
                           </div>
                         )}
 
                         {isAdmin && replyId === d.id && (
-                          <div style={{ marginTop: "12px" }}>
+                          <div style={replyEditorBox}>
                             <textarea
                               value={replyText}
                               onChange={(e) => setReplyText(e.target.value)}
@@ -404,11 +428,18 @@ export default function DemandeFilmPage() {
   );
 }
 
+function formatDate(value?: string) {
+  if (!value) return "date inconnue";
+  return new Date(value).toLocaleDateString("fr-FR");
+}
+
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   padding: "60px 30px",
   background: `
-    linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.88)),
+    radial-gradient(circle at 15% 12%, rgba(0,198,255,0.18), transparent 34%),
+    radial-gradient(circle at 85% 18%, rgba(105,40,255,0.18), transparent 34%),
+    linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.9)),
     url("https://images.unsplash.com/photo-1524985069026-dd778a71c7b4")
   `,
   backgroundSize: "cover",
@@ -416,41 +447,77 @@ const pageStyle: React.CSSProperties = {
   backgroundAttachment: "fixed",
   color: "#fff",
   fontFamily: "Arial, sans-serif",
+  position: "relative",
+  overflow: "hidden",
+};
+
+const pageGlowOne: React.CSSProperties = {
+  position: "fixed",
+  width: "420px",
+  height: "420px",
+  borderRadius: "50%",
+  background: "rgba(0,198,255,0.12)",
+  filter: "blur(80px)",
+  top: "-120px",
+  left: "-140px",
+  pointerEvents: "none",
+};
+
+const pageGlowTwo: React.CSSProperties = {
+  position: "fixed",
+  width: "420px",
+  height: "420px",
+  borderRadius: "50%",
+  background: "rgba(92,0,255,0.14)",
+  filter: "blur(90px)",
+  bottom: "-120px",
+  right: "-140px",
+  pointerEvents: "none",
 };
 
 const containerStyle: React.CSSProperties = {
-  maxWidth: "960px",
+  maxWidth: "980px",
   margin: "0 auto",
+  position: "relative",
+  zIndex: 2,
 };
 
 const heroStyle: React.CSSProperties = {
-  padding: "34px",
-  borderRadius: "28px",
+  padding: "36px",
+  borderRadius: "30px",
   marginBottom: "28px",
-  background: "rgba(5,10,18,0.76)",
+  background:
+    "linear-gradient(135deg, rgba(5,10,18,0.84), rgba(8,16,32,0.74))",
   border: "1px solid rgba(0,198,255,0.35)",
-  boxShadow: "0 0 60px rgba(0,198,255,0.15)",
+  boxShadow: "0 0 70px rgba(0,198,255,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
   display: "flex",
   justifyContent: "space-between",
   gap: "20px",
   alignItems: "center",
-  backdropFilter: "blur(14px)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+};
+
+const heroContent: React.CSSProperties = {
+  maxWidth: "720px",
 };
 
 const badgeStyle: React.CSSProperties = {
   display: "inline-block",
-  padding: "8px 14px",
+  padding: "9px 16px",
   borderRadius: "999px",
-  background: "rgba(0,198,255,0.12)",
-  border: "1px solid rgba(0,198,255,0.32)",
+  background: "rgba(0,198,255,0.13)",
+  border: "1px solid rgba(0,198,255,0.38)",
   color: "#67e8f9",
   fontWeight: 900,
   marginBottom: "14px",
+  boxShadow: "0 0 20px rgba(0,198,255,0.16)",
 };
 
 const heroTitle: React.CSSProperties = {
-  fontSize: "42px",
+  fontSize: "44px",
   margin: 0,
+  letterSpacing: "-0.04em",
 };
 
 const heroText: React.CSSProperties = {
@@ -459,56 +526,89 @@ const heroText: React.CSSProperties = {
   lineHeight: 1.6,
 };
 
+const heroStatsRow: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
+  flexWrap: "wrap",
+  marginTop: "16px",
+};
+
+const miniStat: React.CSSProperties = {
+  padding: "7px 10px",
+  borderRadius: "999px",
+  background: "rgba(255,255,255,0.07)",
+  border: "1px solid rgba(255,255,255,0.11)",
+  color: "#dbeafe",
+  fontSize: "12px",
+  fontWeight: 800,
+};
+
 const statsBox: React.CSSProperties = {
-  minWidth: "120px",
+  minWidth: "124px",
   padding: "18px",
-  borderRadius: "20px",
+  borderRadius: "22px",
   textAlign: "center",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.12)",
+  background: "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
+  border: "1px solid rgba(255,255,255,0.13)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
 };
 
 const cardStyle: React.CSSProperties = {
-  padding: "26px",
-  borderRadius: "24px",
-  background: "rgba(10,15,25,0.82)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
+  padding: "28px",
+  borderRadius: "26px",
+  background:
+    "linear-gradient(180deg, rgba(10,15,25,0.86), rgba(5,10,18,0.88))",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
   marginBottom: "25px",
   border: "1px solid rgba(0,198,255,0.25)",
-  boxShadow: "0 20px 70px rgba(0,0,0,0.6)",
+  boxShadow: "0 24px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.04)",
+};
+
+const cardHeaderRow: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "14px",
+  alignItems: "flex-start",
 };
 
 const sectionTitle: React.CSSProperties = {
   margin: 0,
-  fontSize: "22px",
+  fontSize: "23px",
+};
+
+const sectionSubText: React.CSSProperties = {
+  margin: "7px 0 0",
+  color: "#8ea0b6",
+  fontSize: "13px",
 };
 
 const formGrid: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1fr 150px 150px",
+  gridTemplateColumns: "1fr 150px 160px",
   gap: "14px",
-  marginTop: "18px",
+  marginTop: "20px",
 };
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  color: "#9ca3af",
+  color: "#a8b3c5",
   fontSize: "13px",
-  fontWeight: 800,
+  fontWeight: 900,
   marginBottom: "7px",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "15px",
-  borderRadius: "14px",
-  background: "#0b0f18",
+  borderRadius: "16px",
+  background: "rgba(5,10,18,0.92)",
   color: "#fff",
-  border: "1px solid rgba(255,255,255,0.12)",
+  border: "1px solid rgba(255,255,255,0.13)",
   outline: "none",
   boxSizing: "border-box",
   marginBottom: "10px",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -519,13 +619,21 @@ const textareaStyle: React.CSSProperties = {
 const buttonStyle: React.CSSProperties = {
   width: "100%",
   marginTop: "18px",
-  padding: "15px",
-  borderRadius: "14px",
+  padding: "16px",
+  borderRadius: "16px",
   background: "linear-gradient(135deg,#00c6ff,#0072ff,#3a00ff)",
   border: "none",
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
+  boxShadow: "0 14px 34px rgba(0,114,255,0.35), 0 0 22px rgba(0,198,255,0.20)",
+};
+
+const helpText: React.CSSProperties = {
+  color: "#8ea0b6",
+  fontSize: "13px",
+  textAlign: "center",
+  margin: "12px 0 0",
 };
 
 const messageStyle: React.CSSProperties = {
@@ -535,15 +643,17 @@ const messageStyle: React.CSSProperties = {
 
 const listStyle: React.CSSProperties = {
   display: "grid",
-  gap: "14px",
-  marginTop: "18px",
+  gap: "16px",
+  marginTop: "20px",
 };
 
 const demandeCard: React.CSSProperties = {
-  padding: "18px",
-  borderRadius: "18px",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  padding: "20px",
+  borderRadius: "20px",
+  background:
+    "linear-gradient(135deg, rgba(255,255,255,0.075), rgba(255,255,255,0.038))",
+  border: "1px solid rgba(255,255,255,0.11)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 34px rgba(0,0,0,0.28)",
 };
 
 const demandeTop: React.CSSProperties = {
@@ -557,16 +667,43 @@ const demandeTitle: React.CSSProperties = {
   margin: 0,
   fontSize: "17px",
   wordBreak: "break-word",
+  color: "#fff",
 };
 
-const metaText: React.CSSProperties = {
+const metaRow: React.CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  flexWrap: "wrap",
+  marginTop: "10px",
+};
+
+const metaPill: React.CSSProperties = {
+  padding: "6px 9px",
+  borderRadius: "999px",
+  background: "rgba(0,198,255,0.10)",
+  border: "1px solid rgba(0,198,255,0.20)",
   color: "#93c5fd",
-  margin: "8px 0 0",
+  fontSize: "12px",
+  fontWeight: 800,
+};
+
+const commentBox: React.CSSProperties = {
+  marginTop: "14px",
+  padding: "13px",
+  borderRadius: "16px",
+  background: "rgba(0,0,0,0.20)",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+
+const boxLabel: React.CSSProperties = {
+  color: "#cbd5e1",
+  fontSize: "13px",
 };
 
 const commentText: React.CSSProperties = {
   color: "#e5e7eb",
   lineHeight: 1.6,
+  margin: "8px 0 0",
 };
 
 const authorText: React.CSSProperties = {
@@ -575,31 +712,42 @@ const authorText: React.CSSProperties = {
 };
 
 const statusBadge: React.CSSProperties = {
-  padding: "6px 10px",
+  padding: "7px 11px",
   borderRadius: "999px",
   background: "rgba(255,215,0,0.15)",
   border: "1px solid rgba(255,215,0,0.35)",
   color: "#fde68a",
   fontSize: "12px",
   fontWeight: 900,
+  whiteSpace: "nowrap",
 };
 
 const repliedBadge: React.CSSProperties = {
-  padding: "6px 10px",
+  padding: "7px 11px",
   borderRadius: "999px",
   background: "rgba(34,197,94,0.15)",
   border: "1px solid rgba(34,197,94,0.35)",
   color: "#86efac",
   fontSize: "12px",
   fontWeight: 900,
+  whiteSpace: "nowrap",
 };
 
 const replyBox: React.CSSProperties = {
-  marginTop: "12px",
-  padding: "12px",
-  borderRadius: "14px",
-  background: "rgba(0,198,255,0.10)",
-  border: "1px solid rgba(0,198,255,0.30)",
+  marginTop: "14px",
+  padding: "14px",
+  borderRadius: "16px",
+  background: "linear-gradient(135deg, rgba(0,198,255,0.13), rgba(0,114,255,0.08))",
+  border: "1px solid rgba(0,198,255,0.32)",
+  boxShadow: "0 0 22px rgba(0,198,255,0.10)",
+};
+
+const replyEditorBox: React.CSSProperties = {
+  marginTop: "14px",
+  padding: "14px",
+  borderRadius: "16px",
+  background: "rgba(0,0,0,0.24)",
+  border: "1px solid rgba(255,255,255,0.09)",
 };
 
 const buttonRow: React.CSSProperties = {
@@ -612,8 +760,8 @@ const buttonRow: React.CSSProperties = {
 const btnBlue: React.CSSProperties = {
   background: "rgba(0,198,255,0.16)",
   border: "1px solid rgba(0,198,255,0.45)",
-  padding: "9px 13px",
-  borderRadius: "10px",
+  padding: "10px 14px",
+  borderRadius: "12px",
   color: "#67e8f9",
   cursor: "pointer",
   fontWeight: 900,
@@ -622,8 +770,8 @@ const btnBlue: React.CSSProperties = {
 const btnGray: React.CSSProperties = {
   background: "rgba(255,255,255,0.08)",
   border: "1px solid rgba(255,255,255,0.16)",
-  padding: "9px 13px",
-  borderRadius: "10px",
+  padding: "10px 14px",
+  borderRadius: "12px",
   color: "#e5e7eb",
   cursor: "pointer",
   fontWeight: 900,
@@ -632,17 +780,19 @@ const btnGray: React.CSSProperties = {
 const btnRed: React.CSSProperties = {
   background: "rgba(255,40,40,0.16)",
   border: "1px solid rgba(255,80,80,0.45)",
-  padding: "9px 13px",
-  borderRadius: "10px",
+  padding: "10px 14px",
+  borderRadius: "12px",
   color: "#ffabab",
   cursor: "pointer",
   fontWeight: 900,
 };
 
 const emptyStyle: React.CSSProperties = {
-  padding: "35px",
+  padding: "38px",
   textAlign: "center",
   color: "#94a3b8",
-  borderRadius: "18px",
+  borderRadius: "20px",
   border: "1px dashed rgba(255,255,255,0.16)",
+  marginTop: "20px",
+  background: "rgba(255,255,255,0.035)",
 };
