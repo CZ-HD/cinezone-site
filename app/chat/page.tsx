@@ -659,7 +659,7 @@ export default function ChatPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <p>Chargement du chat...</p>
+        <p style={loadingText}>Chargement du chat...</p>
       </main>
     );
   }
@@ -670,7 +670,7 @@ export default function ChatPage() {
   return (
     <main style={pageStyle}>
       <div style={chatLayout}>
-        <div style={chatBox}>
+        <section style={chatBox}>
           {hasNewMessage && (
             <button
               onClick={() => {
@@ -684,16 +684,13 @@ export default function ChatPage() {
           )}
 
           <div style={headerStyle}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "12px",
-              }}
-            >
-              <h1 style={{ margin: 0 }}>💬 Chat CineZone</h1>
+            <div style={headerTop}>
+              <div>
+                <h1 style={chatTitle}>💬 Chat CineZone</h1>
+                <p style={chatSubtitle}>Échangez avec la communauté CineZone</p>
+              </div>
 
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div style={headerActions}>
                 <button
                   onClick={() => setSoundEnabled(!soundEnabled)}
                   style={soundBtn}
@@ -725,7 +722,7 @@ export default function ChatPage() {
               </div>
 
               <div>
-                <p style={{ margin: 0, color: "#fff", fontWeight: "bold" }}>
+                <p style={connectedText}>
                   Connecté :{" "}
                   <span
                     style={{
@@ -739,12 +736,11 @@ export default function ChatPage() {
 
                 <p
                   style={{
-                    margin: "4px 0 0",
+                    ...statusText,
                     color:
                       profile?.status_text === "🔴 Hors ligne"
                         ? "#ff7777"
                         : "#4cff9b",
-                    fontSize: "13px",
                   }}
                 >
                   {profile?.status_text || "🟢 En ligne"}
@@ -756,7 +752,7 @@ export default function ChatPage() {
               <div style={profileBox}>
                 <h3 style={{ marginTop: 0 }}>Modifier mon profil</h3>
 
-                <label>Pseudo</label>
+                <label style={labelStyle}>Pseudo</label>
                 <input
                   value={editUsername}
                   onChange={(e) => setEditUsername(e.target.value)}
@@ -764,11 +760,11 @@ export default function ChatPage() {
                   placeholder="Ton pseudo"
                 />
 
-                <label>Avatar</label>
+                <label style={labelStyle}>Avatar</label>
                 <input type="file" accept="image/*" onChange={uploadAvatar} />
                 {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
 
-                <label>Statut</label>
+                <label style={labelStyle}>Statut</label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
@@ -856,9 +852,7 @@ export default function ChatPage() {
 
           <div style={messagesBox}>
             {messages.length === 0 ? (
-              <p style={{ color: "#888", textAlign: "center" }}>
-                Aucun message pour le moment.
-              </p>
+              <p style={emptyText}>Aucun message pour le moment.</p>
             ) : (
               messages.map((msg) => {
                 const isMe = msg.user_id === user?.id;
@@ -885,15 +879,15 @@ export default function ChatPage() {
                     style={{
                       display: "flex",
                       justifyContent: isMe ? "flex-end" : "flex-start",
-                      marginBottom: "18px",
+                      marginBottom: "20px",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
-                        gap: "10px",
+                        gap: "12px",
                         alignItems: "flex-start",
-                        maxWidth: "76%",
+                        maxWidth: "78%",
                         flexDirection: isMe ? "row-reverse" : "row",
                       }}
                     >
@@ -1110,18 +1104,18 @@ export default function ChatPage() {
               Envoyer
             </button>
           </div>
-        </div>
+        </section>
 
         <aside style={onlinePanel}>
-          <h2 style={{ margin: 0, fontSize: "18px" }}>🟢 En ligne</h2>
+          <h2 style={onlineTitle}>🟢 En ligne</h2>
 
-          <p style={{ color: "#9ca3af", marginTop: "6px" }}>
+          <p style={onlineCount}>
             {onlineMembers.length} membre
             {onlineMembers.length > 1 ? "s" : ""} connecté
             {onlineMembers.length > 1 ? "s" : ""}
           </p>
 
-          <div style={{ display: "grid", gap: "12px", marginTop: "18px" }}>
+          <div style={onlineGrid}>
             {onlineMembers.length === 0 ? (
               <p style={{ color: "#888" }}>Aucun membre en ligne.</p>
             ) : (
@@ -1181,83 +1175,165 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "calc(100vh - 56px)",
   background: `
-    radial-gradient(circle at 5% 70%, rgba(255, 0, 120, 0.10), transparent 42%),
-    radial-gradient(circle at 90% 50%, rgba(0, 170, 255, 0.24), transparent 48%),
-    radial-gradient(circle at 72% 82%, rgba(0, 200, 255, 0.14), transparent 54%),
-    linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.86)),
-    url('/chat-bg.jpg')
+    radial-gradient(circle at 12% 15%, rgba(0, 198, 255, 0.18), transparent 34%),
+    radial-gradient(circle at 86% 28%, rgba(120, 50, 255, 0.20), transparent 38%),
+    radial-gradient(circle at 10% 88%, rgba(255, 0, 120, 0.10), transparent 36%),
+    linear-gradient(135deg, #020617 0%, #040817 45%, #020617 100%)
   `,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
   color: "#fff",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  padding: "70px 24px 32px",
-  fontFamily: "Arial, sans-serif",
+  padding: "80px 24px 32px",
+  fontFamily: "Inter, Arial, sans-serif",
   position: "relative",
   overflow: "hidden",
 };
 
+const loadingText: React.CSSProperties = {
+  padding: "14px 18px",
+  borderRadius: "16px",
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(0,198,255,0.25)",
+  boxShadow: "0 0 24px rgba(0,198,255,0.18)",
+};
+
 const chatLayout: React.CSSProperties = {
   width: "100%",
-  maxWidth: "1180px",
+  maxWidth: "1240px",
   display: "grid",
-  gridTemplateColumns: "1fr 280px",
-  gap: "18px",
+  gridTemplateColumns: "1fr 310px",
+  gap: "22px",
   alignItems: "stretch",
 };
 
 const chatBox: React.CSSProperties = {
   width: "100%",
-  height: "78vh",
-  background: "linear-gradient(180deg, rgba(8,13,25,0.94), rgba(3,6,12,0.96))",
-  border: "1px solid rgba(0,198,255,0.35)",
-  borderRadius: "26px",
-  boxShadow: "0 30px 90px rgba(0,0,0,0.85), 0 0 35px rgba(0,198,255,0.18)",
+  height: "80vh",
+  background:
+    "linear-gradient(180deg, rgba(9,14,28,0.92), rgba(2,6,15,0.96))",
+  border: "1px solid rgba(0,198,255,0.28)",
+  borderRadius: "28px",
+  boxShadow:
+    "0 35px 100px rgba(0,0,0,0.9), 0 0 55px rgba(0,198,255,0.16)",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
   position: "relative",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
 };
 
 const onlinePanel: React.CSSProperties = {
-  height: "78vh",
-  padding: "20px",
-  borderRadius: "26px",
-  background: "linear-gradient(180deg, rgba(8,13,25,0.94), rgba(3,6,12,0.96))",
-  border: "1px solid rgba(0,198,255,0.35)",
-  boxShadow: "0 30px 90px rgba(0,0,0,0.65), 0 0 30px rgba(0,198,255,0.14)",
+  height: "80vh",
+  padding: "22px",
+  borderRadius: "28px",
+  background:
+    "linear-gradient(180deg, rgba(9,14,28,0.9), rgba(2,6,15,0.96))",
+  border: "1px solid rgba(0,198,255,0.24)",
+  boxShadow:
+    "0 35px 90px rgba(0,0,0,0.75), 0 0 38px rgba(0,198,255,0.12)",
   overflowY: "auto",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
 };
 
 const newMessageBadge: React.CSSProperties = {
   position: "absolute",
-  top: "94px",
+  top: "104px",
   right: "24px",
   zIndex: 20,
-  padding: "8px 14px",
+  padding: "9px 15px",
   borderRadius: "999px",
   border: "1px solid rgba(255,255,255,0.18)",
   background: "linear-gradient(135deg, #ff3b3b, #b00020)",
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
-  boxShadow: "0 0 22px rgba(255,60,60,0.45)",
+  boxShadow: "0 0 24px rgba(255,60,60,0.48)",
+};
+
+const headerStyle: React.CSSProperties = {
+  padding: "22px",
+  borderBottom: "1px solid rgba(255,255,255,0.08)",
+  background:
+    "linear-gradient(135deg, rgba(0,198,255,0.12), rgba(124,58,237,0.14), rgba(0,0,0,0.18))",
+};
+
+const headerTop: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: "14px",
+};
+
+const chatTitle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "22px",
+  letterSpacing: "-0.03em",
+};
+
+const chatSubtitle: React.CSSProperties = {
+  margin: "6px 0 0",
+  color: "#9fb3c8",
+  fontSize: "14px",
+};
+
+const headerActions: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
+  flexWrap: "wrap",
+  justifyContent: "flex-end",
+};
+
+const connectedBox: React.CSSProperties = {
+  display: "flex",
+  gap: "12px",
+  alignItems: "center",
+  marginTop: "18px",
+};
+
+const connectedText: React.CSSProperties = {
+  margin: 0,
+  color: "#fff",
+  fontWeight: "bold",
+};
+
+const statusText: React.CSSProperties = {
+  margin: "4px 0 0",
+  fontSize: "13px",
+  fontWeight: 700,
+};
+
+const profileBox: React.CSSProperties = {
+  marginTop: "18px",
+  padding: "16px",
+  borderRadius: "18px",
+  background: "rgba(0,0,0,0.42)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  display: "grid",
+  gap: "10px",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+};
+
+const labelStyle: React.CSSProperties = {
+  color: "#cbd5e1",
+  fontWeight: 800,
+  fontSize: "13px",
 };
 
 const announcementBox: React.CSSProperties = {
-  margin: "12px 16px",
-  padding: "14px 16px",
-  borderRadius: "18px",
-  background: "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(130,0,255,0.08), rgba(0,0,0,0.28))",
-  border: "1px solid rgba(0,198,255,0.28)",
-  borderLeft: "4px solid #00c6ff",
-  boxShadow: "0 0 24px rgba(0,198,255,0.14), inset 0 1px 0 rgba(255,255,255,0.06)",
+  margin: "14px 18px",
+  padding: "16px 18px",
+  borderRadius: "20px",
+  background:
+    "linear-gradient(135deg, rgba(255,60,90,0.13), rgba(130,0,255,0.08), rgba(0,0,0,0.32))",
+  border: "1px solid rgba(255,70,100,0.38)",
+  boxShadow:
+    "0 0 28px rgba(255,70,100,0.16), inset 0 1px 0 rgba(255,255,255,0.06)",
   backdropFilter: "blur(12px)",
   WebkitBackdropFilter: "blur(12px)",
-  color: "#e6faff",
+  color: "#fff",
 };
 
 const announcementHeader: React.CSSProperties = {
@@ -1270,7 +1346,7 @@ const announcementHeader: React.CSSProperties = {
 
 const announcementSub: React.CSSProperties = {
   margin: "4px 0 0",
-  color: "#00c6ff",
+  color: "#67e8f9",
   fontSize: "12px",
   fontWeight: 900,
   textShadow: "0 0 10px rgba(0,198,255,0.45)",
@@ -1279,7 +1355,7 @@ const announcementSub: React.CSSProperties = {
 const announcementTextStyle: React.CSSProperties = {
   margin: "10px 0 0",
   whiteSpace: "pre-line",
-  lineHeight: 1.45,
+  lineHeight: 1.5,
   fontSize: "14px",
   color: "#eef8ff",
 };
@@ -1291,8 +1367,8 @@ const announcementActions: React.CSSProperties = {
 };
 
 const announcementEditBtn: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "10px",
+  padding: "8px 11px",
+  borderRadius: "11px",
   border: "1px solid rgba(0,198,255,0.45)",
   background: "rgba(0,198,255,0.16)",
   color: "#67e8f9",
@@ -1301,8 +1377,8 @@ const announcementEditBtn: React.CSSProperties = {
 };
 
 const announcementDeleteBtn: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "10px",
+  padding: "8px 11px",
+  borderRadius: "11px",
   border: "1px solid rgba(255,90,90,0.45)",
   background: "rgba(255,70,70,0.16)",
   color: "#ffb3b3",
@@ -1317,8 +1393,8 @@ const announcementSaveBtn: React.CSSProperties = {
 };
 
 const announcementCancelBtn: React.CSSProperties = {
-  padding: "7px 10px",
-  borderRadius: "10px",
+  padding: "8px 11px",
+  borderRadius: "11px",
   border: "1px solid rgba(255,255,255,0.16)",
   background: "rgba(255,255,255,0.08)",
   color: "#fff",
@@ -1331,7 +1407,7 @@ const announcementTextarea: React.CSSProperties = {
   minHeight: "140px",
   marginTop: "12px",
   padding: "12px",
-  borderRadius: "12px",
+  borderRadius: "14px",
   border: "1px solid rgba(0,198,255,0.35)",
   background: "#0b0f18",
   color: "#fff",
@@ -1341,196 +1417,67 @@ const announcementTextarea: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-const typingBox: React.CSSProperties = {
-  padding: "8px 18px",
-  color: "#00c6ff",
-  fontSize: "13px",
-  borderTop: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(0,198,255,0.06)",
-};
-
-const onlineMemberCard: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "10px",
-  padding: "10px",
-  borderRadius: "16px",
-  background: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(0,198,255,0.05))",
-  border: "1px solid rgba(255,255,255,0.12)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
-};
-
-const headerStyle: React.CSSProperties = {
-  padding: "20px",
-  borderBottom: "1px solid rgba(0,198,255,0.18)",
-  background: "linear-gradient(135deg, rgba(0,198,255,0.14), rgba(130,0,255,0.12), rgba(0,0,0,0.2))",
-};
-
-const connectedBox: React.CSSProperties = {
-  display: "flex",
-  gap: "12px",
-  alignItems: "center",
-  marginTop: "12px",
-};
-
-const avatarWrap: React.CSSProperties = {
-  position: "relative",
-  width: "50px",
-  height: "50px",
-};
-
-const avatarSmall: React.CSSProperties = {
-  width: "50px",
-  height: "50px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.8)",
-  boxShadow: "0 0 18px rgba(0,198,255,0.75)",
-};
-
-const onlineDot: React.CSSProperties = {
-  position: "absolute",
-  right: "1px",
-  bottom: "1px",
-  width: "12px",
-  height: "12px",
-  borderRadius: "50%",
-  border: "2px solid #07111f",
-};
-
-const profileBox: React.CSSProperties = {
-  marginTop: "18px",
-  padding: "16px",
-  borderRadius: "16px",
-  background: "rgba(0,0,0,0.42)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  display: "grid",
-  gap: "10px",
-};
-
 const messagesBox: React.CSSProperties = {
   flex: 1,
-  padding: "22px",
+  padding: "26px",
   overflowY: "auto",
-  background: "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.38))",
+  background:
+    "radial-gradient(circle at 82% 18%, rgba(0,198,255,0.08), transparent 35%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.36))",
 };
 
-const messageHeader: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "10px",
-  opacity: 0.85,
-};
-
-const avatarWrapSmall: React.CSSProperties = {
-  position: "relative",
-  width: "38px",
-  height: "38px",
-};
-
-const avatarMsg: React.CSSProperties = {
-  width: "38px",
-  height: "38px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.75)",
-  boxShadow: "0 0 14px rgba(0,198,255,0.55)",
-};
-
-const onlineDotSmall: React.CSSProperties = {
-  position: "absolute",
-  right: "-1px",
-  bottom: "-1px",
-  width: "10px",
-  height: "10px",
-  borderRadius: "50%",
-  border: "2px solid #07111f",
-};
-
-const myMessageBox: React.CSSProperties = {
-  maxWidth: "68%",
-  padding: "10px 12px",
-  borderRadius: "14px",
-  background: "rgba(0,150,255,0.10)",
-  border: "1px solid rgba(0,198,255,0.25)",
-  backdropFilter: "blur(8px)",
-  color: "#fff",
-};
-
-const otherMessageBox: React.CSSProperties = {
-  maxWidth: "68%",
-  padding: "10px 12px",
-  borderRadius: "14px",
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  backdropFilter: "blur(8px)",
-  color: "#ddd",
+const emptyText: React.CSSProperties = {
+  color: "#8ea0b6",
+  textAlign: "center",
+  marginTop: "42px",
 };
 
 const messageMeta: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: "7px",
-  marginBottom: "5px",
+  marginBottom: "6px",
   fontSize: "13px",
   flexWrap: "wrap",
 };
 
 const myBubble: React.CSSProperties = {
   maxWidth: "100%",
-  padding: "12px 15px",
-  borderRadius: "18px 18px 6px 18px",
-  background: "linear-gradient(135deg, rgba(0,105,210,0.45), rgba(0,45,110,0.5))",
-  border: "1px solid rgba(0,198,255,0.38)",
+  padding: "13px 16px",
+  borderRadius: "20px 20px 6px 20px",
+  background:
+    "linear-gradient(135deg, rgba(0,145,255,0.55), rgba(58,0,255,0.42))",
+  border: "1px solid rgba(0,198,255,0.42)",
   color: "#fff",
-  lineHeight: 1.45,
+  lineHeight: 1.5,
   fontSize: "15px",
   wordBreak: "break-word",
   whiteSpace: "pre-line",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.28)",
+  boxShadow: "0 12px 34px rgba(0,114,255,0.22)",
 };
 
 const otherBubble: React.CSSProperties = {
   maxWidth: "100%",
-  padding: "12px 15px",
-  borderRadius: "18px 18px 18px 6px",
-  background: "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.045))",
-  border: "1px solid rgba(255,255,255,0.12)",
+  padding: "13px 16px",
+  borderRadius: "20px 20px 20px 6px",
+  background:
+    "linear-gradient(135deg, rgba(255,255,255,0.105), rgba(255,255,255,0.045))",
+  border: "1px solid rgba(255,255,255,0.13)",
   color: "#fff",
-  lineHeight: 1.45,
+  lineHeight: 1.5,
   fontSize: "15px",
   wordBreak: "break-word",
   whiteSpace: "pre-line",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
-};
-
-const replyPreviewBox: React.CSSProperties = {
-  marginTop: "10px",
-  padding: "8px 10px",
-  borderRadius: "10px",
-  background: "rgba(0,0,0,0.28)",
-  borderLeft: "3px solid #00c6ff",
-  color: "#cbd5e1",
-  fontSize: "12px",
+  boxShadow: "0 12px 30px rgba(0,0,0,0.25)",
 };
 
 const replyPreviewBoxClean: React.CSSProperties = {
   marginBottom: "10px",
-  padding: "8px 10px",
-  borderLeft: "3px solid rgba(0,198,255,0.65)",
+  padding: "9px 11px",
+  borderLeft: "3px solid rgba(0,198,255,0.7)",
   color: "#9fb3c8",
   fontSize: "13px",
-  background: "rgba(0,0,0,0.18)",
-  borderRadius: "10px",
-};
-
-const messageText: React.CSSProperties = {
-  marginTop: "10px",
-  lineHeight: 1.55,
-  fontSize: "15px",
-  color: "#fff",
-  wordBreak: "break-word",
-  whiteSpace: "pre-line",
+  background: "rgba(0,0,0,0.20)",
+  borderRadius: "12px",
 };
 
 const chatImageStyle: React.CSSProperties = {
@@ -1553,20 +1500,21 @@ const reactionRow: React.CSSProperties = {
 };
 
 const reactionBtn: React.CSSProperties = {
-  height: "26px",
-  minWidth: "28px",
+  height: "27px",
+  minWidth: "30px",
   fontSize: "12px",
-  padding: "3px 7px",
+  padding: "3px 8px",
   borderRadius: "999px",
   border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.07)",
+  background: "rgba(255,255,255,0.075)",
   color: "#fff",
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   gap: "4px",
-  transition: "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
+  transition:
+    "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
   position: "relative",
   zIndex: 10,
 };
@@ -1592,15 +1540,12 @@ const reactionCount: React.CSSProperties = {
   color: "#dbeafe",
 };
 
-const adminBadge: React.CSSProperties = {
-  color: "#000",
-  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
-  fontSize: "10px",
-  fontWeight: 900,
-  marginLeft: "7px",
-  padding: "3px 7px",
-  borderRadius: "999px",
-  boxShadow: "0 0 12px rgba(255,215,100,0.55)",
+const messageActions: React.CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  marginTop: "7px",
+  flexWrap: "wrap",
+  transition: "opacity 0.16s ease",
 };
 
 const replyBtn: React.CSSProperties = {
@@ -1627,6 +1572,14 @@ const deleteBtn: React.CSSProperties = {
   fontWeight: "bold",
 };
 
+const typingBox: React.CSSProperties = {
+  padding: "9px 18px",
+  color: "#67e8f9",
+  fontSize: "13px",
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,198,255,0.06)",
+};
+
 const replyBar: React.CSSProperties = {
   padding: "10px 16px",
   background: "rgba(0,198,255,0.1)",
@@ -1650,26 +1603,29 @@ const cancelReplyBtn: React.CSSProperties = {
 
 const inputBox: React.CSSProperties = {
   display: "flex",
-  gap: "10px",
-  padding: "16px",
-  borderTop: "1px solid rgba(0,198,255,0.18)",
-  background: "rgba(0,0,0,0.55)",
+  gap: "12px",
+  padding: "18px",
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(2,6,15,0.88)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
 };
 
 const inputStyle: React.CSSProperties = {
   flex: 1,
   padding: "14px",
-  borderRadius: "14px",
-  border: "1px solid rgba(0,198,255,0.22)",
+  borderRadius: "16px",
+  border: "1px solid rgba(0,198,255,0.26)",
   background: "rgba(3,8,18,0.92)",
   color: "#fff",
   outline: "none",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
 };
 
 const imageUploadBtn: React.CSSProperties = {
-  width: "50px",
-  minWidth: "50px",
-  borderRadius: "14px",
+  width: "52px",
+  minWidth: "52px",
+  borderRadius: "16px",
   border: "1px solid rgba(0,198,255,0.45)",
   background: "rgba(0,198,255,0.14)",
   color: "#fff",
@@ -1679,17 +1635,18 @@ const imageUploadBtn: React.CSSProperties = {
   cursor: "pointer",
   fontSize: "20px",
   fontWeight: 900,
+  boxShadow: "0 0 18px rgba(0,198,255,0.12)",
 };
 
 const btnStyle: React.CSSProperties = {
   padding: "14px 20px",
-  borderRadius: "14px",
+  borderRadius: "16px",
   border: "none",
   color: "#fff",
   fontWeight: "bold",
   cursor: "pointer",
   background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
-  boxShadow: "0 10px 30px rgba(0,114,255,0.45)",
+  boxShadow: "0 12px 34px rgba(0,114,255,0.48)",
 };
 
 const profileBtn: React.CSSProperties = {
@@ -1712,24 +1669,91 @@ const soundBtn: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const messageBubble: React.CSSProperties = {
-  display: "inline-block",
-  maxWidth: "100%",
-  padding: "10px 14px",
-  borderRadius: "16px",
-  background: "rgba(255,255,255,0.07)",
-  border: "1px solid rgba(255,255,255,0.10)",
-  color: "#fff",
-  lineHeight: 1.45,
-  fontSize: "15px",
-  wordBreak: "break-word",
-  whiteSpace: "pre-line",
+const avatarWrap: React.CSSProperties = {
+  position: "relative",
+  width: "52px",
+  height: "52px",
 };
 
-const messageActions: React.CSSProperties = {
+const avatarSmall: React.CSSProperties = {
+  width: "52px",
+  height: "52px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.8)",
+  boxShadow: "0 0 20px rgba(0,198,255,0.75)",
+};
+
+const onlineDot: React.CSSProperties = {
+  position: "absolute",
+  right: "1px",
+  bottom: "1px",
+  width: "12px",
+  height: "12px",
+  borderRadius: "50%",
+  border: "2px solid #07111f",
+};
+
+const avatarWrapSmall: React.CSSProperties = {
+  position: "relative",
+  width: "40px",
+  height: "40px",
+};
+
+const avatarMsg: React.CSSProperties = {
+  width: "40px",
+  height: "40px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.75)",
+  boxShadow: "0 0 15px rgba(0,198,255,0.55)",
+};
+
+const onlineDotSmall: React.CSSProperties = {
+  position: "absolute",
+  right: "-1px",
+  bottom: "-1px",
+  width: "10px",
+  height: "10px",
+  borderRadius: "50%",
+  border: "2px solid #07111f",
+};
+
+const adminBadge: React.CSSProperties = {
+  color: "#000",
+  background: "linear-gradient(135deg, #ffe58a, #ffb300)",
+  fontSize: "10px",
+  fontWeight: 900,
+  marginLeft: "7px",
+  padding: "3px 7px",
+  borderRadius: "999px",
+  boxShadow: "0 0 12px rgba(255,215,100,0.55)",
+};
+
+const onlineTitle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "18px",
+};
+
+const onlineCount: React.CSSProperties = {
+  color: "#9ca3af",
+  marginTop: "6px",
+};
+
+const onlineGrid: React.CSSProperties = {
+  display: "grid",
+  gap: "12px",
+  marginTop: "18px",
+};
+
+const onlineMemberCard: React.CSSProperties = {
   display: "flex",
-  gap: "8px",
-  marginTop: "7px",
-  flexWrap: "wrap",
-  transition: "opacity 0.16s ease",
+  alignItems: "center",
+  gap: "11px",
+  padding: "11px",
+  borderRadius: "18px",
+  background:
+    "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(0,198,255,0.05))",
+  border: "1px solid rgba(255,255,255,0.12)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
 };
