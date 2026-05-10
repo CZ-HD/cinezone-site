@@ -122,14 +122,15 @@ export default function Home() {
       )}
 
       <section style={quickCards}>
-        <QuickCard href="/films" icon="🔥" title="Tendances" text="Les films populaires" />
-        <QuickCard href="/films" icon="🆕" title="Nouveautés" text="Les derniers ajouts" />
-        <QuickCard href="/films" icon="🎬" title="Films" text="Accéder au catalogue" />
+        <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
+        <QuickCard href="#nouveautes" icon="🆕" title="Nouveautés" text="Voir les derniers ajouts" />
+        <QuickCard href="/films" icon="🎬" title="Catalogue" text="Accéder à tous les films" />
         <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
       </section>
 
       <div style={contentStyle}>
-        <Row title="🔥 Tendances" movies={trending} />
+        <Row id="tendances" title="🔥 Tendances" movies={trending} />
+        <Row id="nouveautes" title="🆕 Nouveautés" movies={trending} />
         <Row title="⭐ Top Rated" movies={topRated} />
         <Row title="⚔️ Action" movies={action} />
         <Row title="😂 Comédie" movies={comedy} />
@@ -152,9 +153,9 @@ function QuickCard({ href, icon, title, text }: any) {
   );
 }
 
-function Row({ title, movies }: any) {
+function Row({ id, title, movies }: any) {
   return (
-    <section style={rowStyle}>
+    <section id={id} style={rowStyle}>
       <h2 style={rowTitle}>{title}</h2>
 
       <div style={sliderStyle}>
@@ -296,6 +297,7 @@ const quickCards: React.CSSProperties = {
   marginTop: "-65px",
   position: "relative",
   zIndex: 4,
+  scrollMarginTop: "120px",
 };
 
 const quickCard: React.CSSProperties = {
@@ -328,6 +330,7 @@ const contentStyle: React.CSSProperties = {
 
 const rowStyle: React.CSSProperties = {
   marginBottom: "38px",
+  scrollMarginTop: "120px",
 };
 
 const rowTitle: React.CSSProperties = {
