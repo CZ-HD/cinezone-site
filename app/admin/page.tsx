@@ -853,7 +853,10 @@ if (line.includes("|")) {
     })}
   </div>
 )}
-
+      </section>
+    </main>
+  );
+}
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "radial-gradient(circle at top, rgba(0,120,255,0.2), #000 62%)",
