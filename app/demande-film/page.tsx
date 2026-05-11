@@ -674,7 +674,7 @@ const pasteButton: React.CSSProperties = {
   justifyContent: "center",
   cursor: "default",
   userSelect: "none",
-  marginBottom: "10px",
+  marginBottom: "1px",
   opacity: 0.9,
 };
 
