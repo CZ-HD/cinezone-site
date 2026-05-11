@@ -31,6 +31,7 @@ export default function DemandeFilmPage() {
 
   const [replyId, setReplyId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [movieData, setMovieData] = useState<Record<string, any>>({});
 
   useEffect(() => {
     init();
@@ -71,8 +72,22 @@ export default function DemandeFilmPage() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    setDemandes(data || []);
+    const demandesData = data || [];
+
+setDemandes(demandesData);
+
+for (const demande of demandesData) {
+  if (!movieData[demande.id]) {
+    const info = await fetchMovieData(demande.tmdb_link);
+
+    if (info) {
+      setMovieData((prev) => ({
+        ...prev,
+        [demande.id]: info,
+      }));
+    }
   }
+}
 
   async function envoyerDemande() {
     if (!tmdbLink.trim() || !annee.trim() || !codec || !commentaire.trim()) {
@@ -315,8 +330,16 @@ export default function DemandeFilmPage() {
                 return (
                   <article key={d.id} style={movieRequestCard}>
                     <div style={fakePoster}>
-                      <span>🎬</span>
-                    </div>
+  {movieData[d.id]?.poster ? (
+    <img
+      src={movieData[d.id].poster}
+      alt={movieData[d.id].title}
+      style={posterImage}
+    />
+  ) : (
+    <span>🎬</span>
+  )}
+</div>
 
                     <div style={requestContent}>
                       {editId === d.id ? (
@@ -478,7 +501,21 @@ export default function DemandeFilmPage() {
     </main>
   );
 }
+async function fetchMovieData(tmdbLink: string) {
+  try {
+    const response = await fetch(
+      `/api/tmdb/movie?id=${encodeURIComponent(tmdbLink)}`
+    );
 
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
 function formatDate(value?: string) {
   if (!value) return "date inconnue";
   return new Date(value).toLocaleDateString("fr-FR");
@@ -782,6 +819,12 @@ const fakePoster: React.CSSProperties = {
   display: "grid",
   placeItems: "center",
   fontSize: "34px",
+};
+  const posterImage: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  borderRadius: "12px",
 };
 
 const requestContent: React.CSSProperties = {
