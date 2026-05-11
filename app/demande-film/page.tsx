@@ -217,25 +217,6 @@ export default function DemandeFilmPage() {
             <button
               type="button"
               style={pasteButton}
-              onClick={async () => {
-                try {
-                  if (!navigator.clipboard) {
-                    alert("Le collage automatique n'est pas supporté.");
-                    return;
-                  }
-
-                  const text = await navigator.clipboard.readText();
-
-                  if (!text) {
-                    alert("Aucun lien trouvé.");
-                    return;
-                  }
-
-                  setTmdbLink(text);
-                } catch {
-                  alert("Impossible de lire le presse-papiers.");
-                }
-              }}
             >
               📋 Coller le lien
             </button>
@@ -680,14 +661,21 @@ const inputInside: React.CSSProperties = {
 };
 
 const pasteButton: React.CSSProperties = {
-  padding: "15px 22px",
-  borderRadius: "12px",
-  background: "rgba(80,40,255,0.12)",
-  border: "1px solid rgba(130,80,255,0.8)",
+  height: "54px",
+  minWidth: "185px",
+  padding: "0 22px",
+  borderRadius: "14px",
+  background: "rgba(80,40,255,0.10)",
+  border: "1px solid rgba(130,80,255,0.7)",
   color: "#fff",
   fontWeight: 900,
-  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "default",
+  userSelect: "none",
   marginBottom: "10px",
+  opacity: 0.9,
 };
 
 const textareaWithIcon: React.CSSProperties = {
