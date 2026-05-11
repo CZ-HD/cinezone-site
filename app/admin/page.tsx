@@ -309,14 +309,33 @@ export default function AdminPage() {
       .eq("slug", slug)
       .maybeSingle();
 
+    const firstMovie = moviesToAttach[0];
+    const autoPoster = firstMovie?.poster_path
+      ? firstMovie.poster_path.startsWith("http")
+        ? firstMovie.poster_path
+        : `https://image.tmdb.org/t/p/w600_and_h900_bestv2${firstMovie.poster_path}`
+      : null;
+
+    const autoBackdrop = null;
+
     if (existingSaga?.id) {
       sagaId = existingSaga.id;
+
+      await supabase
+        .from("sagas")
+        .update({
+          poster: autoPoster,
+          backdrop: autoBackdrop,
+        })
+        .eq("id", sagaId);
     } else {
       const { data: newSaga, error: sagaError } = await supabase
         .from("sagas")
         .insert({
           title,
           slug,
+          poster: autoPoster,
+          backdrop: autoBackdrop,
           description: `Tous les films ${title} regroupés sur CineZone HD`,
         })
         .select("id")
