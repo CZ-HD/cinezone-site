@@ -118,7 +118,8 @@ const cardStyle: React.CSSProperties = {
 const posterStyle: React.CSSProperties = {
   width: "100%",
   height: "255px",
-  objectFit: "cover",
+  objectFit: "contain",
+  background: "#000",
   borderRadius: "14px",
 };
 
