@@ -135,7 +135,7 @@ const gridStyle: React.CSSProperties = {
 const cardStyle: React.CSSProperties = {
   textDecoration: "none",
   color: "#fff",
-  padding: "14px",
+  padding: "10px",
   borderRadius: "22px",
   background: "rgba(255,255,255,0.06)",
   border: "1px solid rgba(255,255,255,0.12)",
@@ -143,7 +143,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 const posterBox: React.CSSProperties = {
-  height: "310px",
+  height: "250px",
   borderRadius: "18px",
   overflow: "hidden",
   background:
@@ -160,7 +160,7 @@ const posterStyle: React.CSSProperties = {
 };
 
 const cardTitle: React.CSSProperties = {
-  fontSize: "20px",
+  fontSize: "17px",
   margin: "0 0 8px",
 };
 
