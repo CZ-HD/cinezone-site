@@ -156,7 +156,8 @@ const posterBox: React.CSSProperties = {
 const posterStyle: React.CSSProperties = {
   width: "100%",
   height: "100%",
-  objectFit: "cover",
+  objectFit: "contain",
+  background: "#000",
 };
 
 const cardTitle: React.CSSProperties = {
