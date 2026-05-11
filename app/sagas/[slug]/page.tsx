@@ -113,21 +113,25 @@ const gridStyle: React.CSSProperties = {
 const cardStyle: React.CSSProperties = {
   color: "#fff",
   textDecoration: "none",
+  display: "flex",
+  flexDirection: "column",
+  gap: "6px",
 };
 
 const posterStyle: React.CSSProperties = {
   width: "100%",
-  height: "255px",
+  aspectRatio: "2 / 3",
   objectFit: "contain",
   background: "#000",
-  borderRadius: "14px",
+  borderRadius: "16px",
 };
 
 const fakePoster: React.CSSProperties = {
-  height: "255px",
+  width: "100%",
+  aspectRatio: "2 / 3",
   display: "grid",
   placeItems: "center",
-  borderRadius: "14px",
+  borderRadius: "16px",
   background: "rgba(255,255,255,0.08)",
   fontSize: "40px",
 };
