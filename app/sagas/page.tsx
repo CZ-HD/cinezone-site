@@ -143,13 +143,14 @@ const cardStyle: React.CSSProperties = {
 };
 
 const posterBox: React.CSSProperties = {
-  height: "250px",
+  aspectRatio: "2 / 3",
+  width: "100%",
   borderRadius: "18px",
   overflow: "hidden",
-  background:
-    "linear-gradient(135deg, rgba(0,198,255,0.24), rgba(80,40,255,0.24), rgba(0,0,0,0.5))",
-  display: "grid",
-  placeItems: "center",
+  background: "#000",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   marginBottom: "14px",
 };
 
