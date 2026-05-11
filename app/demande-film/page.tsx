@@ -73,21 +73,21 @@ export default function DemandeFilmPage() {
       .order("created_at", { ascending: false });
 
     const demandesData = data || [];
+    setDemandes(demandesData);
 
-setDemandes(demandesData);
+    for (const demande of demandesData) {
+      if (!demande?.id || !demande?.tmdb_link) continue;
 
-for (const demande of demandesData) {
-  if (!movieData[demande.id]) {
-    const info = await fetchMovieData(demande.tmdb_link);
+      const info = await fetchMovieData(demande.tmdb_link);
 
-    if (info) {
-      setMovieData((prev) => ({
-        ...prev,
-        [demande.id]: info,
-      }));
+      if (info) {
+        setMovieData((prev) => ({
+          ...prev,
+          [demande.id]: info,
+        }));
+      }
     }
   }
-}
 
   async function envoyerDemande() {
     if (!tmdbLink.trim() || !annee.trim() || !codec || !commentaire.trim()) {
@@ -229,10 +229,7 @@ for (const demande of demandesData) {
               </div>
             </div>
 
-            <button
-              type="button"
-              style={pasteButton}
-            >
+            <button type="button" style={pasteButton}>
               ⬅️ ici 📋 Coller le lien
             </button>
           </div>
@@ -326,20 +323,21 @@ for (const demande of demandesData) {
             <div style={listStyle}>
               {filteredDemandes.map((d) => {
                 const canEdit = d.user_id === user?.id;
+                const movie = movieData[d.id];
 
                 return (
                   <article key={d.id} style={movieRequestCard}>
                     <div style={fakePoster}>
-  {movieData[d.id]?.poster ? (
-    <img
-      src={movieData[d.id].poster}
-      alt={movieData[d.id].title}
-      style={posterImage}
-    />
-  ) : (
-    <span>🎬</span>
-  )}
-</div>
+                      {movie?.poster ? (
+                        <img
+                          src={movie.poster}
+                          alt={movie.title || "Affiche du film"}
+                          style={posterImage}
+                        />
+                      ) : (
+                        <span>🎬</span>
+                      )}
+                    </div>
 
                     <div style={requestContent}>
                       {editId === d.id ? (
@@ -385,7 +383,9 @@ for (const demande of demandesData) {
                         <>
                           <div style={requestTop}>
                             <div>
-                              <h3 style={demandeTitle}>{cleanTitle(d.tmdb_link)}</h3>
+                              <h3 style={demandeTitle}>
+                                {movie?.title || cleanTitle(d.tmdb_link)}
+                              </h3>
                               <p style={tmdbText}>{d.tmdb_link}</p>
                             </div>
 
@@ -501,6 +501,7 @@ for (const demande of demandesData) {
     </main>
   );
 }
+
 async function fetchMovieData(tmdbLink: string) {
   try {
     const response = await fetch(
@@ -516,6 +517,7 @@ async function fetchMovieData(tmdbLink: string) {
     return null;
   }
 }
+
 function formatDate(value?: string) {
   if (!value) return "date inconnue";
   return new Date(value).toLocaleDateString("fr-FR");
@@ -811,8 +813,9 @@ const movieRequestCard: React.CSSProperties = {
 };
 
 const fakePoster: React.CSSProperties = {
-  minHeight: "138px",
+  height: "138px",
   borderRadius: "12px",
+  overflow: "hidden",
   background:
     "linear-gradient(135deg, rgba(0,198,255,0.28), rgba(80,40,255,0.28), rgba(0,0,0,0.5))",
   border: "1px solid rgba(0,198,255,0.25)",
@@ -820,7 +823,8 @@ const fakePoster: React.CSSProperties = {
   placeItems: "center",
   fontSize: "34px",
 };
-  const posterImage: React.CSSProperties = {
+
+const posterImage: React.CSSProperties = {
   width: "100%",
   height: "100%",
   objectFit: "cover",
