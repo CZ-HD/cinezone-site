@@ -609,24 +609,6 @@ const tmdbRow: React.CSSProperties = {
   marginTop: "18px",
 };
 
-const pasteButton: React.CSSProperties = {
-  height: "54px",
-  minWidth: "185px",
-  padding: "0 22px",
-  borderRadius: "14px",
-  background: "rgba(80,40,255,0.10)",
-  border: "1px solid rgba(130,80,255,0.7)",
-  color: "#fff",
-  fontWeight: 900,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "default",
-  userSelect: "none",
-  marginBottom: "1px",
-  opacity: 0.9,
-};
-
 const formGrid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr 1fr",
