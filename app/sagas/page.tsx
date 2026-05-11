@@ -44,7 +44,7 @@ export default function SagasPage() {
         <span style={badgeStyle}>🎞️ Collections</span>
         <h1 style={titleStyle}>Sagas CineZone HD</h1>
         <p style={textStyle}>
-          Retrouve les films regroupés par saga, sans modifier le fonctionnement des films.
+          Découvre toutes les sagas disponibles sur CineZone HD.
         </p>
       </section>
 
