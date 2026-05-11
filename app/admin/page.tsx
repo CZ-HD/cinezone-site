@@ -8,8 +8,7 @@ const CREATOR_EMAILS = [
   "blackph4tom@gmail.com",
   "lafooteusedu54@hotmail.fr",
 ];
-const DEFAULT_AVATAR =
-  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/Boss.png";
+const DEFAULT_AVATAR = "/favicon.ico";
 
 type Profile = {
   id: string;
