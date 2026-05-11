@@ -48,10 +48,11 @@ export default function RootLayout({
   const showSeries = false;
 
   const navLinks = [
-    ["Films", "/films"],
-    ...(showSeries ? [["Séries", "/series"]] : []),
-    ["🎬 Demande film", "/demande-film"],
-  ];
+  ["Films", "/films"],
+  ["🎞️ Sagas", "/sagas"],
+  ...(showSeries ? [["Séries", "/series"]] : []),
+  ["🎬 Demande film", "/demande-film"],
+];
 
   return (
     <html lang="fr" suppressHydrationWarning>
