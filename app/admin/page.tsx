@@ -280,6 +280,77 @@ export default function AdminPage() {
     loadAdminMovies();
   };
 
+  const createSagaAndAttachSearchResults = async () => {
+    const title = filmSearch.trim();
+
+    if (!title) {
+      setMessage("❌ Écris le nom de la saga dans la recherche. Exemple : Retour vers le futur");
+      return;
+    }
+
+    const moviesToAttach = adminMovies.filter((movie) =>
+      (movie.title || "").toLowerCase().includes(title.toLowerCase())
+    );
+
+    if (moviesToAttach.length === 0) {
+      setMessage("❌ Aucun film trouvé avec cette recherche.");
+      return;
+    }
+
+    setSagaLoading(true);
+
+    const slug = makeSlug(title);
+
+    let sagaId = "";
+
+    const { data: existingSaga } = await supabase
+      .from("sagas")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (existingSaga?.id) {
+      sagaId = existingSaga.id;
+    } else {
+      const { data: newSaga, error: sagaError } = await supabase
+        .from("sagas")
+        .insert({
+          title,
+          slug,
+          description: `Tous les films ${title} regroupés sur CineZone HD`,
+        })
+        .select("id")
+        .single();
+
+      if (sagaError || !newSaga?.id) {
+        setSagaLoading(false);
+        setMessage("❌ Erreur création saga : " + (sagaError?.message || "inconnue"));
+        return;
+      }
+
+      sagaId = newSaga.id;
+    }
+
+    const ids = moviesToAttach.map((movie) => movie.id);
+
+    const { error } = await supabase
+      .from("downloads")
+      .update({ saga_id: sagaId })
+      .in("id", ids);
+
+    setSagaLoading(false);
+
+    if (error) {
+      setMessage("❌ Erreur association automatique : " + error.message);
+      return;
+    }
+
+    setMessage(`✅ Saga prête : ${moviesToAttach.length} film(s) ajouté(s) dans ${title}.`);
+    setSelectedSagaId(sagaId);
+    loadSagas();
+    loadAdminMovies();
+  };
+
   const getPresence = (userId: string) =>
     presences.find((presence) => presence.user_id === userId);
 
@@ -831,10 +902,23 @@ export default function AdminPage() {
             <input
               value={filmSearch}
               onChange={(e) => setFilmSearch(e.target.value)}
-              placeholder="Rechercher un film..."
+              placeholder="Rechercher un film... ex: Retour vers le futur"
               style={inputStyle}
             />
           </div>
+
+          <button
+            onClick={createSagaAndAttachSearchResults}
+            style={{
+              ...btnGreen,
+              marginBottom: "14px",
+              opacity: sagaLoading ? 0.6 : 1,
+              cursor: sagaLoading ? "not-allowed" : "pointer",
+            }}
+            disabled={sagaLoading}
+          >
+            ⚡ Créer la saga + ajouter tous les films trouvés
+          </button>
 
           {sagas.length === 0 ? (
             <p style={{ color: "#aaa" }}>Aucune saga créée pour le moment.</p>
