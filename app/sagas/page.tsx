@@ -74,8 +74,8 @@ export default function SagasPage() {
               <div>
                 <h2 style={cardTitle}>{saga.title}</h2>
                 <p style={cardText}>
-                  {saga.description || "Voir les films de cette saga"}
-                </p>
+  Tous les films {saga.title}
+</p>
               </div>
             </Link>
           ))}
