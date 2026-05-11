@@ -218,7 +218,7 @@ export default function DemandeFilmPage() {
               type="button"
               style={pasteButton}
             >
-              📋 Coller le lien
+              ⬅️ ici 📋 Coller le lien
             </button>
           </div>
 
