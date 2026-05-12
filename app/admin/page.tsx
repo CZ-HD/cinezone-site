@@ -243,19 +243,20 @@ export default function AdminPage() {
 const deleteReadNotifications = async () => {
   if (!confirm("Supprimer toutes les notifications lues ?")) return;
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("notifications")
     .delete()
-    .eq("read", true);
+    .eq("read", true)
+    .select("id");
 
   if (error) {
-    setMessage("❌ Erreur suppression notifications : " + error.message);
+    alert("Erreur suppression : " + error.message);
     return;
   }
 
- await loadNotifications();
+await loadNotifications();
 
-  alert("Notifications lues supprimées");
+  alert(`${data?.length || 0} notification(s) lue(s) supprimée(s)`);
 };
   const loadUsers = async () => {
     const { data, error, count } = await supabase
