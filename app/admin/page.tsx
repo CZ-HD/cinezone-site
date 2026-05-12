@@ -246,17 +246,35 @@ const deleteReadNotifications = async () => {
   const { data, error } = await supabase
     .from("notifications")
     .delete()
-.is("read", true)
-.select("id");
+    .is("read", true)
+    .select("id");
 
   if (error) {
     alert("Erreur suppression : " + error.message);
     return;
   }
 
-await loadNotifications();
+  await loadNotifications();
 
   alert(`${data?.length || 0} notification(s) lue(s) supprimée(s)`);
+};
+
+const deleteAllNotifications = async () => {
+  if (!confirm("Supprimer toutes les notifications ?")) return;
+
+  const { error } = await supabase
+    .from("notifications")
+    .delete()
+    .neq("id", "");
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  await loadNotifications();
+
+  alert("Toutes les notifications supprimées");
 };
   const loadUsers = async () => {
     const { data, error, count } = await supabase
@@ -1118,7 +1136,7 @@ await loadNotifications();
         <div style={memberHeader}>
           <div>
             <h2 style={{ margin: 0 }}>🔔 Suivi des notifications</h2>
-            <p style={subText}>Voir qui a reçu, lu ou pas encore ouvert les notifications.</p>
+           <p style={subText}>Voir qui a reçu, lu ou pas encore ouvert les notifications.</p>
           </div>
 
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -1155,6 +1173,14 @@ await loadNotifications();
   style={btnRed}
 >
   🗑 Supprimer lues
+</button>
+
+<button
+  type="button"
+  onClick={deleteAllNotifications}
+  style={btnRed}
+>
+  🗑 Tout supprimer
 </button>
           </div>
         </div>
