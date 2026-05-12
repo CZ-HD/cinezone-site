@@ -269,12 +269,15 @@ const filteredMovies = movies.filter((movie) => {
         <>
           <section>
             <h2 style={sectionTitle}>
-              🍿 Catalogue CineZone
-              {isAdmin &&
-  ` — ${totalMovies} film${
-    totalMovies > 1 ? "s" : ""
-  }`}
-            </h2>
+  🍿 Catalogue CineZone
+  {isAdmin &&
+    ` — ${
+      loading
+        ? "Chargement..."
+        : `${totalMovies} film${totalMovies > 1 ? "s" : ""}`
+    }`
+  }
+</h2>
 
             {filteredMovies.length === 0 ? (
               <p style={{ color: "#aaa" }}>Aucun film trouvé pour ce filtre.</p>
