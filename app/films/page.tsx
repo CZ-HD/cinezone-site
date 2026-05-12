@@ -15,6 +15,7 @@ const END_YEAR = 2027;
 
 export default function FilmsPage() {
   const [movies, setMovies] = useState<any[]>([]);
+  const [totalMovies, setTotalMovies] = useState(0);
   const [tmdbResults, setTmdbResults] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -72,23 +73,26 @@ if (profile?.role === "admin" && profile?.status === "approved") {
   };
 
   const loadMovies = async () => {
-    setLoading(true);
+  setLoading(true);
 
-    const { data, error } = await supabase
-      .from("downloads")
-      .select("id, title, poster_path, vote_average, release_date, release_year")
-      .order("id", { ascending: false });
+  const { data, count, error } = await supabase
+    .from("downloads")
+    .select("id, title, poster_path, vote_average, release_date, release_year", {
+      count: "exact",
+    })
+    .order("id", { ascending: false })
+    .range(0, 5000);
 
-    if (error) {
-      console.error(error);
-      setLoading(false);
-      return;
-    }
-
-    setMovies(data || []);
+  if (error) {
+    console.error(error);
     setLoading(false);
-  };
+    return;
+  }
 
+  setMovies(data || []);
+  setTotalMovies(count || 0);
+  setLoading(false);
+};
   const cleanSearch = (value: string) => {
   return value
     .toLowerCase()
@@ -258,9 +262,9 @@ const filteredMovies = movies.filter((movie) => {
             <h2 style={sectionTitle}>
               🍿 Catalogue CineZone
               {isAdmin &&
-                ` — ${filteredMovies.length} film${
-                  filteredMovies.length > 1 ? "s" : ""
-                }`}
+  ` — ${totalMovies} film${
+    totalMovies > 1 ? "s" : ""
+  }`}
             </h2>
 
             {filteredMovies.length === 0 ? (
@@ -271,7 +275,7 @@ const filteredMovies = movies.filter((movie) => {
   currentPage={currentPage}
   totalPages={totalPages}
   itemsPerPage={itemsPerPage}
-  totalItems={filteredMovies.length}
+  totalItems={search || minYear !== START_YEAR || maxYear !== END_YEAR ? filteredMovies.length : totalMovies}
   isAdmin={isAdmin}
   onPageChange={setCurrentPage}
   onItemsPerPageChange={(value) => {
