@@ -18,8 +18,10 @@ export default function SagasPage() {
   const [sagas, setSagas] = useState<Saga[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const itemsPerPage = 12;
+
   const totalPages = Math.ceil(sagas.length / itemsPerPage);
 
   const paginatedSagas = sagas.slice(
@@ -29,7 +31,33 @@ export default function SagasPage() {
 
   useEffect(() => {
     loadSagas();
+    checkAdmin();
   }, []);
+
+  async function checkAdmin() {
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
+
+    if (!user?.email) return;
+
+    if (
+      user.email === "blackph4tom@gmail.com" ||
+      user.email === "lafooteusedu54@hotmail.fr"
+    ) {
+      setIsAdmin(true);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role,status")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role === "admin" && profile?.status === "approved") {
+      setIsAdmin(true);
+    }
+  }
 
   async function loadSagas() {
     const { data, error } = await supabase
@@ -51,14 +79,16 @@ export default function SagasPage() {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <span style={badgeStyle}>🎞️ Collections</span>
+
         <h1 style={titleStyle}>Sagas CineZone HD</h1>
+
         <p style={textStyle}>
           Découvre toutes les sagas disponibles sur CineZone HD.
         </p>
       </section>
 
       {loading ? (
-        <p style={textStyle}>Chargement des sagas...</p>
+        <p style={loadingStyle}>Chargement des sagas...</p>
       ) : sagas.length === 0 ? (
         <section style={emptyStyle}>
           <h2>Aucune saga pour le moment</h2>
@@ -68,8 +98,15 @@ export default function SagasPage() {
         <>
           <section style={topBarStyle}>
             <span>
-              Page {page} sur {totalPages} — {sagas.length} saga
-              {sagas.length > 1 ? "s" : ""}
+              Page {page} sur {totalPages}
+
+              {isAdmin && (
+                <>
+                  {" "}
+                  — {sagas.length} saga
+                  {sagas.length > 1 ? "s" : ""}
+                </>
+              )}
             </span>
 
             <div style={paginationButtonsStyle}>
@@ -86,12 +123,17 @@ export default function SagasPage() {
               </button>
 
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={page === totalPages}
                 style={{
                   ...pageButtonStyle,
                   opacity: page === totalPages ? 0.45 : 1,
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
+                  cursor:
+                    page === totalPages
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
                 Suivant
@@ -120,7 +162,10 @@ export default function SagasPage() {
 
                 <div>
                   <h2 style={cardTitle}>{saga.title}</h2>
-                  <p style={cardText}>Tous les films {saga.title}</p>
+
+                  <p style={cardText}>
+                    Tous les films {saga.title}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -145,12 +190,17 @@ export default function SagasPage() {
               </span>
 
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={page === totalPages}
                 style={{
                   ...pageButtonStyle,
                   opacity: page === totalPages ? 0.45 : 1,
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
+                  cursor:
+                    page === totalPages
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
                 Suivant
@@ -202,6 +252,11 @@ const textStyle: React.CSSProperties = {
   lineHeight: 1.6,
 };
 
+const loadingStyle: React.CSSProperties = {
+  textAlign: "center",
+  color: "#94a3b8",
+};
+
 const topBarStyle: React.CSSProperties = {
   maxWidth: "1100px",
   margin: "0 auto 22px",
@@ -236,6 +291,7 @@ const cardStyle: React.CSSProperties = {
   background: "rgba(255,255,255,0.06)",
   border: "1px solid rgba(255,255,255,0.12)",
   boxShadow: "0 18px 50px rgba(0,0,0,0.45)",
+  transition: "0.2s",
 };
 
 const posterBox: React.CSSProperties = {
