@@ -4,9 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const DEFAULT_AVATAR =
-  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/Boss.png";
+  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+
+const CREATOR_EMAILS = [
+  "blackph4tom@gmail.com",
+  "lafooteusedu54@hotmail.fr",
+];
 
 type Message = {
   id: string;
@@ -30,6 +35,17 @@ type Profile = {
   role?: string;
   role_color?: string;
   status_text?: string;
+};
+
+type MentionProfile = {
+  id: string;
+  email?: string | null;
+  username?: string | null;
+};
+
+type ResolvedMentions = {
+  safeContent: string;
+  mentionedUsers: MentionProfile[];
 };
 
 type Reaction = {
@@ -338,7 +354,24 @@ export default function ChatPage() {
   }, [messages.length]);
 
   const onlineUserIds = onlineMembers.map((member) => member.user_id);
-  const isAdmin = profile?.role === "admin";
+  const isAdmin = profile?.role === "admin" || CREATOR_EMAILS.includes(user?.email || "");
+
+  const isAllowedImage = (file: File) => {
+    return (
+      file.type.includes("png") ||
+      file.type.includes("jpeg") ||
+      file.type.includes("jpg") ||
+      file.type.includes("webp") ||
+      file.type.includes("gif")
+    );
+  };
+
+  const getCleanImageExt = (file: File) => {
+    if (file.type.includes("png")) return "png";
+    if (file.type.includes("webp")) return "webp";
+    if (file.type.includes("gif")) return "gif";
+    return "jpg";
+  };
 
   const sendTyping = async () => {
     if (!user || !profile) return;
@@ -427,12 +460,28 @@ export default function ChatPage() {
       setUploading(true);
 
       const file = e.target.files[0];
-      const fileExt = file.name.split(".").pop();
+
+      if (!isAllowedImage(file)) {
+        alert("Format image non supporté. PNG, JPG, WEBP ou GIF uniquement.");
+        e.target.value = "";
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image trop lourde. Maximum autorisé : 2 Mo.");
+        e.target.value = "";
+        return;
+      }
+
+      const fileExt = getCleanImageExt(file);
       const filePath = `${user.id}/avatar-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type,
+        });
 
       if (uploadError) {
         alert("Erreur upload avatar : " + uploadError.message);
@@ -456,6 +505,8 @@ export default function ChatPage() {
         ...prev,
         avatar: publicUrl,
       }));
+
+      e.target.value = "";
     } finally {
       setUploading(false);
     }
@@ -469,17 +520,26 @@ export default function ChatPage() {
 
       const file = e.target.files[0];
 
-      if (!file.type.startsWith("image/")) {
-        alert("Choisis une image.");
+      if (!isAllowedImage(file)) {
+        alert("Format image non supporté. PNG, JPG, WEBP ou GIF uniquement.");
+        e.target.value = "";
         return;
       }
 
-      const fileExt = file.name.split(".").pop();
+      if (file.size > 4 * 1024 * 1024) {
+        alert("Image trop lourde. Maximum autorisé : 4 Mo.");
+        e.target.value = "";
+        return;
+      }
+
+      const fileExt = getCleanImageExt(file);
       const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("chat-images")
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          contentType: file.type,
+        });
 
       if (uploadError) {
         alert("Erreur image : " + uploadError.message);
@@ -537,11 +597,78 @@ export default function ChatPage() {
     }
   };
 
+  const resolveMentions = async (content: string): Promise<ResolvedMentions> => {
+    if (!isAdmin || !user) {
+      return { safeContent: content, mentionedUsers: [] };
+    }
+
+    const matches = [...content.matchAll(/@([^\s]+)/g)];
+
+    if (matches.length === 0) {
+      return { safeContent: content, mentionedUsers: [] };
+    }
+
+    let safeContent = content;
+    const mentionedUsers: MentionProfile[] = [];
+    const alreadyMentioned = new Set<string>();
+
+    for (const match of matches) {
+      const rawMention = match[0];
+      const value = match[1].trim();
+
+      if (!value) continue;
+
+      const { data: mentionedUser } = await supabase
+        .from("profiles")
+        .select("id, username, email")
+        .or(`username.eq.${value},email.eq.${value}`)
+        .maybeSingle();
+
+      if (!mentionedUser?.id) continue;
+      if (mentionedUser.id === user.id) continue;
+      if (alreadyMentioned.has(mentionedUser.id)) continue;
+
+      alreadyMentioned.add(mentionedUser.id);
+      mentionedUsers.push(mentionedUser);
+
+      if (value.includes("@")) {
+        safeContent = safeContent.replace(
+          rawMention,
+          mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
+        );
+      }
+    }
+
+    return { safeContent, mentionedUsers };
+  };
+
+  const createMentionNotifications = async (
+    mentionedUsers: MentionProfile[],
+    messagePreview: string
+  ) => {
+    if (!user || !profile || mentionedUsers.length === 0) return;
+
+    const senderName = profile.username || user.email || "Le staff";
+
+    await supabase.from("notifications").insert(
+      mentionedUsers.map((member) => ({
+        user_id: member.id,
+        type: "mention",
+        title: "🔔 Mention dans le chat",
+        message: `${senderName} t'a mentionné dans le chat.`,
+        link: "/chat",
+        read: false,
+      }))
+    );
+  };
+
   const sendMessage = async () => {
     if (!text.trim() || !user) return;
 
-    const message = text.trim();
+    const originalMessage = text.trim();
     setText("");
+
+    const { safeContent, mentionedUsers } = await resolveMentions(originalMessage);
 
     const { data: freshProfile } = await supabase
       .from("profiles")
@@ -559,7 +686,7 @@ export default function ChatPage() {
         role: freshProfile?.role || "user",
         role_color: freshProfile?.role_color || "#00c6ff",
         status_text: freshProfile?.status_text || "🟢 En ligne",
-        content: message,
+        content: safeContent,
         image_url: null,
         pinned: false,
         reply_to: replyTo?.id || null,
@@ -569,6 +696,7 @@ export default function ChatPage() {
 
     if (error) {
       alert("Erreur message : " + error.message);
+      setText(originalMessage);
       return;
     }
 
@@ -580,6 +708,7 @@ export default function ChatPage() {
       );
     }
 
+    await createMentionNotifications(mentionedUsers, safeContent);
     setReplyTo(null);
   };
 
@@ -709,7 +838,14 @@ export default function ChatPage() {
 
             <div style={connectedBox}>
               <div style={avatarWrap}>
-                <img src={avatarUrl} alt="avatar" style={avatarSmall} />
+                <img
+                  src={avatarUrl}
+                  alt="avatar"
+                  style={avatarSmall}
+                  onError={(e) => {
+                    e.currentTarget.src = DEFAULT_AVATAR;
+                  }}
+                />
                 <span
                   style={{
                     ...onlineDot,
@@ -761,7 +897,11 @@ export default function ChatPage() {
                 />
 
                 <label style={labelStyle}>Avatar</label>
-                <input type="file" accept="image/*" onChange={uploadAvatar} />
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                  onChange={uploadAvatar}
+                />
                 {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
 
                 <label style={labelStyle}>Statut</label>
@@ -892,7 +1032,14 @@ export default function ChatPage() {
                       }}
                     >
                       <div style={avatarWrapSmall}>
-                        <img src={msgAvatar} alt="avatar" style={avatarMsg} />
+                        <img
+                          src={msgAvatar}
+                          alt="avatar"
+                          style={avatarMsg}
+                          onError={(e) => {
+                            e.currentTarget.src = DEFAULT_AVATAR;
+                          }}
+                        />
                         <span
                           style={{
                             ...onlineDotSmall,
@@ -1084,6 +1231,8 @@ export default function ChatPage() {
               placeholder={
                 replyTo
                   ? `Répondre à ${replyTo.username || replyTo.email}...`
+                  : isAdmin
+                  ? "Écris ton message... (@email ou @pseudo pour notifier)"
                   : "Écris ton message..."
               }
               style={inputStyle}
@@ -1093,7 +1242,7 @@ export default function ChatPage() {
               {imageUploading ? "⏳" : "📎"}
               <input
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
                 onChange={uploadChatImage}
                 style={{ display: "none" }}
                 disabled={imageUploading}
@@ -1126,6 +1275,9 @@ export default function ChatPage() {
                       src={member.avatar || DEFAULT_AVATAR}
                       alt="avatar"
                       style={avatarMsg}
+                      onError={(e) => {
+                        e.currentTarget.src = DEFAULT_AVATAR;
+                      }}
                     />
                     <span
                       style={{
