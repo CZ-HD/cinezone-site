@@ -8,6 +8,11 @@ const DEFAULT_AVATAR =
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "🔥"];
 
+const CREATOR_EMAILS = [
+  "blackph4tom@gmail.com",
+  "lafooteusedu54@hotmail.fr",
+];
+
 type Comment = {
   id: string;
   item_id: string;
@@ -19,10 +24,6 @@ type Comment = {
   content: string;
   created_at: string;
   parent_id?: string | null;
-
-  display_username?: string;
-  display_avatar?: string;
-  display_role?: string;
 };
 
 type CommentReaction = {
@@ -33,11 +34,15 @@ type CommentReaction = {
   created_at: string;
 };
 
-type ProfileMap = {
+type MentionProfile = {
   id: string;
+  email?: string | null;
   username?: string | null;
-  avatar?: string | null;
-  role?: string | null;
+};
+
+type ResolvedMentions = {
+  safeContent: string;
+  mentionedUsers: MentionProfile[];
 };
 
 export default function Comments({
@@ -56,6 +61,9 @@ export default function Comments({
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const isAdmin =
+    profile?.role === "admin" || CREATOR_EMAILS.includes(user?.email || "");
+
   useEffect(() => {
     async function init() {
       const { data } = await supabase.auth.getUser();
@@ -69,7 +77,7 @@ export default function Comments({
 
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("id, username, avatar, role")
+        .select("id, email, username, avatar, role")
         .eq("id", data.user.id)
         .single();
 
@@ -91,53 +99,78 @@ export default function Comments({
       .eq("item_type", itemType)
       .order("created_at", { ascending: false });
 
-    const commentsData = data || [];
-
-    const userIds = [
-      ...new Set(
-        commentsData
-          .map((comment) => comment.user_id)
-          .filter(Boolean)
-      ),
-    ];
-
-    let profilesMap: Record<string, ProfileMap> = {};
-
-    if (userIds.length > 0) {
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("id, username, avatar, role")
-        .in("id", userIds);
-
-      profilesMap = (profilesData || []).reduce(
-        (acc: Record<string, ProfileMap>, profileItem: ProfileMap) => {
-          acc[profileItem.id] = profileItem;
-          return acc;
-        },
-        {}
-      );
-    }
-
-    const cleanComments = commentsData.map((comment) => {
-      const currentProfile = profilesMap[comment.user_id];
-
-      return {
-        ...comment,
-        display_username:
-          currentProfile?.username || comment.username || "Utilisateur",
-        display_avatar:
-          currentProfile?.avatar || comment.avatar || DEFAULT_AVATAR,
-        display_role:
-          currentProfile?.role || comment.role || "user",
-      };
-    });
-
-    setComments(cleanComments);
+    setComments(data || []);
   };
 
   const loadReactions = async () => {
     const { data } = await supabase.from("comment_reactions").select("*");
     setReactions(data || []);
+  };
+
+  const resolveMentions = async (content: string): Promise<ResolvedMentions> => {
+    if (!isAdmin || !user) {
+      return { safeContent: content, mentionedUsers: [] };
+    }
+
+    const matches = [...content.matchAll(/@([^\s]+)/g)];
+
+    if (matches.length === 0) {
+      return { safeContent: content, mentionedUsers: [] };
+    }
+
+    let safeContent = content;
+    const mentionedUsers: MentionProfile[] = [];
+    const alreadyMentioned = new Set<string>();
+
+    for (const match of matches) {
+      const rawMention = match[0];
+      const value = match[1].trim();
+
+      if (!value) continue;
+
+      const { data: mentionedUser } = await supabase
+        .from("profiles")
+        .select("id, username, email")
+        .or(`username.eq.${value},email.eq.${value}`)
+        .maybeSingle();
+
+      if (!mentionedUser?.id) continue;
+      if (mentionedUser.id === user.id) continue;
+      if (alreadyMentioned.has(mentionedUser.id)) continue;
+
+      alreadyMentioned.add(mentionedUser.id);
+      mentionedUsers.push(mentionedUser);
+
+      if (value.includes("@")) {
+        safeContent = safeContent.replace(
+          rawMention,
+          mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
+        );
+      }
+    }
+
+    return { safeContent, mentionedUsers };
+  };
+
+  const createMentionNotifications = async (
+    mentionedUsers: MentionProfile[],
+    content: string
+  ) => {
+    if (!user || !profile || mentionedUsers.length === 0) return;
+
+    const senderName = profile.username || user.email || "Le staff";
+    const preview = content.length > 80 ? `${content.slice(0, 80)}...` : content;
+
+    await supabase.from("notifications").insert(
+      mentionedUsers.map((member) => ({
+        user_id: member.id,
+        type: "comment_mention",
+        title: "🔔 Mention dans un commentaire",
+        message: `${senderName} t'a mentionné dans un commentaire : ${preview}`,
+        link: `/movie/${itemId}`,
+        read: false,
+      }))
+    );
   };
 
   const createAdminNotification = async (content: string) => {
@@ -165,8 +198,10 @@ export default function Comments({
   const sendComment = async () => {
     if (!text.trim() || !user) return;
 
-    const content = text.trim();
+    const originalContent = text.trim();
     setText("");
+
+    const { safeContent, mentionedUsers } = await resolveMentions(originalContent);
 
     const { error } = await supabase.from("comments").insert({
       item_id: String(itemId),
@@ -175,24 +210,28 @@ export default function Comments({
       username: profile?.username || user.email,
       avatar: profile?.avatar || DEFAULT_AVATAR,
       role: profile?.role || "user",
-      content,
+      content: safeContent,
       parent_id: null,
     });
 
     if (error) {
       alert("Erreur commentaire : " + error.message);
+      setText(originalContent);
       return;
     }
 
-    await createAdminNotification(content);
+    await createAdminNotification(safeContent);
+    await createMentionNotifications(mentionedUsers, safeContent);
     await loadComments();
   };
 
   const sendReply = async () => {
     if (!replyText.trim() || !user || !replyTo) return;
 
-    const content = replyText.trim();
+    const originalContent = replyText.trim();
     setReplyText("");
+
+    const { safeContent, mentionedUsers } = await resolveMentions(originalContent);
 
     const { error } = await supabase.from("comments").insert({
       item_id: String(itemId),
@@ -201,17 +240,19 @@ export default function Comments({
       username: profile?.username || user.email,
       avatar: profile?.avatar || DEFAULT_AVATAR,
       role: profile?.role || "user",
-      content,
+      content: safeContent,
       parent_id: replyTo.id,
     });
 
     if (error) {
       alert("Erreur réponse : " + error.message);
+      setReplyText(originalContent);
       return;
     }
 
     setReplyTo(null);
-    await createAdminNotification(content);
+    await createAdminNotification(safeContent);
+    await createMentionNotifications(mentionedUsers, safeContent);
     await loadComments();
   };
 
@@ -310,7 +351,11 @@ export default function Comments({
             if (e.key === "Enter") sendComment();
           }}
           placeholder={
-            user ? "Écrire un commentaire..." : "Connecte-toi pour commenter..."
+            user
+              ? isAdmin
+                ? "Écrire un commentaire... (@email ou @pseudo pour notifier)"
+                : "Écrire un commentaire..."
+              : "Connecte-toi pour commenter..."
           }
           disabled={!user}
           style={input}
@@ -329,22 +374,25 @@ export default function Comments({
         <div style={list}>
           {parentComments.map((comment) => {
             const replies = getReplies(comment.id);
-            const isAdmin = comment.display_role === "admin";
+            const isCommentAdmin = comment.role === "admin";
 
             return (
               <div key={comment.id}>
                 <div style={card}>
                   <img
-                    src={comment.display_avatar || DEFAULT_AVATAR}
+                    src={comment.avatar || DEFAULT_AVATAR}
                     alt="avatar"
                     style={avatar}
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_AVATAR;
+                    }}
                   />
 
                   <div style={{ flex: 1 }}>
                     <div style={topRow}>
-                      <strong style={{ color: isAdmin ? "gold" : "#00c6ff" }}>
-                        {comment.display_username || "Utilisateur"}
-                        {isAdmin && <span style={adminBadge}>ADMIN</span>}
+                      <strong style={{ color: isCommentAdmin ? "gold" : "#00c6ff" }}>
+                        {comment.username || "Utilisateur"}
+                        {isCommentAdmin && <span style={adminBadge}>ADMIN</span>}
                       </strong>
 
                       <span style={dateText}>
@@ -395,7 +443,7 @@ export default function Comments({
                     {replyTo?.id === comment.id && (
                       <div style={replyInputBox}>
                         <div style={replyingTo}>
-                          Réponse à {comment.display_username || "Utilisateur"}
+                          Réponse à {comment.username || "Utilisateur"}
                           <button
                             onClick={() => {
                               setReplyTo(null);
@@ -414,7 +462,11 @@ export default function Comments({
                             onKeyDown={(e) => {
                               if (e.key === "Enter") sendReply();
                             }}
-                            placeholder="Écrire une réponse..."
+                            placeholder={
+                              isAdmin
+                                ? "Écrire une réponse... (@email ou @pseudo pour notifier)"
+                                : "Écrire une réponse..."
+                            }
                             style={input}
                           />
                           <button onClick={sendReply} style={btn}>
@@ -427,14 +479,17 @@ export default function Comments({
                     {replies.length > 0 && (
                       <div style={repliesBox}>
                         {replies.map((reply) => {
-                          const replyIsAdmin = reply.display_role === "admin";
+                          const replyIsAdmin = reply.role === "admin";
 
                           return (
                             <div key={reply.id} style={replyCard}>
                               <img
-                                src={reply.display_avatar || DEFAULT_AVATAR}
+                                src={reply.avatar || DEFAULT_AVATAR}
                                 alt="avatar"
                                 style={avatarSmall}
+                                onError={(e) => {
+                                  e.currentTarget.src = DEFAULT_AVATAR;
+                                }}
                               />
 
                               <div style={{ flex: 1 }}>
@@ -445,7 +500,7 @@ export default function Comments({
                                       fontSize: "13px",
                                     }}
                                   >
-                                    {reply.display_username || "Utilisateur"}
+                                    {reply.username || "Utilisateur"}
                                     {replyIsAdmin && (
                                       <span style={adminBadge}>ADMIN</span>
                                     )}
