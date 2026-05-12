@@ -612,7 +612,28 @@ export default function ChatPage() {
     const mentionedUsers: MentionProfile[] = [];
     const alreadyMentioned = new Set<string>();
 
-    for (const match of matches) {
+if (content.includes("@everyone") || content.includes("@toutlemonde")) {
+  const { data: members } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("status", "approved");
+
+  if (members?.length) {
+    for (const member of members) {
+      if (member.id === user.id) continue;
+      if (alreadyMentioned.has(member.id)) continue;
+
+      alreadyMentioned.add(member.id);
+      mentionedUsers.push({ id: member.id });
+    }
+  }
+
+  safeContent = safeContent
+    .replaceAll("@everyone", "@tout le monde")
+    .replaceAll("@toutlemonde", "@tout le monde");
+}
+
+      for (const match of matches) {
       const rawMention = match[0];
       const value = match[1].trim();
 
