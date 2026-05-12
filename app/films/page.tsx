@@ -100,6 +100,7 @@ if (profile?.role === "admin" && profile?.status === "approved") {
   }
 
   setMovies(allMovies);
+  setTotalMovies(allMovies.length);
   setLoading(false);
 };
   const cleanSearch = (value: string) => {
