@@ -17,6 +17,15 @@ type Saga = {
 export default function SagasPage() {
   const [sagas, setSagas] = useState<Saga[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(sagas.length / itemsPerPage);
+
+  const paginatedSagas = sagas.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
 
   useEffect(() => {
     loadSagas();
@@ -56,30 +65,99 @@ export default function SagasPage() {
           <p>Tu pourras bientôt ajouter tes collections ici.</p>
         </section>
       ) : (
-        <section style={gridStyle}>
-          {sagas.map((saga) => (
-            <Link
-              key={saga.id}
-              href={`/sagas/${saga.slug}`}
-              style={cardStyle}
-            >
-              <div style={posterBox}>
-                {saga.poster ? (
-                  <img src={saga.poster} alt={saga.title} style={posterStyle} />
-                ) : (
-                  <span style={{ fontSize: "42px" }}>🎬</span>
-                )}
-              </div>
+        <>
+          <section style={topBarStyle}>
+            <span>
+              Page {page} sur {totalPages} — {sagas.length} saga
+              {sagas.length > 1 ? "s" : ""}
+            </span>
 
-              <div>
-                <h2 style={cardTitle}>{saga.title}</h2>
-                <p style={cardText}>
-  Tous les films {saga.title}
-</p>
-              </div>
-            </Link>
-          ))}
-        </section>
+            <div style={paginationButtonsStyle}>
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                style={{
+                  ...pageButtonStyle,
+                  opacity: page === 1 ? 0.45 : 1,
+                  cursor: page === 1 ? "not-allowed" : "pointer",
+                }}
+              >
+                Précédent
+              </button>
+
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                style={{
+                  ...pageButtonStyle,
+                  opacity: page === totalPages ? 0.45 : 1,
+                  cursor: page === totalPages ? "not-allowed" : "pointer",
+                }}
+              >
+                Suivant
+              </button>
+            </div>
+          </section>
+
+          <section style={gridStyle}>
+            {paginatedSagas.map((saga) => (
+              <Link
+                key={saga.id}
+                href={`/sagas/${saga.slug}`}
+                style={cardStyle}
+              >
+                <div style={posterBox}>
+                  {saga.poster ? (
+                    <img
+                      src={saga.poster}
+                      alt={saga.title}
+                      style={posterStyle}
+                    />
+                  ) : (
+                    <span style={{ fontSize: "42px" }}>🎬</span>
+                  )}
+                </div>
+
+                <div>
+                  <h2 style={cardTitle}>{saga.title}</h2>
+                  <p style={cardText}>Tous les films {saga.title}</p>
+                </div>
+              </Link>
+            ))}
+          </section>
+
+          {totalPages > 1 && (
+            <section style={bottomPaginationStyle}>
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                style={{
+                  ...pageButtonStyle,
+                  opacity: page === 1 ? 0.45 : 1,
+                  cursor: page === 1 ? "not-allowed" : "pointer",
+                }}
+              >
+                Précédent
+              </button>
+
+              <span style={pageTextStyle}>
+                Page {page} sur {totalPages}
+              </span>
+
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                style={{
+                  ...pageButtonStyle,
+                  opacity: page === totalPages ? 0.45 : 1,
+                  cursor: page === totalPages ? "not-allowed" : "pointer",
+                }}
+              >
+                Suivant
+              </button>
+            </section>
+          )}
+        </>
       )}
     </main>
   );
@@ -122,6 +200,24 @@ const titleStyle: React.CSSProperties = {
 const textStyle: React.CSSProperties = {
   color: "#cbd5e1",
   lineHeight: 1.6,
+};
+
+const topBarStyle: React.CSSProperties = {
+  maxWidth: "1100px",
+  margin: "0 auto 22px",
+  padding: "14px 0",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "14px",
+  flexWrap: "wrap",
+  color: "#94a3b8",
+  fontWeight: 700,
+};
+
+const paginationButtonsStyle: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
 };
 
 const gridStyle: React.CSSProperties = {
@@ -170,6 +266,30 @@ const cardText: React.CSSProperties = {
   color: "#94a3b8",
   fontSize: "14px",
   lineHeight: 1.5,
+};
+
+const bottomPaginationStyle: React.CSSProperties = {
+  maxWidth: "1100px",
+  margin: "34px auto 0",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "16px",
+  flexWrap: "wrap",
+};
+
+const pageButtonStyle: React.CSSProperties = {
+  padding: "12px 18px",
+  borderRadius: "14px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(0,198,255,0.14)",
+  color: "#fff",
+  fontWeight: 900,
+};
+
+const pageTextStyle: React.CSSProperties = {
+  color: "#94a3b8",
+  fontWeight: 700,
 };
 
 const emptyStyle: React.CSSProperties = {
