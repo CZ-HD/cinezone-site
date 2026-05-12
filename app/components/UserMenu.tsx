@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const DEFAULT_AVATAR =
-  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/Boss.png";
+  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png";
 
 export default function UserMenu() {
   const [open, setOpen] = useState(false);
@@ -81,12 +81,40 @@ export default function UserMenu() {
       setUploading(true);
 
       const file = e.target.files[0];
-      const ext = file.name.split(".").pop();
+
+      if (
+        !file.type.includes("png") &&
+        !file.type.includes("jpeg") &&
+        !file.type.includes("jpg") &&
+        !file.type.includes("webp") &&
+        !file.type.includes("gif")
+      ) {
+        alert("Format image non supporté.\nPNG, JPG ou WEBP uniquement.");
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image trop lourde.\nMaximum autorisé : 2 Mo.");
+        return;
+      }
+
+      const ext =
+  file.type.includes("png")
+    ? "png"
+    : file.type.includes("webp")
+    ? "webp"
+    : file.type.includes("gif")
+    ? "gif"
+    : "jpg";
+
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true });
+        .upload(path, file, {
+          upsert: true,
+          contentType: file.type,
+        });
 
       if (uploadError) {
         alert(uploadError.message);
@@ -110,6 +138,8 @@ export default function UserMenu() {
         ...prev,
         avatar: newAvatar,
       }));
+
+      e.target.value = "";
     } finally {
       setUploading(false);
     }
@@ -125,7 +155,14 @@ export default function UserMenu() {
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button onClick={() => setOpen(!open)} style={userBtn}>
-        <img src={profile.avatar || DEFAULT_AVATAR} alt="avatar" style={avatarSmall} />
+        <img
+          src={profile.avatar || DEFAULT_AVATAR}
+          alt="avatar"
+          style={avatarSmall}
+          onError={(e) => {
+            e.currentTarget.src = DEFAULT_AVATAR;
+          }}
+        />
         <span>{profile.username}</span>
         <span>▾</span>
       </button>
@@ -133,7 +170,14 @@ export default function UserMenu() {
       {open && (
         <div style={dropdown}>
           <div style={profileTop}>
-            <img src={profile.avatar || DEFAULT_AVATAR} alt="avatar" style={avatarBig} />
+            <img
+              src={profile.avatar || DEFAULT_AVATAR}
+              alt="avatar"
+              style={avatarBig}
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_AVATAR;
+              }}
+            />
 
             <div>
               <strong>{profile.username}</strong>
@@ -163,7 +207,7 @@ export default function UserMenu() {
                 📷 Changer avatar
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
                   onChange={uploadAvatar}
                   style={{ display: "none" }}
                 />
