@@ -402,7 +402,7 @@ export default function Comments({
                       </span>
                     </div>
 
-                    <p style={content}>{comment.content}</p>
+                    <p style={contentStyle}>{comment.content}</p>
 
                     <div style={reactionRow}>
                       {REACTION_EMOJIS.map((emoji) => {
@@ -638,7 +638,7 @@ const dateText: React.CSSProperties = {
   fontSize: "12px",
 };
 
-const content: React.CSSProperties = {
+const contentStyle: React.CSSProperties = {
   color: "#f1f5ff",
   lineHeight: 1.55,
   margin: "8px 0",
