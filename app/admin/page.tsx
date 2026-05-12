@@ -182,34 +182,35 @@ export default function AdminPage() {
   };
 
   const loadNotifications = async () => {
-    const { data, error } = await supabase
-      .from("notifications")
-      .select(`
-        id,
-        user_id,
-        type,
-        title,
-        message,
-        link,
-        read,
-        created_at,
-        read_at,
-        profiles:user_id (
-          username,
-          email,
-          avatar
-        )
-      `)
-      .order("created_at", { ascending: false })
-      .limit(300);
+  const { data: notifData, error: notifError } = await supabase
+    .from("notifications")
+    .select("id,user_id,type,title,message,link,read,created_at,read_at")
+    .order("created_at", { ascending: false })
+    .limit(300);
 
-    if (error) {
-      setMessage("❌ Erreur notifications : " + error.message);
-      return;
-    }
+  if (notifError) {
+    setMessage("❌ Erreur notifications : " + notifError.message);
+    return;
+  }
 
-    setNotifications((data || []) as NotificationRow[]);
-  };
+  const userIds = [...new Set((notifData || []).map((n) => n.user_id))];
+
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("id, username, email, avatar")
+    .in("id", userIds);
+
+  const profilesMap = new Map(
+    (profileData || []).map((profile) => [profile.id, profile])
+  );
+
+  const finalData = (notifData || []).map((notif) => ({
+    ...notif,
+    profiles: profilesMap.get(notif.user_id) || null,
+  }));
+
+  setNotifications(finalData as NotificationRow[]);
+};
 
   const loadUsers = async () => {
     const { data, error, count } = await supabase
