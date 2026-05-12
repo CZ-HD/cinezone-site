@@ -11,6 +11,7 @@ type Notification = {
   message: string;
   link?: string | null;
   read: boolean;
+  read_at?: string | null;
   created_at: string;
 };
 
@@ -31,14 +32,14 @@ export default function NotificationsBell() {
     await loadNotifications(data.user.id);
 
     const channel = supabase
-      .channel("notifications-user")
+      .channel(`notifications-user-${data.user.id}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications" },
         (payload) => {
           const notif = payload.new as Notification & { user_id: string };
 
-          if (notif.user_id === data.user.id) {
+          if (notif.user_id === data.user.id && !notif.read) {
             setNotifications((prev) => [notif, ...prev]);
           }
         }
@@ -55,6 +56,7 @@ export default function NotificationsBell() {
       .from("notifications")
       .select("*")
       .eq("user_id", userId)
+      .eq("read", false)
       .order("created_at", { ascending: false })
       .limit(20);
 
@@ -62,11 +64,15 @@ export default function NotificationsBell() {
   }
 
   async function markAsRead(id: string) {
-    await supabase.from("notifications").update({ read: true }).eq("id", id);
+    await supabase
+      .from("notifications")
+      .update({
+        read: true,
+        read_at: new Date().toISOString(),
+      })
+      .eq("id", id);
 
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   }
 
   async function markAllAsRead() {
@@ -74,14 +80,17 @@ export default function NotificationsBell() {
 
     await supabase
       .from("notifications")
-      .update({ read: true })
+      .update({
+        read: true,
+        read_at: new Date().toISOString(),
+      })
       .eq("user_id", user.id)
       .eq("read", false);
 
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications([]);
   }
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.length;
 
   return (
     <div style={{ position: "relative" }}>
@@ -110,10 +119,7 @@ export default function NotificationsBell() {
                 <Link
                   key={notif.id}
                   href={notif.link || "/"}
-                  style={{
-                    ...notifCard,
-                    opacity: notif.read ? 0.65 : 1,
-                  }}
+                  style={notifCard}
                   onClick={() => {
                     markAsRead(notif.id);
                     setOpen(false);
@@ -121,7 +127,7 @@ export default function NotificationsBell() {
                 >
                   <strong>{notif.title}</strong>
                   <p>{notif.message}</p>
-                  {!notif.read && <span style={newDot}>● Nouveau</span>}
+                  <span style={newDot}>● Nouveau</span>
                 </Link>
               ))}
             </div>
