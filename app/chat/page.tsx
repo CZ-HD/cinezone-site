@@ -1049,7 +1049,8 @@ if (content.includes("@everyone") || content.includes("@toutlemonde")) {
                         gap: "12px",
                         alignItems: "flex-start",
                         maxWidth: "78%",
-                        flexDirection: isMe ? "row-reverse" : "row",
+flexDirection: isMe ? "row-reverse" : "row",
+paddingRight: isMe ? "16px" : "0",
                       }}
                     >
                       <div style={avatarWrapSmall}>
@@ -1869,13 +1870,15 @@ const onlineDot: React.CSSProperties = {
 
 const avatarWrapSmall: React.CSSProperties = {
   position: "relative",
-  width: "40px",
-  height: "40px",
+  width: "44px",
+  height: "44px",
+  minWidth: "44px",
+  flexShrink: 0,
 };
 
 const avatarMsg: React.CSSProperties = {
-  width: "40px",
-  height: "40px",
+  width: "44px",
+  height: "44px",
   borderRadius: "50%",
   objectFit: "cover",
   border: "2px solid rgba(0,198,255,0.75)",
