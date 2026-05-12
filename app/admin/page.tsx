@@ -1115,9 +1115,25 @@ export default function AdminPage() {
               <option value="unread">Non lues</option>
             </select>
 
-            <button onClick={loadNotifications} style={btnBlue}>
-              🔄 Actualiser
-            </button>
+           <button
+  type="button"
+  onClick={async () => {
+    console.log("refresh notifications");
+
+    await loadNotifications();
+
+    alert("Notifications actualisées");
+  }}
+  }
+  style={{
+    ...btnBlue,
+    position: "relative",
+    zIndex: 20,
+    pointerEvents: "auto",
+  }}
+>
+  🔄 Actualiser
+</button>
           </div>
         </div>
 
