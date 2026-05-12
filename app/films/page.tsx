@@ -75,22 +75,31 @@ if (profile?.role === "admin" && profile?.status === "approved") {
   const loadMovies = async () => {
   setLoading(true);
 
-  const { data, count, error } = await supabase
-    .from("downloads")
-    .select("id, title, poster_path, vote_average, release_date, release_year", {
-      count: "exact",
-    })
-    .order("id", { ascending: false })
-    .range(0, 5000);
+  let allMovies: any[] = [];
+  let from = 0;
+  const step = 1000;
 
-  if (error) {
-    console.error(error);
-    setLoading(false);
-    return;
+  while (true) {
+    const { data, error } = await supabase
+      .from("downloads")
+      .select("id, title, poster_path, vote_average, release_date, release_year")
+      .order("id", { ascending: false })
+      .range(from, from + step - 1);
+
+    if (error) {
+      console.error(error);
+      setLoading(false);
+      return;
+    }
+
+    allMovies = [...allMovies, ...(data || [])];
+
+    if (!data || data.length < step) break;
+
+    from += step;
   }
 
-  setMovies(data || []);
-  setTotalMovies(count || 0);
+  setMovies(allMovies);
   setLoading(false);
 };
   const cleanSearch = (value: string) => {
