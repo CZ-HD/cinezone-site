@@ -240,7 +240,23 @@ export default function AdminPage() {
 
   setNotifications(finalData as NotificationRow[]);
 };
+const deleteReadNotifications = async () => {
+  if (!confirm("Supprimer toutes les notifications lues ?")) return;
 
+  const { error } = await supabase
+    .from("notifications")
+    .delete()
+    .eq("read", true);
+
+  if (error) {
+    setMessage("❌ Erreur suppression notifications : " + error.message);
+    return;
+  }
+
+ await loadNotifications();
+
+  alert("Notifications lues supprimées");
+};
   const loadUsers = async () => {
     const { data, error, count } = await supabase
       .from("profiles")
@@ -1131,6 +1147,14 @@ export default function AdminPage() {
 >
   🔄 Actualiser
 </button>
+
+<button
+  type="button"
+  onClick={deleteReadNotifications}
+  style={btnRed}
+>
+  🗑 Supprimer lues
+</button>
           </div>
         </div>
 
@@ -1711,4 +1735,14 @@ const miniPosterFallback: React.CSSProperties = {
   placeItems: "center",
   borderRadius: "8px",
   background: "rgba(255,255,255,0.08)",
+};
+
+const btnRed: React.CSSProperties = {
+  padding: "10px 16px",
+  borderRadius: "12px",
+  border: "none",
+  background: "#b91c1c",
+  color: "#fff",
+  fontWeight: 700,
+  cursor: "pointer",
 };
