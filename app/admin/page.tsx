@@ -187,26 +187,53 @@ export default function AdminPage() {
   const { data: notifData, error: notifError } = await supabase
     .from("notifications")
     .select("id,user_id,type,title,message,link,read,created_at,read_at")
-    .order("created_at", { ascending: false })
-    .limit(500);
+    .order("created_at", { ascending: false });
 
   if (notifError) {
     setMessage("❌ Erreur notifications : " + notifError.message);
     return;
   }
 
-  const userIds = [...new Set((notifData || []).map((n) => n.user_id))];
+  const notificationsList = notifData || [];
 
-  const { data: profileData } = await supabase
+  if (notificationsList.length === 0) {
+    setNotifications([]);
+    return;
+  }
+
+  const userIds = [
+    ...new Set(
+      notificationsList
+        .map((n) => n.user_id)
+        .filter(Boolean)
+    ),
+  ];
+
+  if (userIds.length === 0) {
+    setNotifications(
+      notificationsList.map((notif) => ({
+        ...notif,
+        profiles: null,
+      })) as NotificationRow[]
+    );
+    return;
+  }
+
+  const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .select("id, username, email, avatar")
     .in("id", userIds);
+
+  if (profileError) {
+    setMessage("❌ Erreur profils notifications : " + profileError.message);
+    return;
+  }
 
   const profilesMap = new Map(
     (profileData || []).map((profile) => [profile.id, profile])
   );
 
-  const finalData = (notifData || []).map((notif) => ({
+  const finalData = notificationsList.map((notif) => ({
     ...notif,
     profiles: profilesMap.get(notif.user_id) || null,
   }));
