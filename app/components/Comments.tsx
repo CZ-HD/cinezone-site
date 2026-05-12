@@ -162,16 +162,16 @@ export default function Comments({
     const preview = content.length > 80 ? `${content.slice(0, 80)}...` : content;
 
     await supabase.from("notifications").insert(
-      mentionedUsers.map((member) => ({
-        user_id: member.id,
-        type: "comment_mention",
-        title: "🔔 Mention dans un commentaire",
-        message: `${senderName} t'a mentionné dans un commentaire : ${preview}`,
-        link: `/movie/${itemId}`,
-        read: false,
-      }))
-    );
-  };
+  mentionedUsers.map((member) => ({
+    user_id: member.id,
+    type: "comment_mention",
+    title: "🔔 Mention dans un commentaire",
+    message: `${profile?.username || user.email} t’a mentionné dans un commentaire.`,
+    link: `/movie/${itemId}`,
+    read: false,
+    read_at: null,
+  }))
+);
 
   const createAdminNotification = async (content: string) => {
     if (profile?.role === "admin") return;
