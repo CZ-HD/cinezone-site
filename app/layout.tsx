@@ -7,7 +7,7 @@ import MenuDropdown from "./components/MenuDropdown";
 import PresenceTracker from "./components/PresenceTracker";
 import UserMenu from "./components/UserMenu";
 import "./globals.css";
-import NotificationsBell from "./components/NotificationsBell.tsx";
+import NotificationsBell from "./components/NotificationsBell";
 
 export const metadata: Metadata = {
   title: "CineZone HD",
