@@ -182,11 +182,13 @@ export default function AdminPage() {
   };
 
   const loadNotifications = async () => {
+  setMessage("");
+
   const { data: notifData, error: notifError } = await supabase
     .from("notifications")
     .select("id,user_id,type,title,message,link,read,created_at,read_at")
     .order("created_at", { ascending: false })
-    .limit(300);
+    .limit(500);
 
   if (notifError) {
     setMessage("❌ Erreur notifications : " + notifError.message);
