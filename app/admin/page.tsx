@@ -50,6 +50,23 @@ type DownloadMovie = {
   saga_id?: string | null;
 };
 
+type NotificationRow = {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  link?: string | null;
+  read: boolean;
+  created_at: string;
+  read_at?: string | null;
+  profiles?: {
+    username?: string | null;
+    email?: string | null;
+    avatar?: string | null;
+  } | null;
+};
+
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -74,6 +91,9 @@ export default function AdminPage() {
   const [memberCount, setMemberCount] = useState(0);
   const [searchMember, setSearchMember] = useState("");
 
+  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
+  const [notificationFilter, setNotificationFilter] = useState("all");
+
   const [sagas, setSagas] = useState<Saga[]>([]);
   const [adminMovies, setAdminMovies] = useState<DownloadMovie[]>([]);
   const [sagaTitle, setSagaTitle] = useState("");
@@ -96,10 +116,12 @@ export default function AdminPage() {
     loadUsers();
     loadSagas();
     loadAdminMovies();
+    loadNotifications();
 
     const timer = setInterval(() => {
       loadPresence();
       loadUsers();
+      loadNotifications();
     }, 15000);
 
     return () => clearInterval(timer);
@@ -138,6 +160,7 @@ export default function AdminPage() {
       setIsAdmin(true);
       setLoading(false);
       loadUsers();
+      loadNotifications();
       return;
     }
 
@@ -155,6 +178,37 @@ export default function AdminPage() {
     setIsAdmin(true);
     setLoading(false);
     loadUsers();
+    loadNotifications();
+  };
+
+  const loadNotifications = async () => {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select(`
+        id,
+        user_id,
+        type,
+        title,
+        message,
+        link,
+        read,
+        created_at,
+        read_at,
+        profiles:user_id (
+          username,
+          email,
+          avatar
+        )
+      `)
+      .order("created_at", { ascending: false })
+      .limit(300);
+
+    if (error) {
+      setMessage("❌ Erreur notifications : " + error.message);
+      return;
+    }
+
+    setNotifications((data || []) as NotificationRow[]);
   };
 
   const loadUsers = async () => {
@@ -395,6 +449,18 @@ export default function AdminPage() {
 
     const days = Math.floor(hours / 24);
     return `Vu il y a ${days} j`;
+  };
+
+  const formatDate = (value?: string | null) => {
+    if (!value) return "—";
+
+    return new Date(value).toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const saveDownload = async () => {
@@ -664,6 +730,15 @@ export default function AdminPage() {
       (profile.status || "").toLowerCase().includes(q)
     );
   });
+
+  const filteredNotifications = notifications.filter((notif) => {
+    if (notificationFilter === "read") return notif.read;
+    if (notificationFilter === "unread") return !notif.read;
+    return true;
+  });
+
+  const readNotifications = notifications.filter((n) => n.read).length;
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
 
   const filteredAdminMovies = useMemo(() => {
     const q = filmSearch.toLowerCase().trim();
@@ -995,6 +1070,128 @@ export default function AdminPage() {
       <section style={cardStyle}>
         <div style={memberHeader}>
           <div>
+            <h2 style={{ margin: 0 }}>🔔 Suivi des notifications</h2>
+            <p style={subText}>Voir qui a reçu, lu ou pas encore ouvert les notifications.</p>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <select
+              value={notificationFilter}
+              onChange={(e) => setNotificationFilter(e.target.value)}
+              style={searchInput}
+            >
+              <option value="all">Toutes</option>
+              <option value="read">Lues</option>
+              <option value="unread">Non lues</option>
+            </select>
+
+            <button onClick={loadNotifications} style={btnBlue}>
+              🔄 Actualiser
+            </button>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "18px" }}>
+          <span style={rolePill}>Total : {notifications.length}</span>
+          <span style={{ ...rolePill, color: "#4ade80" }}>Lues : {readNotifications}</span>
+          <span style={{ ...rolePill, color: "#fb7185" }}>Non lues : {unreadNotifications}</span>
+        </div>
+
+        <div style={memberGrid}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.6fr 2fr 1fr 1fr 1fr",
+              padding: "16px 14px",
+              background: "rgba(255,255,255,0.04)",
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              fontWeight: 800,
+              color: "#dbeafe",
+              gap: "12px",
+            }}
+          >
+            <div>Membre</div>
+            <div>Notification</div>
+            <div>Envoyée</div>
+            <div>Statut</div>
+            <div>Lue le</div>
+          </div>
+
+          {filteredNotifications.length === 0 ? (
+            <p style={{ color: "#aaa", padding: "18px" }}>Aucune notification trouvée.</p>
+          ) : (
+            filteredNotifications.map((notif) => (
+              <div
+                key={notif.id}
+                style={{
+                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                  padding: "16px 14px",
+                  display: "grid",
+                  gridTemplateColumns: "1.6fr 2fr 1fr 1fr 1fr",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <img
+                    src={notif.profiles?.avatar || DEFAULT_AVATAR}
+                    alt="avatar"
+                    style={{
+                      width: "42px",
+                      height: "42px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid rgba(0,198,255,0.45)",
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_AVATAR;
+                    }}
+                  />
+
+                  <div>
+                    <strong style={{ color: "#00d2ff" }}>
+                      {notif.profiles?.username || "Membre"}
+                    </strong>
+                    <p style={{ margin: "4px 0 0", color: "#9ca3af", fontSize: "12px" }}>
+                      {notif.profiles?.email || "Email inconnu"}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <strong>{notif.title}</strong>
+                  <p style={{ margin: "5px 0 0", color: "#cbd5e1", fontSize: "13px" }}>
+                    {notif.message}
+                  </p>
+                  <p style={{ margin: "5px 0 0", color: "#67e8f9", fontSize: "12px" }}>
+                    {notif.type} {notif.link ? `· ${notif.link}` : ""}
+                  </p>
+                </div>
+
+                <div style={{ color: "#cbd5e1", fontSize: "13px" }}>
+                  {formatDate(notif.created_at)}
+                </div>
+
+                <div>
+                  {notif.read ? (
+                    <span style={{ ...rolePill, color: "#4ade80" }}>✅ Lu</span>
+                  ) : (
+                    <span style={{ ...rolePill, color: "#fb7185" }}>⏳ Non lu</span>
+                  )}
+                </div>
+
+                <div style={{ color: "#cbd5e1", fontSize: "13px" }}>
+                  {formatDate(notif.read_at)}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section style={cardStyle}>
+        <div style={memberHeader}>
+          <div>
             <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
             <p style={subText}>Statut réel, page actuelle et dernière activité.</p>
           </div>
@@ -1062,6 +1259,9 @@ export default function AdminPage() {
                         border: connected
                           ? "2px solid #22c55e"
                           : "2px solid rgba(255,255,255,0.15)",
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.src = DEFAULT_AVATAR;
                       }}
                     />
 
