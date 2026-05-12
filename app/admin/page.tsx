@@ -1119,12 +1119,9 @@ export default function AdminPage() {
   type="button"
   onClick={async () => {
     console.log("refresh notifications");
-
     await loadNotifications();
-
     alert("Notifications actualisées");
   }}
-  }
   style={{
     ...btnBlue,
     position: "relative",
