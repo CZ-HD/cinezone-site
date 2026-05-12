@@ -1736,13 +1736,3 @@ const miniPosterFallback: React.CSSProperties = {
   borderRadius: "8px",
   background: "rgba(255,255,255,0.08)",
 };
-
-const btnRed: React.CSSProperties = {
-  padding: "10px 16px",
-  borderRadius: "12px",
-  border: "none",
-  background: "#b91c1c",
-  color: "#fff",
-  fontWeight: 700,
-  cursor: "pointer",
-};
