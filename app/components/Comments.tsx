@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const DEFAULT_AVATAR =
-  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/Boss.png";
+const DEFAULT_AVATAR = "/favicon.ico";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "🔥"];
 
@@ -19,6 +18,10 @@ type Comment = {
   content: string;
   created_at: string;
   parent_id?: string | null;
+
+  display_username?: string;
+  display_avatar?: string;
+  display_role?: string;
 };
 
 type CommentReaction = {
@@ -27,6 +30,13 @@ type CommentReaction = {
   user_id: string;
   emoji: string;
   created_at: string;
+};
+
+type ProfileMap = {
+  id: string;
+  username?: string | null;
+  avatar?: string | null;
+  role?: string | null;
 };
 
 export default function Comments({
@@ -80,7 +90,48 @@ export default function Comments({
       .eq("item_type", itemType)
       .order("created_at", { ascending: false });
 
-    setComments(data || []);
+    const commentsData = data || [];
+
+    const userIds = [
+      ...new Set(
+        commentsData
+          .map((comment) => comment.user_id)
+          .filter(Boolean)
+      ),
+    ];
+
+    let profilesMap: Record<string, ProfileMap> = {};
+
+    if (userIds.length > 0) {
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, username, avatar, role")
+        .in("id", userIds);
+
+      profilesMap = (profilesData || []).reduce(
+        (acc: Record<string, ProfileMap>, profileItem: ProfileMap) => {
+          acc[profileItem.id] = profileItem;
+          return acc;
+        },
+        {}
+      );
+    }
+
+    const cleanComments = commentsData.map((comment) => {
+      const currentProfile = profilesMap[comment.user_id];
+
+      return {
+        ...comment,
+        display_username:
+          currentProfile?.username || comment.username || "Utilisateur",
+        display_avatar:
+          currentProfile?.avatar || comment.avatar || DEFAULT_AVATAR,
+        display_role:
+          currentProfile?.role || comment.role || "user",
+      };
+    });
+
+    setComments(cleanComments);
   };
 
   const loadReactions = async () => {
@@ -277,13 +328,13 @@ export default function Comments({
         <div style={list}>
           {parentComments.map((comment) => {
             const replies = getReplies(comment.id);
-            const isAdmin = comment.role === "admin";
+            const isAdmin = comment.display_role === "admin";
 
             return (
               <div key={comment.id}>
                 <div style={card}>
                   <img
-                    src={comment.avatar || DEFAULT_AVATAR}
+                    src={comment.display_avatar || DEFAULT_AVATAR}
                     alt="avatar"
                     style={avatar}
                   />
@@ -291,7 +342,7 @@ export default function Comments({
                   <div style={{ flex: 1 }}>
                     <div style={topRow}>
                       <strong style={{ color: isAdmin ? "gold" : "#00c6ff" }}>
-                        {comment.username || "Utilisateur"}
+                        {comment.display_username || "Utilisateur"}
                         {isAdmin && <span style={adminBadge}>ADMIN</span>}
                       </strong>
 
@@ -343,7 +394,7 @@ export default function Comments({
                     {replyTo?.id === comment.id && (
                       <div style={replyInputBox}>
                         <div style={replyingTo}>
-                          Réponse à {comment.username || "Utilisateur"}
+                          Réponse à {comment.display_username || "Utilisateur"}
                           <button
                             onClick={() => {
                               setReplyTo(null);
@@ -375,12 +426,12 @@ export default function Comments({
                     {replies.length > 0 && (
                       <div style={repliesBox}>
                         {replies.map((reply) => {
-                          const replyIsAdmin = reply.role === "admin";
+                          const replyIsAdmin = reply.display_role === "admin";
 
                           return (
                             <div key={reply.id} style={replyCard}>
                               <img
-                                src={reply.avatar || DEFAULT_AVATAR}
+                                src={reply.display_avatar || DEFAULT_AVATAR}
                                 alt="avatar"
                                 style={avatarSmall}
                               />
@@ -393,7 +444,7 @@ export default function Comments({
                                       fontSize: "13px",
                                     }}
                                   >
-                                    {reply.username || "Utilisateur"}
+                                    {reply.display_username || "Utilisateur"}
                                     {replyIsAdmin && (
                                       <span style={adminBadge}>ADMIN</span>
                                     )}
