@@ -246,8 +246,8 @@ const deleteReadNotifications = async () => {
   const { data, error } = await supabase
     .from("notifications")
     .delete()
-    .eq("read", true)
-    .select("id");
+.is("read", true)
+.select("id");
 
   if (error) {
     alert("Erreur suppression : " + error.message);
