@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const DEFAULT_AVATAR = "/favicon.ico";
+const DEFAULT_AVATAR =
+  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "🔥"];
 
