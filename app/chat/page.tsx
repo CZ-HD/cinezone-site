@@ -598,40 +598,81 @@ export default function ChatPage() {
   };
 
   const resolveMentions = async (content: string): Promise<ResolvedMentions> => {
-    if (!isAdmin || !user) {
-      return { safeContent: content, mentionedUsers: [] };
+  if (!isAdmin || !user) {
+    return { safeContent: content, mentionedUsers: [] };
+  }
+
+  let safeContent = content;
+  const mentionedUsers: MentionProfile[] = [];
+  const alreadyMentioned = new Set<string>();
+
+  const lowerContent = content.toLowerCase();
+
+  const isEveryone =
+    lowerContent.includes("@everyone") ||
+    lowerContent.includes("@toutlemonde") ||
+    lowerContent.includes("@tout le monde");
+
+  if (isEveryone) {
+    const { data: members, error } = await supabase
+      .from("profiles")
+      .select("id, username, email")
+      .eq("status", "approved");
+
+    if (error) {
+      alert("Erreur mention tout le monde : " + error.message);
+      return { safeContent, mentionedUsers: [] };
     }
 
-    const matches = [...content.matchAll(/@([^\s]+)/g)];
-
-    if (matches.length === 0) {
-      return { safeContent: content, mentionedUsers: [] };
-    }
-
-    let safeContent = content;
-    const mentionedUsers: MentionProfile[] = [];
-    const alreadyMentioned = new Set<string>();
-
-if (content.includes("@everyone") || content.includes("@toutlemonde")) {
-  const { data: members } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("status", "approved");
-
-  if (members?.length) {
-    for (const member of members) {
+    for (const member of members || []) {
+      if (!member.id) continue;
       if (member.id === user.id) continue;
       if (alreadyMentioned.has(member.id)) continue;
 
       alreadyMentioned.add(member.id);
-      mentionedUsers.push({ id: member.id });
+      mentionedUsers.push(member);
+    }
+
+    safeContent = safeContent
+      .replaceAll("@everyone", "@tout le monde")
+      .replaceAll("@toutlemonde", "@tout le monde")
+      .replaceAll("@tout le monde", "@tout le monde");
+  }
+
+  const matches = [...content.matchAll(/@([^\s]+)/g)];
+
+  for (const match of matches) {
+    const rawMention = match[0];
+    const value = match[1].trim();
+
+    if (!value) continue;
+    if (value.toLowerCase() === "everyone") continue;
+    if (value.toLowerCase() === "toutlemonde") continue;
+    if (value.toLowerCase() === "tout") continue;
+
+    const { data: mentionedUser } = await supabase
+      .from("profiles")
+      .select("id, username, email")
+      .or(`username.eq.${value},email.eq.${value}`)
+      .maybeSingle();
+
+    if (!mentionedUser?.id) continue;
+    if (mentionedUser.id === user.id) continue;
+    if (alreadyMentioned.has(mentionedUser.id)) continue;
+
+    alreadyMentioned.add(mentionedUser.id);
+    mentionedUsers.push(mentionedUser);
+
+    if (value.includes("@")) {
+      safeContent = safeContent.replace(
+        rawMention,
+        mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
+      );
     }
   }
 
-  safeContent = safeContent
-    .replaceAll("@everyone", "@tout le monde")
-    .replaceAll("@toutlemonde", "@tout le monde");
-}
+  return { safeContent, mentionedUsers };
+};
 
       for (const match of matches) {
       const rawMention = match[0];
