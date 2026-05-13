@@ -21,19 +21,23 @@ export default function PresenceTracker() {
         .eq("id", user.id)
         .maybeSingle();
 
-      await supabase.from("user_presence").upsert({
-        user_id: user.id,
-        email: user.email,
-        username: profile?.username || user.email,
-        avatar: profile?.avatar,
-        role: profile?.role || "user",
-        current_page: pathname,
-        last_seen: new Date().toISOString(),
-      });
-    }
+await supabase.from("user_presence").upsert(
+  {
+    user_id: user.id,
+    email: user.email,
+    username: profile?.username || "Nouveau membre",
+    avatar: profile?.avatar || null,
+    role: profile?.role || "user",
+    current_page: pathname || "/",
+    last_seen: new Date().toISOString(),
+  },
+  {
+    onConflict: "user_id",
+  }
+);
 
     updatePresence();
-    interval = setInterval(updatePresence, 20000);
+    interval = setInterval(updatePresence, 10000);
 
     return () => clearInterval(interval);
   }, [pathname]);
