@@ -672,16 +672,17 @@ if (content.includes("@everyone") || content.includes("@toutlemonde")) {
     const senderName = profile.username || user.email || "Le staff";
 
     await supabase.from("notifications").insert(
-      mentionedUsers.map((member) => ({
-        user_id: member.id,
-        type: "mention",
-        title: "🔔 Mention dans le chat",
-        message: `${senderName} t'a mentionné dans le chat.`,
-        link: "/chat",
-        read: false,
-      }))
-    );
-  };
+  mentionedUsers.map((member) => ({
+    user_id: member.id,
+    type: "mention",
+    title: "🔔 Mention dans le chat",
+    message: `${senderName} t'a mentionné dans le chat.`,
+    link: "/chat",
+    read: false,
+    read_at: null,
+    created_at: new Date().toISOString(),
+  }))
+);
 
   const sendMessage = async () => {
     if (!text.trim() || !user) return;
