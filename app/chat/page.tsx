@@ -37,6 +37,17 @@ type Profile = {
   status_text?: string;
 };
 
+type ProfileMap = Record<
+  string,
+  {
+    username?: string | null;
+    avatar?: string | null;
+    role?: string | null;
+    role_color?: string | null;
+    status_text?: string | null;
+  }
+>;
+
 type MentionProfile = {
   id: string;
   email?: string | null;
@@ -71,6 +82,7 @@ type TypingUser = {
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [profilesMap, setProfilesMap] = useState<ProfileMap>({});
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [reactionPulse, setReactionPulse] = useState<string | null>(null);
   const [text, setText] = useState("");
@@ -125,6 +137,56 @@ export default function ChatPage() {
     } catch {}
   };
 
+  const loadProfilesForMessages = async (messageList: Message[]) => {
+    const userIds = [
+      ...new Set(messageList.map((message) => message.user_id).filter(Boolean)),
+    ];
+
+    if (userIds.length === 0) {
+      setProfilesMap({});
+      return;
+    }
+
+    const { data: profilesData, error } = await supabase
+      .from("profiles")
+      .select("id, username, avatar, role, role_color, status_text")
+      .in("id", userIds);
+
+    if (error) {
+      console.error("Erreur profils chat :", error.message);
+      return;
+    }
+
+    const map: ProfileMap = {};
+
+    (profilesData || []).forEach((item: any) => {
+      map[item.id] = {
+        username: item.username,
+        avatar: item.avatar,
+        role: item.role,
+        role_color: item.role_color,
+        status_text: item.status_text,
+      };
+    });
+
+    setProfilesMap(map);
+  };
+
+  const addProfileToMap = (profileId: string, profileData: any) => {
+    if (!profileId || !profileData) return;
+
+    setProfilesMap((prev) => ({
+      ...prev,
+      [profileId]: {
+        username: profileData.username,
+        avatar: profileData.avatar,
+        role: profileData.role,
+        role_color: profileData.role_color,
+        status_text: profileData.status_text,
+      },
+    }));
+  };
+
   useEffect(() => {
     async function init() {
       const { data } = await supabase.auth.getUser();
@@ -154,13 +216,16 @@ export default function ChatPage() {
       setProfile(fixedProfile);
       setEditUsername(fixedProfile.username || "");
       setEditStatus(fixedProfile.status_text || "🟢 En ligne");
+      addProfileToMap(data.user.id, fixedProfile);
 
       const { data: msgs } = await supabase
         .from("messages")
         .select("*")
         .order("created_at", { ascending: true });
 
-      setMessages(msgs || []);
+      const messageList = (msgs || []) as Message[];
+      setMessages(messageList);
+      await loadProfilesForMessages(messageList);
 
       const { data: reacts } = await supabase
         .from("message_reactions")
@@ -186,13 +251,25 @@ export default function ChatPage() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
-        (payload) => {
+        async (payload) => {
           const newMessage = payload.new as Message;
 
           setMessages((prev) => {
             if (prev.some((m) => m.id === newMessage.id)) return prev;
             return [...prev, newMessage];
           });
+
+          if (newMessage.user_id) {
+            const { data: liveProfile } = await supabase
+              .from("profiles")
+              .select("id, username, avatar, role, role_color, status_text")
+              .eq("id", newMessage.user_id)
+              .maybeSingle();
+
+            if (liveProfile?.id) {
+              addProfileToMap(liveProfile.id, liveProfile);
+            }
+          }
 
           if (newMessage.user_id !== userIdRef.current) {
             setHasNewMessage(true);
@@ -354,7 +431,8 @@ export default function ChatPage() {
   }, [messages.length]);
 
   const onlineUserIds = onlineMembers.map((member) => member.user_id);
-  const isAdmin = profile?.role === "admin" || CREATOR_EMAILS.includes(user?.email || "");
+  const isAdmin =
+    profile?.role === "admin" || CREATOR_EMAILS.includes(user?.email || "");
 
   const isAllowedImage = (file: File) => {
     return (
@@ -431,13 +509,15 @@ export default function ChatPage() {
       safeStatus = "🟢 En ligne";
     }
 
-    const { error } = await supabase
+    const { data: updatedProfile, error } = await supabase
       .from("profiles")
       .update({
         username: editUsername || user.email,
         status_text: safeStatus || "🟢 En ligne",
       })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .select("id, username, avatar, role, role_color, status_text")
+      .single();
 
     if (error) {
       alert("Erreur sauvegarde : " + error.message);
@@ -446,10 +526,14 @@ export default function ChatPage() {
 
     setProfile((prev) => ({
       ...prev,
-      username: editUsername || user.email,
-      status_text: safeStatus || "🟢 En ligne",
+      username: updatedProfile?.username || editUsername || user.email,
+      avatar: updatedProfile?.avatar || prev?.avatar || DEFAULT_AVATAR,
+      role: updatedProfile?.role || prev?.role || "user",
+      role_color: updatedProfile?.role_color || prev?.role_color || "#00c6ff",
+      status_text: updatedProfile?.status_text || safeStatus || "🟢 En ligne",
     }));
 
+    addProfileToMap(user.id, updatedProfile);
     setShowProfile(false);
   };
 
@@ -491,10 +575,12 @@ export default function ChatPage() {
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
       const publicUrl = data.publicUrl;
 
-      const { error } = await supabase
+      const { data: updatedProfile, error } = await supabase
         .from("profiles")
         .update({ avatar: publicUrl })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .select("id, username, avatar, role, role_color, status_text")
+        .single();
 
       if (error) {
         alert("Erreur sauvegarde avatar : " + error.message);
@@ -506,6 +592,7 @@ export default function ChatPage() {
         avatar: publicUrl,
       }));
 
+      addProfileToMap(user.id, updatedProfile || { ...profile, avatar: publicUrl });
       e.target.value = "";
     } finally {
       setUploading(false);
@@ -554,7 +641,7 @@ export default function ChatPage() {
 
       const { data: freshProfile } = await supabase
         .from("profiles")
-        .select("username, avatar, role, role_color, status_text")
+        .select("id, username, avatar, role, role_color, status_text")
         .eq("id", user.id)
         .single();
 
@@ -581,6 +668,10 @@ export default function ChatPage() {
         return;
       }
 
+      if (freshProfile?.id) {
+        addProfileToMap(freshProfile.id, freshProfile);
+      }
+
       if (insertedMessage) {
         setMessages((prev) =>
           prev.some((m) => m.id === insertedMessage.id)
@@ -598,111 +689,111 @@ export default function ChatPage() {
   };
 
   const resolveMentions = async (content: string): Promise<ResolvedMentions> => {
-  if (!isAdmin || !user) {
-    return { safeContent: content, mentionedUsers: [] };
-  }
-
-  let safeContent = content;
-  const mentionedUsers: MentionProfile[] = [];
-  const alreadyMentioned = new Set<string>();
-
-  const lowerContent = content.toLowerCase();
-
-  const isEveryone =
-    lowerContent.includes("@everyone") ||
-    lowerContent.includes("@toutlemonde") ||
-    lowerContent.includes("@tout le monde");
-
-  if (isEveryone) {
-    const { data: members, error } = await supabase
-      .from("profiles")
-      .select("id, username, email")
-      .eq("status", "approved");
-
-    if (error) {
-      alert("Erreur mention tout le monde : " + error.message);
-      return { safeContent, mentionedUsers: [] };
+    if (!isAdmin || !user) {
+      return { safeContent: content, mentionedUsers: [] };
     }
 
-    for (const member of members || []) {
-      if (!member.id) continue;
-      if (member.id === user.id) continue;
-      if (alreadyMentioned.has(member.id)) continue;
+    let safeContent = content;
+    const mentionedUsers: MentionProfile[] = [];
+    const alreadyMentioned = new Set<string>();
 
-      alreadyMentioned.add(member.id);
-      mentionedUsers.push(member);
+    const lowerContent = content.toLowerCase();
+
+    const isEveryone =
+      lowerContent.includes("@everyone") ||
+      lowerContent.includes("@toutlemonde") ||
+      lowerContent.includes("@tout le monde");
+
+    if (isEveryone) {
+      const { data: members, error } = await supabase
+        .from("profiles")
+        .select("id, username, email")
+        .eq("status", "approved");
+
+      if (error) {
+        alert("Erreur mention tout le monde : " + error.message);
+        return { safeContent, mentionedUsers: [] };
+      }
+
+      for (const member of members || []) {
+        if (!member.id) continue;
+        if (member.id === user.id) continue;
+        if (alreadyMentioned.has(member.id)) continue;
+
+        alreadyMentioned.add(member.id);
+        mentionedUsers.push(member);
+      }
+
+      safeContent = safeContent
+        .replaceAll("@everyone", "@tout le monde")
+        .replaceAll("@toutlemonde", "@tout le monde");
     }
 
-    safeContent = safeContent
-      .replaceAll("@everyone", "@tout le monde")
-      .replaceAll("@toutlemonde", "@tout le monde");
-  }
+    const matches = [...content.matchAll(/@([^\s]+)/g)];
 
-  const matches = [...content.matchAll(/@([^\s]+)/g)];
+    for (const match of matches) {
+      const rawMention = match[0];
+      const value = match[1].trim();
 
-  for (const match of matches) {
-    const rawMention = match[0];
-    const value = match[1].trim();
+      if (!value) continue;
+      if (value.toLowerCase() === "everyone") continue;
+      if (value.toLowerCase() === "toutlemonde") continue;
+      if (value.toLowerCase() === "tout") continue;
 
-    if (!value) continue;
-    if (value.toLowerCase() === "everyone") continue;
-    if (value.toLowerCase() === "toutlemonde") continue;
-    if (value.toLowerCase() === "tout") continue;
+      const { data: mentionedUser } = await supabase
+        .from("profiles")
+        .select("id, username, email")
+        .or(`username.eq.${value},email.eq.${value}`)
+        .maybeSingle();
 
-    const { data: mentionedUser } = await supabase
-      .from("profiles")
-      .select("id, username, email")
-      .or(`username.eq.${value},email.eq.${value}`)
-      .maybeSingle();
+      if (!mentionedUser?.id) continue;
+      if (mentionedUser.id === user.id) continue;
+      if (alreadyMentioned.has(mentionedUser.id)) continue;
 
-    if (!mentionedUser?.id) continue;
-    if (mentionedUser.id === user.id) continue;
-    if (alreadyMentioned.has(mentionedUser.id)) continue;
+      alreadyMentioned.add(mentionedUser.id);
+      mentionedUsers.push(mentionedUser);
 
-    alreadyMentioned.add(mentionedUser.id);
-    mentionedUsers.push(mentionedUser);
+      if (value.includes("@")) {
+        safeContent = safeContent.replace(
+          rawMention,
+          mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
+        );
+      }
+    }
 
-    if (value.includes("@")) {
-      safeContent = safeContent.replace(
-        rawMention,
-        mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
+    return { safeContent, mentionedUsers };
+  };
+
+  const createMentionNotifications = async (
+    mentionedUsers: MentionProfile[],
+    messagePreview: string
+  ) => {
+    if (!user || !profile || mentionedUsers.length === 0) return;
+
+    const senderName = profile.username || user.email || "Le staff";
+
+    const { error: notifError } = await supabase
+      .from("notifications")
+      .insert(
+        mentionedUsers.map((member) => ({
+          user_id: member.id,
+          type: "mention",
+          title: "🔔 Mention dans le chat",
+          message: `${senderName} t'a mentionné dans le chat.`,
+          link: "/chat",
+          read: false,
+          read_at: null,
+          created_at: new Date().toISOString(),
+        }))
       );
+
+    if (notifError) {
+      console.error("Erreur notifications :", notifError);
+      alert("Erreur notifications : " + notifError.message);
     }
-  }
+  };
 
-  return { safeContent, mentionedUsers };
-};
-
-const createMentionNotifications = async (
-  mentionedUsers: MentionProfile[],
-  messagePreview: string
-) => {
-  if (!user || !profile || mentionedUsers.length === 0) return;
-
-  const senderName = profile.username || user.email || "Le staff";
-
-  const { error: notifError } = await supabase
-    .from("notifications")
-    .insert(
-      mentionedUsers.map((member) => ({
-        user_id: member.id,
-        type: "mention",
-        title: "🔔 Mention dans le chat",
-        message: `${senderName} t'a mentionné dans le chat.`,
-        link: "/chat",
-        read: false,
-        read_at: null,
-        created_at: new Date().toISOString(),
-      }))
-    );
-
-  if (notifError) {
-    console.error("Erreur notifications :", notifError);
-    alert("Erreur notifications : " + notifError.message);
-  }
-};
-
-const sendMessage = async () => {
+  const sendMessage = async () => {
     if (!text.trim() || !user) return;
 
     const originalMessage = text.trim();
@@ -712,7 +803,7 @@ const sendMessage = async () => {
 
     const { data: freshProfile } = await supabase
       .from("profiles")
-      .select("username, avatar, role, role_color, status_text")
+      .select("id, username, avatar, role, role_color, status_text")
       .eq("id", user.id)
       .single();
 
@@ -738,6 +829,10 @@ const sendMessage = async () => {
       alert("Erreur message : " + error.message);
       setText(originalMessage);
       return;
+    }
+
+    if (freshProfile?.id) {
+      addProfileToMap(freshProfile.id, freshProfile);
     }
 
     if (insertedMessage) {
@@ -1036,14 +1131,20 @@ const sendMessage = async () => {
             ) : (
               messages.map((msg) => {
                 const isMe = msg.user_id === user?.id;
+                const liveProfile = profilesMap[msg.user_id];
                 const name = isMe
                   ? displayName
-                  : msg.username || msg.email || "Utilisateur";
-                const msgAvatar = isMe ? avatarUrl : msg.avatar || DEFAULT_AVATAR;
+                  : liveProfile?.username || msg.username || msg.email || "Utilisateur";
+                const msgAvatar = isMe
+                  ? avatarUrl
+                  : liveProfile?.avatar || msg.avatar || DEFAULT_AVATAR;
+                const liveRole = liveProfile?.role || msg.role;
+                const liveRoleColor = liveProfile?.role_color || msg.role_color;
+                const liveStatusText = liveProfile?.status_text || msg.status_text;
                 const userIsOnline = onlineUserIds.includes(msg.user_id);
-                const isStatusOffline = msg.status_text === "🔴 Hors ligne";
+                const isStatusOffline = liveStatusText === "🔴 Hors ligne";
                 const nameColor =
-                  msg.role === "admin" ? "gold" : msg.role_color || "#00c6ff";
+                  liveRole === "admin" ? "gold" : liveRoleColor || "#00c6ff";
                 const msgReactions = getMessageReactions(msg.id);
                 const repliedMessage = getReplyMessage(msg.reply_to);
                 const time = new Date(msg.created_at).toLocaleTimeString("fr-FR", {
@@ -1068,8 +1169,8 @@ const sendMessage = async () => {
                         gap: "12px",
                         alignItems: "flex-start",
                         maxWidth: "78%",
-flexDirection: isMe ? "row-reverse" : "row",
-paddingRight: isMe ? "16px" : "0",
+                        flexDirection: isMe ? "row-reverse" : "row",
+                        paddingRight: isMe ? "16px" : "0",
                       }}
                     >
                       <div style={avatarWrapSmall}>
@@ -1106,7 +1207,7 @@ paddingRight: isMe ? "16px" : "0",
                           <span style={{ color: nameColor, fontWeight: 900 }}>
                             {name}
                           </span>
-                          {msg.role === "admin" && (
+                          {liveRole === "admin" && (
                             <span style={adminBadge}>ADMIN</span>
                           )}
                           <span
