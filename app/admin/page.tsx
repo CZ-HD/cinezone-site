@@ -254,7 +254,7 @@ const deleteReadNotifications = async () => {
     return;
   }
 
-  await loadNotifications();
+ await loadNotifications();
 
   alert(`${data?.length || 0} notification(s) lue(s) supprimée(s)`);
 };
@@ -262,19 +262,20 @@ const deleteReadNotifications = async () => {
 const deleteAllNotifications = async () => {
   if (!confirm("Supprimer toutes les notifications ?")) return;
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("notifications")
     .delete()
-    .neq("id", "");
+    .neq("id", "")
+    .select("id");
 
   if (error) {
-    alert("Erreur : " + error.message);
+    alert("Erreur suppression : " + error.message);
     return;
   }
 
-  await loadNotifications();
+ await loadNotifications();
 
-  alert("Toutes les notifications supprimées");
+  alert(`${data?.length || 0} notification(s) supprimée(s)`);
 };
   const loadUsers = async () => {
     const { data, error, count } = await supabase
