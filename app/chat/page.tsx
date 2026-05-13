@@ -664,33 +664,35 @@ if (content.includes("@everyone") || content.includes("@toutlemonde")) {
   };
 
   const createMentionNotifications = async (
-    mentionedUsers: MentionProfile[],
-    messagePreview: string
-  ) => {
-    if (!user || !profile || mentionedUsers.length === 0) return;
+  mentionedUsers: MentionProfile[],
+  messagePreview: string
+) => {
+  if (!user || !profile || mentionedUsers.length === 0) return;
 
-    const senderName = profile.username || user.email || "Le staff";
+  const senderName = profile.username || user.email || "Le staff";
 
-    const { error: notifError } = await supabase
-  .from("notifications")
-  .insert(
-    mentionedUsers.map((member) => ({
-      user_id: member.id,
-      type: "mention",
-      title: "🔔 Mention dans le chat",
-      message: `${senderName} t'a mentionné dans le chat.`,
-      link: "/chat",
-      read: false,
-      read_at: null,
-      created_at: new Date().toISOString(),
-    }))
-  );
+  const { error: notifError } = await supabase
+    .from("notifications")
+    .insert(
+      mentionedUsers.map((member) => ({
+        user_id: member.id,
+        type: "mention",
+        title: "🔔 Mention dans le chat",
+        message: `${senderName} t'a mentionné dans le chat.`,
+        link: "/chat",
+        read: false,
+        read_at: null,
+        created_at: new Date().toISOString(),
+      }))
+    );
 
-if (notifError) {
-  console.error("Erreur notifications :", notifError);
-  alert("Erreur notifications : " + notifError.message);
-}
-  const sendMessage = async () => {
+  if (notifError) {
+    console.error("Erreur notifications :", notifError);
+    alert("Erreur notifications : " + notifError.message);
+  }
+};
+
+const sendMessage = async () => {
     if (!text.trim() || !user) return;
 
     const originalMessage = text.trim();
