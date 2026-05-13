@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
@@ -19,12 +19,26 @@ export default function SagasPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchSaga, setSearchSaga] = useState("");
 
   const itemsPerPage = 12;
 
-  const totalPages = Math.ceil(sagas.length / itemsPerPage);
+  const filteredSagas = useMemo(() => {
+    const q = searchSaga.toLowerCase().trim();
 
-  const paginatedSagas = sagas.slice(
+    if (!q) return sagas;
+
+    return sagas.filter(
+      (saga) =>
+        saga.title.toLowerCase().includes(q) ||
+        saga.slug.toLowerCase().includes(q) ||
+        (saga.description || "").toLowerCase().includes(q)
+    );
+  }, [sagas, searchSaga]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredSagas.length / itemsPerPage));
+
+  const paginatedSagas = filteredSagas.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
@@ -33,6 +47,10 @@ export default function SagasPage() {
     loadSagas();
     checkAdmin();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchSaga]);
 
   async function checkAdmin() {
     const { data } = await supabase.auth.getUser();
@@ -96,6 +114,25 @@ export default function SagasPage() {
         </section>
       ) : (
         <>
+          <section style={searchSectionStyle}>
+            <input
+              value={searchSaga}
+              onChange={(e) => setSearchSaga(e.target.value)}
+              placeholder="🔍 Rechercher une saga..."
+              style={searchInputStyle}
+            />
+
+            {searchSaga && (
+              <button
+                type="button"
+                onClick={() => setSearchSaga("")}
+                style={clearSearchButtonStyle}
+              >
+                Effacer
+              </button>
+            )}
+          </section>
+
           <section style={topBarStyle}>
             <span>
               Page {page} sur {totalPages}
@@ -103,8 +140,9 @@ export default function SagasPage() {
               {isAdmin && (
                 <>
                   {" "}
-                  — {sagas.length} saga
-                  {sagas.length > 1 ? "s" : ""}
+                  — {filteredSagas.length} saga
+                  {filteredSagas.length > 1 ? "s" : ""}
+                  {searchSaga && ` trouvée${filteredSagas.length > 1 ? "s" : ""}`}
                 </>
               )}
             </span>
@@ -123,17 +161,12 @@ export default function SagasPage() {
               </button>
 
               <button
-                onClick={() =>
-                  setPage((p) => Math.min(totalPages, p + 1))
-                }
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 style={{
                   ...pageButtonStyle,
                   opacity: page === totalPages ? 0.45 : 1,
-                  cursor:
-                    page === totalPages
-                      ? "not-allowed"
-                      : "pointer",
+                  cursor: page === totalPages ? "not-allowed" : "pointer",
                 }}
               >
                 Suivant
@@ -141,35 +174,40 @@ export default function SagasPage() {
             </div>
           </section>
 
-          <section style={gridStyle}>
-            {paginatedSagas.map((saga) => (
-              <Link
-                key={saga.id}
-                href={`/sagas/${saga.slug}`}
-                style={cardStyle}
-              >
-                <div style={posterBox}>
-                  {saga.poster ? (
-                    <img
-                      src={saga.poster}
-                      alt={saga.title}
-                      style={posterStyle}
-                    />
-                  ) : (
-                    <span style={{ fontSize: "42px" }}>🎬</span>
-                  )}
-                </div>
+          {filteredSagas.length === 0 ? (
+            <section style={emptyStyle}>
+              <h2>Aucune saga trouvée</h2>
+              <p>Essaie un autre mot-clé.</p>
+            </section>
+          ) : (
+            <section style={gridStyle}>
+              {paginatedSagas.map((saga) => (
+                <Link
+                  key={saga.id}
+                  href={`/sagas/${saga.slug}`}
+                  style={cardStyle}
+                >
+                  <div style={posterBox}>
+                    {saga.poster ? (
+                      <img
+                        src={saga.poster}
+                        alt={saga.title}
+                        style={posterStyle}
+                      />
+                    ) : (
+                      <span style={{ fontSize: "42px" }}>🎬</span>
+                    )}
+                  </div>
 
-                <div>
-                  <h2 style={cardTitle}>{saga.title}</h2>
+                  <div>
+                    <h2 style={cardTitle}>{saga.title}</h2>
 
-                  <p style={cardText}>
-                    Tous les films {saga.title}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </section>
+                    <p style={cardText}>Tous les films {saga.title}</p>
+                  </div>
+                </Link>
+              ))}
+            </section>
+          )}
 
           {totalPages > 1 && (
             <section style={bottomPaginationStyle}>
@@ -185,22 +223,15 @@ export default function SagasPage() {
                 Précédent
               </button>
 
-              <span style={pageTextStyle}>
-                Page {page} sur {totalPages}
-              </span>
+              <span style={pageTextStyle}>Page {page} sur {totalPages}</span>
 
               <button
-                onClick={() =>
-                  setPage((p) => Math.min(totalPages, p + 1))
-                }
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 style={{
                   ...pageButtonStyle,
                   opacity: page === totalPages ? 0.45 : 1,
-                  cursor:
-                    page === totalPages
-                      ? "not-allowed"
-                      : "pointer",
+                  cursor: page === totalPages ? "not-allowed" : "pointer",
                 }}
               >
                 Suivant
@@ -255,6 +286,37 @@ const textStyle: React.CSSProperties = {
 const loadingStyle: React.CSSProperties = {
   textAlign: "center",
   color: "#94a3b8",
+};
+
+const searchSectionStyle: React.CSSProperties = {
+  maxWidth: "1100px",
+  margin: "0 auto 20px",
+  display: "flex",
+  gap: "12px",
+  alignItems: "center",
+  flexWrap: "wrap",
+};
+
+const searchInputStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "460px",
+  padding: "15px 16px",
+  borderRadius: "16px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background: "rgba(10,15,25,0.9)",
+  color: "#fff",
+  outline: "none",
+  fontWeight: 700,
+};
+
+const clearSearchButtonStyle: React.CSSProperties = {
+  padding: "13px 16px",
+  borderRadius: "14px",
+  border: "1px solid rgba(255,90,90,0.45)",
+  background: "rgba(255,60,60,0.16)",
+  color: "#ffb3b3",
+  fontWeight: 900,
+  cursor: "pointer",
 };
 
 const topBarStyle: React.CSSProperties = {
