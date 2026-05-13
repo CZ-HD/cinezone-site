@@ -313,18 +313,33 @@ const deleteAllNotifications = async () => {
   };
 
   const loadAdminMovies = async () => {
+  let allMovies: DownloadMovie[] = [];
+  let from = 0;
+  const step = 1000;
+
+  while (true) {
     const { data, error } = await supabase
       .from("downloads")
       .select("id,title,poster_path,release_year,saga_id")
-      .order("title", { ascending: true });
+      .order("title", { ascending: true })
+      .range(from, from + step - 1);
 
     if (error) {
       setMessage("❌ Erreur chargement films : " + error.message);
       return;
     }
 
-    setAdminMovies(data || []);
-  };
+    allMovies = [...allMovies, ...(data || [])];
+
+    if (!data || data.length < step) {
+      break;
+    }
+
+    from += step;
+  }
+
+  setAdminMovies(allMovies);
+};
 
   const createSaga = async () => {
     if (!sagaTitle.trim()) {
