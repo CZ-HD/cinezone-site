@@ -265,7 +265,7 @@ const deleteAllNotifications = async () => {
   const { data, error } = await supabase
     .from("notifications")
     .delete()
-    .neq("id", "")
+    .not("id", "is", null)
     .select("id");
 
   if (error) {
@@ -273,7 +273,7 @@ const deleteAllNotifications = async () => {
     return;
   }
 
- await loadNotifications();
+  await loadNotifications();
 
   alert(`${data?.length || 0} notification(s) supprimée(s)`);
 };
