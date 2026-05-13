@@ -684,6 +684,7 @@ if (content.includes("@everyone") || content.includes("@toutlemonde")) {
   }))
 );
 
+};
   const sendMessage = async () => {
     if (!text.trim() || !user) return;
 
