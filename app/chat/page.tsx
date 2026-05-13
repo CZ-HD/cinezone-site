@@ -635,8 +635,7 @@ export default function ChatPage() {
 
     safeContent = safeContent
       .replaceAll("@everyone", "@tout le monde")
-      .replaceAll("@toutlemonde", "@tout le monde")
-      .replaceAll("@tout le monde", "@tout le monde");
+      .replaceAll("@toutlemonde", "@tout le monde");
   }
 
   const matches = [...content.matchAll(/@([^\s]+)/g)];
@@ -674,37 +673,7 @@ export default function ChatPage() {
   return { safeContent, mentionedUsers };
 };
 
-      for (const match of matches) {
-      const rawMention = match[0];
-      const value = match[1].trim();
-
-      if (!value) continue;
-
-      const { data: mentionedUser } = await supabase
-        .from("profiles")
-        .select("id, username, email")
-        .or(`username.eq.${value},email.eq.${value}`)
-        .maybeSingle();
-
-      if (!mentionedUser?.id) continue;
-      if (mentionedUser.id === user.id) continue;
-      if (alreadyMentioned.has(mentionedUser.id)) continue;
-
-      alreadyMentioned.add(mentionedUser.id);
-      mentionedUsers.push(mentionedUser);
-
-      if (value.includes("@")) {
-        safeContent = safeContent.replace(
-          rawMention,
-          mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
-        );
-      }
-    }
-
-    return { safeContent, mentionedUsers };
-  };
-
-  const createMentionNotifications = async (
+const createMentionNotifications = async (
   mentionedUsers: MentionProfile[],
   messagePreview: string
 ) => {
