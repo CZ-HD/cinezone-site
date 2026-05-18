@@ -44,6 +44,8 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     letterSpacing: "0.4px",
     textDecoration: "none",
     transition: "all 0.25s ease",
+    userSelect: "none",
+    WebkitUserSelect: "none",
   };
 
   if (loading) {
@@ -86,6 +88,10 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
       href={finalLink}
       target="_blank"
       rel="noopener noreferrer"
+      draggable={false}
+      onContextMenu={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+      onCopy={(e) => e.preventDefault()}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
