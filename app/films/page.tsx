@@ -358,14 +358,7 @@ function MovieGrid({
           <Link
   key={movie.id}
   href={local ? `/movie/${movie.id}` : `/admin?tmdb=${movie.id}`}
-  style={{
-    color: "#fff",
-    textDecoration: "none",
-    userSelect: "none",
-    WebkitUserSelect: "none",
-  }}
-  onContextMenu={(e) => e.preventDefault()}
-  onDragStart={(e) => e.preventDefault()}
+  style={{ color: "#fff", textDecoration: "none" }}
 >
             <div style={posterWrapStyle}>
               {year && <span style={yearBadge}>{year}</span>}
