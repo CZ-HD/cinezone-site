@@ -936,17 +936,6 @@ export default function ChatPage() {
   const displayName = profile?.username || user?.email || "Utilisateur";
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
-  const chatRooms = [
-    { icon: "💬", label: "général", active: true, hint: "Discussion principale" },
-    { icon: "🎬", label: "films", active: false, hint: "Bientôt" },
-    { icon: "📥", label: "demandes", active: false, hint: "Bientôt" },
-    { icon: "🔥", label: "nouveautés", active: false, hint: "Bientôt" },
-    { icon: "🍿", label: "séries", active: false, hint: "Bientôt" },
-    ...(isAdmin
-      ? [{ icon: "👑", label: "staff", active: false, hint: "Admin" }]
-      : []),
-  ];
-
   return (
     <main style={pageStyle}>
       <div style={shellStyle}>
@@ -995,24 +984,125 @@ export default function ChatPage() {
             </div>
           </div>
 
-          <div style={roomsHeader}>
-            <span>Salons</span>
-            <span style={roomsCount}>{chatRooms.length}</span>
-          </div>
-
-          <div style={roomsList}>
-            {chatRooms.map((room) => (
-              <button
-                key={room.label}
-                type="button"
-                style={room.active ? roomButtonActive : roomButton}
-                title={room.hint}
+          <div
+            style={{
+              marginTop: "22px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "18px",
+            }}
+          >
+            <div
+              style={{
+                padding: "14px",
+                borderRadius: "18px",
+                background:
+                  "linear-gradient(135deg, rgba(0,198,255,0.12), rgba(124,58,237,0.10))",
+                border: "1px solid rgba(0,198,255,0.22)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 950,
+                  fontSize: "18px",
+                  color: "#fff",
+                  letterSpacing: "-0.03em",
+                }}
               >
-                <span style={roomIcon}>{room.icon}</span>
-                <span style={roomLabel}># {room.label}</span>
-                {!room.active && <span style={soonBadge}>{room.hint}</span>}
-              </button>
-            ))}
+                CZ CineZone
+              </div>
+
+              <div
+                style={{
+                  marginTop: "6px",
+                  color: "#67e8f9",
+                  fontSize: "13px",
+                  fontWeight: 900,
+                }}
+              >
+                {onlineMembers.length} membre
+                {onlineMembers.length > 1 ? "s" : ""} 🔥
+              </div>
+            </div>
+
+            <div>
+              <div
+                style={{
+                  marginBottom: "10px",
+                  color: "#9fb3c8",
+                  fontSize: "12px",
+                  fontWeight: 950,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                💬 Discussion
+              </div>
+
+              <div style={{ display: "grid", gap: "8px" }}>
+                <button type="button" style={roomButtonActive}>
+                  <span style={roomIcon}>💬</span>
+                  <span style={roomLabel}># général</span>
+                </button>
+
+                <button type="button" style={roomButton}>
+                  <span style={roomIcon}>📥</span>
+                  <span style={roomLabel}># demandes</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div
+                style={{
+                  marginBottom: "10px",
+                  color: "#9fb3c8",
+                  fontSize: "12px",
+                  fontWeight: 950,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                🎬 Cinéma
+              </div>
+
+              <div style={{ display: "grid", gap: "8px" }}>
+                <button type="button" style={roomButton}>
+                  <span style={roomIcon}>🎬</span>
+                  <span style={roomLabel}># films</span>
+                </button>
+
+                <button type="button" style={roomButton}>
+                  <span style={roomIcon}>📚</span>
+                  <span style={roomLabel}># sagas</span>
+                </button>
+              </div>
+            </div>
+
+            {isAdmin && (
+              <div>
+                <div
+                  style={{
+                    marginBottom: "10px",
+                    color: "#9fb3c8",
+                    fontSize: "12px",
+                    fontWeight: 950,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  👑 Staff
+                </div>
+
+                <div style={{ display: "grid", gap: "8px" }}>
+                  <button type="button" style={roomButton}>
+                    <span style={roomIcon}>👑</span>
+                    <span style={roomLabel}># staff</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={quickActionsCard}>
@@ -1597,27 +1687,6 @@ const miniProfileStatus: React.CSSProperties = {
   fontWeight: 800,
 };
 
-const roomsHeader: React.CSSProperties = {
-  marginTop: "22px",
-  marginBottom: "10px",
-  display: "flex",
-  justifyContent: "space-between",
-  color: "#9fb3c8",
-  fontSize: "12px",
-  textTransform: "uppercase",
-  fontWeight: 950,
-  letterSpacing: "0.08em",
-};
-
-const roomsCount: React.CSSProperties = {
-  color: "#67e8f9",
-};
-
-const roomsList: React.CSSProperties = {
-  display: "grid",
-  gap: "8px",
-};
-
 const roomButton: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "26px 1fr auto",
@@ -1650,12 +1719,6 @@ const roomLabel: React.CSSProperties = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-};
-
-const soonBadge: React.CSSProperties = {
-  fontSize: "10px",
-  color: "#67e8f9",
-  opacity: 0.8,
 };
 
 const quickActionsCard: React.CSSProperties = {
