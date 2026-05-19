@@ -2258,7 +2258,7 @@ const emojiPickerBox: React.CSSProperties = {
   position: "absolute",
   bottom: "58px",
   left: 0,
-  width: "228px",
+  maxWidth: "320px",
   padding: "10px",
   borderRadius: "16px",
   border: "1px solid rgba(0,198,255,0.32)",
