@@ -923,7 +923,10 @@ export default function ChatPage() {
   if (loading) {
     return (
       <main style={pageStyle}>
-        <p style={loadingText}>Chargement du chat...</p>
+        <div style={loadingCard}>
+          <div style={loaderGlow}>CZ</div>
+          <p style={loadingText}>Chargement du chat CineZone...</p>
+        </div>
       </main>
     );
   }
@@ -931,9 +934,92 @@ export default function ChatPage() {
   const displayName = profile?.username || user?.email || "Utilisateur";
   const avatarUrl = profile?.avatar || DEFAULT_AVATAR;
 
+  const chatRooms = [
+    { icon: "💬", label: "général", active: true, hint: "Discussion principale" },
+    { icon: "🎬", label: "films", active: false, hint: "Bientôt" },
+    { icon: "📥", label: "demandes", active: false, hint: "Bientôt" },
+    { icon: "🔥", label: "nouveautés", active: false, hint: "Bientôt" },
+    { icon: "🍿", label: "séries", active: false, hint: "Bientôt" },
+    ...(isAdmin
+      ? [{ icon: "👑", label: "staff", active: false, hint: "Admin" }]
+      : []),
+  ];
+
   return (
     <main style={pageStyle}>
-      <div style={chatLayout}>
+      <div style={shellStyle}>
+        <aside style={roomsPanel}>
+          <div style={brandCard}>
+            <div style={brandLogo}>CZ</div>
+            <div>
+              <h2 style={brandTitle}>CineZone</h2>
+              <p style={brandSub}>Chat communautaire</p>
+            </div>
+          </div>
+
+          <div style={miniProfileCard}>
+            <div style={avatarWrap}>
+              <img
+                src={avatarUrl}
+                alt="avatar"
+                style={avatarSmall}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_AVATAR;
+                }}
+              />
+              <span
+                style={{
+                  ...onlineDot,
+                  background:
+                    profile?.status_text === "🔴 Hors ligne" ? "#ff5c5c" : "#4cff9b",
+                }}
+              />
+            </div>
+
+            <div style={{ minWidth: 0 }}>
+              <p style={miniProfileName}>
+                {displayName}
+                {isAdmin && <span style={adminBadge}>ADMIN</span>}
+              </p>
+              <p
+                style={{
+                  ...miniProfileStatus,
+                  color:
+                    profile?.status_text === "🔴 Hors ligne" ? "#ff7777" : "#4cff9b",
+                }}
+              >
+                {profile?.status_text || "🟢 En ligne"}
+              </p>
+            </div>
+          </div>
+
+          <div style={roomsHeader}>
+            <span>Salons</span>
+            <span style={roomsCount}>{chatRooms.length}</span>
+          </div>
+
+          <div style={roomsList}>
+            {chatRooms.map((room) => (
+              <button
+                key={room.label}
+                type="button"
+                style={room.active ? roomButtonActive : roomButton}
+                title={room.hint}
+              >
+                <span style={roomIcon}>{room.icon}</span>
+                <span style={roomLabel}># {room.label}</span>
+                {!room.active && <span style={soonBadge}>{room.hint}</span>}
+              </button>
+            ))}
+          </div>
+
+          <div style={quickActionsCard}>
+            <a href="/films" style={quickAction}>🎞️ Films</a>
+            <a href="/demande-film" style={quickAction}>📥 Demander</a>
+            <a href="/sagas" style={quickAction}>📚 Sagas</a>
+          </div>
+        </aside>
+
         <section style={chatBox}>
           {hasNewMessage && (
             <button
@@ -947,126 +1033,79 @@ export default function ChatPage() {
             </button>
           )}
 
-          <div style={headerStyle}>
-            <div style={headerTop}>
-              <div>
-                <h1 style={chatTitle}>💬 Chat CineZone</h1>
-                <p style={chatSubtitle}>Échangez avec la communauté CineZone</p>
+          <header style={chatHeader}>
+            <div>
+              <div style={channelTitleRow}>
+                <span style={channelHash}>#</span>
+                <h1 style={chatTitle}>général</h1>
               </div>
-
-              <div style={headerActions}>
-                <button
-                  onClick={() => setSoundEnabled(!soundEnabled)}
-                  style={soundBtn}
-                >
-                  {soundEnabled ? "🔊 Son ON" : "🔇 Son OFF"}
-                </button>
-
-                <button
-                  onClick={() => setShowProfile(!showProfile)}
-                  style={profileBtn}
-                >
-                  ⚙️ Mon profil
-                </button>
-              </div>
+              <p style={chatSubtitle}>Salon principal de la communauté CineZone HD.</p>
             </div>
 
-            <div style={connectedBox}>
-              <div style={avatarWrap}>
-                <img
-                  src={avatarUrl}
-                  alt="avatar"
-                  style={avatarSmall}
-                  onError={(e) => {
-                    e.currentTarget.src = DEFAULT_AVATAR;
-                  }}
-                />
-                <span
-                  style={{
-                    ...onlineDot,
-                    background:
-                      profile?.status_text === "🔴 Hors ligne"
-                        ? "#ff5c5c"
-                        : "#4cff9b",
-                  }}
-                />
-              </div>
+            <div style={headerActions}>
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                style={soundBtn}
+              >
+                {soundEnabled ? "🔊 Son" : "🔇 Muet"}
+              </button>
 
-              <div>
-                <p style={connectedText}>
-                  Connecté :{" "}
-                  <span
-                    style={{
-                      color: isAdmin ? "gold" : profile?.role_color || "#00c6ff",
-                    }}
-                  >
-                    {displayName}
-                  </span>
-                  {isAdmin && <span style={adminBadge}>ADMIN</span>}
-                </p>
-
-                <p
-                  style={{
-                    ...statusText,
-                    color:
-                      profile?.status_text === "🔴 Hors ligne"
-                        ? "#ff7777"
-                        : "#4cff9b",
-                  }}
-                >
-                  {profile?.status_text || "🟢 En ligne"}
-                </p>
-              </div>
+              <button
+                onClick={() => setShowProfile(!showProfile)}
+                style={profileBtn}
+              >
+                ⚙️ Profil
+              </button>
             </div>
+          </header>
 
-            {showProfile && (
-              <div style={profileBox}>
-                <h3 style={{ marginTop: 0 }}>Modifier mon profil</h3>
-
-                <label style={labelStyle}>Pseudo</label>
-                <input
-                  value={editUsername}
-                  onChange={(e) => setEditUsername(e.target.value)}
-                  style={inputStyle}
-                  placeholder="Ton pseudo"
-                />
-
-                <label style={labelStyle}>Avatar</label>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                  onChange={uploadAvatar}
-                />
-                {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
-
-                <label style={labelStyle}>Statut</label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value)}
-                  style={inputStyle}
-                >
-                  <option value="🟢 En ligne">🟢 En ligne</option>
-                  <option value="🔴 Hors ligne">🔴 Hors ligne</option>
-                  <option value="⛔ Occupé">⛔ Occupé</option>
-                  <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
-                  {isAdmin && (
-                    <option value="👑 Admin disponible">👑 Admin disponible</option>
-                  )}
-                </select>
-
-                <button onClick={saveProfile} style={btnStyle}>
-                  💾 Sauvegarder
-                </button>
+          {showProfile && (
+            <div style={profileBoxV2}>
+              <div style={profileBoxHeader}>
+                <strong>Modifier mon profil</strong>
+                <button onClick={() => setShowProfile(false)} style={closeGhostBtn}>✕</button>
               </div>
-            )}
-          </div>
+
+              <label style={labelStyle}>Pseudo</label>
+              <input
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
+                style={inputStyle}
+                placeholder="Ton pseudo"
+              />
+
+              <label style={labelStyle}>Avatar</label>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                onChange={uploadAvatar}
+                style={fileInputStyle}
+              />
+              {uploading && <p style={infoText}>Upload...</p>}
+
+              <label style={labelStyle}>Statut</label>
+              <select
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="🟢 En ligne">🟢 En ligne</option>
+                <option value="🔴 Hors ligne">🔴 Hors ligne</option>
+                <option value="⛔ Occupé">⛔ Occupé</option>
+                <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
+                {isAdmin && <option value="👑 Admin disponible">👑 Admin disponible</option>}
+              </select>
+
+              <button onClick={saveProfile} style={btnStyle}>💾 Sauvegarder</button>
+            </div>
+          )}
 
           {(announcement || isAdmin) && (
-            <div style={announcementBox}>
+            <div style={announcementBoxV2}>
               <div style={announcementHeader}>
                 <div>
-                  <strong>📌 Annonce Admin</strong>
-                  <p style={announcementSub}>Message officiel du chat CineZone</p>
+                  <strong>📢 Annonce CineZone</strong>
+                  <p style={announcementSub}>Message officiel du chat</p>
                 </div>
 
                 {isAdmin && (
@@ -1080,24 +1119,20 @@ export default function ChatPage() {
                             setEditingAnnouncement(true);
                           }}
                         >
-                          ✏️ Modifier
+                          Modifier
                         </button>
 
                         {announcement && (
-                          <button
-                            style={announcementDeleteBtn}
-                            onClick={clearAnnouncement}
-                          >
-                            🗑 Effacer
+                          <button style={announcementDeleteBtn} onClick={clearAnnouncement}>
+                            Effacer
                           </button>
                         )}
                       </>
                     ) : (
                       <>
                         <button style={announcementSaveBtn} onClick={saveAnnouncement}>
-                          💾 Sauver
+                          Sauver
                         </button>
-
                         <button
                           style={announcementCancelBtn}
                           onClick={() => setEditingAnnouncement(false)}
@@ -1119,7 +1154,7 @@ export default function ChatPage() {
                 />
               ) : (
                 <p style={announcementTextStyle}>
-                  {announcement || "Aucune annonce pour le moment."}
+                  {announcement || "Bienvenue sur le chat CineZone. Respect, bonne ambiance et cinéma avant tout 🎬"}
                 </p>
               )}
             </div>
@@ -1127,7 +1162,11 @@ export default function ChatPage() {
 
           <div style={messagesBox}>
             {messages.length === 0 ? (
-              <p style={emptyText}>Aucun message pour le moment.</p>
+              <div style={emptyState}>
+                <div style={emptyIcon}>💬</div>
+                <p style={emptyText}>Aucun message pour le moment.</p>
+                <span style={emptyHint}>Soyez le premier à lancer la discussion.</span>
+              </div>
             ) : (
               messages.map((msg) => {
                 const isMe = msg.user_id === user?.id;
@@ -1143,8 +1182,7 @@ export default function ChatPage() {
                 const liveStatusText = liveProfile?.status_text || msg.status_text;
                 const userIsOnline = onlineUserIds.includes(msg.user_id);
                 const isStatusOffline = liveStatusText === "🔴 Hors ligne";
-                const nameColor =
-                  liveRole === "admin" ? "gold" : liveRoleColor || "#00c6ff";
+                const nameColor = liveRole === "admin" ? "gold" : liveRoleColor || "#00c6ff";
                 const msgReactions = getMessageReactions(msg.id);
                 const repliedMessage = getReplyMessage(msg.reply_to);
                 const time = new Date(msg.created_at).toLocaleTimeString("fr-FR", {
@@ -1153,211 +1191,141 @@ export default function ChatPage() {
                 });
 
                 return (
-                  <div
+                  <article
                     key={msg.id}
                     onMouseEnter={() => setHoveredMessageId(msg.id)}
                     onMouseLeave={() => setHoveredMessageId(null)}
-                    style={{
-                      display: "flex",
-                      justifyContent: isMe ? "flex-end" : "flex-start",
-                      marginBottom: "20px",
-                    }}
+                    style={messageLine}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "12px",
-                        alignItems: "flex-start",
-                        maxWidth: "78%",
-                        flexDirection: isMe ? "row-reverse" : "row",
-                        paddingRight: isMe ? "16px" : "0",
-                      }}
-                    >
-                      <div style={avatarWrapSmall}>
-                        <img
-                          src={msgAvatar}
-                          alt="avatar"
-                          style={avatarMsg}
-                          onError={(e) => {
-                            e.currentTarget.src = DEFAULT_AVATAR;
-                          }}
-                        />
+                    <div style={avatarWrapMsg}>
+                      <img
+                        src={msgAvatar}
+                        alt="avatar"
+                        style={avatarMsg}
+                        onError={(e) => {
+                          e.currentTarget.src = DEFAULT_AVATAR;
+                        }}
+                      />
+                      <span
+                        style={{
+                          ...onlineDotSmall,
+                          background:
+                            isStatusOffline || !userIsOnline ? "#ff5c5c" : "#4cff9b",
+                        }}
+                      />
+                    </div>
+
+                    <div style={messageContent}>
+                      <div style={messageMeta}>
+                        <span style={{ color: nameColor, fontWeight: 900 }}>{name}</span>
+                        {liveRole === "admin" && <span style={adminBadge}>ADMIN</span>}
+                        <span style={messageTime}>{time}</span>
                         <span
                           style={{
-                            ...onlineDotSmall,
-                            background: isStatusOffline ? "#ff5c5c" : "#4cff9b",
+                            ...messageStatus,
+                            color:
+                              isStatusOffline || !userIsOnline ? "#ff7777" : "#4cff9b",
                           }}
-                        />
+                        >
+                          {isStatusOffline || !userIsOnline ? "hors ligne" : "en ligne"}
+                        </span>
+                      </div>
+
+                      <div style={messageBubbleV2}>
+                        {msg.reply_to && (
+                          <div style={replyPreviewBoxClean}>
+                            <strong>
+                              Réponse à {repliedMessage?.username || repliedMessage?.email || "message supprimé"}
+                            </strong>
+                            <p style={{ margin: "5px 0 0" }}>
+                              {repliedMessage?.content || "Message supprimé"}
+                            </p>
+                          </div>
+                        )}
+
+                        {msg.content && <div>{msg.content}</div>}
+
+                        {msg.image_url && (
+                          <a href={msg.image_url} target="_blank" rel="noreferrer">
+                            <img src={msg.image_url} alt="image chat" style={chatImageStyle} />
+                          </a>
+                        )}
+                      </div>
+
+                      <div style={reactionRow}>
+                        {REACTION_EMOJIS.map((emoji) => {
+                          const count = msgReactions.filter((r) => r.emoji === emoji).length;
+                          const active = msgReactions.some(
+                            (r) => r.emoji === emoji && r.user_id === user?.id
+                          );
+
+                          if (count === 0 && !active && hoveredMessageId !== msg.id) {
+                            return null;
+                          }
+
+                          return (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => toggleReaction(msg.id, emoji)}
+                              style={{
+                                ...reactionBtn,
+                                ...(active ? reactionBtnActive : {}),
+                                opacity: count === 0 && hoveredMessageId === msg.id ? 0.58 : 1,
+                                transform:
+                                  reactionPulse === `${msg.id}-${emoji}`
+                                    ? "scale(1.35)"
+                                    : active
+                                    ? "scale(1.06)"
+                                    : "scale(1)",
+                              }}
+                            >
+                              <span style={active ? reactionEmojiActive : reactionEmoji}>{emoji}</span>
+                              {count > 0 && <span style={reactionCount}>{count}</span>}
+                            </button>
+                          );
+                        })}
                       </div>
 
                       <div
                         style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: isMe ? "flex-end" : "flex-start",
+                          ...messageActions,
+                          opacity: hoveredMessageId === msg.id ? 1 : 0,
+                          pointerEvents: hoveredMessageId === msg.id ? "auto" : "none",
                         }}
                       >
-                        <div
-                          style={{
-                            ...messageMeta,
-                            justifyContent: isMe ? "flex-end" : "flex-start",
-                            textAlign: isMe ? "right" : "left",
-                          }}
-                        >
-                          <span style={{ color: nameColor, fontWeight: 900 }}>
-                            {name}
-                          </span>
-                          {liveRole === "admin" && (
-                            <span style={adminBadge}>ADMIN</span>
-                          )}
-                          <span
-                            style={{
-                              color: isStatusOffline
-                                ? "#ff7777"
-                                : userIsOnline
-                                ? "#4cff9b"
-                                : "#ff7777",
-                            }}
-                          >
-                            {isStatusOffline
-                              ? "🔴 Hors ligne"
-                              : userIsOnline
-                              ? "🟢 En ligne"
-                              : "🔴 Hors ligne"}
-                          </span>
-                          <span style={{ color: "#7f8ea3" }}>{time}</span>
-                        </div>
-
-                        <div style={isMe ? myBubble : otherBubble}>
-                          {msg.reply_to && (
-                            <div style={replyPreviewBoxClean}>
-                              <strong>
-                                Réponse à{" "}
-                                {repliedMessage?.username ||
-                                  repliedMessage?.email ||
-                                  "message supprimé"}
-                              </strong>
-                              <p style={{ margin: "6px 0 0" }}>
-                                {repliedMessage?.content || "Message supprimé"}
-                              </p>
-                            </div>
-                          )}
-
-                          {msg.content && <div>{msg.content}</div>}
-
-                          {msg.image_url && (
-                            <a href={msg.image_url} target="_blank" rel="noreferrer">
-                              <img
-                                src={msg.image_url}
-                                alt="image chat"
-                                style={chatImageStyle}
-                              />
-                            </a>
-                          )}
-                        </div>
-
-                        <div
-                          style={{
-                            ...reactionRow,
-                            justifyContent: isMe ? "flex-end" : "flex-start",
-                          }}
-                        >
-                          {REACTION_EMOJIS.map((emoji) => {
-                            const count = msgReactions.filter(
-                              (r) => r.emoji === emoji
-                            ).length;
-                            const active = msgReactions.some(
-                              (r) => r.emoji === emoji && r.user_id === user?.id
-                            );
-
-                            if (count === 0 && !active && hoveredMessageId !== msg.id) {
-                              return null;
-                            }
-
-                            return (
-                              <button
-                                key={emoji}
-                                type="button"
-                                onClick={() => toggleReaction(msg.id, emoji)}
-                                style={{
-                                  ...reactionBtn,
-                                  ...(active ? reactionBtnActive : {}),
-                                  opacity:
-                                    count === 0 && hoveredMessageId === msg.id
-                                      ? 0.55
-                                      : 1,
-                                  transform:
-                                    reactionPulse === `${msg.id}-${emoji}`
-                                      ? "scale(1.4)"
-                                      : active
-                                      ? "scale(1.08)"
-                                      : "scale(1)",
-                                }}
-                              >
-                                <span
-                                  style={active ? reactionEmojiActive : reactionEmoji}
-                                >
-                                  {emoji}
-                                </span>
-                                {count > 0 && <span style={reactionCount}>{count}</span>}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        <div
-                          style={{
-                            ...messageActions,
-                            justifyContent: isMe ? "flex-end" : "flex-start",
-                            opacity: hoveredMessageId === msg.id ? 1 : 0,
-                            pointerEvents:
-                              hoveredMessageId === msg.id ? "auto" : "none",
-                          }}
-                        >
-                          <button onClick={() => setReplyTo(msg)} style={replyBtn}>
-                            ↩️ Répondre
+                        <button onClick={() => setReplyTo(msg)} style={replyBtn}>↩️ Répondre</button>
+                        {isAdmin && (
+                          <button onClick={() => deleteMessage(msg.id)} style={deleteBtn}>
+                            🗑 Supprimer
                           </button>
-
-                          {isAdmin && (
-                            <button
-                              onClick={() => deleteMessage(msg.id)}
-                              style={deleteBtn}
-                            >
-                              🗑 Supprimer
-                            </button>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
-                  </div>
+                  </article>
                 );
               })
             )}
-
             <div ref={bottomRef} />
           </div>
 
           {typingUsers.length > 0 && (
             <div style={typingBox}>
-              ✍️ {typingUsers.map((u) => u.username).join(", ")}{" "}
-              {typingUsers.length > 1 ? "écrivent..." : "écrit..."}
+              <span style={typingDots}>● ● ●</span> {typingUsers.map((u) => u.username).join(", ")} {typingUsers.length > 1 ? "écrivent..." : "écrit..."}
             </div>
           )}
 
           {replyTo && (
             <div style={replyBar}>
               <span>
-                ↩️ Réponse à <strong>{replyTo.username || replyTo.email}</strong>{" "}
-                : {replyTo.content || "image"}
+                ↩️ Réponse à <strong>{replyTo.username || replyTo.email}</strong> : {replyTo.content || "image"}
               </span>
-
-              <button onClick={() => setReplyTo(null)} style={cancelReplyBtn}>
-                ✖
-              </button>
+              <button onClick={() => setReplyTo(null)} style={cancelReplyBtn}>✖</button>
             </div>
           )}
 
           <div style={inputBox}>
+            <button type="button" style={plusBtn}>＋</button>
             <input
               value={text}
               onChange={(e) => {
@@ -1374,8 +1342,8 @@ export default function ChatPage() {
                 replyTo
                   ? `Répondre à ${replyTo.username || replyTo.email}...`
                   : isAdmin
-                  ? "Écris ton message... (@email ou @pseudo pour notifier)"
-                  : "Écris ton message..."
+                  ? "Écris dans #général... (@email ou @pseudo pour notifier)"
+                  : "Écris dans #général..."
               }
               style={inputStyle}
             />
@@ -1391,20 +1359,19 @@ export default function ChatPage() {
               />
             </label>
 
-            <button onClick={sendMessage} style={btnStyle}>
-              Envoyer
-            </button>
+            <button onClick={sendMessage} style={btnStyle}>Envoyer</button>
           </div>
         </section>
 
         <aside style={onlinePanel}>
-          <h2 style={onlineTitle}>🟢 En ligne</h2>
-
-          <p style={onlineCount}>
-            {onlineMembers.length} membre
-            {onlineMembers.length > 1 ? "s" : ""} connecté
-            {onlineMembers.length > 1 ? "s" : ""}
-          </p>
+          <div style={onlineHeaderV2}>
+            <div>
+              <h2 style={onlineTitle}>Membres</h2>
+              <p style={onlineCount}>
+                🟢 {onlineMembers.length} connecté{onlineMembers.length > 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
 
           <div style={onlineGrid}>
             {onlineMembers.length === 0 ? (
@@ -1416,7 +1383,7 @@ export default function ChatPage() {
                     <img
                       src={member.avatar || DEFAULT_AVATAR}
                       alt="avatar"
-                      style={avatarMsg}
+                      style={avatarMember}
                       onError={(e) => {
                         e.currentTarget.src = DEFAULT_AVATAR;
                       }}
@@ -1425,19 +1392,20 @@ export default function ChatPage() {
                       style={{
                         ...onlineDotSmall,
                         background:
-                          member.status_text === "🔴 Hors ligne"
-                            ? "#ff5c5c"
-                            : "#4cff9b",
+                          member.status_text === "🔴 Hors ligne" ? "#ff5c5c" : "#4cff9b",
                       }}
                     />
                   </div>
 
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <p
                       style={{
                         margin: 0,
                         fontWeight: 900,
                         color: member.role === "admin" ? "gold" : "#fff",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {member.username || "Utilisateur"}
@@ -1448,9 +1416,7 @@ export default function ChatPage() {
                         margin: "4px 0 0",
                         fontSize: "12px",
                         color:
-                          member.status_text === "🔴 Hors ligne"
-                            ? "#ff7777"
-                            : "#4cff9b",
+                          member.status_text === "🔴 Hors ligne" ? "#ff7777" : "#4cff9b",
                       }}
                     >
                       {member.status_text || "🟢 En ligne"}
@@ -1459,6 +1425,13 @@ export default function ChatPage() {
                 </div>
               ))
             )}
+          </div>
+
+          <div style={activityCard}>
+            <strong>Activité récente</strong>
+            <p>🎬 Chat CineZone v2 actif</p>
+            <p>📥 Les demandes se font depuis le bouton dédié</p>
+            <p>🔥 Les nouveautés peuvent être annoncées ici</p>
           </div>
         </aside>
       </div>
@@ -1469,108 +1442,253 @@ export default function ChatPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "calc(100vh - 56px)",
   background: `
-    radial-gradient(circle at 12% 15%, rgba(0, 198, 255, 0.18), transparent 34%),
-    radial-gradient(circle at 86% 28%, rgba(120, 50, 255, 0.20), transparent 38%),
-    radial-gradient(circle at 10% 88%, rgba(255, 0, 120, 0.10), transparent 36%),
-    linear-gradient(135deg, #020617 0%, #040817 45%, #020617 100%)
+    radial-gradient(circle at 10% 10%, rgba(0, 198, 255, 0.18), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(106, 55, 255, 0.22), transparent 34%),
+    radial-gradient(circle at 18% 92%, rgba(255, 0, 130, 0.10), transparent 32%),
+    linear-gradient(135deg, #020617 0%, #050816 45%, #020617 100%)
   `,
   color: "#fff",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "80px 24px 32px",
+  padding: "76px 18px 24px",
   fontFamily: "Inter, Arial, sans-serif",
-  position: "relative",
   overflow: "hidden",
 };
 
-const loadingText: React.CSSProperties = {
-  padding: "14px 18px",
-  borderRadius: "16px",
-  background: "rgba(255,255,255,0.08)",
-  border: "1px solid rgba(0,198,255,0.25)",
-  boxShadow: "0 0 24px rgba(0,198,255,0.18)",
+const loadingCard: React.CSSProperties = {
+  minHeight: "70vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "column",
+  gap: "14px",
 };
 
-const chatLayout: React.CSSProperties = {
-  width: "100%",
-  maxWidth: "1240px",
+const loaderGlow: React.CSSProperties = {
+  width: "64px",
+  height: "64px",
+  borderRadius: "22px",
+  background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
   display: "grid",
-  gridTemplateColumns: "1fr 310px",
-  gap: "22px",
-  alignItems: "stretch",
+  placeItems: "center",
+  fontWeight: 950,
+  boxShadow: "0 0 36px rgba(0,198,255,0.65)",
+};
+
+const loadingText: React.CSSProperties = {
+  padding: "12px 18px",
+  borderRadius: "999px",
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(0,198,255,0.25)",
+  color: "#dff8ff",
+  fontWeight: 800,
+};
+
+const shellStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "1540px",
+  height: "calc(100vh - 110px)",
+  margin: "0 auto",
+  display: "grid",
+  gridTemplateColumns: "280px minmax(0, 1fr) 300px",
+  gap: "16px",
+};
+
+const panelBase: React.CSSProperties = {
+  background: "linear-gradient(180deg, rgba(10,16,32,0.92), rgba(3,7,18,0.96))",
+  border: "1px solid rgba(0,198,255,0.22)",
+  boxShadow: "0 28px 90px rgba(0,0,0,0.75), 0 0 40px rgba(0,198,255,0.10)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+};
+
+const roomsPanel: React.CSSProperties = {
+  ...panelBase,
+  borderRadius: "26px",
+  padding: "18px",
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+};
+
+const brandCard: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  paddingBottom: "16px",
+  borderBottom: "1px solid rgba(255,255,255,0.08)",
+};
+
+const brandLogo: React.CSSProperties = {
+  width: "48px",
+  height: "48px",
+  borderRadius: "17px",
+  background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
+  display: "grid",
+  placeItems: "center",
+  fontWeight: 950,
+  boxShadow: "0 0 26px rgba(0,198,255,0.55)",
+};
+
+const brandTitle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "20px",
+  letterSpacing: "-0.04em",
+};
+
+const brandSub: React.CSSProperties = {
+  margin: "4px 0 0",
+  color: "#8fa3bd",
+  fontSize: "12px",
+  fontWeight: 700,
+};
+
+const miniProfileCard: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  marginTop: "16px",
+  padding: "12px",
+  borderRadius: "18px",
+  background: "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(124,58,237,0.10))",
+  border: "1px solid rgba(255,255,255,0.10)",
+};
+
+const miniProfileName: React.CSSProperties = {
+  margin: 0,
+  fontWeight: 950,
+  color: "#fff",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+
+const miniProfileStatus: React.CSSProperties = {
+  margin: "4px 0 0",
+  fontSize: "12px",
+  fontWeight: 800,
+};
+
+const roomsHeader: React.CSSProperties = {
+  marginTop: "22px",
+  marginBottom: "10px",
+  display: "flex",
+  justifyContent: "space-between",
+  color: "#9fb3c8",
+  fontSize: "12px",
+  textTransform: "uppercase",
+  fontWeight: 950,
+  letterSpacing: "0.08em",
+};
+
+const roomsCount: React.CSSProperties = {
+  color: "#67e8f9",
+};
+
+const roomsList: React.CSSProperties = {
+  display: "grid",
+  gap: "8px",
+};
+
+const roomButton: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "26px 1fr auto",
+  alignItems: "center",
+  gap: "8px",
+  width: "100%",
+  padding: "11px 12px",
+  borderRadius: "14px",
+  border: "1px solid transparent",
+  background: "transparent",
+  color: "#9fb3c8",
+  cursor: "pointer",
+  textAlign: "left",
+  fontWeight: 800,
+};
+
+const roomButtonActive: React.CSSProperties = {
+  ...roomButton,
+  color: "#fff",
+  background: "linear-gradient(135deg, rgba(0,198,255,0.20), rgba(80,54,255,0.22))",
+  border: "1px solid rgba(0,198,255,0.35)",
+  boxShadow: "0 0 22px rgba(0,198,255,0.14)",
+};
+
+const roomIcon: React.CSSProperties = {
+  fontSize: "17px",
+};
+
+const roomLabel: React.CSSProperties = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+
+const soonBadge: React.CSSProperties = {
+  fontSize: "10px",
+  color: "#67e8f9",
+  opacity: 0.8,
+};
+
+const quickActionsCard: React.CSSProperties = {
+  marginTop: "auto",
+  display: "grid",
+  gap: "8px",
+  paddingTop: "16px",
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+};
+
+const quickAction: React.CSSProperties = {
+  color: "#dff8ff",
+  textDecoration: "none",
+  padding: "10px 12px",
+  borderRadius: "13px",
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  fontWeight: 800,
 };
 
 const chatBox: React.CSSProperties = {
-  width: "100%",
-  height: "80vh",
-  background:
-    "linear-gradient(180deg, rgba(9,14,28,0.92), rgba(2,6,15,0.96))",
-  border: "1px solid rgba(0,198,255,0.28)",
-  borderRadius: "28px",
-  boxShadow:
-    "0 35px 100px rgba(0,0,0,0.9), 0 0 55px rgba(0,198,255,0.16)",
+  ...panelBase,
+  minWidth: 0,
+  borderRadius: "26px",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
   position: "relative",
-  backdropFilter: "blur(18px)",
-  WebkitBackdropFilter: "blur(18px)",
 };
 
-const onlinePanel: React.CSSProperties = {
-  height: "80vh",
-  padding: "22px",
-  borderRadius: "28px",
-  background:
-    "linear-gradient(180deg, rgba(9,14,28,0.9), rgba(2,6,15,0.96))",
-  border: "1px solid rgba(0,198,255,0.24)",
-  boxShadow:
-    "0 35px 90px rgba(0,0,0,0.75), 0 0 38px rgba(0,198,255,0.12)",
-  overflowY: "auto",
-  backdropFilter: "blur(18px)",
-  WebkitBackdropFilter: "blur(18px)",
-};
-
-const newMessageBadge: React.CSSProperties = {
-  position: "absolute",
-  top: "104px",
-  right: "24px",
-  zIndex: 20,
-  padding: "9px 15px",
-  borderRadius: "999px",
-  border: "1px solid rgba(255,255,255,0.18)",
-  background: "linear-gradient(135deg, #ff3b3b, #b00020)",
-  color: "#fff",
-  fontWeight: 900,
-  cursor: "pointer",
-  boxShadow: "0 0 24px rgba(255,60,60,0.48)",
-};
-
-const headerStyle: React.CSSProperties = {
-  padding: "22px",
-  borderBottom: "1px solid rgba(255,255,255,0.08)",
-  background:
-    "linear-gradient(135deg, rgba(0,198,255,0.12), rgba(124,58,237,0.14), rgba(0,0,0,0.18))",
-};
-
-const headerTop: React.CSSProperties = {
+const chatHeader: React.CSSProperties = {
+  minHeight: "76px",
+  padding: "18px 22px",
   display: "flex",
+  alignItems: "center",
   justifyContent: "space-between",
-  alignItems: "flex-start",
   gap: "14px",
+  borderBottom: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(124,58,237,0.10), rgba(0,0,0,0.12))",
+};
+
+const channelTitleRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+};
+
+const channelHash: React.CSSProperties = {
+  color: "#67e8f9",
+  fontSize: "28px",
+  fontWeight: 950,
 };
 
 const chatTitle: React.CSSProperties = {
   margin: 0,
-  fontSize: "22px",
-  letterSpacing: "-0.03em",
+  fontSize: "24px",
+  letterSpacing: "-0.04em",
 };
 
 const chatSubtitle: React.CSSProperties = {
-  margin: "6px 0 0",
+  margin: "4px 0 0",
   color: "#9fb3c8",
-  fontSize: "14px",
+  fontSize: "13px",
 };
 
 const headerActions: React.CSSProperties = {
@@ -1580,54 +1698,87 @@ const headerActions: React.CSSProperties = {
   justifyContent: "flex-end",
 };
 
-const connectedBox: React.CSSProperties = {
-  display: "flex",
-  gap: "12px",
-  alignItems: "center",
-  marginTop: "18px",
-};
-
-const connectedText: React.CSSProperties = {
-  margin: 0,
+const soundBtn: React.CSSProperties = {
+  padding: "10px 13px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.16)",
   color: "#fff",
-  fontWeight: "bold",
+  background: "rgba(255,255,255,0.08)",
+  fontWeight: 900,
+  cursor: "pointer",
 };
 
-const statusText: React.CSSProperties = {
-  margin: "4px 0 0",
-  fontSize: "13px",
-  fontWeight: 700,
+const profileBtn: React.CSSProperties = {
+  padding: "10px 13px",
+  borderRadius: "999px",
+  border: "1px solid rgba(0,198,255,0.42)",
+  color: "#fff",
+  background: "rgba(0,198,255,0.14)",
+  fontWeight: 900,
+  cursor: "pointer",
 };
 
-const profileBox: React.CSSProperties = {
-  marginTop: "18px",
+const profileBoxV2: React.CSSProperties = {
+  margin: "14px 18px 0",
   padding: "16px",
   borderRadius: "18px",
-  background: "rgba(0,0,0,0.42)",
-  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(0,0,0,0.38)",
+  border: "1px solid rgba(0,198,255,0.24)",
   display: "grid",
   gap: "10px",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+  boxShadow: "0 16px 40px rgba(0,0,0,0.28)",
+};
+
+const profileBoxHeader: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
+const closeGhostBtn: React.CSSProperties = {
+  width: "30px",
+  height: "30px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.07)",
+  color: "#fff",
+  cursor: "pointer",
 };
 
 const labelStyle: React.CSSProperties = {
   color: "#cbd5e1",
-  fontWeight: 800,
+  fontWeight: 900,
   fontSize: "13px",
 };
 
-const announcementBox: React.CSSProperties = {
-  margin: "14px 18px",
-  padding: "16px 18px",
-  borderRadius: "20px",
-  background:
-    "linear-gradient(135deg, rgba(255,60,90,0.13), rgba(130,0,255,0.08), rgba(0,0,0,0.32))",
-  border: "1px solid rgba(255,70,100,0.38)",
-  boxShadow:
-    "0 0 28px rgba(255,70,100,0.16), inset 0 1px 0 rgba(255,255,255,0.06)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
+const inputStyle: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  padding: "14px",
+  borderRadius: "16px",
+  border: "1px solid rgba(0,198,255,0.26)",
+  background: "rgba(3,8,18,0.94)",
   color: "#fff",
+  outline: "none",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+};
+
+const fileInputStyle: React.CSSProperties = {
+  color: "#cbd5e1",
+};
+
+const infoText: React.CSSProperties = {
+  color: "#67e8f9",
+  margin: 0,
+};
+
+const announcementBoxV2: React.CSSProperties = {
+  margin: "14px 18px 0",
+  padding: "15px 17px",
+  borderRadius: "18px",
+  background: "linear-gradient(135deg, rgba(125,58,237,0.18), rgba(0,198,255,0.08), rgba(0,0,0,0.25))",
+  border: "1px solid rgba(125,58,237,0.45)",
+  boxShadow: "0 0 28px rgba(125,58,237,0.16)",
 };
 
 const announcementHeader: React.CSSProperties = {
@@ -1635,7 +1786,6 @@ const announcementHeader: React.CSSProperties = {
   justifyContent: "space-between",
   gap: "12px",
   alignItems: "flex-start",
-  marginBottom: "8px",
 };
 
 const announcementSub: React.CSSProperties = {
@@ -1643,7 +1793,6 @@ const announcementSub: React.CSSProperties = {
   color: "#67e8f9",
   fontSize: "12px",
   fontWeight: 900,
-  textShadow: "0 0 10px rgba(0,198,255,0.45)",
 };
 
 const announcementTextStyle: React.CSSProperties = {
@@ -1698,7 +1847,7 @@ const announcementCancelBtn: React.CSSProperties = {
 
 const announcementTextarea: React.CSSProperties = {
   width: "100%",
-  minHeight: "140px",
+  minHeight: "120px",
   marginTop: "12px",
   padding: "12px",
   borderRadius: "14px",
@@ -1713,71 +1862,167 @@ const announcementTextarea: React.CSSProperties = {
 
 const messagesBox: React.CSSProperties = {
   flex: 1,
-  padding: "26px",
+  minHeight: 0,
+  padding: "20px 22px",
   overflowY: "auto",
-  background:
-    "radial-gradient(circle at 82% 18%, rgba(0,198,255,0.08), transparent 35%), linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.36))",
+  background: "radial-gradient(circle at 82% 20%, rgba(0,198,255,0.07), transparent 34%), linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.28))",
+};
+
+const emptyState: React.CSSProperties = {
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "column",
+  color: "#8ea0b6",
+};
+
+const emptyIcon: React.CSSProperties = {
+  fontSize: "42px",
+  marginBottom: "10px",
 };
 
 const emptyText: React.CSSProperties = {
-  color: "#8ea0b6",
+  color: "#dbeafe",
   textAlign: "center",
-  marginTop: "42px",
+  margin: 0,
+  fontWeight: 900,
+};
+
+const emptyHint: React.CSSProperties = {
+  marginTop: "6px",
+  fontSize: "13px",
+};
+
+const messageLine: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "46px minmax(0, 1fr)",
+  gap: "12px",
+  padding: "9px 8px",
+  borderRadius: "16px",
+  marginBottom: "8px",
+  transition: "background 0.16s ease",
+};
+
+const avatarWrapMsg: React.CSSProperties = {
+  position: "relative",
+  width: "44px",
+  height: "44px",
+  minWidth: "44px",
+};
+
+const avatarWrapSmall: React.CSSProperties = {
+  position: "relative",
+  width: "40px",
+  height: "40px",
+  minWidth: "40px",
+  flexShrink: 0,
+};
+
+const avatarWrap: React.CSSProperties = {
+  position: "relative",
+  width: "48px",
+  height: "48px",
+  flexShrink: 0,
+};
+
+const avatarSmall: React.CSSProperties = {
+  width: "48px",
+  height: "48px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.8)",
+  boxShadow: "0 0 20px rgba(0,198,255,0.70)",
+};
+
+const avatarMsg: React.CSSProperties = {
+  width: "44px",
+  height: "44px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.75)",
+  boxShadow: "0 0 15px rgba(0,198,255,0.48)",
+};
+
+const avatarMember: React.CSSProperties = {
+  width: "40px",
+  height: "40px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.55)",
+};
+
+const onlineDot: React.CSSProperties = {
+  position: "absolute",
+  right: "1px",
+  bottom: "1px",
+  width: "12px",
+  height: "12px",
+  borderRadius: "50%",
+  border: "2px solid #07111f",
+};
+
+const onlineDotSmall: React.CSSProperties = {
+  position: "absolute",
+  right: "-1px",
+  bottom: "-1px",
+  width: "10px",
+  height: "10px",
+  borderRadius: "50%",
+  border: "2px solid #07111f",
+};
+
+const messageContent: React.CSSProperties = {
+  minWidth: 0,
 };
 
 const messageMeta: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: "7px",
-  marginBottom: "6px",
+  marginBottom: "5px",
   fontSize: "13px",
   flexWrap: "wrap",
 };
 
-const myBubble: React.CSSProperties = {
-  maxWidth: "100%",
-  padding: "13px 16px",
-  borderRadius: "20px 20px 6px 20px",
-  background:
-    "linear-gradient(135deg, rgba(0,145,255,0.55), rgba(58,0,255,0.42))",
-  border: "1px solid rgba(0,198,255,0.42)",
-  color: "#fff",
-  lineHeight: 1.5,
-  fontSize: "15px",
-  wordBreak: "break-word",
-  whiteSpace: "pre-line",
-  boxShadow: "0 12px 34px rgba(0,114,255,0.22)",
+const messageTime: React.CSSProperties = {
+  color: "#7f8ea3",
+  fontSize: "12px",
 };
 
-const otherBubble: React.CSSProperties = {
-  maxWidth: "100%",
-  padding: "13px 16px",
-  borderRadius: "20px 20px 20px 6px",
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.105), rgba(255,255,255,0.045))",
-  border: "1px solid rgba(255,255,255,0.13)",
+const messageStatus: React.CSSProperties = {
+  fontSize: "12px",
+  fontWeight: 800,
+};
+
+const messageBubbleV2: React.CSSProperties = {
+  display: "inline-block",
+  maxWidth: "min(720px, 100%)",
+  padding: "10px 13px",
+  borderRadius: "14px",
+  background: "rgba(255,255,255,0.055)",
+  border: "1px solid rgba(255,255,255,0.08)",
   color: "#fff",
   lineHeight: 1.5,
   fontSize: "15px",
   wordBreak: "break-word",
   whiteSpace: "pre-line",
-  boxShadow: "0 12px 30px rgba(0,0,0,0.25)",
 };
 
 const replyPreviewBoxClean: React.CSSProperties = {
-  marginBottom: "10px",
-  padding: "9px 11px",
-  borderLeft: "3px solid rgba(0,198,255,0.7)",
+  marginBottom: "9px",
+  padding: "8px 10px",
+  borderLeft: "3px solid rgba(0,198,255,0.75)",
   color: "#9fb3c8",
   fontSize: "13px",
-  background: "rgba(0,0,0,0.20)",
-  borderRadius: "12px",
+  background: "rgba(0,0,0,0.22)",
+  borderRadius: "10px",
 };
 
 const chatImageStyle: React.CSSProperties = {
   marginTop: "10px",
-  maxWidth: "280px",
-  maxHeight: "280px",
+  maxWidth: "300px",
+  maxHeight: "300px",
   borderRadius: "16px",
   objectFit: "cover",
   border: "1px solid rgba(255,255,255,0.18)",
@@ -1789,12 +2034,12 @@ const chatImageStyle: React.CSSProperties = {
 const reactionRow: React.CSSProperties = {
   display: "flex",
   gap: "5px",
-  marginTop: "7px",
+  marginTop: "6px",
   flexWrap: "wrap",
 };
 
 const reactionBtn: React.CSSProperties = {
-  height: "27px",
+  height: "26px",
   minWidth: "30px",
   fontSize: "12px",
   padding: "3px 8px",
@@ -1807,16 +2052,13 @@ const reactionBtn: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: "4px",
-  transition:
-    "transform 0.22s cubic-bezier(.2,1.6,.4,1), filter 0.22s ease, box-shadow 0.22s ease",
-  position: "relative",
-  zIndex: 10,
+  transition: "transform 0.22s cubic-bezier(.2,1.6,.4,1), box-shadow 0.22s ease",
 };
 
 const reactionBtnActive: React.CSSProperties = {
-  background: "rgba(0,198,255,0.2)",
+  background: "rgba(0,198,255,0.20)",
   border: "1px solid rgba(0,198,255,0.75)",
-  boxShadow: "0 0 16px rgba(0,198,255,0.55)",
+  boxShadow: "0 0 16px rgba(0,198,255,0.50)",
 };
 
 const reactionEmoji: React.CSSProperties = {
@@ -1837,46 +2079,49 @@ const reactionCount: React.CSSProperties = {
 const messageActions: React.CSSProperties = {
   display: "flex",
   gap: "8px",
-  marginTop: "7px",
+  marginTop: "5px",
   flexWrap: "wrap",
   transition: "opacity 0.16s ease",
 };
 
 const replyBtn: React.CSSProperties = {
-  marginTop: "12px",
   background: "rgba(0,198,255,0.12)",
   color: "#67e8f9",
   border: "1px solid rgba(0,198,255,0.35)",
   borderRadius: "10px",
-  padding: "7px 10px",
+  padding: "6px 9px",
   cursor: "pointer",
   fontSize: "12px",
   fontWeight: "bold",
 };
 
 const deleteBtn: React.CSSProperties = {
-  marginTop: "12px",
   background: "rgba(255,70,70,0.16)",
   color: "#ffb3b3",
   border: "1px solid rgba(255,90,90,0.45)",
   borderRadius: "10px",
-  padding: "7px 10px",
+  padding: "6px 9px",
   cursor: "pointer",
   fontSize: "12px",
   fontWeight: "bold",
 };
 
 const typingBox: React.CSSProperties = {
-  padding: "9px 18px",
+  padding: "8px 18px",
   color: "#67e8f9",
   fontSize: "13px",
   borderTop: "1px solid rgba(255,255,255,0.08)",
   background: "rgba(0,198,255,0.06)",
 };
 
+const typingDots: React.CSSProperties = {
+  color: "#8b5cf6",
+  marginRight: "6px",
+};
+
 const replyBar: React.CSSProperties = {
   padding: "10px 16px",
-  background: "rgba(0,198,255,0.1)",
+  background: "rgba(0,198,255,0.10)",
   borderTop: "1px solid rgba(0,198,255,0.25)",
   color: "#dbeafe",
   display: "flex",
@@ -1897,28 +2142,28 @@ const cancelReplyBtn: React.CSSProperties = {
 
 const inputBox: React.CSSProperties = {
   display: "flex",
-  gap: "12px",
-  padding: "18px",
+  gap: "10px",
+  padding: "14px 16px",
   borderTop: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(2,6,15,0.88)",
+  background: "rgba(2,6,15,0.92)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
 };
 
-const inputStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "14px",
+const plusBtn: React.CSSProperties = {
+  width: "46px",
+  minWidth: "46px",
   borderRadius: "16px",
-  border: "1px solid rgba(0,198,255,0.26)",
-  background: "rgba(3,8,18,0.92)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.07)",
   color: "#fff",
-  outline: "none",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+  fontSize: "22px",
+  cursor: "pointer",
 };
 
 const imageUploadBtn: React.CSSProperties = {
-  width: "52px",
-  minWidth: "52px",
+  width: "48px",
+  minWidth: "48px",
   borderRadius: "16px",
   border: "1px solid rgba(0,198,255,0.45)",
   background: "rgba(0,198,255,0.14)",
@@ -1927,129 +2172,99 @@ const imageUploadBtn: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   cursor: "pointer",
-  fontSize: "20px",
+  fontSize: "19px",
   fontWeight: 900,
   boxShadow: "0 0 18px rgba(0,198,255,0.12)",
 };
 
 const btnStyle: React.CSSProperties = {
-  padding: "14px 20px",
+  padding: "13px 18px",
   borderRadius: "16px",
   border: "none",
   color: "#fff",
-  fontWeight: "bold",
+  fontWeight: 950,
   cursor: "pointer",
   background: "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
-  boxShadow: "0 12px 34px rgba(0,114,255,0.48)",
+  boxShadow: "0 12px 30px rgba(0,114,255,0.42)",
 };
 
-const profileBtn: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: "999px",
-  border: "1px solid rgba(0,198,255,0.45)",
-  color: "#fff",
-  background: "rgba(0,198,255,0.14)",
-  fontWeight: "bold",
-  cursor: "pointer",
-};
-
-const soundBtn: React.CSSProperties = {
-  padding: "10px 14px",
+const newMessageBadge: React.CSSProperties = {
+  position: "absolute",
+  top: "88px",
+  right: "22px",
+  zIndex: 20,
+  padding: "9px 15px",
   borderRadius: "999px",
   border: "1px solid rgba(255,255,255,0.18)",
+  background: "linear-gradient(135deg, #ff3b3b, #b00020)",
   color: "#fff",
-  background: "rgba(255,255,255,0.08)",
-  fontWeight: "bold",
+  fontWeight: 950,
   cursor: "pointer",
+  boxShadow: "0 0 24px rgba(255,60,60,0.45)",
 };
 
-const avatarWrap: React.CSSProperties = {
-  position: "relative",
-  width: "52px",
-  height: "52px",
+const onlinePanel: React.CSSProperties = {
+  ...panelBase,
+  borderRadius: "26px",
+  padding: "18px",
+  overflowY: "auto",
 };
 
-const avatarSmall: React.CSSProperties = {
-  width: "52px",
-  height: "52px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.8)",
-  boxShadow: "0 0 20px rgba(0,198,255,0.75)",
+const onlineHeaderV2: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingBottom: "14px",
+  borderBottom: "1px solid rgba(255,255,255,0.08)",
 };
 
-const onlineDot: React.CSSProperties = {
-  position: "absolute",
-  right: "1px",
-  bottom: "1px",
-  width: "12px",
-  height: "12px",
-  borderRadius: "50%",
-  border: "2px solid #07111f",
+const onlineTitle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "19px",
+  letterSpacing: "-0.03em",
 };
 
-const avatarWrapSmall: React.CSSProperties = {
-  position: "relative",
-  width: "44px",
-  height: "44px",
-  minWidth: "44px",
-  flexShrink: 0,
+const onlineCount: React.CSSProperties = {
+  color: "#9ca3af",
+  margin: "5px 0 0",
+  fontSize: "13px",
+  fontWeight: 800,
 };
 
-const avatarMsg: React.CSSProperties = {
-  width: "44px",
-  height: "44px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.75)",
-  boxShadow: "0 0 15px rgba(0,198,255,0.55)",
+const onlineGrid: React.CSSProperties = {
+  display: "grid",
+  gap: "10px",
+  marginTop: "16px",
 };
 
-const onlineDotSmall: React.CSSProperties = {
-  position: "absolute",
-  right: "-1px",
-  bottom: "-1px",
-  width: "10px",
-  height: "10px",
-  borderRadius: "50%",
-  border: "2px solid #07111f",
+const onlineMemberCard: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  padding: "10px",
+  borderRadius: "16px",
+  background: "linear-gradient(135deg, rgba(255,255,255,0.07), rgba(0,198,255,0.045))",
+  border: "1px solid rgba(255,255,255,0.10)",
+};
+
+const activityCard: React.CSSProperties = {
+  marginTop: "18px",
+  padding: "14px",
+  borderRadius: "18px",
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  color: "#dbeafe",
+  fontSize: "13px",
+  lineHeight: 1.45,
 };
 
 const adminBadge: React.CSSProperties = {
   color: "#000",
   background: "linear-gradient(135deg, #ffe58a, #ffb300)",
   fontSize: "10px",
-  fontWeight: 900,
+  fontWeight: 950,
   marginLeft: "7px",
   padding: "3px 7px",
   borderRadius: "999px",
-  boxShadow: "0 0 12px rgba(255,215,100,0.55)",
-};
-
-const onlineTitle: React.CSSProperties = {
-  margin: 0,
-  fontSize: "18px",
-};
-
-const onlineCount: React.CSSProperties = {
-  color: "#9ca3af",
-  marginTop: "6px",
-};
-
-const onlineGrid: React.CSSProperties = {
-  display: "grid",
-  gap: "12px",
-  marginTop: "18px",
-};
-
-const onlineMemberCard: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "11px",
-  padding: "11px",
-  borderRadius: "18px",
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(0,198,255,0.05))",
-  border: "1px solid rgba(255,255,255,0.12)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+  boxShadow: "0 0 12px rgba(255,215,100,0.50)",
 };
