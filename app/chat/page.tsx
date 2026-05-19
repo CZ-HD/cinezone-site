@@ -7,6 +7,7 @@ const DEFAULT_AVATAR =
   "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+const CHAT_EMOJIS = ["👍", "❤️", "🔥", "😂", "😎", "🎬", "🍿", "👑", "🙏", "💯", "⭐", "🚀"];
 
 const CREATOR_EMAILS = [
   "blackph4tom@gmail.com",
@@ -101,6 +102,7 @@ export default function ChatPage() {
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const [announcement, setAnnouncement] = useState("");
   const [editingAnnouncement, setEditingAnnouncement] = useState(false);
@@ -1325,7 +1327,35 @@ export default function ChatPage() {
           )}
 
           <div style={inputBox}>
-            <button type="button" style={plusBtn}>＋</button>
+            <div style={{ position: "relative" }}>
+              <button
+                type="button"
+                style={plusBtn}
+                onClick={() => setShowEmojiPicker((prev) => !prev)}
+                title="Ajouter un emoji"
+              >
+                ＋
+              </button>
+
+              {showEmojiPicker && (
+                <div style={emojiPickerBox}>
+                  {CHAT_EMOJIS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => {
+                        setText((prev) => `${prev}${emoji}`);
+                        setShowEmojiPicker(false);
+                      }}
+                      style={emojiPickerBtn}
+                      title={`Ajouter ${emoji}`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <input
               value={text}
               onChange={(e) => {
@@ -2159,6 +2189,35 @@ const plusBtn: React.CSSProperties = {
   color: "#fff",
   fontSize: "22px",
   cursor: "pointer",
+};
+
+const emojiPickerBox: React.CSSProperties = {
+  position: "absolute",
+  bottom: "58px",
+  left: 0,
+  width: "228px",
+  padding: "10px",
+  borderRadius: "16px",
+  border: "1px solid rgba(0,198,255,0.32)",
+  background: "linear-gradient(180deg, rgba(7,18,38,0.98), rgba(3,8,18,0.98))",
+  boxShadow: "0 18px 45px rgba(0,0,0,0.55), 0 0 26px rgba(0,198,255,0.20)",
+  display: "flex",
+  gap: "8px",
+  flexWrap: "wrap",
+  zIndex: 999,
+};
+
+const emojiPickerBtn: React.CSSProperties = {
+  width: "34px",
+  height: "34px",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(255,255,255,0.06)",
+  color: "#fff",
+  fontSize: "20px",
+  cursor: "pointer",
+  display: "grid",
+  placeItems: "center",
 };
 
 const imageUploadBtn: React.CSSProperties = {
