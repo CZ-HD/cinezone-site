@@ -1483,7 +1483,8 @@ const [mentionUsers, setMentionUsers] = useState<OnlineMember[]>([]);
           setShowMentions(false);
         }
       }}
-      onKeyDown={(e) => {
+}
+onKeyDown={(e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           sendMessage();
