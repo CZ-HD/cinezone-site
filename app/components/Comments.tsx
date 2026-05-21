@@ -57,16 +57,19 @@ export default function Comments({
   const [text, setText] = useState("");
   const [replyText, setReplyText] = useState("");
   const [replyTo, setReplyTo] = useState<Comment | null>(null);
+
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+
   const [loading, setLoading] = useState(true);
 
-  // MENTIONS FACEBOOK
+  // MENTIONS
   const [mentionResults, setMentionResults] = useState<any[]>([]);
   const [showMentions, setShowMentions] = useState(false);
 
   const isAdmin =
-    profile?.role === "admin" || CREATOR_EMAILS.includes(user?.email || "");
+    profile?.role === "admin" ||
+    CREATOR_EMAILS.includes(user?.email || "");
 
   useEffect(() => {
     async function init() {
@@ -115,7 +118,7 @@ export default function Comments({
     setReactions(data || []);
   };
 
-  // RECHERCHE MENTIONS
+  // SEARCH MENTIONS
   const searchMentions = async (query: string) => {
     if (!query.trim()) {
       setMentionResults([]);
@@ -126,7 +129,7 @@ export default function Comments({
       .from("profiles")
       .select("id, username, avatar")
       .ilike("username", `%${query}%`)
-      .limit(6);
+      .limit(8);
 
     setMentionResults(data || []);
   };
@@ -134,25 +137,20 @@ export default function Comments({
   const resolveMentions = async (
     content: string
   ): Promise<ResolvedMentions> => {
-    if (!isAdmin || !user) {
-      return { safeContent: content, mentionedUsers: [] };
-    }
-
     const matches = [...content.matchAll(/@([^\s]+)/g)];
 
     if (matches.length === 0) {
-      return { safeContent: content, mentionedUsers: [] };
+      return {
+        safeContent: content,
+        mentionedUsers: [],
+      };
     }
-
-    let safeContent = content;
 
     const mentionedUsers: MentionProfile[] = [];
 
     const alreadyMentioned = new Set<string>();
 
     for (const match of matches) {
-      const rawMention = match[0];
-
       const value = match[1].trim();
 
       if (!value) continue;
@@ -165,170 +163,143 @@ export default function Comments({
 
       if (!mentionedUser?.id) continue;
 
-      if (mentionedUser.id === user.id) continue;
-
-      if (alreadyMentioned.has(mentionedUser.id)) continue;
+      if (alreadyMentioned.has(mentionedUser.id))
+        continue;
 
       alreadyMentioned.add(mentionedUser.id);
 
       mentionedUsers.push(mentionedUser);
-
-      if (value.includes("@")) {
-        safeContent = safeContent.replace(
-          rawMention,
-          mentionedUser.username
-            ? `@${mentionedUser.username}`
-            : "@membre"
-        );
-      }
     }
 
-    return { safeContent, mentionedUsers };
+    return {
+      safeContent: content,
+      mentionedUsers,
+    };
   };
 
   const createMentionNotifications = async (
-    mentionedUsers: MentionProfile[],
-    content: string
+    mentionedUsers: MentionProfile[]
   ) => {
-    if (!user || !profile || mentionedUsers.length === 0) return;
+    if (
+      !user ||
+      !profile ||
+      mentionedUsers.length === 0
+    )
+      return;
 
     await supabase.from("notifications").insert(
       mentionedUsers.map((member) => ({
         user_id: member.id,
         type: "comment_mention",
-        title: "🔔 Mention dans un commentaire",
+        title: "🔔 Mention",
         message: `${
           profile?.username || user.email
-        } t’a mentionné dans un commentaire.`,
+        } vous a mentionné.`,
         link: `/movie/${itemId}`,
         read: false,
-        read_at: null,
       }))
     );
-  };
-
-  const createAdminNotification = async (content: string) => {
-    if (profile?.role === "admin") return;
-
-    const { data: admins } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("role", "admin");
-
-    if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((admin) => ({
-          user_id: admin.id,
-          type: "comment",
-          title: "💬 Nouveau commentaire",
-          message: content,
-          link: `/movie/${itemId}`,
-          read: false,
-          read_at: null,
-        }))
-      );
-    }
   };
 
   const sendComment = async () => {
     if (!text.trim() || !user) return;
 
-    const originalContent = text.trim();
+    const content = text.trim();
 
     setText("");
 
     const { safeContent, mentionedUsers } =
-      await resolveMentions(originalContent);
+      await resolveMentions(content);
 
-    const { error } = await supabase.from("comments").insert({
-      item_id: String(itemId),
-      item_type: itemType,
-      user_id: user.id,
-      username: profile?.username || user.email,
-      avatar: profile?.avatar || DEFAULT_AVATAR,
-      role: profile?.role || "user",
-      content: safeContent,
-      parent_id: null,
-    });
+    const { error } = await supabase
+      .from("comments")
+      .insert({
+        item_id: String(itemId),
+        item_type: itemType,
+        user_id: user.id,
+        username:
+          profile?.username || user.email,
+        avatar:
+          profile?.avatar || DEFAULT_AVATAR,
+        role: profile?.role || "user",
+        content: safeContent,
+        parent_id: null,
+      });
 
     if (error) {
-      alert("Erreur commentaire : " + error.message);
-
-      setText(originalContent);
-
+      alert(error.message);
+      setText(content);
       return;
     }
 
-    await createAdminNotification(safeContent);
-
     await createMentionNotifications(
-      mentionedUsers,
-      safeContent
+      mentionedUsers
     );
 
     await loadComments();
   };
 
   const sendReply = async () => {
-    if (!replyText.trim() || !user || !replyTo) return;
+    if (
+      !replyText.trim() ||
+      !replyTo ||
+      !user
+    )
+      return;
 
-    const originalContent = replyText.trim();
+    const content = replyText.trim();
 
     setReplyText("");
 
     const { safeContent, mentionedUsers } =
-      await resolveMentions(originalContent);
+      await resolveMentions(content);
 
-    const { error } = await supabase.from("comments").insert({
-      item_id: String(itemId),
-      item_type: itemType,
-      user_id: user.id,
-      username: profile?.username || user.email,
-      avatar: profile?.avatar || DEFAULT_AVATAR,
-      role: profile?.role || "user",
-      content: safeContent,
-      parent_id: replyTo.id,
-    });
+    const { error } = await supabase
+      .from("comments")
+      .insert({
+        item_id: String(itemId),
+        item_type: itemType,
+        user_id: user.id,
+        username:
+          profile?.username || user.email,
+        avatar:
+          profile?.avatar || DEFAULT_AVATAR,
+        role: profile?.role || "user",
+        content: safeContent,
+        parent_id: replyTo.id,
+      });
 
     if (error) {
-      alert("Erreur réponse : " + error.message);
-
-      setReplyText(originalContent);
-
+      alert(error.message);
       return;
     }
 
     setReplyTo(null);
 
-    await createAdminNotification(safeContent);
-
     await createMentionNotifications(
-      mentionedUsers,
-      safeContent
+      mentionedUsers
     );
 
     await loadComments();
   };
 
-  const deleteComment = async (commentId: string) => {
+  const deleteComment = async (
+    commentId: string
+  ) => {
     if (profile?.role !== "admin") return;
 
-    if (!confirm("Supprimer ce commentaire ?")) return;
+    const confirmDelete = confirm(
+      "Supprimer ce commentaire ?"
+    );
 
-    const { error } = await supabase
+    if (!confirmDelete) return;
+
+    await supabase
       .from("comments")
       .delete()
       .eq("id", commentId);
 
-    if (error) {
-      alert("Erreur suppression : " + error.message);
-
-      return;
-    }
-
     await loadComments();
-
-    await loadReactions();
   };
 
   const toggleReaction = async (
@@ -345,30 +316,18 @@ export default function Comments({
     );
 
     if (existing) {
-      const { error } = await supabase
+      await supabase
         .from("comment_reactions")
         .delete()
         .eq("id", existing.id);
-
-      if (error) {
-        alert("Erreur réaction : " + error.message);
-
-        return;
-      }
     } else {
-      const { error } = await supabase
+      await supabase
         .from("comment_reactions")
         .insert({
           comment_id: commentId,
           user_id: user.id,
           emoji,
         });
-
-      if (error) {
-        alert("Erreur réaction : " + error.message);
-
-        return;
-      }
     }
 
     await loadReactions();
@@ -402,7 +361,8 @@ export default function Comments({
   const getReplies = (commentId: string) =>
     comments
       .filter(
-        (comment) => comment.parent_id === commentId
+        (comment) =>
+          comment.parent_id === commentId
       )
       .sort(
         (a, b) =>
@@ -414,7 +374,9 @@ export default function Comments({
     <section style={box}>
       <div style={header}>
         <div>
-          <h2 style={{ margin: 0 }}>💬 Commentaires</h2>
+          <h2 style={{ margin: 0 }}>
+            💬 Commentaires
+          </h2>
 
           <p
             style={{
@@ -428,8 +390,13 @@ export default function Comments({
         </div>
       </div>
 
-      {/* INPUT COMMENTAIRE */}
-      <div style={{ ...inputBox, position: "relative" }}>
+      {/* INPUT */}
+      <div
+        style={{
+          ...inputBox,
+          position: "relative",
+        }}
+      >
         <input
           value={text}
           onChange={async (e) => {
@@ -437,79 +404,91 @@ export default function Comments({
 
             setText(value);
 
-            const match = value.match(/@(\w*)$/);
+            const match =
+              value.match(/@(\w*)$/);
 
             if (match) {
               setShowMentions(true);
 
-              await searchMentions(match[1]);
+              await searchMentions(
+                match[1]
+              );
             } else {
               setShowMentions(false);
             }
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter") sendComment();
+            if (e.key === "Enter")
+              sendComment();
           }}
-          placeholder={
-            user
-              ? isAdmin
-                ? "Écrire un commentaire... (@pseudo)"
-                : "Écrire un commentaire..."
-              : "Connecte-toi pour commenter..."
-          }
+          placeholder="Écrire un commentaire..."
           disabled={!user}
           style={input}
         />
 
-        {/* POPUP FACEBOOK */}
+        {/* POPUP MENTIONS */}
         {showMentions &&
           mentionResults.length > 0 && (
             <div style={mentionsBox}>
-              {mentionResults.map((member) => (
-                <div
-                  key={member.id}
-                  style={mentionItem}
-                  onClick={() => {
-                    const updated = text.replace(
-                      /@(\w*)$/,
-                      `@${member.username} `
-                    );
+              {mentionResults.map(
+                (member) => (
+                  <div
+                    key={member.id}
+                    style={mentionItem}
+                    onClick={() => {
+                      const updated =
+                        text.replace(
+                          /@(\w*)$/,
+                          `@${member.username} `
+                        );
 
-                    setText(updated);
+                      setText(updated);
 
-                    setShowMentions(false);
-                  }}
-                >
-                  <img
-                    src={
-                      member.avatar ||
-                      DEFAULT_AVATAR
-                    }
-                    alt=""
-                    style={mentionAvatar}
-                  />
+                      setShowMentions(
+                        false
+                      );
+                    }}
+                  >
+                    <img
+                      src={
+                        member.avatar ||
+                        DEFAULT_AVATAR
+                      }
+                      alt=""
+                      style={
+                        mentionAvatar
+                      }
+                    />
 
-                  <div>
-                    <strong
-                      style={{
-                        color: "#fff",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {member.username}
-                    </strong>
+                    <div>
+                      <strong
+                        style={{
+                          color:
+                            "#fff",
+                        }}
+                      >
+                        {
+                          member.username
+                        }
+                      </strong>
 
-                    <div
-                      style={{
-                        color: "#94a3b8",
-                        fontSize: "12px",
-                      }}
-                    >
-                      @{member.username}
+                      <div
+                        style={{
+                          color:
+                            "#94a3b8",
+                          fontSize:
+                            "12px",
+                        }}
+                      >
+                        @
+                        {
+                          member.username
+                        }
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           )}
 
@@ -521,6 +500,315 @@ export default function Comments({
           Envoyer
         </button>
       </div>
+
+      {/* COMMENTAIRES */}
+      {loading ? (
+        <p style={{ color: "#aaa" }}>
+          Chargement...
+        </p>
+      ) : parentComments.length === 0 ? (
+        <p style={empty}>
+          Aucun commentaire.
+        </p>
+      ) : (
+        <div style={list}>
+          {parentComments.map((comment) => {
+            const replies = getReplies(
+              comment.id
+            );
+
+            const isCommentAdmin =
+              comment.role === "admin";
+
+            return (
+              <div key={comment.id}>
+                <div style={card}>
+                  <img
+                    src={
+                      comment.avatar ||
+                      DEFAULT_AVATAR
+                    }
+                    alt=""
+                    style={avatar}
+                  />
+
+                  <div style={{ flex: 1 }}>
+                    <div style={topRow}>
+                      <strong
+                        style={{
+                          color:
+                            isCommentAdmin
+                              ? "gold"
+                              : "#00c6ff",
+                        }}
+                      >
+                        {comment.username}
+
+                        {isCommentAdmin && (
+                          <span
+                            style={
+                              adminBadge
+                            }
+                          >
+                            ADMIN
+                          </span>
+                        )}
+                      </strong>
+
+                      <span
+                        style={dateText}
+                      >
+                        {new Date(
+                          comment.created_at
+                        ).toLocaleDateString(
+                          "fr-FR"
+                        )}
+                      </span>
+                    </div>
+
+                    <p style={contentStyle}>
+                      {comment.content}
+                    </p>
+
+                    {/* REACTIONS */}
+                    <div
+                      style={reactionRow}
+                    >
+                      {REACTION_EMOJIS.map(
+                        (emoji) => {
+                          const count =
+                            getReactionCount(
+                              comment.id,
+                              emoji
+                            );
+
+                          const active =
+                            hasReacted(
+                              comment.id,
+                              emoji
+                            );
+
+                          return (
+                            <button
+                              key={emoji}
+                              onClick={() =>
+                                toggleReaction(
+                                  comment.id,
+                                  emoji
+                                )
+                              }
+                              style={{
+                                ...reactionBtn,
+                                ...(active
+                                  ? reactionBtnActive
+                                  : {}),
+                              }}
+                            >
+                              {emoji}
+
+                              {count > 0 &&
+                                count}
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+
+                    {/* ACTIONS */}
+                    <div
+                      style={actionRow}
+                    >
+                      <button
+                        onClick={() =>
+                          setReplyTo(
+                            comment
+                          )
+                        }
+                        style={replyBtn}
+                      >
+                        ↩️ Répondre
+                      </button>
+
+                      {profile?.role ===
+                        "admin" && (
+                        <button
+                          onClick={() =>
+                            deleteComment(
+                              comment.id
+                            )
+                          }
+                          style={
+                            deleteBtn
+                          }
+                        >
+                          🗑 Supprimer
+                        </button>
+                      )}
+                    </div>
+
+                    {/* INPUT REPONSE */}
+                    {replyTo?.id ===
+                      comment.id && (
+                      <div
+                        style={
+                          replyInputBox
+                        }
+                      >
+                        <div
+                          style={
+                            replyingTo
+                          }
+                        >
+                          Réponse à{" "}
+                          {
+                            comment.username
+                          }
+
+                          <button
+                            onClick={() =>
+                              setReplyTo(
+                                null
+                              )
+                            }
+                            style={
+                              cancelReplyBtn
+                            }
+                          >
+                            Annuler
+                          </button>
+                        </div>
+
+                        <div
+                          style={
+                            inputBox
+                          }
+                        >
+                          <input
+                            value={
+                              replyText
+                            }
+                            onChange={(
+                              e
+                            ) =>
+                              setReplyText(
+                                e
+                                  .target
+                                  .value
+                              )
+                            }
+                            onKeyDown={(
+                              e
+                            ) => {
+                              if (
+                                e.key ===
+                                "Enter"
+                              )
+                                sendReply();
+                            }}
+                            placeholder="Répondre..."
+                            style={input}
+                          />
+
+                          <button
+                            onClick={
+                              sendReply
+                            }
+                            style={btn}
+                          >
+                            Répondre
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* REPONSES */}
+                    {replies.length >
+                      0 && (
+                      <div
+                        style={
+                          repliesBox
+                        }
+                      >
+                        {replies.map(
+                          (reply) => (
+                            <div
+                              key={
+                                reply.id
+                              }
+                              style={
+                                replyCard
+                              }
+                            >
+                              <img
+                                src={
+                                  reply.avatar ||
+                                  DEFAULT_AVATAR
+                                }
+                                alt=""
+                                style={
+                                  avatarSmall
+                                }
+                              />
+
+                              <div
+                                style={{
+                                  flex: 1,
+                                }}
+                              >
+                                <div
+                                  style={
+                                    topRow
+                                  }
+                                >
+                                  <strong
+                                    style={{
+                                      color:
+                                        reply.role ===
+                                        "admin"
+                                          ? "gold"
+                                          : "#00c6ff",
+                                    }}
+                                  >
+                                    {
+                                      reply.username
+                                    }
+                                  </strong>
+
+                                  <span
+                                    style={
+                                      dateText
+                                    }
+                                  >
+                                    {new Date(
+                                      reply.created_at
+                                    ).toLocaleDateString(
+                                      "fr-FR"
+                                    )}
+                                  </span>
+                                </div>
+
+                                <p
+                                  style={
+                                    replyContent
+                                  }
+                                >
+                                  {
+                                    reply.content
+                                  }
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
@@ -531,8 +819,10 @@ const box: React.CSSProperties = {
   borderRadius: "24px",
   background:
     "linear-gradient(180deg, rgba(12,18,30,0.88), rgba(5,8,14,0.92))",
-  border: "1px solid rgba(0,198,255,0.22)",
-  boxShadow: "0 20px 70px rgba(0,0,0,0.65)",
+  border:
+    "1px solid rgba(0,198,255,0.22)",
+  boxShadow:
+    "0 20px 70px rgba(0,0,0,0.65)",
 };
 
 const header: React.CSSProperties = {
@@ -545,14 +835,15 @@ const header: React.CSSProperties = {
 const inputBox: React.CSSProperties = {
   display: "flex",
   gap: "10px",
-  marginBottom: "0",
+  marginTop: "20px",
 };
 
 const input: React.CSSProperties = {
   flex: 1,
   padding: "15px",
   borderRadius: "16px",
-  border: "1px solid rgba(255,255,255,0.14)",
+  border:
+    "1px solid rgba(255,255,255,0.14)",
   background: "#0b0f18",
   color: "#fff",
   outline: "none",
@@ -566,9 +857,154 @@ const btn: React.CSSProperties = {
   fontWeight: 900,
   background:
     "linear-gradient(135deg, #00c6ff, #0072ff, #3a00ff)",
-  boxShadow:
-    "0 10px 28px rgba(0,114,255,0.35)",
   cursor: "pointer",
+};
+
+const list: React.CSSProperties = {
+  display: "grid",
+  gap: "14px",
+  marginTop: "22px",
+};
+
+const card: React.CSSProperties = {
+  display: "flex",
+  gap: "14px",
+  padding: "16px",
+  borderRadius: "18px",
+  background:
+    "rgba(255,255,255,0.055)",
+};
+
+const avatar: React.CSSProperties = {
+  width: "42px",
+  height: "42px",
+  borderRadius: "50%",
+  objectFit: "cover",
+};
+
+const avatarSmall: React.CSSProperties = {
+  width: "32px",
+  height: "32px",
+  borderRadius: "50%",
+  objectFit: "cover",
+};
+
+const topRow: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+};
+
+const adminBadge: React.CSSProperties = {
+  marginLeft: "6px",
+  padding: "2px 6px",
+  borderRadius: "999px",
+  background: "gold",
+  color: "#000",
+  fontSize: "10px",
+};
+
+const dateText: React.CSSProperties = {
+  color: "#94a3b8",
+  fontSize: "12px",
+};
+
+const contentStyle: React.CSSProperties = {
+  color: "#fff",
+  marginTop: "8px",
+};
+
+const reactionRow: React.CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  marginTop: "12px",
+};
+
+const reactionBtn: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: "999px",
+  border: "none",
+  background:
+    "rgba(255,255,255,0.08)",
+  color: "#fff",
+  cursor: "pointer",
+};
+
+const reactionBtnActive: React.CSSProperties = {
+  background:
+    "rgba(0,198,255,0.25)",
+};
+
+const actionRow: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
+  marginTop: "12px",
+};
+
+const replyBtn: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: "10px",
+  border: "none",
+  background:
+    "rgba(0,198,255,0.15)",
+  color: "#67e8f9",
+  cursor: "pointer",
+};
+
+const deleteBtn: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: "10px",
+  border: "none",
+  background:
+    "rgba(255,0,0,0.15)",
+  color: "#ffb4b4",
+  cursor: "pointer",
+};
+
+const replyInputBox: React.CSSProperties = {
+  marginTop: "14px",
+};
+
+const replyingTo: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "10px",
+  color: "#94a3b8",
+};
+
+const cancelReplyBtn: React.CSSProperties = {
+  background: "transparent",
+  border: "none",
+  color: "#ff9b9b",
+  cursor: "pointer",
+};
+
+const repliesBox: React.CSSProperties = {
+  marginTop: "16px",
+  paddingLeft: "14px",
+  borderLeft:
+    "2px solid rgba(0,198,255,0.2)",
+  display: "grid",
+  gap: "10px",
+};
+
+const replyCard: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
+  background:
+    "rgba(255,255,255,0.04)",
+  padding: "12px",
+  borderRadius: "14px",
+};
+
+const replyContent: React.CSSProperties = {
+  color: "#fff",
+  marginTop: "6px",
+};
+
+const empty: React.CSSProperties = {
+  color: "#94a3b8",
+  textAlign: "center",
+  padding: "20px",
 };
 
 const mentionsBox: React.CSSProperties = {
@@ -580,8 +1016,10 @@ const mentionsBox: React.CSSProperties = {
   overflowY: "auto",
   background: "#1c1f26",
   borderRadius: "18px",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+  border:
+    "1px solid rgba(255,255,255,0.08)",
+  boxShadow:
+    "0 20px 60px rgba(0,0,0,0.6)",
   zIndex: 9999,
   padding: "6px",
 };
@@ -600,5 +1038,4 @@ const mentionAvatar: React.CSSProperties = {
   height: "42px",
   borderRadius: "50%",
   objectFit: "cover",
-  border: "2px solid rgba(0,198,255,0.4)",
 };
