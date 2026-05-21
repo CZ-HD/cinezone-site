@@ -1428,143 +1428,165 @@ const [mentionUsers, setMentionUsers] = useState<OnlineMember[]>([]);
           )}
 
           <div style={inputBox}>
-            <div style={{ position: "relative" }}>
-              <button
-                type="button"
-                style={plusBtn}
-                onClick={() => setShowEmojiPicker((prev) => !prev)}
-                title="Ajouter un emoji"
-              >
-                ＋
-              </button>
-
-              {showEmojiPicker && (
-                <div style={emojiPickerBox}>
-                  {CHAT_EMOJIS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => {
-                        setText((prev) => `${prev}${emoji}`);
-                        setShowEmojiPicker(false);
-                      }}
-                      style={emojiPickerBtn}
-                      title={`Ajouter ${emoji}`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div style={{ position: "relative", flex: 1 }}>
-  <input
-    value={text}
-    onChange={(e) => {
-      setText(e.target.value);
-      sendTyping();
-
-      const value = e.target.value;
-
-      if (value.includes("@")) {
-        const search = value.split("@").pop()?.toLowerCase() || "";
-
-        const filtered = onlineMembers.filter((member) =>
-          (member.username || "")
-            .toLowerCase()
-            .includes(search)
-        );
-
-        setMentionUsers(filtered);
-        setShowMentions(true);
-      } else {
-        setShowMentions(false);
-      }
-    }}
-    onKeyDown={(e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    }}
-    placeholder={
-      replyTo
-        ? `Répondre à ${replyTo.username || replyTo.email}...`
-        : isAdmin
-        ? "Écris dans #général... (@pseudo)"
-        : "Écris dans #général..."
-    }
-    style={inputStyle}
-  />
-
-  {showMentions && mentionUsers.length > 0 && (
-    <div
-      style={{
-        position: "absolute",
-        bottom: "58px",
-        left: 0,
-        width: "100%",
-        background: "#111827",
-        border: "1px solid rgba(255,255,255,0.1)",
-        borderRadius: "16px",
-        overflow: "hidden",
-        zIndex: 999,
-      }}
+  <div style={{ position: "relative" }}>
+    <button
+      type="button"
+      style={plusBtn}
+      onClick={() => setShowEmojiPicker((prev) => !prev)}
+      title="Ajouter un emoji"
     >
-      {mentionUsers.map((member) => (
-        <button
-          key={member.user_id}
-          type="button"
-          onClick={() => {
-            const beforeAt = text.substring(0, text.lastIndexOf("@"));
+      ＋
+    </button>
 
-            setText(
-              `${beforeAt}@${member.username} `
-            );
-
-            setShowMentions(false);
-          }}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "12px",
-            background: "transparent",
-            border: "none",
-            color: "#fff",
-            cursor: "pointer",
-          }}
-        >
-          <img
-            src={member.avatar || DEFAULT_AVATAR}
-            alt=""
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "50%",
-              objectFit: "cover",
+    {showEmojiPicker && (
+      <div style={emojiPickerBox}>
+        {CHAT_EMOJIS.map((emoji) => (
+          <button
+            key={emoji}
+            type="button"
+            onClick={() => {
+              setText((prev) => `${prev}${emoji}`);
+              setShowEmojiPicker(false);
             }}
-          />
+            style={emojiPickerBtn}
+            title={`Ajouter ${emoji}`}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
 
-          <div style={{ textAlign: "left" }}>
-            <div style={{ fontWeight: 800 }}>
-              @{member.username}
-            </div>
+  <div style={{ position: "relative", flex: 1 }}>
+    <input
+      value={text}
+      onChange={(e) => {
+        setText(e.target.value);
+        sendTyping();
 
-            <div
+        const value = e.target.value;
+
+        if (value.includes("@")) {
+          const search =
+            value.split("@").pop()?.toLowerCase() || "";
+
+          const filtered = onlineMembers.filter((member) =>
+            (member.username || "")
+              .toLowerCase()
+              .includes(search)
+          );
+
+          setMentionUsers(filtered);
+          setShowMentions(true);
+        } else {
+          setShowMentions(false);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      }}
+      placeholder={
+        replyTo
+          ? `Répondre à ${replyTo.username || replyTo.email}...`
+          : isAdmin
+          ? "Écris dans #général... (@pseudo)"
+          : "Écris dans #général..."
+      }
+      style={inputStyle}
+    />
+
+    {showMentions && mentionUsers.length > 0 && (
+      <div
+        style={{
+          position: "absolute",
+          bottom: "58px",
+          left: 0,
+          width: "100%",
+          background: "#111827",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          zIndex: 999,
+        }}
+      >
+        {mentionUsers.map((member) => (
+          <button
+            key={member.user_id}
+            type="button"
+            onClick={() => {
+              const beforeAt = text.substring(
+                0,
+                text.lastIndexOf("@")
+              );
+
+              setText(
+                `${beforeAt}@${member.username} `
+              );
+
+              setShowMentions(false);
+            }}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px",
+              background: "transparent",
+              border: "none",
+              color: "#fff",
+              cursor: "pointer",
+            }}
+          >
+            <img
+              src={member.avatar || DEFAULT_AVATAR}
+              alt=""
               style={{
-                fontSize: "12px",
-                opacity: 0.7,
+                width: "38px",
+                height: "38px",
+                borderRadius: "50%",
+                objectFit: "cover",
               }}
-            >
-              {member.status_text || "🟢 En ligne"}
+            />
+
+            <div style={{ textAlign: "left" }}>
+              <div style={{ fontWeight: 800 }}>
+                @{member.username}
+              </div>
+
+              <div
+                style={{
+                  fontSize: "12px",
+                  opacity: 0.7,
+                }}
+              >
+                {member.status_text || "🟢 En ligne"}
+              </div>
             </div>
-          </div>
-        </button>
-      ))}
-    </div>
-  )}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <label style={imageUploadBtn}>
+    {imageUploading ? "⏳" : "📎"}
+
+    <input
+      type="file"
+      accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+      onChange={uploadChatImage}
+      style={{ display: "none" }}
+      disabled={imageUploading}
+    />
+  </label>
+
+  <button onClick={sendMessage} style={btnStyle}>
+    Envoyer
+  </button>
 </div>
 
           <div style={activityCard}>
