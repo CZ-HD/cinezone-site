@@ -112,9 +112,13 @@ export default function ChatPage() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const [announcement, setAnnouncement] = useState("");
-  const [editingAnnouncement, setEditingAnnouncement] = useState(false);
-  const [announcementText, setAnnouncementText] = useState("");
+const [editingAnnouncement, setEditingAnnouncement] = useState(false);
+const [announcementText, setAnnouncementText] = useState("");
 
+const [showMentions, setShowMentions] = useState(false);
+
+const [mentionUsers, setMentionUsers] = useState<OnlineMember[]>([]);
+  
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<Record<string, any>>({});
   const userIdRef = useRef<string | null>(null);
@@ -1453,106 +1457,115 @@ export default function ChatPage() {
                 </div>
               )}
             </div>
-            <input
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-                sendTyping();
+            <div style={{ position: "relative", flex: 1 }}>
+  <input
+    value={text}
+    onChange={(e) => {
+      setText(e.target.value);
+      sendTyping();
+
+      const value = e.target.value;
+
+      if (value.includes("@")) {
+        const search = value.split("@").pop()?.toLowerCase() || "";
+
+        const filtered = onlineMembers.filter((member) =>
+          (member.username || "")
+            .toLowerCase()
+            .includes(search)
+        );
+
+        setMentionUsers(filtered);
+        setShowMentions(true);
+      } else {
+        setShowMentions(false);
+      }
+    }}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }}
+    placeholder={
+      replyTo
+        ? `Répondre à ${replyTo.username || replyTo.email}...`
+        : isAdmin
+        ? "Écris dans #général... (@pseudo)"
+        : "Écris dans #général..."
+    }
+    style={inputStyle}
+  />
+
+  {showMentions && mentionUsers.length > 0 && (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "58px",
+        left: 0,
+        width: "100%",
+        background: "#111827",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: "16px",
+        overflow: "hidden",
+        zIndex: 999,
+      }}
+    >
+      {mentionUsers.map((member) => (
+        <button
+          key={member.user_id}
+          type="button"
+          onClick={() => {
+            const beforeAt = text.substring(0, text.lastIndexOf("@"));
+
+            setText(
+              `${beforeAt}@${member.username} `
+            );
+
+            setShowMentions(false);
+          }}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "12px",
+            background: "transparent",
+            border: "none",
+            color: "#fff",
+            cursor: "pointer",
+          }}
+        >
+          <img
+            src={member.avatar || DEFAULT_AVATAR}
+            alt=""
+            style={{
+              width: "38px",
+              height: "38px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontWeight: 800 }}>
+              @{member.username}
+            </div>
+
+            <div
+              style={{
+                fontSize: "12px",
+                opacity: 0.7,
               }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-              placeholder={
-                replyTo
-                  ? `Répondre à ${replyTo.username || replyTo.email}...`
-                  : isAdmin
-                  ? "Écris dans #général... (@email ou @pseudo pour notifier)"
-                  : "Écris dans #général..."
-              }
-              style={inputStyle}
-            />
-
-            <label style={imageUploadBtn}>
-              {imageUploading ? "⏳" : "📎"}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                onChange={uploadChatImage}
-                style={{ display: "none" }}
-                disabled={imageUploading}
-              />
-            </label>
-
-            <button onClick={sendMessage} style={btnStyle}>Envoyer</button>
-          </div>
-        </section>
-
-        <aside style={onlinePanel}>
-          <div style={onlineHeaderV2}>
-            <div>
-              <h2 style={onlineTitle}>Membres</h2>
-              <p style={onlineCount}>
-                🟢 {onlineMembers.length} connecté{onlineMembers.length > 1 ? "s" : ""}
-              </p>
+            >
+              {member.status_text || "🟢 En ligne"}
             </div>
           </div>
-
-          <div style={onlineGrid}>
-            {onlineMembers.length === 0 ? (
-              <p style={{ color: "#888" }}>Aucun membre en ligne.</p>
-            ) : (
-              onlineMembers.map((member) => (
-                <div key={member.user_id} style={onlineMemberCard}>
-                  <div style={avatarWrapSmall}>
-                    <img
-                      src={member.avatar || DEFAULT_AVATAR}
-                      alt="avatar"
-                      style={avatarMember}
-                      onError={(e) => {
-                        e.currentTarget.src = DEFAULT_AVATAR;
-                      }}
-                    />
-                    <span
-                      style={{
-                        ...onlineDotSmall,
-                        background:
-                          member.status_text === "🔴 Hors ligne" ? "#ff5c5c" : "#4cff9b",
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ minWidth: 0 }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontWeight: 900,
-                        color: member.role === "admin" ? "gold" : "#fff",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {member.username || "Utilisateur"}
-                      {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
-                    </p>
-                    <p
-                      style={{
-                        margin: "4px 0 0",
-                        fontSize: "12px",
-                        color:
-                          member.status_text === "🔴 Hors ligne" ? "#ff7777" : "#4cff9b",
-                      }}
-                    >
-                      {member.status_text || "🟢 En ligne"}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+        </button>
+      ))}
+    </div>
+  )}
+</div>
 
           <div style={activityCard}>
             <strong>Activité récente</strong>
