@@ -360,7 +360,21 @@ function MovieGrid({
   href={local ? `/movie/${movie.id}` : `/admin?tmdb=${movie.id}`}
   style={{ color: "#fff", textDecoration: "none" }}
 >
-            <div style={posterWrapStyle}>
+            <div
+  style={posterWrapStyle}
+  onMouseEnter={(e) => {
+    const target = e.currentTarget as HTMLDivElement;
+
+    target.style.transform = "translateY(-6px) scale(1.03)";
+    target.style.filter = "brightness(1.05)";
+  }}
+  onMouseLeave={(e) => {
+    const target = e.currentTarget as HTMLDivElement;
+
+    target.style.transform = "translateY(0px) scale(1)";
+    target.style.filter = "brightness(1)";
+  }}
+>
               {year && <span style={yearBadge}>{year}</span>}
 
               <img
@@ -576,6 +590,8 @@ const gridStyle: React.CSSProperties = {
 
 const posterWrapStyle: React.CSSProperties = {
   position: "relative",
+  transition: "transform 0.28s ease, filter 0.28s ease",
+  cursor: "pointer",
 };
 
 const yearBadge: React.CSSProperties = {
@@ -598,6 +614,8 @@ const posterStyle: React.CSSProperties = {
   objectFit: "cover",
   borderRadius: "16px",
   boxShadow: "0 18px 45px rgba(0,0,0,0.55)",
+  transition:
+    "transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease",
 };
 
 const copyIdBtn: React.CSSProperties = {
