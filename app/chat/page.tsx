@@ -480,22 +480,20 @@ export default function ChatPage() {
     );
 
   return (
+  <main style={page}>
     <section style={box}>
       <h2 style={{ color: "#fff" }}>
         💬 Chat ({messages.length})
       </h2>
 
-      {/* EMOJIS */}
+      {/* BARRE EMOJIS */}
       <div style={emojiBar}>
         {CHAT_EMOJIS.map((emoji) => (
           <button
             key={emoji}
             style={emojiBtn}
             onClick={() =>
-              setText(
-                (prev) =>
-                  prev + emoji
-              )
+              setText((prev) => prev + emoji)
             }
           >
             {emoji}
@@ -503,6 +501,7 @@ export default function ChatPage() {
         ))}
       </div>
 
+      {/* INPUT */}
       <div
         style={{
           ...inputBox,
@@ -512,8 +511,7 @@ export default function ChatPage() {
         <input
           value={text}
           onChange={async (e) => {
-            const value =
-              e.target.value;
+            const value = e.target.value;
 
             setText(value);
 
@@ -523,17 +521,13 @@ export default function ChatPage() {
               );
 
             if (match) {
-              setShowMentions(
-                true
-              );
+              setShowMentions(true);
 
               await searchMentions(
                 match[1]
               );
             } else {
-              setShowMentions(
-                false
-              );
+              setShowMentions(false);
             }
           }}
           onKeyDown={(e) => {
@@ -544,17 +538,15 @@ export default function ChatPage() {
           style={input}
         />
 
+        {/* MENTIONS */}
         {showMentions &&
-          mentionResults.length >
-            0 && (
+          mentionResults.length > 0 && (
             <div style={mentionsBox}>
               {mentionResults.map(
                 (member) => (
                   <div
                     key={member.id}
-                    style={
-                      mentionItem
-                    }
+                    style={mentionItem}
                     onClick={() => {
                       const name =
                         member.username ||
@@ -567,9 +559,7 @@ export default function ChatPage() {
                         )
                       );
 
-                      setShowMentions(
-                        false
-                      );
+                      setShowMentions(false);
                     }}
                   >
                     <img
@@ -611,6 +601,222 @@ export default function ChatPage() {
               )}
             </div>
           )}
+
+        <button
+          onClick={sendMessage}
+          style={btn}
+        >
+          Envoyer
+        </button>
+      </div>
+
+      {/* LISTE MESSAGES */}
+      {loading ? (
+        <p style={{ color: "#aaa" }}>
+          Chargement...
+        </p>
+      ) : (
+        <div style={list}>
+          {parentMessages.map(
+            (message) => {
+              const replies =
+                getReplies(
+                  message.id
+                );
+
+              return (
+                <div
+                  key={message.id}
+                  style={card}
+                >
+                  <img
+                    src={
+                      message.avatar ||
+                      DEFAULT_AVATAR
+                    }
+                    style={avatar}
+                  />
+
+                  <div style={{ flex: 1 }}>
+                    <div style={topRow}>
+                      <strong
+                        style={{
+                          color:
+                            message.role ===
+                            "admin"
+                              ? "gold"
+                              : "#00c6ff",
+                        }}
+                      >
+                        {
+                          message.username
+                        }
+                      </strong>
+
+                      <span
+                        style={
+                          dateText
+                        }
+                      >
+                        {new Date(
+                          message.created_at
+                        ).toLocaleDateString(
+                          "fr-FR"
+                        )}
+                      </span>
+                    </div>
+
+                    <p
+                      style={
+                        contentStyle
+                      }
+                    >
+                      {
+                        message.content
+                      }
+                    </p>
+
+                    {/* REACTIONS */}
+                    <div
+                      style={
+                        reactionRow
+                      }
+                    >
+                      {REACTION_EMOJIS.map(
+                        (
+                          emoji
+                        ) => (
+                          <button
+                            key={
+                              emoji
+                            }
+                            onClick={() =>
+                              toggleReaction(
+                                message.id,
+                                emoji
+                              )
+                            }
+                            style={{
+                              ...reactionBtn,
+                              ...(hasReacted(
+                                message.id,
+                                emoji
+                              )
+                                ? reactionBtnActive
+                                : {}),
+                            }}
+                          >
+                            {emoji}{" "}
+                            {getReactionCount(
+                              message.id,
+                              emoji
+                            ) || ""}
+                          </button>
+                        )
+                      )}
+                    </div>
+
+                    <div
+                      style={
+                        actionRow
+                      }
+                    >
+                      <button
+                        style={
+                          replyBtn
+                        }
+                        onClick={() =>
+                          setReplyTo(
+                            message
+                          )
+                        }
+                      >
+                        Répondre
+                      </button>
+
+                      {isAdmin && (
+                        <button
+                          style={
+                            deleteBtn
+                          }
+                          onClick={() =>
+                            deleteMessage(
+                              message.id
+                            )
+                          }
+                        >
+                          Supprimer
+                        </button>
+                      )}
+                    </div>
+
+                    {/* REPONSES */}
+                    {replies.length >
+                      0 && (
+                      <div
+                        style={
+                          repliesBox
+                        }
+                      >
+                        {replies.map(
+                          (
+                            reply
+                          ) => (
+                            <div
+                              key={
+                                reply.id
+                              }
+                              style={
+                                replyCard
+                              }
+                            >
+                              <img
+                                src={
+                                  reply.avatar ||
+                                  DEFAULT_AVATAR
+                                }
+                                style={
+                                  avatarSmall
+                                }
+                              />
+
+                              <div>
+                                <strong
+                                  style={{
+                                    color:
+                                      "#00c6ff",
+                                  }}
+                                >
+                                  {
+                                    reply.username
+                                  }
+                                </strong>
+
+                                <p
+                                  style={
+                                    replyContent
+                                  }
+                                >
+                                  {
+                                    reply.content
+                                  }
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+          )}
+        </div>
+      )}
+    </section>
+  </main>
+);
 
         <button
           onClick={sendMessage}
@@ -1066,3 +1272,10 @@ const mentionAvatar: React.CSSProperties =
     height: "36px",
     borderRadius: "50%",
   };
+
+const page: React.CSSProperties = {
+  minHeight: "100vh",
+  padding: "20px",
+  background:
+    "linear-gradient(to bottom, #020617, #000)",
+};
