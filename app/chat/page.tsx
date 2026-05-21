@@ -152,30 +152,27 @@ setReactions(data || []);
 
 // MENTIONS COMPLETES
 const searchMentions = async (query: string) => {
-const cleanQuery = query.trim();
+  const cleanQuery = query.trim();
 
-```
-if (!cleanQuery) {
+  if (!cleanQuery) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, username, email, avatar")
+      .limit(20);
+
+    setMentionResults(data || []);
+    return;
+  }
+
   const { data } = await supabase
     .from("profiles")
     .select("id, username, email, avatar")
+    .or(
+      `username.ilike.%${cleanQuery}%,email.ilike.%${cleanQuery}%`
+    )
     .limit(20);
 
   setMentionResults(data || []);
-  return;
-}
-
-const { data } = await supabase
-  .from("profiles")
-  .select("id, username, email, avatar")
-  .or(
-    `username.ilike.%${cleanQuery}%,email.ilike.%${cleanQuery}%`
-  )
-  .limit(20);
-
-setMentionResults(data || []);
-```
-
 };
 
 const createMentionNotifications = async (
