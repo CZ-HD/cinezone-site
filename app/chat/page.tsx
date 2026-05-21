@@ -805,108 +805,76 @@ const [mentionUsers, setMentionUsers] = useState<OnlineMember[]>([]);
       alert("Erreur notifications : " + notifError.message);
     }
   };
-
+  
   const sendMessage = async () => {
-    if (!text.trim() || !user) return;
+  if (!text.trim() || !user) return;
 
-    const originalMessage = text.trim();
-    setText("");
+  const originalMessage = text.trim();
 
-    const { safeContent, mentionedUsers } = await resolveMentions(originalMessage);
+  setText("");
+  setShowMentions(false);
 
-    const { data: freshProfile } = await supabase
-      .from("profiles")
-      .select("id, username, avatar, role, role_color, status_text")
-      .eq("id", user.id)
-      .single();
-
-    const { data: insertedMessage, error } = await supabase
+  try {
+    const { data, error } = await supabase
       .from("messages")
       .insert({
+        content: originalMessage,
         user_id: user.id,
-        email: user.email,
-        username: freshProfile?.username || user.email,
-        avatar: freshProfile?.avatar || DEFAULT_AVATAR,
-        role: freshProfile?.role || "user",
-        role_color: freshProfile?.role_color || "#00c6ff",
-        status_text: freshProfile?.status_text || "🟢 En ligne",
-        content: safeContent,
-        image_url: null,
-        pinned: false,
+        room: "general",
         reply_to: replyTo?.id || null,
       })
-      .select("*")
+      .select()
       .single();
 
     if (error) {
-      alert("Erreur message : " + error.message);
+      console.error(error);
       setText(originalMessage);
       return;
     }
 
-    if (freshProfile?.id) {
-      addProfileToMap(freshProfile.id, freshProfile);
+    if (replyTo) {
+      setReplyTo(null);
     }
 
-    if (insertedMessage) {
-      setMessages((prev) =>
-        prev.some((m) => m.id === insertedMessage.id)
-          ? prev
-          : [...prev, insertedMessage]
-      );
-    }
+    sendTyping();
+  } catch (error) {
+    console.error(error);
+    setText(originalMessage);
+  }
+};
 
-    await createMentionNotifications(mentionedUsers, safeContent);
-    setReplyTo(null);
+const addReaction = async (
+  messageId: string,
+  emoji: string
+) => {
+  if (!user) return;
+
+  const tempReaction = {
+    id: `temp-${Date.now()}`,
+    message_id: messageId,
+    user_id: user.id,
+    emoji,
+    created_at: new Date().toISOString(),
   };
 
-  const toggleReaction = async (messageId: string, emoji: string) => {
-    if (!user) return;
+  setReactions((prev) => [...prev, tempReaction]);
 
-    const pulseKey = `${messageId}-${emoji}`;
-    setReactionPulse(pulseKey);
-    setTimeout(() => setReactionPulse(null), 220);
-
-    const existing = reactions.find(
-      (r) =>
-        r.message_id === messageId &&
-        r.user_id === user.id &&
-        r.emoji === emoji
-    );
-
-    if (existing) {
-      setReactions((prev) => prev.filter((r) => r.id !== existing.id));
-
-      const { error } = await supabase
-        .from("message_reactions")
-        .delete()
-        .eq("id", existing.id);
-
-      if (error) alert("Erreur réaction : " + error.message);
-      return;
-    }
-
-    const tempReaction: Reaction = {
-      id: `temp-${Date.now()}`,
-      message_id: messageId,
-      user_id: user.id,
-      emoji,
-      created_at: new Date().toISOString(),
-    };
-
-    setReactions((prev) => [...prev, tempReaction]);
-
-    const { error } = await supabase.from("message_reactions").insert({
+  const { error } = await supabase
+    .from("message_reactions")
+    .insert({
       message_id: messageId,
       user_id: user.id,
       emoji,
     });
 
-    if (error) {
-      alert("Erreur réaction : " + error.message);
-      setReactions((prev) => prev.filter((r) => r.id !== tempReaction.id));
-    }
-  };
+  if (error) {
+    alert("Erreur réaction : " + error.message);
+
+    setReactions((prev) =>
+      prev.filter((r) => r.id !== tempReaction.id)
+    );
+  }
+};
 
   const deleteMessage = async (messageId: string) => {
     if (!isAdmin) return;
