@@ -1462,10 +1462,10 @@ const [mentionUsers, setMentionUsers] = useState<OnlineMember[]>([]);
     <input
       value={text}
       onChange={(e) => {
-        setText(e.target.value);
-        sendTyping();
-
         const value = e.target.value;
+
+        setText(value);
+        sendTyping();
 
         if (value.includes("@")) {
           const search =
@@ -1483,8 +1483,7 @@ const [mentionUsers, setMentionUsers] = useState<OnlineMember[]>([]);
           setShowMentions(false);
         }
       }}
-}
-onKeyDown={(e) => {
+      onKeyDown={(e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           sendMessage();
@@ -1572,6 +1571,23 @@ onKeyDown={(e) => {
       </div>
     )}
   </div>
+
+  <label style={imageUploadBtn}>
+    {imageUploading ? "⏳" : "📎"}
+
+    <input
+      type="file"
+      accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+      onChange={uploadChatImage}
+      style={{ display: "none" }}
+      disabled={imageUploading}
+    />
+  </label>
+
+  <button onClick={sendMessage} style={btnStyle}>
+    Envoyer
+  </button>
+</div>
 
   <label style={imageUploadBtn}>
     {imageUploading ? "⏳" : "📎"}
