@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const DEFAULT_AVATAR =
@@ -171,13 +171,11 @@ export default function ChatPage() {
     setReactions(data || []);
   };
 
-  // MENTIONS
   const searchMentions = async (
     query: string
   ) => {
     const cleanQuery = query.trim();
 
-    // SI VIDE = TOUT LE MONDE
     if (!cleanQuery) {
       const { data } = await supabase
         .from("profiles")
@@ -480,598 +478,394 @@ export default function ChatPage() {
     );
 
   return (
-  <main style={page}>
-    <section style={box}>
-      <h2 style={{ color: "#fff" }}>
-        💬 Chat ({messages.length})
-      </h2>
+    <main style={page}>
+      <section style={box}>
+        <h2 style={{ color: "#fff" }}>
+          💬 Chat ({messages.length})
+        </h2>
 
-      {/* BARRE EMOJIS */}
-      <div style={emojiBar}>
-        {CHAT_EMOJIS.map((emoji) => (
+        <div style={emojiBar}>
+          {CHAT_EMOJIS.map((emoji) => (
+            <button
+              key={emoji}
+              style={emojiBtn}
+              onClick={() =>
+                setText(
+                  (prev) => prev + emoji
+                )
+              }
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+
+        <div
+          style={{
+            ...inputBox,
+            position: "relative",
+          }}
+        >
+          <input
+            value={text}
+            onChange={async (e) => {
+              const value =
+                e.target.value;
+
+              setText(value);
+
+              const match =
+                value.match(
+                  /@([a-zA-Z0-9._@-]*)$/
+                );
+
+              if (match) {
+                setShowMentions(true);
+
+                await searchMentions(
+                  match[1]
+                );
+              } else {
+                setShowMentions(false);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter")
+                sendMessage();
+            }}
+            placeholder="Écrire un message..."
+            style={input}
+          />
+
+          {showMentions &&
+            mentionResults.length >
+              0 && (
+              <div style={mentionsBox}>
+                {mentionResults.map(
+                  (member) => (
+                    <div
+                      key={member.id}
+                      style={mentionItem}
+                      onClick={() => {
+                        const name =
+                          member.username ||
+                          member.email;
+
+                        setText(
+                          text.replace(
+                            /@([a-zA-Z0-9._@-]*)$/,
+                            `@${name} `
+                          )
+                        );
+
+                        setShowMentions(
+                          false
+                        );
+                      }}
+                    >
+                      <img
+                        src={
+                          member.avatar ||
+                          DEFAULT_AVATAR
+                        }
+                        style={
+                          mentionAvatar
+                        }
+                      />
+
+                      <div>
+                        <div
+                          style={{
+                            color:
+                              "#fff",
+                          }}
+                        >
+                          {member.username ||
+                            "Sans pseudo"}
+                        </div>
+
+                        <div
+                          style={{
+                            color:
+                              "#94a3b8",
+                            fontSize:
+                              "12px",
+                          }}
+                        >
+                          {
+                            member.email
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+
           <button
-            key={emoji}
-            style={emojiBtn}
-            onClick={() =>
-              setText((prev) => prev + emoji)
-            }
+            onClick={sendMessage}
+            style={btn}
           >
-            {emoji}
+            Envoyer
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* INPUT */}
-      <div
-        style={{
-          ...inputBox,
-          position: "relative",
-        }}
-      >
-        <input
-          value={text}
-          onChange={async (e) => {
-            const value = e.target.value;
+        {loading ? (
+          <p style={{ color: "#aaa" }}>
+            Chargement...
+          </p>
+        ) : (
+          <div style={list}>
+            {parentMessages.map(
+              (message) => {
+                const replies =
+                  getReplies(
+                    message.id
+                  );
 
-            setText(value);
-
-            const match =
-              value.match(
-                /@([a-zA-Z0-9._@-]*)$/
-              );
-
-            if (match) {
-              setShowMentions(true);
-
-              await searchMentions(
-                match[1]
-              );
-            } else {
-              setShowMentions(false);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter")
-              sendMessage();
-          }}
-          placeholder="Écrire un message..."
-          style={input}
-        />
-
-        {/* MENTIONS */}
-        {showMentions &&
-          mentionResults.length > 0 && (
-            <div style={mentionsBox}>
-              {mentionResults.map(
-                (member) => (
+                return (
                   <div
-                    key={member.id}
-                    style={mentionItem}
-                    onClick={() => {
-                      const name =
-                        member.username ||
-                        member.email;
-
-                      setText(
-                        text.replace(
-                          /@([a-zA-Z0-9._@-]*)$/,
-                          `@${name} `
-                        )
-                      );
-
-                      setShowMentions(false);
-                    }}
+                    key={message.id}
+                    style={card}
                   >
                     <img
                       src={
-                        member.avatar ||
+                        message.avatar ||
                         DEFAULT_AVATAR
                       }
-                      style={
-                        mentionAvatar
-                      }
+                      style={avatar}
                     />
 
-                    <div>
+                    <div
+                      style={{
+                        flex: 1,
+                      }}
+                    >
                       <div
-                        style={{
-                          color:
-                            "#fff",
-                        }}
+                        style={topRow}
                       >
-                        {member.username ||
-                          "Sans pseudo"}
+                        <strong
+                          style={{
+                            color:
+                              message.role ===
+                              "admin"
+                                ? "gold"
+                                : "#00c6ff",
+                          }}
+                        >
+                          {
+                            message.username
+                          }
+                        </strong>
+
+                        <span
+                          style={
+                            dateText
+                          }
+                        >
+                          {new Date(
+                            message.created_at
+                          ).toLocaleDateString(
+                            "fr-FR"
+                          )}
+                        </span>
                       </div>
 
+                      <p
+                        style={
+                          contentStyle
+                        }
+                      >
+                        {
+                          message.content
+                        }
+                      </p>
+
                       <div
-                        style={{
-                          color:
-                            "#94a3b8",
-                          fontSize:
-                            "12px",
-                        }}
-                      >
-                        {
-                          member.email
-                        }
-                      </div>
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-          )}
-
-        <button
-          onClick={sendMessage}
-          style={btn}
-        >
-          Envoyer
-        </button>
-      </div>
-
-      {/* LISTE MESSAGES */}
-      {loading ? (
-        <p style={{ color: "#aaa" }}>
-          Chargement...
-        </p>
-      ) : (
-        <div style={list}>
-          {parentMessages.map(
-            (message) => {
-              const replies =
-                getReplies(
-                  message.id
-                );
-
-              return (
-                <div
-                  key={message.id}
-                  style={card}
-                >
-                  <img
-                    src={
-                      message.avatar ||
-                      DEFAULT_AVATAR
-                    }
-                    style={avatar}
-                  />
-
-                  <div style={{ flex: 1 }}>
-                    <div style={topRow}>
-                      <strong
-                        style={{
-                          color:
-                            message.role ===
-                            "admin"
-                              ? "gold"
-                              : "#00c6ff",
-                        }}
-                      >
-                        {
-                          message.username
-                        }
-                      </strong>
-
-                      <span
                         style={
-                          dateText
+                          reactionRow
                         }
                       >
-                        {new Date(
-                          message.created_at
-                        ).toLocaleDateString(
-                          "fr-FR"
-                        )}
-                      </span>
-                    </div>
-
-                    <p
-                      style={
-                        contentStyle
-                      }
-                    >
-                      {
-                        message.content
-                      }
-                    </p>
-
-                    {/* REACTIONS */}
-                    <div
-                      style={
-                        reactionRow
-                      }
-                    >
-                      {REACTION_EMOJIS.map(
-                        (
-                          emoji
-                        ) => (
-                          <button
-                            key={
-                              emoji
-                            }
-                            onClick={() =>
-                              toggleReaction(
+                        {REACTION_EMOJIS.map(
+                          (
+                            emoji
+                          ) => (
+                            <button
+                              key={
+                                emoji
+                              }
+                              onClick={() =>
+                                toggleReaction(
+                                  message.id,
+                                  emoji
+                                )
+                              }
+                              style={{
+                                ...reactionBtn,
+                                ...(hasReacted(
+                                  message.id,
+                                  emoji
+                                )
+                                  ? reactionBtnActive
+                                  : {}),
+                              }}
+                            >
+                              {emoji}{" "}
+                              {getReactionCount(
                                 message.id,
                                 emoji
-                              )
-                            }
-                            style={{
-                              ...reactionBtn,
-                              ...(hasReacted(
-                                message.id,
-                                emoji
-                              )
-                                ? reactionBtnActive
-                                : {}),
-                            }}
-                          >
-                            {emoji}{" "}
-                            {getReactionCount(
-                              message.id,
-                              emoji
-                            ) || ""}
-                          </button>
-                        )
-                      )}
-                    </div>
-
-                    <div
-                      style={
-                        actionRow
-                      }
-                    >
-                      <button
-                        style={
-                          replyBtn
-                        }
-                        onClick={() =>
-                          setReplyTo(
-                            message
+                              ) || ""}
+                            </button>
                           )
+                        )}
+                      </div>
+
+                      <div
+                        style={
+                          actionRow
                         }
                       >
-                        Répondre
-                      </button>
-
-                      {isAdmin && (
                         <button
                           style={
-                            deleteBtn
+                            replyBtn
                           }
                           onClick={() =>
-                            deleteMessage(
-                              message.id
+                            setReplyTo(
+                              message
                             )
                           }
                         >
-                          Supprimer
+                          Répondre
                         </button>
-                      )}
-                    </div>
 
-                    {/* REPONSES */}
-                    {replies.length >
-                      0 && (
-                      <div
-                        style={
-                          repliesBox
-                        }
-                      >
-                        {replies.map(
-                          (
-                            reply
-                          ) => (
-                            <div
-                              key={
-                                reply.id
-                              }
-                              style={
-                                replyCard
-                              }
-                            >
-                              <img
-                                src={
-                                  reply.avatar ||
-                                  DEFAULT_AVATAR
-                                }
-                                style={
-                                  avatarSmall
-                                }
-                              />
-
-                              <div>
-                                <strong
-                                  style={{
-                                    color:
-                                      "#00c6ff",
-                                  }}
-                                >
-                                  {
-                                    reply.username
-                                  }
-                                </strong>
-
-                                <p
-                                  style={
-                                    replyContent
-                                  }
-                                >
-                                  {
-                                    reply.content
-                                  }
-                                </p>
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            }
-          )}
-        </div>
-      )}
-    </section>
-  </main>
-);
-
-        <button
-          onClick={sendMessage}
-          style={btn}
-        >
-          Envoyer
-        </button>
-      </div>
-
-      {loading ? (
-        <p style={{ color: "#aaa" }}>
-          Chargement...
-        </p>
-      ) : (
-        <div style={list}>
-          {parentMessages.map(
-            (message) => {
-              const replies =
-                getReplies(
-                  message.id
-                );
-
-              return (
-                <div
-                  key={message.id}
-                  style={card}
-                >
-                  <img
-                    src={
-                      message.avatar ||
-                      DEFAULT_AVATAR
-                    }
-                    style={avatar}
-                  />
-
-                  <div
-                    style={{
-                      flex: 1,
-                    }}
-                  >
-                    <div
-                      style={topRow}
-                    >
-                      <strong
-                        style={{
-                          color:
-                            message.role ===
-                            "admin"
-                              ? "gold"
-                              : "#00c6ff",
-                        }}
-                      >
-                        {
-                          message.username
-                        }
-                      </strong>
-
-                      <span
-                        style={
-                          dateText
-                        }
-                      >
-                        {new Date(
-                          message.created_at
-                        ).toLocaleDateString(
-                          "fr-FR"
-                        )}
-                      </span>
-                    </div>
-
-                    <p
-                      style={
-                        contentStyle
-                      }
-                    >
-                      {
-                        message.content
-                      }
-                    </p>
-
-                    <div
-                      style={
-                        reactionRow
-                      }
-                    >
-                      {REACTION_EMOJIS.map(
-                        (
-                          emoji
-                        ) => (
+                        {isAdmin && (
                           <button
-                            key={
-                              emoji
+                            style={
+                              deleteBtn
                             }
                             onClick={() =>
-                              toggleReaction(
-                                message.id,
-                                emoji
+                              deleteMessage(
+                                message.id
                               )
                             }
-                            style={{
-                              ...reactionBtn,
-                              ...(hasReacted(
-                                message.id,
-                                emoji
-                              )
-                                ? reactionBtnActive
-                                : {}),
-                            }}
                           >
-                            {emoji}{" "}
-                            {getReactionCount(
-                              message.id,
-                              emoji
-                            ) || ""}
+                            Supprimer
                           </button>
-                        )
-                      )}
-                    </div>
-
-                    <div
-                      style={
-                        actionRow
-                      }
-                    >
-                      <button
-                        style={
-                          replyBtn
-                        }
-                        onClick={() =>
-                          setReplyTo(
-                            message
-                          )
-                        }
-                      >
-                        Répondre
-                      </button>
-
-                      {isAdmin && (
-                        <button
-                          style={
-                            deleteBtn
-                          }
-                          onClick={() =>
-                            deleteMessage(
-                              message.id
-                            )
-                          }
-                        >
-                          Supprimer
-                        </button>
-                      )}
-                    </div>
-
-                    {replyTo?.id ===
-                      message.id && (
-                      <div
-                        style={
-                          replyInputBox
-                        }
-                      >
-                        <input
-                          value={
-                            replyText
-                          }
-                          onChange={(
-                            e
-                          ) =>
-                            setReplyText(
-                              e.target
-                                .value
-                            )
-                          }
-                          style={
-                            input
-                          }
-                          placeholder="Réponse..."
-                        />
-
-                        <button
-                          onClick={
-                            sendReply
-                          }
-                          style={btn}
-                        >
-                          Envoyer
-                        </button>
-                      </div>
-                    )}
-
-                    {replies.length >
-                      0 && (
-                      <div
-                        style={
-                          repliesBox
-                        }
-                      >
-                        {replies.map(
-                          (
-                            reply
-                          ) => (
-                            <div
-                              key={
-                                reply.id
-                              }
-                              style={
-                                replyCard
-                              }
-                            >
-                              <img
-                                src={
-                                  reply.avatar ||
-                                  DEFAULT_AVATAR
-                                }
-                                style={
-                                  avatarSmall
-                                }
-                              />
-
-                              <div>
-                                <strong
-                                  style={{
-                                    color:
-                                      "#00c6ff",
-                                  }}
-                                >
-                                  {
-                                    reply.username
-                                  }
-                                </strong>
-
-                                <p
-                                  style={
-                                    replyContent
-                                  }
-                                >
-                                  {
-                                    reply.content
-                                  }
-                                </p>
-                              </div>
-                            </div>
-                          )
                         )}
                       </div>
-                    )}
+
+                      {replyTo?.id ===
+                        message.id && (
+                        <div
+                          style={
+                            replyInputBox
+                          }
+                        >
+                          <input
+                            value={
+                              replyText
+                            }
+                            onChange={(
+                              e
+                            ) =>
+                              setReplyText(
+                                e
+                                  .target
+                                  .value
+                              )
+                            }
+                            style={
+                              input
+                            }
+                            placeholder="Réponse..."
+                          />
+
+                          <button
+                            onClick={
+                              sendReply
+                            }
+                            style={btn}
+                          >
+                            Envoyer
+                          </button>
+                        </div>
+                      )}
+
+                      {replies.length >
+                        0 && (
+                        <div
+                          style={
+                            repliesBox
+                          }
+                        >
+                          {replies.map(
+                            (
+                              reply
+                            ) => (
+                              <div
+                                key={
+                                  reply.id
+                                }
+                                style={
+                                  replyCard
+                                }
+                              >
+                                <img
+                                  src={
+                                    reply.avatar ||
+                                    DEFAULT_AVATAR
+                                  }
+                                  style={
+                                    avatarSmall
+                                  }
+                                />
+
+                                <div>
+                                  <strong
+                                    style={{
+                                      color:
+                                        "#00c6ff",
+                                    }}
+                                  >
+                                    {
+                                      reply.username
+                                    }
+                                  </strong>
+
+                                  <p
+                                    style={
+                                      replyContent
+                                    }
+                                  >
+                                    {
+                                      reply.content
+                                    }
+                                  </p>
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            }
-          )}
-        </div>
-      )}
-    </section>
+                );
+              }
+            )}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
+
+const page: React.CSSProperties = {
+  minHeight: "100vh",
+  padding: "20px",
+  background:
+    "linear-gradient(to bottom, #020617, #000)",
+};
 
 const box: React.CSSProperties = {
   marginTop: "44px",
@@ -1272,10 +1066,3 @@ const mentionAvatar: React.CSSProperties =
     height: "36px",
     borderRadius: "50%",
   };
-
-const page: React.CSSProperties = {
-  minHeight: "100vh",
-  padding: "20px",
-  background:
-    "linear-gradient(to bottom, #020617, #000)",
-};
