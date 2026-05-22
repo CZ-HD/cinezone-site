@@ -486,16 +486,16 @@ export default function DemandeFilmPage() {
           }}
         >
           <img
-            src={
-              u.avatar &&
-              u.avatar !== "null" &&
-              u.avatar !== ""
-                ? u.avatar
-                : DEFAULT_AVATAR
-            }
-            alt="avatar"
-            style={mentionAvatar}
-          />
+  src={
+    u.avatar &&
+    u.avatar !== "null" &&
+    u.avatar !== ""
+      ? u.avatar
+      : "/default-avatar.png"
+  }
+  alt="avatar"
+  style={mentionAvatar}
+/>
 
           <div
             style={{
