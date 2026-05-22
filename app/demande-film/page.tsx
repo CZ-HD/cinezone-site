@@ -576,6 +576,16 @@ export default function DemandeFilmPage() {
                             {isAdmin && (
   <>
     <button
+      onClick={() => {
+        setReplyId(d.id);
+        setReplyText(d.admin_reply || "");
+      }}
+      style={btnBlue}
+    >
+      💬 Répondre
+    </button>
+
+    <button
       onClick={() => supprimerDemande(d.id)}
       style={btnRed}
     >
