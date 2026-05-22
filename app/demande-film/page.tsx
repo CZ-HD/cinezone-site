@@ -251,7 +251,7 @@ export default function DemandeFilmPage() {
     }
   }}
 >
-  ⬅️ ici 📋 Coller le lien
+  📋 Cliquer ici - Coller le lien
 </button>
           </div>
 
