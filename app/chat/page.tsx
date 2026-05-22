@@ -111,6 +111,9 @@ export default function ChatPage() {
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  const [mentionResults, setMentionResults] = useState<any[]>([]);
+  const [showMentions, setShowMentions] = useState(false);
+
   const [announcement, setAnnouncement] = useState("");
   const [editingAnnouncement, setEditingAnnouncement] = useState(false);
   const [announcementText, setAnnouncementText] = useState("");
@@ -1453,27 +1456,102 @@ export default function ChatPage() {
                 </div>
               )}
             </div>
-            <input
-              value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-                sendTyping();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-              placeholder={
-                replyTo
-                  ? `Répondre à ${replyTo.username || replyTo.email}...`
-                  : isAdmin
-                  ? "Écris dans #général... (@email ou @pseudo pour notifier)"
-                  : "Écris dans #général..."
-              }
-              style={inputStyle}
-            />
+            <div style={{ position: "relative", flex: 1 }}>
+  {showMentions && mentionResults.length > 0 && (
+    <div style={mentionBox}>
+      {mentionResults.map((u) => (
+        <button
+          key={u.id}
+          type="button"
+          style={mentionItem}
+          onClick={() => {
+            const newText = text.replace(
+              /@([^\s]*)$/,
+              `@${u.username} `
+            );
+
+            setText(newText);
+            setShowMentions(false);
+          }}
+        >
+          <img
+            src={u.avatar || DEFAULT_AVATAR}
+            alt="avatar"
+            style={mentionAvatar}
+            onError={(e) => {
+              e.currentTarget.src = DEFAULT_AVATAR;
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              minWidth: 0,
+            }}
+          >
+            <span style={mentionUsername}>
+              @{u.username || "Utilisateur"}
+            </span>
+
+            {u.email && (
+              <span style={mentionEmail}>
+                {u.email}
+              </span>
+            )}
+          </div>
+        </button>
+      ))}
+    </div>
+  )}
+
+  <input
+    value={text}
+    onChange={async (e) => {
+      const value = e.target.value;
+
+      setText(value);
+      sendTyping();
+
+      const match = value.match(/@([^\s]*)$/);
+
+      if (match) {
+        const query = match[1];
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, username, avatar, email")
+          .ilike("username", `%${query}%`)
+          .limit(6);
+
+        if (!error) {
+          setMentionResults(data || []);
+          setShowMentions(true);
+        }
+      } else {
+        setShowMentions(false);
+      }
+    }}
+    onKeyDown={(e) => {
+      if (e.key === "Escape") {
+        setShowMentions(false);
+      }
+
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }}
+    placeholder={
+      replyTo
+        ? `Répondre à ${replyTo.username || replyTo.email}...`
+        : isAdmin
+        ? "Écris dans #général... (@pseudo)"
+        : "Écris dans #général..."
+    }
+    style={inputStyle}
+  />
+</div>
 
             <label style={imageUploadBtn}>
               {imageUploading ? "⏳" : "📎"}
@@ -2398,4 +2476,53 @@ const adminBadge: React.CSSProperties = {
   padding: "3px 7px",
   borderRadius: "999px",
   boxShadow: "0 0 12px rgba(255,215,100,0.50)",
+};
+const mentionBox: React.CSSProperties = {
+  position: "absolute",
+  bottom: "62px",
+  left: 0,
+  width: "320px",
+  maxHeight: "260px",
+  overflowY: "auto",
+  borderRadius: "18px",
+  background:
+    "linear-gradient(180deg, rgba(7,18,38,0.98), rgba(3,8,18,0.98))",
+  border: "1px solid rgba(0,198,255,0.28)",
+  boxShadow:
+    "0 18px 45px rgba(0,0,0,0.55), 0 0 30px rgba(0,198,255,0.15)",
+  zIndex: 9999,
+  padding: "6px",
+};
+
+const mentionItem: React.CSSProperties = {
+  width: "100%",
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  padding: "10px",
+  borderRadius: "14px",
+  border: "none",
+  background: "transparent",
+  color: "#fff",
+  cursor: "pointer",
+  textAlign: "left",
+};
+
+const mentionAvatar: React.CSSProperties = {
+  width: "38px",
+  height: "38px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid rgba(0,198,255,0.45)",
+};
+
+const mentionUsername: React.CSSProperties = {
+  fontWeight: 900,
+  color: "#fff",
+  fontSize: "14px",
+};
+
+const mentionEmail: React.CSSProperties = {
+  fontSize: "11px",
+  color: "#8fa3bd",
 };
