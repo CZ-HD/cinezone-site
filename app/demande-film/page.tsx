@@ -176,7 +176,6 @@ export default function DemandeFilmPage() {
       return;
     }
 
-    setReplyId(null);
     setReplyText("");
     loadDemandes();
   }
