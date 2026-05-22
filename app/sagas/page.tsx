@@ -18,7 +18,6 @@ export default function SagasPage() {
   const [sagas, setSagas] = useState<Saga[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [searchSaga, setSearchSaga] = useState("");
 
   const itemsPerPage = 12;
@@ -36,7 +35,10 @@ export default function SagasPage() {
     );
   }, [sagas, searchSaga]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredSagas.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredSagas.length / itemsPerPage)
+  );
 
   const paginatedSagas = filteredSagas.slice(
     (page - 1) * itemsPerPage,
@@ -45,37 +47,11 @@ export default function SagasPage() {
 
   useEffect(() => {
     loadSagas();
-    checkAdmin();
   }, []);
 
   useEffect(() => {
     setPage(1);
   }, [searchSaga]);
-
-  async function checkAdmin() {
-    const { data } = await supabase.auth.getUser();
-    const user = data.user;
-
-    if (!user?.email) return;
-
-    if (
-      user.email === "blackph4tom@gmail.com" ||
-      user.email === "lafooteusedu54@hotmail.fr"
-    ) {
-      setIsAdmin(true);
-      return;
-    }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role,status")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profile?.role === "admin" && profile?.status === "approved") {
-      setIsAdmin(true);
-    }
-  }
 
   async function loadSagas() {
     const { data, error } = await supabase
@@ -95,56 +71,71 @@ export default function SagasPage() {
 
   return (
     <main style={pageStyle}>
+      {/* HERO */}
       <section style={heroStyle}>
-        <span style={badgeStyle}>🎞️ Collections</span>
+        <div style={heroOverlay}></div>
 
-        <h1 style={titleStyle}>Sagas CineZone HD</h1>
+        <div style={heroContent}>
+          <span style={badgeStyle}>🎞️ Collections</span>
 
-        <p style={textStyle}>
-          Découvre toutes les sagas disponibles sur CineZone HD.
-        </p>
+          <h1 style={titleStyle}>Sagas CineZone HD</h1>
+
+          <p style={textStyle}>
+            Explore toutes les sagas disponibles sur CineZone HD 🎬
+          </p>
+
+          <div style={statsStyle}>
+            <span style={statsBadge}>
+              🎥 {filteredSagas.length} saga
+              {filteredSagas.length > 1 ? "s" : ""}
+            </span>
+
+            <span style={statsBadge}>
+              📄 Page {page} / {totalPages}
+            </span>
+          </div>
+        </div>
       </section>
 
+      {/* SEARCH */}
+      <section style={searchSectionStyle}>
+        <div style={searchBoxStyle}>
+          <input
+            value={searchSaga}
+            onChange={(e) => setSearchSaga(e.target.value)}
+            placeholder="🔍 Rechercher une saga..."
+            style={searchInputStyle}
+          />
+
+          {searchSaga && (
+            <button
+              type="button"
+              onClick={() => setSearchSaga("")}
+              style={clearSearchButtonStyle}
+            >
+              ✖
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* LOADING */}
       {loading ? (
         <p style={loadingStyle}>Chargement des sagas...</p>
-      ) : sagas.length === 0 ? (
+      ) : filteredSagas.length === 0 ? (
         <section style={emptyStyle}>
-          <h2>Aucune saga pour le moment</h2>
-          <p>Tu pourras bientôt ajouter tes collections ici.</p>
+          <h2>Aucune saga trouvée</h2>
+
+          <p>Essaie un autre mot-clé.</p>
         </section>
       ) : (
         <>
-          <section style={searchSectionStyle}>
-            <input
-              value={searchSaga}
-              onChange={(e) => setSearchSaga(e.target.value)}
-              placeholder="🔍 Rechercher une saga..."
-              style={searchInputStyle}
-            />
-
-            {searchSaga && (
-              <button
-                type="button"
-                onClick={() => setSearchSaga("")}
-                style={clearSearchButtonStyle}
-              >
-                Effacer
-              </button>
-            )}
-          </section>
-
+          {/* PAGINATION TOP */}
           <section style={topBarStyle}>
-            <span>
-              Page {page} sur {totalPages}
-
-              {isAdmin && (
-                <>
-                  {" "}
-                  — {filteredSagas.length} saga
-                  {filteredSagas.length > 1 ? "s" : ""}
-                  {searchSaga && ` trouvée${filteredSagas.length > 1 ? "s" : ""}`}
-                </>
-              )}
+            <span style={topBarText}>
+              🎬 {filteredSagas.length} saga
+              {filteredSagas.length > 1 ? "s" : ""} disponible
+              {filteredSagas.length > 1 ? "s" : ""}
             </span>
 
             <div style={paginationButtonsStyle}>
@@ -153,62 +144,82 @@ export default function SagasPage() {
                 disabled={page === 1}
                 style={{
                   ...pageButtonStyle,
-                  opacity: page === 1 ? 0.45 : 1,
+                  opacity: page === 1 ? 0.4 : 1,
                   cursor: page === 1 ? "not-allowed" : "pointer",
                 }}
               >
-                Précédent
+                ← Précédent
               </button>
 
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={page === totalPages}
                 style={{
                   ...pageButtonStyle,
-                  opacity: page === totalPages ? 0.45 : 1,
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
+                  opacity: page === totalPages ? 0.4 : 1,
+                  cursor:
+                    page === totalPages ? "not-allowed" : "pointer",
                 }}
               >
-                Suivant
+                Suivant →
               </button>
             </div>
           </section>
 
-          {filteredSagas.length === 0 ? (
-            <section style={emptyStyle}>
-              <h2>Aucune saga trouvée</h2>
-              <p>Essaie un autre mot-clé.</p>
-            </section>
-          ) : (
-            <section style={gridStyle}>
-              {paginatedSagas.map((saga) => (
-                <Link
-                  key={saga.id}
-                  href={`/sagas/${saga.slug}`}
-                  style={cardStyle}
-                >
-                  <div style={posterBox}>
-                    {saga.poster ? (
-                      <img
-                        src={saga.poster}
-                        alt={saga.title}
-                        style={posterStyle}
-                      />
-                    ) : (
-                      <span style={{ fontSize: "42px" }}>🎬</span>
-                    )}
-                  </div>
+          {/* GRID */}
+          <section style={gridStyle}>
+            {paginatedSagas.map((saga) => (
+              <Link
+                key={saga.id}
+                href={`/sagas/${saga.slug}`}
+                style={cardStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform =
+                    "translateY(-8px) scale(1.02)";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(0,198,255,0.22)";
+                  e.currentTarget.style.border =
+                    "1px solid rgba(0,198,255,0.4)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform =
+                    "translateY(0) scale(1)";
+                  e.currentTarget.style.boxShadow =
+                    "0 18px 50px rgba(0,0,0,0.45)";
+                  e.currentTarget.style.border =
+                    "1px solid rgba(255,255,255,0.08)";
+                }}
+              >
+                <div style={posterBox}>
+                  {saga.poster ? (
+                    <img
+                      src={saga.poster}
+                      alt={saga.title}
+                      style={posterStyle}
+                    />
+                  ) : (
+                    <div style={fallbackPoster}>
+                      🎬
+                    </div>
+                  )}
 
-                  <div>
-                    <h2 style={cardTitle}>{saga.title}</h2>
+                  <div style={posterOverlay}></div>
+                </div>
 
-                    <p style={cardText}>Tous les films {saga.title}</p>
-                  </div>
-                </Link>
-              ))}
-            </section>
-          )}
+                <div style={cardContent}>
+                  <h2 style={cardTitle}>{saga.title}</h2>
 
+                  <p style={cardText}>
+                    Tous les films de la saga {saga.title}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </section>
+
+          {/* PAGINATION BOTTOM */}
           {totalPages > 1 && (
             <section style={bottomPaginationStyle}>
               <button
@@ -216,25 +227,30 @@ export default function SagasPage() {
                 disabled={page === 1}
                 style={{
                   ...pageButtonStyle,
-                  opacity: page === 1 ? 0.45 : 1,
+                  opacity: page === 1 ? 0.4 : 1,
                   cursor: page === 1 ? "not-allowed" : "pointer",
                 }}
               >
-                Précédent
+                ← Précédent
               </button>
 
-              <span style={pageTextStyle}>Page {page} sur {totalPages}</span>
+              <span style={pageTextStyle}>
+                Page {page} sur {totalPages}
+              </span>
 
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={page === totalPages}
                 style={{
                   ...pageButtonStyle,
-                  opacity: page === totalPages ? 0.45 : 1,
-                  cursor: page === totalPages ? "not-allowed" : "pointer",
+                  opacity: page === totalPages ? 0.4 : 1,
+                  cursor:
+                    page === totalPages ? "not-allowed" : "pointer",
                 }}
               >
-                Suivant
+                Suivant →
               </button>
             </section>
           )}
@@ -244,151 +260,233 @@ export default function SagasPage() {
   );
 }
 
+/* PAGE */
+
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
-  padding: "70px 30px",
-  background:
-    "radial-gradient(circle at top, rgba(0,198,255,0.18), #000 58%)",
+  padding: "60px 28px",
+  background: `
+    radial-gradient(circle at top, rgba(0,198,255,0.16), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(0,140,255,0.10), transparent 25%),
+    #020617
+  `,
   color: "#fff",
-  fontFamily: "Arial, sans-serif",
+  position: "relative",
+  overflow: "hidden",
 };
 
+/* HERO */
+
 const heroStyle: React.CSSProperties = {
-  maxWidth: "1100px",
-  margin: "0 auto 34px",
+  position: "relative",
+  maxWidth: "1450px",
+  margin: "0 auto 30px",
   padding: "34px",
-  borderRadius: "28px",
-  background: "rgba(10,15,25,0.82)",
-  border: "1px solid rgba(0,198,255,0.28)",
-  boxShadow: "0 20px 70px rgba(0,0,0,0.6)",
+  borderRadius: "32px",
+  overflow: "hidden",
+  background: "rgba(8,12,20,0.82)",
+  border: "1px solid rgba(0,198,255,0.16)",
+  boxShadow: "0 25px 80px rgba(0,0,0,0.6)",
+  backdropFilter: "blur(12px)",
+};
+
+const heroOverlay: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  background:
+    "linear-gradient(to right, rgba(0,198,255,0.08), transparent)",
+};
+
+const heroContent: React.CSSProperties = {
+  position: "relative",
+  zIndex: 2,
 };
 
 const badgeStyle: React.CSSProperties = {
-  display: "inline-block",
-  padding: "9px 16px",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "10px 18px",
   borderRadius: "999px",
   background: "rgba(0,198,255,0.12)",
-  border: "1px solid rgba(0,198,255,0.35)",
+  border: "1px solid rgba(0,198,255,0.25)",
   color: "#67e8f9",
   fontWeight: 900,
+  fontSize: "14px",
 };
 
 const titleStyle: React.CSSProperties = {
-  fontSize: "42px",
-  margin: "18px 0 10px",
+  fontSize: "56px",
+  fontWeight: 900,
+  letterSpacing: "-2px",
+  margin: "20px 0 10px",
+  textShadow: "0 0 30px rgba(0,198,255,0.18)",
 };
 
 const textStyle: React.CSSProperties = {
   color: "#cbd5e1",
-  lineHeight: 1.6,
+  fontSize: "17px",
+  lineHeight: 1.7,
+  maxWidth: "700px",
 };
 
-const loadingStyle: React.CSSProperties = {
-  textAlign: "center",
-  color: "#94a3b8",
-};
-
-const searchSectionStyle: React.CSSProperties = {
-  maxWidth: "1100px",
-  margin: "0 auto 20px",
+const statsStyle: React.CSSProperties = {
   display: "flex",
   gap: "12px",
-  alignItems: "center",
+  marginTop: "24px",
   flexWrap: "wrap",
+};
+
+const statsBadge: React.CSSProperties = {
+  padding: "10px 16px",
+  borderRadius: "14px",
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "#dbeafe",
+  fontWeight: 700,
+};
+
+/* SEARCH */
+
+const searchSectionStyle: React.CSSProperties = {
+  maxWidth: "1450px",
+  margin: "0 auto 24px",
+};
+
+const searchBoxStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
 };
 
 const searchInputStyle: React.CSSProperties = {
   width: "100%",
-  maxWidth: "460px",
-  padding: "15px 16px",
-  borderRadius: "16px",
-  border: "1px solid rgba(0,198,255,0.35)",
-  background: "rgba(10,15,25,0.9)",
+  padding: "18px 22px",
+  borderRadius: "18px",
+  border: "1px solid rgba(0,198,255,0.18)",
+  background: "rgba(8,12,20,0.85)",
   color: "#fff",
-  outline: "none",
+  fontSize: "15px",
   fontWeight: 700,
+  outline: "none",
+  backdropFilter: "blur(10px)",
 };
 
 const clearSearchButtonStyle: React.CSSProperties = {
-  padding: "13px 16px",
-  borderRadius: "14px",
-  border: "1px solid rgba(255,90,90,0.45)",
-  background: "rgba(255,60,60,0.16)",
-  color: "#ffb3b3",
+  padding: "16px 18px",
+  borderRadius: "16px",
+  border: "1px solid rgba(255,80,80,0.22)",
+  background: "rgba(255,50,50,0.10)",
+  color: "#ffb4b4",
   fontWeight: 900,
   cursor: "pointer",
 };
 
+/* TOP BAR */
+
 const topBarStyle: React.CSSProperties = {
-  maxWidth: "1100px",
-  margin: "0 auto 22px",
-  padding: "14px 0",
+  maxWidth: "1450px",
+  margin: "0 auto 24px",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  gap: "14px",
+  gap: "16px",
   flexWrap: "wrap",
+};
+
+const topBarText: React.CSSProperties = {
   color: "#94a3b8",
   fontWeight: 700,
 };
 
-const paginationButtonsStyle: React.CSSProperties = {
-  display: "flex",
-  gap: "10px",
-};
+/* GRID */
 
 const gridStyle: React.CSSProperties = {
-  maxWidth: "1100px",
+  maxWidth: "1450px",
   margin: "0 auto",
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-  gap: "18px",
+  gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+  gap: "24px",
 };
 
 const cardStyle: React.CSSProperties = {
   textDecoration: "none",
   color: "#fff",
-  padding: "10px",
-  borderRadius: "22px",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: "24px",
+  overflow: "hidden",
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.08)",
   boxShadow: "0 18px 50px rgba(0,0,0,0.45)",
-  transition: "0.2s",
+  transition: "all 0.25s ease",
+  backdropFilter: "blur(10px)",
 };
 
 const posterBox: React.CSSProperties = {
+  position: "relative",
   aspectRatio: "2 / 3",
-  width: "100%",
-  borderRadius: "18px",
   overflow: "hidden",
   background: "#000",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  marginBottom: "14px",
 };
 
 const posterStyle: React.CSSProperties = {
   width: "100%",
   height: "100%",
-  objectFit: "contain",
-  background: "#000",
+  objectFit: "cover",
+  transition: "transform 0.35s ease",
+};
+
+const posterOverlay: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  background:
+    "linear-gradient(to top, rgba(0,0,0,0.7), transparent 40%)",
+};
+
+const fallbackPoster: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "50px",
+};
+
+const cardContent: React.CSSProperties = {
+  padding: "18px",
 };
 
 const cardTitle: React.CSSProperties = {
-  fontSize: "17px",
-  margin: "0 0 8px",
+  fontSize: "18px",
+  fontWeight: 800,
+  marginBottom: "10px",
 };
 
 const cardText: React.CSSProperties = {
   color: "#94a3b8",
   fontSize: "14px",
-  lineHeight: 1.5,
+  lineHeight: 1.6,
+};
+
+/* PAGINATION */
+
+const paginationButtonsStyle: React.CSSProperties = {
+  display: "flex",
+  gap: "12px",
+};
+
+const pageButtonStyle: React.CSSProperties = {
+  padding: "13px 18px",
+  borderRadius: "14px",
+  border: "1px solid rgba(0,198,255,0.18)",
+  background: "rgba(0,198,255,0.10)",
+  color: "#fff",
+  fontWeight: 800,
+  transition: "0.2s",
 };
 
 const bottomPaginationStyle: React.CSSProperties = {
-  maxWidth: "1100px",
-  margin: "34px auto 0",
+  maxWidth: "1450px",
+  margin: "40px auto 0",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -396,26 +494,27 @@ const bottomPaginationStyle: React.CSSProperties = {
   flexWrap: "wrap",
 };
 
-const pageButtonStyle: React.CSSProperties = {
-  padding: "12px 18px",
-  borderRadius: "14px",
-  border: "1px solid rgba(0,198,255,0.35)",
-  background: "rgba(0,198,255,0.14)",
-  color: "#fff",
-  fontWeight: 900,
-};
-
 const pageTextStyle: React.CSSProperties = {
   color: "#94a3b8",
   fontWeight: 700,
 };
 
+/* EMPTY */
+
 const emptyStyle: React.CSSProperties = {
-  maxWidth: "1100px",
-  margin: "0 auto",
-  padding: "40px",
+  maxWidth: "900px",
+  margin: "40px auto",
+  padding: "50px",
   textAlign: "center",
-  borderRadius: "24px",
-  background: "rgba(255,255,255,0.05)",
-  border: "1px dashed rgba(255,255,255,0.18)",
+  borderRadius: "28px",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+
+/* LOADING */
+
+const loadingStyle: React.CSSProperties = {
+  textAlign: "center",
+  color: "#94a3b8",
+  marginTop: "50px",
 };
