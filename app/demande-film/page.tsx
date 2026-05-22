@@ -20,6 +20,7 @@ export default function DemandeFilmPage() {
   const [tmdbLink, setTmdbLink] = useState("");
   const [annee, setAnnee] = useState("");
   const [codec, setCodec] = useState("H264");
+  const [langue, setLangue] = useState("VF / VOSTFR");
   const [commentaire, setCommentaire] = useState("");
   const [message, setMessage] = useState("");
 
@@ -98,13 +99,14 @@ export default function DemandeFilmPage() {
     setLoading(true);
 
     const { error } = await supabase.from("demandes_films").insert({
-      user_id: user.id,
-      email: user.email,
-      tmdb_link: tmdbLink.trim(),
-      annee: annee.trim(),
-      codec,
-      commentaire: commentaire.trim(),
-    });
+    user_id: user.id,
+    email: user.email,
+  tmdb_link: tmdbLink.trim(),
+  annee: annee.trim(),
+  codec,
+  langue,
+  commentaire: commentaire.trim(),
+});
 
     setLoading(false);
 
@@ -117,6 +119,7 @@ export default function DemandeFilmPage() {
     setTmdbLink("");
     setAnnee("");
     setCodec("H264");
+    setLangue("VF / VOSTFR");
     setCommentaire("");
     loadDemandes();
   }
@@ -229,9 +232,27 @@ export default function DemandeFilmPage() {
               </div>
             </div>
 
-            <button type="button" style={pasteButton}>
-              ⬅️ ici 📋 Coller le lien
-            </button>
+            <button
+  type="button"
+  style={pasteButton}
+  onClick={async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+
+      setTmdbLink(text);
+
+      const movie = await fetchMovieData(text);
+
+      if (movie?.year) {
+        setAnnee(movie.year.toString());
+      }
+    } catch {
+      alert("Impossible de lire le presse-papiers.");
+    }
+  }}
+>
+  ⬅️ ici 📋 Coller le lien
+</button>
           </div>
 
           <div style={formGrid}>
@@ -259,11 +280,15 @@ export default function DemandeFilmPage() {
 
             <div>
               <label style={labelStyle}>Langue</label>
-              <select style={inputStyle} defaultValue="VF / VOSTFR">
-                <option>VF / VOSTFR</option>
-                <option>VF</option>
-                <option>VOSTFR</option>
-              </select>
+              <select
+  value={langue}
+  onChange={(e) => setLangue(e.target.value)}
+  style={inputStyle}
+>
+  <option>VF / VOSTFR</option>
+  <option>VF</option>
+  <option>VOSTFR</option>
+</select>
             </div>
           </div>
 
@@ -405,7 +430,7 @@ export default function DemandeFilmPage() {
                             </div>
                             <div style={infoBox}>
                               🌐<span>Langue</span>
-                              <strong>VF/VOSTFR</strong>
+                              <strong>{d.langue || "VF/VOSTFR"}</strong>
                             </div>
                             <div style={infoBox}>
                               💬<span>Commentaire</span>
@@ -512,12 +537,19 @@ async function fetchMovieData(tmdbLink: string) {
       return null;
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    return {
+      ...data,
+      year:
+        data?.release_date?.split("-")[0] ||
+        data?.year ||
+        null,
+    };
   } catch {
     return null;
   }
 }
-
 function formatDate(value?: string) {
   if (!value) return "date inconnue";
   return new Date(value).toLocaleDateString("fr-FR");
