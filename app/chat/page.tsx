@@ -1504,7 +1504,7 @@ export default function ChatPage() {
             }}
           >
             <span style={mentionUsername}>
-              @{u.username || "Utilisateur"}
+              @{u.username || u.email?.split("@")[0] || "Utilisateur"}
             </span>
 
             {u.email && (
@@ -1532,11 +1532,12 @@ export default function ChatPage() {
         const query = match[1];
 
         const { data, error } = await supabase
-          .from("profiles")
-          .select("id, username, avatar, email")
-          .not("username", "is", null)
-          .ilike("username", `%${query}%`)
-          .limit(6);
+  .from("profiles")
+  .select("id, username, avatar, email")
+  .or(
+    `username.ilike.%${query}%,email.ilike.%${query}%`
+  )
+  .limit(12);
 
         if (!error) {
           setMentionResults(data || []);
