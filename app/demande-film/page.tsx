@@ -574,15 +574,15 @@ export default function DemandeFilmPage() {
                             )}
 
                             {isAdmin && (
-                              <>
-                                
-                                  onClick={() => supprimerDemande(d.id)}
-                                  style={btnRed}
-                                >
-                                  🗑 Supprimer
-                                </button>
-                              </>
-                            )}
+  <>
+    <button
+      onClick={() => supprimerDemande(d.id)}
+      style={btnRed}
+    >
+      🗑 Supprimer
+    </button>
+  </>
+)}
                           </div>
                         </>
                       )}
