@@ -1456,7 +1456,14 @@ export default function ChatPage() {
                 </div>
               )}
             </div>
-            <div style={{ position: "relative", flex: 1 }}>
+            <div
+  style={{
+    position: "relative",
+    flex: 1,
+    display: "flex",
+    width: "100%",
+  }}
+>
   {showMentions && mentionResults.length > 0 && (
     <div style={mentionBox}>
       {mentionResults.map((u) => (
@@ -1475,13 +1482,19 @@ export default function ChatPage() {
           }}
         >
           <img
-            src={u.avatar || DEFAULT_AVATAR}
-            alt="avatar"
-            style={mentionAvatar}
-            onError={(e) => {
-              e.currentTarget.src = DEFAULT_AVATAR;
-            }}
-          />
+  src={
+    u.avatar &&
+    u.avatar !== "null" &&
+    u.avatar !== ""
+      ? u.avatar
+      : DEFAULT_AVATAR
+  }
+  alt="avatar"
+  style={mentionAvatar}
+  onError={(e) => {
+    e.currentTarget.src = DEFAULT_AVATAR;
+  }}
+/>
 
           <div
             style={{
@@ -1521,6 +1534,7 @@ export default function ChatPage() {
         const { data, error } = await supabase
           .from("profiles")
           .select("id, username, avatar, email")
+          .not("username", "is", null)
           .ilike("username", `%${query}%`)
           .limit(6);
 
@@ -2481,8 +2495,8 @@ const mentionBox: React.CSSProperties = {
   position: "absolute",
   bottom: "62px",
   left: 0,
-  width: "320px",
-  maxHeight: "260px",
+  width: "360px",
+  maxHeight: "320px",
   overflowY: "auto",
   borderRadius: "18px",
   background:
