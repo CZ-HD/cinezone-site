@@ -73,7 +73,11 @@ export default function SagasPage() {
     <main style={pageStyle}>
       {/* HERO */}
       <section style={heroStyle}>
+        <div style={heroBackdrop}></div>
+
         <div style={heroOverlay}></div>
+
+        <div style={heroGlow}></div>
 
         <div style={heroContent}>
           <span style={badgeStyle}>🎞️ Collections</span>
@@ -85,14 +89,27 @@ export default function SagasPage() {
           </p>
 
           <div style={statsStyle}>
-            <span style={statsBadge}>
-              🎥 {filteredSagas.length} saga
-              {filteredSagas.length > 1 ? "s" : ""}
-            </span>
+            <div style={statsCard}>
+              <span style={statsIcon}>🎬</span>
 
-            <span style={statsBadge}>
-              📄 Page {page} / {totalPages}
-            </span>
+              <div>
+                <strong>{filteredSagas.length}</strong>
+
+                <p style={statsText}>sagas disponibles</p>
+              </div>
+            </div>
+
+            <div style={statsCard}>
+              <span style={statsIcon}>📄</span>
+
+              <div>
+                <strong>
+                  Page {page} / {totalPages}
+                </strong>
+
+                <p style={statsText}>résultats</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -130,7 +147,7 @@ export default function SagasPage() {
         </section>
       ) : (
         <>
-          {/* PAGINATION TOP */}
+          {/* TOP BAR */}
           <section style={topBarStyle}>
             <span style={topBarText}>
               🎬 {filteredSagas.length} saga
@@ -160,7 +177,9 @@ export default function SagasPage() {
                   ...pageButtonStyle,
                   opacity: page === totalPages ? 0.4 : 1,
                   cursor:
-                    page === totalPages ? "not-allowed" : "pointer",
+                    page === totalPages
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
                 Suivant →
@@ -178,18 +197,16 @@ export default function SagasPage() {
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform =
                     "translateY(-8px) scale(1.02)";
+
                   e.currentTarget.style.boxShadow =
-                    "0 25px 60px rgba(0,198,255,0.22)";
-                  e.currentTarget.style.border =
-                    "1px solid rgba(0,198,255,0.4)";
+                    "0 30px 80px rgba(0,198,255,0.18)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform =
                     "translateY(0) scale(1)";
+
                   e.currentTarget.style.boxShadow =
-                    "0 18px 50px rgba(0,0,0,0.45)";
-                  e.currentTarget.style.border =
-                    "1px solid rgba(255,255,255,0.08)";
+                    "0 20px 60px rgba(0,0,0,0.45)";
                 }}
               >
                 <div style={posterBox}>
@@ -219,7 +236,7 @@ export default function SagasPage() {
             ))}
           </section>
 
-          {/* PAGINATION BOTTOM */}
+          {/* PAGINATION */}
           {totalPages > 1 && (
             <section style={bottomPaginationStyle}>
               <button
@@ -247,7 +264,9 @@ export default function SagasPage() {
                   ...pageButtonStyle,
                   opacity: page === totalPages ? 0.4 : 1,
                   cursor:
-                    page === totalPages ? "not-allowed" : "pointer",
+                    page === totalPages
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
                 Suivant →
@@ -271,7 +290,6 @@ const pageStyle: React.CSSProperties = {
     #020617
   `,
   color: "#fff",
-  position: "relative",
   overflow: "hidden",
 };
 
@@ -280,70 +298,115 @@ const pageStyle: React.CSSProperties = {
 const heroStyle: React.CSSProperties = {
   position: "relative",
   maxWidth: "1450px",
-  margin: "0 auto 30px",
-  padding: "34px",
-  borderRadius: "32px",
+  margin: "0 auto 34px",
+  minHeight: "320px",
+  borderRadius: "34px",
   overflow: "hidden",
-  background: "rgba(8,12,20,0.82)",
-  border: "1px solid rgba(0,198,255,0.16)",
-  boxShadow: "0 25px 80px rgba(0,0,0,0.6)",
-  backdropFilter: "blur(12px)",
+  border: "1px solid rgba(0,198,255,0.14)",
+  boxShadow:
+    "0 0 120px rgba(0,198,255,0.10), 0 30px 80px rgba(0,0,0,0.65)",
+  background: "#020617",
+};
+
+const heroBackdrop: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  backgroundImage:
+    'url("https://image.tmdb.org/t/p/original/yDHYTfA3R0jFYba16jBB1ef8oIt.jpg")',
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  opacity: 0.35,
+  transform: "scale(1.05)",
 };
 
 const heroOverlay: React.CSSProperties = {
   position: "absolute",
   inset: 0,
+  background: `
+    linear-gradient(
+      to right,
+      rgba(2,6,23,0.96) 10%,
+      rgba(2,6,23,0.70) 45%,
+      rgba(2,6,23,0.96) 100%
+    )
+  `,
+};
+
+const heroGlow: React.CSSProperties = {
+  position: "absolute",
+  width: "700px",
+  height: "700px",
+  borderRadius: "999px",
   background:
-    "linear-gradient(to right, rgba(0,198,255,0.08), transparent)",
+    "radial-gradient(circle, rgba(0,198,255,0.18), transparent 70%)",
+  top: "-250px",
+  right: "-150px",
+  filter: "blur(40px)",
 };
 
 const heroContent: React.CSSProperties = {
   position: "relative",
-  zIndex: 2,
+  zIndex: 5,
+  padding: "42px",
 };
 
 const badgeStyle: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   gap: "8px",
+  width: "fit-content",
   padding: "10px 18px",
   borderRadius: "999px",
   background: "rgba(0,198,255,0.12)",
-  border: "1px solid rgba(0,198,255,0.25)",
+  border: "1px solid rgba(0,198,255,0.24)",
   color: "#67e8f9",
   fontWeight: 900,
-  fontSize: "14px",
+  backdropFilter: "blur(10px)",
 };
 
 const titleStyle: React.CSSProperties = {
-  fontSize: "56px",
+  fontSize: "68px",
   fontWeight: 900,
-  letterSpacing: "-2px",
-  margin: "20px 0 10px",
-  textShadow: "0 0 30px rgba(0,198,255,0.18)",
+  lineHeight: 1,
+  margin: "22px 0 14px",
+  letterSpacing: "-3px",
+  color: "#fff",
+  textShadow: "0 0 30px rgba(0,198,255,0.20)",
 };
 
 const textStyle: React.CSSProperties = {
-  color: "#cbd5e1",
-  fontSize: "17px",
+  color: "#dbeafe",
+  fontSize: "18px",
   lineHeight: 1.7,
   maxWidth: "700px",
 };
 
 const statsStyle: React.CSSProperties = {
   display: "flex",
-  gap: "12px",
-  marginTop: "24px",
+  gap: "16px",
+  marginTop: "30px",
   flexWrap: "wrap",
 };
 
-const statsBadge: React.CSSProperties = {
-  padding: "10px 16px",
-  borderRadius: "14px",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  color: "#dbeafe",
-  fontWeight: 700,
+const statsCard: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "14px",
+  padding: "14px 18px",
+  borderRadius: "18px",
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  backdropFilter: "blur(14px)",
+};
+
+const statsIcon: React.CSSProperties = {
+  fontSize: "22px",
+};
+
+const statsText: React.CSSProperties = {
+  margin: 0,
+  color: "#cbd5e1",
+  fontSize: "13px",
 };
 
 /* SEARCH */
@@ -355,7 +418,6 @@ const searchSectionStyle: React.CSSProperties = {
 
 const searchBoxStyle: React.CSSProperties = {
   display: "flex",
-  alignItems: "center",
   gap: "12px",
 };
 
@@ -363,18 +425,18 @@ const searchInputStyle: React.CSSProperties = {
   width: "100%",
   padding: "18px 22px",
   borderRadius: "18px",
-  border: "1px solid rgba(0,198,255,0.18)",
-  background: "rgba(8,12,20,0.85)",
+  border: "1px solid rgba(0,198,255,0.14)",
+  background: "rgba(15,23,42,0.82)",
   color: "#fff",
   fontSize: "15px",
   fontWeight: 700,
   outline: "none",
-  backdropFilter: "blur(10px)",
+  backdropFilter: "blur(12px)",
 };
 
 const clearSearchButtonStyle: React.CSSProperties = {
-  padding: "16px 18px",
-  borderRadius: "16px",
+  padding: "0 18px",
+  borderRadius: "18px",
   border: "1px solid rgba(255,80,80,0.22)",
   background: "rgba(255,50,50,0.10)",
   color: "#ffb4b4",
@@ -412,34 +474,38 @@ const gridStyle: React.CSSProperties = {
 const cardStyle: React.CSSProperties = {
   textDecoration: "none",
   color: "#fff",
-  borderRadius: "24px",
+  borderRadius: "26px",
   overflow: "hidden",
-  background: "rgba(255,255,255,0.05)",
+  background:
+    "linear-gradient(to bottom, rgba(15,23,42,0.96), rgba(2,6,23,0.98))",
   border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 18px 50px rgba(0,0,0,0.45)",
-  transition: "all 0.25s ease",
-  backdropFilter: "blur(10px)",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+  transition: "all 0.28s ease",
+  backdropFilter: "blur(12px)",
 };
 
 const posterBox: React.CSSProperties = {
   position: "relative",
   aspectRatio: "2 / 3",
   overflow: "hidden",
-  background: "#000",
 };
 
 const posterStyle: React.CSSProperties = {
   width: "100%",
   height: "100%",
   objectFit: "cover",
-  transition: "transform 0.35s ease",
 };
 
 const posterOverlay: React.CSSProperties = {
   position: "absolute",
   inset: 0,
-  background:
-    "linear-gradient(to top, rgba(0,0,0,0.7), transparent 40%)",
+  background: `
+    linear-gradient(
+      to top,
+      rgba(2,6,23,0.92),
+      transparent 45%
+    )
+  `,
 };
 
 const fallbackPoster: React.CSSProperties = {
@@ -449,6 +515,7 @@ const fallbackPoster: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   fontSize: "50px",
+  background: "#000",
 };
 
 const cardContent: React.CSSProperties = {
@@ -456,7 +523,7 @@ const cardContent: React.CSSProperties = {
 };
 
 const cardTitle: React.CSSProperties = {
-  fontSize: "18px",
+  fontSize: "20px",
   fontWeight: 800,
   marginBottom: "10px",
 };
