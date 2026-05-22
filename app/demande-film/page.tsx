@@ -32,6 +32,8 @@ export default function DemandeFilmPage() {
 
   const [replyId, setReplyId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [mentionResults, setMentionResults] = useState<any[]>([]);
+  const [showMentions, setShowMentions] = useState(false);
   const [movieData, setMovieData] = useState<Record<string, any>>({});
 
   useEffect(() => {
@@ -461,13 +463,91 @@ export default function DemandeFilmPage() {
 
                           {isAdmin && replyId === d.id && (
                             <div style={replyEditorBox}>
-                              <textarea
-                                value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Écrire une réponse au membre..."
-                                rows={3}
-                                style={textareaStyle}
-                              />
+                              <div style={{ position: "relative" }}>
+  {showMentions && mentionResults.length > 0 && (
+    <div style={mentionBox}>
+      {mentionResults.map((u) => (
+        <button
+          key={u.id}
+          type="button"
+          style={mentionItem}
+          onClick={() => {
+            const newText = replyText.replace(
+              /@([^\s]*)$/,
+              `@${
+                u.username ||
+                u.email?.split("@")[0] ||
+                "Utilisateur"
+              } `
+            );
+
+            setReplyText(newText);
+            setShowMentions(false);
+          }}
+        >
+          <img
+            src={
+              u.avatar &&
+              u.avatar !== "null" &&
+              u.avatar !== ""
+                ? u.avatar
+                : DEFAULT_AVATAR
+            }
+            alt="avatar"
+            style={mentionAvatar}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              minWidth: 0,
+            }}
+          >
+            <span style={mentionUsername}>
+              @{u.username || u.email?.split("@")[0]}
+            </span>
+
+            <span style={mentionEmail}>
+              {u.email}
+            </span>
+          </div>
+        </button>
+      ))}
+    </div>
+  )}
+
+  <textarea
+    value={replyText}
+    onChange={async (e) => {
+      const value = e.target.value;
+
+      setReplyText(value);
+
+      const match = value.match(/@([^\s]*)$/);
+
+      if (match) {
+        const query = match[1];
+
+        const { data } = await supabase
+          .from("profiles")
+          .select("id, username, avatar, email")
+          .or(
+            `username.ilike.%${query}%,email.ilike.%${query}%`
+          )
+          .limit(10);
+
+        setMentionResults(data || []);
+        setShowMentions(true);
+      } else {
+        setShowMentions(false);
+      }
+    }}
+    placeholder="Écrire une réponse au membre..."
+    rows={3}
+    style={textareaStyle}
+  />
+</div>
 
                               <div style={buttonRow}>
                                 <button
@@ -986,4 +1066,50 @@ const emptyStyle: React.CSSProperties = {
   color: "#94a3b8",
   borderRadius: "18px",
   border: "1px dashed rgba(255,255,255,0.16)",
+};
+const mentionBox: React.CSSProperties = {
+  position: "absolute",
+  bottom: "105%",
+  left: 0,
+  width: "340px",
+  maxHeight: "300px",
+  overflowY: "auto",
+  borderRadius: "16px",
+  background: "#0b1220",
+  border: "1px solid rgba(0,198,255,0.25)",
+  boxShadow: "0 15px 40px rgba(0,0,0,0.45)",
+  zIndex: 9999,
+  padding: "6px",
+};
+
+const mentionItem: React.CSSProperties = {
+  width: "100%",
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  padding: "10px",
+  borderRadius: "12px",
+  border: "none",
+  background: "transparent",
+  color: "#fff",
+  cursor: "pointer",
+  textAlign: "left",
+};
+
+const mentionAvatar: React.CSSProperties = {
+  width: "38px",
+  height: "38px",
+  borderRadius: "50%",
+  objectFit: "cover",
+};
+
+const mentionUsername: React.CSSProperties = {
+  fontWeight: 900,
+  color: "#fff",
+  fontSize: "14px",
+};
+
+const mentionEmail: React.CSSProperties = {
+  fontSize: "11px",
+  color: "#94a3b8",
 };
