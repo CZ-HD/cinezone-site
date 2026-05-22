@@ -30,7 +30,6 @@ export default function DemandeFilmPage() {
   const [editCodec, setEditCodec] = useState("H264");
   const [editCommentaire, setEditCommentaire] = useState("");
 
-  const [replyId, setReplyId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [mentionResults, setMentionResults] = useState<any[]>([]);
   const [showMentions, setShowMentions] = useState(false);
@@ -461,7 +460,7 @@ export default function DemandeFilmPage() {
                             </div>
                           )}
 
-                          {isAdmin && replyId === d.id && (
+                          {isAdmin && (
                             <div style={replyEditorBox}>
                               <div style={{ position: "relative" }}>
   {showMentions && mentionResults.length > 0 && (
@@ -557,7 +556,7 @@ export default function DemandeFilmPage() {
                                   📩 Envoyer la réponse
                                 </button>
                                 <button
-                                  onClick={() => setReplyId(null)}
+                                  onClick={() => setReplyText("")}
                                   style={btnGray}
                                 >
                                   Annuler
