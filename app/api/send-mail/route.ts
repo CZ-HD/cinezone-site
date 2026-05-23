@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const data = await resend.emails.send({
-      from: "CineZone HD <noreply@cinezone-hd.fr>",
+      from: "onboarding@resend.dev",
 
       to: body.to
         .split(",")
