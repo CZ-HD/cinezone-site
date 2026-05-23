@@ -5,9 +5,9 @@ export async function POST(req: Request) {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.BREVO_API_KEY,
-      },
+  "Content-Type": "application/json",
+  "api-key": process.env.BREVO_API_KEY || "",
+},
 
       body: JSON.stringify({
         sender: {
