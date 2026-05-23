@@ -44,12 +44,12 @@ export async function POST(req: Request) {
       data,
     });
 
-  } catch (error) {
+  } catch (error: any) {
 
-    return Response.json({
-      success: false,
-      error,
-    });
+  return Response.json({
+    success: false,
+    error: error.message,
+  });
 
-  }
+}
 }
