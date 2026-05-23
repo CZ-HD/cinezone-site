@@ -2,61 +2,61 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
+    const emails = Array.isArray(body.to)
+      ? body.to
+      : body.to.split(",");
 
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.BREVO_API_KEY || "",
-      },
+    const response = await fetch(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        method: "POST",
 
-      body: JSON.stringify({
-        sender: {
-          name: "CineZone HD",
-          email: "onboarding@resend.dev",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": process.env.BREVO_API_KEY || "",
         },
 
-        to: Array.isArray(body.to)
-  ? body.to.map((email: string) => ({
-      email: email.trim(),
-    }))
-  : body.to.split(",").map((email: string) => ({
-      email: email.trim(),
-    })),
+        body: JSON.stringify({
+          sender: {
+            name: "CineZone HD",
+            email: "onboarding@resend.dev",
+          },
 
-        subject: body.subject,
+          to: emails.map((email: string) => ({
+            email: email.trim(),
+          })),
 
-        htmlContent: `
-          <div style="background:#050816;padding:30px;color:white;font-family:Arial">
+          subject: body.subject,
 
-            <h1 style="color:#00c6ff;">
-              🎬 CineZone HD
-            </h1>
+          htmlContent: `
+            <div style="background:#050816;padding:30px;color:white;font-family:Arial">
 
-            <div style="
-              background:#0f172a;
-              padding:20px;
-              border-radius:12px;
-              margin-top:20px;
-            ">
-              ${body.message.replace(/\n/g, "<br>")}
+              <h1 style="color:#00c6ff;">
+                🎬 CineZone HD
+              </h1>
+
+              <div style="
+                background:#0f172a;
+                padding:20px;
+                border-radius:12px;
+                margin-top:20px;
+              ">
+                ${body.message.replace(/\n/g, "<br>")}
+              </div>
+
+              <p style="margin-top:20px;color:#999;">
+                Message envoyé par l'administration CineZone HD
+              </p>
+
             </div>
-
-            <p style="margin-top:20px;color:#999;">
-              Message envoyé par l'administration CineZone HD
-            </p>
-
-          </div>
-        `,
-      }),
-    });
+          `,
+        }),
+      }
+    );
 
     const data = await response.json();
 
-    return Response.json({
-      success: true,
-      data,
-    });
+    return Response.json(data);
 
   } catch (error: any) {
 
