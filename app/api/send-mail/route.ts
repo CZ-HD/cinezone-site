@@ -7,19 +7,19 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const data = await resend.emails.send({
-      from: "onboarding@resend.dev",
+  from: "onboarding@resend.dev",
 
-      to: body.to,
+  to: Array.isArray(body.to)
+    ? body.to
+    : [body.to],
 
-      subject: body.subject,
+  subject: body.subject,
 
-      html: `
-        <div style="font-family: Arial; background:#020817; color:white; padding:30px;">
-          
-          <h1 style="color:#00c6ff;">
-            🎬 CineZone HD
-          </h1>
-
+  html: `
+    <h1>CineZone HD</h1>
+    <p>${body.message}</p>
+  `,
+});
           <div style="
             background:#0f172a;
             padding:20px;
