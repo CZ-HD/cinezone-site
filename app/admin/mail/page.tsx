@@ -26,7 +26,7 @@ const sendMail = async () => {
   if (data.success) {
     alert("✅ Mail envoyé !");
   } else {
-    alert("❌ " + (data.error || "Erreur envoi"));
+    alert(JSON.stringify(data, null, 2));
   }
 };
   return (
