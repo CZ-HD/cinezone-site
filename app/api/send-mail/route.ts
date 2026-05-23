@@ -7,33 +7,17 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const data = await resend.emails.send({
-  from: "onboarding@resend.dev",
+      from: "onboarding@resend.dev",
 
-  to: Array.isArray(body.to)
-    ? body.to
-    : [body.to],
+      to: Array.isArray(body.to)
+        ? body.to
+        : [body.to],
 
-  subject: body.subject,
+      subject: body.subject,
 
-  html: `
-    <h1>CineZone HD</h1>
-    <p>${body.message}</p>
-  `,
-});
-          <div style="
-            background:#0f172a;
-            padding:20px;
-            border-radius:12px;
-            border:1px solid rgba(255,255,255,0.1);
-          ">
-            ${body.message.replace(/\n/g, "<br>")}
-          </div>
-
-          <p style="margin-top:20px; opacity:0.7;">
-            © CineZone HD
-          </p>
-
-        </div>
+      html: `
+        <h1>CineZone HD</h1>
+        <p>${body.message}</p>
       `,
     });
 
@@ -44,10 +28,10 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
 
-  return Response.json({
-    success: false,
-    error: error.message,
-  });
+    return Response.json({
+      success: false,
+      error: error.message,
+    });
 
-}
+  }
 }
