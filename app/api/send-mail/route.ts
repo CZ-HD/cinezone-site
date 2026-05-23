@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           sender: {
             name: "CineZone HD",
-            email: "blackph4tom@gmail.com",
+            email: "dragov.kamarov15@gmail.com",
           },
 
           to: emails.map((email: string) => ({
