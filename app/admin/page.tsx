@@ -845,10 +845,30 @@ const deleteAllNotifications = async () => {
     <main style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <span style={badgeStyle}>👑 Administration</span>
-          <h1 style={titleStyle}>Admin CineZone HD</h1>
-          <p style={subText}>Gestion des films, des membres, des sagas et des accès.</p>
-        </div>
+  <span style={badgeStyle}>👑 Administration</span>
+  <h1 style={titleStyle}>Admin CineZone HD</h1>
+  <p style={subText}>
+    Gestion des films, des membres, des sagas et des accès.
+ </p>
+
+  <div style={{ marginTop: "18px" }}>
+    <a
+      href="/admin/mail"
+      style={{
+        display: "inline-block",
+        padding: "12px 18px",
+        borderRadius: "14px",
+        background: "linear-gradient(135deg, #00c6ff, #0072ff)",
+        color: "#fff",
+        fontWeight: 800,
+        textDecoration: "none",
+        boxShadow: "0 10px 30px rgba(0,198,255,0.35)",
+      }}
+    >
+      📧 Envoyer un mail
+    </a>
+  </div>
+</div>
 
         <div style={counterStyle}>
           <strong>{memberCount}</strong>
