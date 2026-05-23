@@ -7,28 +7,28 @@ export default function AdminMailPage() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
 
-  const sendMail = async () => {
+const sendMail = async () => {
   const res = await fetch("/api/send-mail", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
 
-  body: JSON.stringify({
-    to: to.split(",").map((e) => e.trim()),
-    subject,
-    message,
-  }),
-});
+    body: JSON.stringify({
+      to: to.split(",").map((e) => e.trim()),
+      subject,
+      message,
+    }),
+  });
 
-const data = await res.json();
+  const data = await res.json();
 
-if (data.success) {
-  alert("✅ Mail envoyé !");
-} else {
-  alert("❌ " + (data.error || "Erreur envoi"));
-} 
-
+  if (data.success) {
+    alert("✅ Mail envoyé !");
+  } else {
+    alert("❌ " + (data.error || "Erreur envoi"));
+  }
+};
   return (
     <div className="p-6 text-white">
       <h1 className="text-3xl font-bold mb-6">
