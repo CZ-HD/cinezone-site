@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
       to: body.to
         .split(",")
-        .map((mail) => mail.trim()),
+        .map((mail: string) => mail.trim()),
 
       subject: body.subject,
 
