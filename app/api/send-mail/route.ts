@@ -2,15 +2,13 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function POST(req: Request) {
+export async function GET() {
   try {
-    const body = await req.json();
-
     const data = await resend.emails.send({
       from: "CineZone HD <noreply@cinezone-hd.fr>",
-      to: body.to,
-      subject: body.subject,
-      html: body.html,
+      to: "VOTREMAIL@gmail.com",
+      subject: "Test CineZone",
+      html: "<h1>Test réussi ✅</h1>",
     });
 
     return Response.json({
@@ -20,10 +18,7 @@ export async function POST(req: Request) {
   } catch (error) {
     return Response.json({
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error",
+      error,
     });
   }
 }
