@@ -846,10 +846,12 @@ const deleteAllNotifications = async () => {
       <section style={heroStyle}>
         <div>
   <span style={badgeStyle}>👑 Administration</span>
+
   <h1 style={titleStyle}>Admin CineZone HD</h1>
+
   <p style={subText}>
     Gestion des films, des membres, des sagas et des accès.
- </p>
+  </p>
 
   <div style={{ marginTop: "18px" }}>
     <a
