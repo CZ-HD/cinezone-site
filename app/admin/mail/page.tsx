@@ -14,9 +14,10 @@ export default function AdminMailPage() {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    to: to.split(",").map((e) => e.trim()),
-    subject,
-    html: `
+  to: to.split(",").map((e) => e.trim()),
+  subject,
+  message,
+}), `
       <div style="background:#050816;padding:30px;color:white;font-family:Arial">
         <h1 style="color:#00c6ff;">🎬 CineZone HD</h1>
 
