@@ -20,7 +20,10 @@ export async function POST(req: Request) {
   } catch (error) {
     return Response.json({
       success: false,
-      error,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unknown error",
     });
   }
 }
