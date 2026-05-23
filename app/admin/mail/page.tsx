@@ -14,11 +14,27 @@ export default function AdminMailPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        to,
-        subject,
-        message,
-      }),
-    });
+  to: to.split(",").map((e) => e.trim()),
+  subject,
+  html: `
+    <div style="background:#050816;padding:30px;color:white;font-family:Arial">
+      <h1 style="color:#00c6ff;">🎬 CineZone HD</h1>
+
+      <div style="
+        background:rgba(255,255,255,0.05);
+        padding:20px;
+        border-radius:14px;
+        margin-top:20px;
+      ">
+        ${message}
+      </div>
+
+      <p style="margin-top:25px;color:#999;">
+        Message envoyé par l'administration CineZone HD
+      </p>
+    </div>
+  `,
+}),
 
     const data = await res.json();
 
@@ -39,7 +55,7 @@ export default function AdminMailPage() {
 
         <input
           type="email"
-          placeholder="Email destinataire"
+          placeholder="Emails séparés par des virgules"
           value={to}
           onChange={(e) => setTo(e.target.value)}
           className="p-3 rounded bg-black border border-cyan-500"
