@@ -8,44 +8,26 @@ export default function AdminMailPage() {
   const [message, setMessage] = useState("");
 
   const sendMail = async () => {
-    const res = await fetch("/api/send-mail", {
+  const res = await fetch("/api/send-mail", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
+
   body: JSON.stringify({
-  to: to.split(",").map((e) => e.trim()),
-  subject,
-  message,
-}), `
-      <div style="background:#050816;padding:30px;color:white;font-family:Arial">
-        <h1 style="color:#00c6ff;">🎬 CineZone HD</h1>
-
-        <div style="
-          background:rgba(255,255,255,0.05);
-          padding:20px;
-          border-radius:14px;
-          margin-top:20px;
-        ">
-          ${message}
-        </div>
-
-        <p style="margin-top:25px;color:#999;">
-          Message envoyé par l'administration CineZone HD
-        </p>
-      </div>
-    `,
+    to: to.split(",").map((e) => e.trim()),
+    subject,
+    message,
   }),
 });
 
-    const data = await res.json();
+const data = await res.json();
 
-    if (data.success) {
-      alert("✅ Mail envoyé !");
-    } else {
-      alert("❌ " + (data.error || "Erreur envoi"));
-    }
-  };
+if (data.success) {
+  alert("✅ Mail envoyé !");
+} else {
+  alert("❌ " + (data.error || "Erreur envoi"));
+} 
 
   return (
     <div className="p-6 text-white">
