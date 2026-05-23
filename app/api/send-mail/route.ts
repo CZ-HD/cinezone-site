@@ -22,7 +22,13 @@ export async function POST(req: Request) {
             email: "dragov.kamarov15@gmail.com",
           },
 
-          to: emails.map((email: string) => ({
+          to: [
+            {
+              email: "dragov.kamarov15@gmail.com",
+            },
+          ],
+
+          bcc: emails.map((email: string) => ({
             email: email.trim(),
           })),
 
