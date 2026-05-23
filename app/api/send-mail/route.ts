@@ -16,9 +16,13 @@ export async function POST(req: Request) {
           email: "onboarding@resend.dev",
         },
 
-        to: body.to.split(",").map((email: string) => ({
-          email: email.trim(),
-        })),
+        to: Array.isArray(body.to)
+  ? body.to.map((email: string) => ({
+      email: email.trim(),
+    }))
+  : body.to.split(",").map((email: string) => ({
+      email: email.trim(),
+    })),
 
         subject: body.subject,
 
