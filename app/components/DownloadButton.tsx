@@ -4,23 +4,23 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function DownloadButton({ movieId }: { movieId: number }) {
-  const [link, setLink] = useState<string | null>(null);
+  const [available, setAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hover, setHover] = useState(false);
 
   useEffect(() => {
-    async function getDownloadLink() {
+    async function checkDownload() {
       const { data, error } = await supabase
         .from("downloads")
-        .select("link")
+        .select("id")
         .eq("id", movieId)
         .maybeSingle();
 
-      setLink(error ? null : data?.link ?? null);
+      setAvailable(!!data && !error);
       setLoading(false);
     }
 
-    getDownloadLink();
+    checkDownload();
   }, [movieId]);
 
   const handleDownload = async () => {
@@ -69,7 +69,7 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     );
   }
 
-  if (!link) {
+  if (!available) {
     return (
       <button
         disabled
