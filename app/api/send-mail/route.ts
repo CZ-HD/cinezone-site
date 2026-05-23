@@ -4,10 +4,11 @@ export async function POST(req: Request) {
 
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
+
       headers: {
-  "Content-Type": "application/json",
-  "api-key": process.env.BREVO_API_KEY || "",
-},
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY || "",
+      },
 
       body: JSON.stringify({
         sender: {
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
           email: "onboarding@resend.dev",
         },
 
-        to: body.to.split(",").map((email) => ({
+        to: body.to.split(",").map((email: string) => ({
           email: email.trim(),
         })),
 
@@ -23,7 +24,10 @@ export async function POST(req: Request) {
 
         htmlContent: `
           <div style="background:#050816;padding:30px;color:white;font-family:Arial">
-            <h1 style="color:#00c6ff;">🎬 CineZone HD</h1>
+
+            <h1 style="color:#00c6ff;">
+              🎬 CineZone HD
+            </h1>
 
             <div style="
               background:#0f172a;
@@ -37,6 +41,7 @@ export async function POST(req: Request) {
             <p style="margin-top:20px;color:#999;">
               Message envoyé par l'administration CineZone HD
             </p>
+
           </div>
         `,
       }),
@@ -49,7 +54,7 @@ export async function POST(req: Request) {
       data,
     });
 
-  } catch (error) {
+  } catch (error: any) {
 
     return Response.json({
       success: false,
