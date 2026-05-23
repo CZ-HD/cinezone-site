@@ -42,7 +42,7 @@ export default function AdminMailPage() {
     if (data.success) {
       alert("✅ Mail envoyé !");
     } else {
-      alert("❌ Erreur envoi");
+      alert("❌ " + (data.error || "Erreur envoi"));
     }
   };
 
