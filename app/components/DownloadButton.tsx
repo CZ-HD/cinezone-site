@@ -3,15 +3,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const addAffiliate = (url: string) => {
-  const affiliate = "af=5257374";
-
-  if (!url.includes("1fichier.com")) return url;
-  if (url.includes("af=")) return url;
-
-  return url.includes("?") ? `${url}&${affiliate}` : `${url}?${affiliate}`;
-};
-
 export default function DownloadButton({ movieId }: { movieId: number }) {
   const [link, setLink] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +23,19 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     getDownloadLink();
   }, [movieId]);
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(`/api/download/${movieId}`);
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const baseStyle: React.CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
@@ -46,6 +50,7 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     transition: "all 0.25s ease",
     userSelect: "none",
     WebkitUserSelect: "none",
+    cursor: "pointer",
   };
 
   if (loading) {
@@ -81,14 +86,9 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     );
   }
 
-  const finalLink = addAffiliate(link);
-
   return (
-    <a
-      href={finalLink}
-      target="_blank"
-      rel="noopener noreferrer"
-      draggable={false}
+    <button
+      onClick={handleDownload}
       onContextMenu={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}
       onCopy={(e) => e.preventDefault()}
@@ -109,6 +109,6 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     >
       <span>⬇</span>
       <span>TÉLÉCHARGER</span>
-    </a>
+    </button>
   );
 }
