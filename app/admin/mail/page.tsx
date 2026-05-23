@@ -35,32 +35,108 @@ export default function AdminMailPage() {
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(to bottom, #020617, #030b1d, #000000)",
+
+        background: `
+          radial-gradient(circle at top left, rgba(0,198,255,0.15), transparent 25%),
+          radial-gradient(circle at bottom right, rgba(59,130,246,0.18), transparent 30%),
+          linear-gradient(to bottom, #020617, #030b1d, #000000)
+        `,
+
+        overflow: "hidden",
+        position: "relative",
+
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+
         padding: "40px",
       }}
     >
+      {/* Glow haut gauche */}
+      <div
+        style={{
+          position: "absolute",
+          width: "500px",
+          height: "500px",
+          background: "rgba(0,198,255,0.12)",
+          filter: "blur(120px)",
+          borderRadius: "50%",
+          top: "-120px",
+          left: "-120px",
+        }}
+      />
+
+      {/* Glow bas droite */}
+      <div
+        style={{
+          position: "absolute",
+          width: "400px",
+          height: "400px",
+          background: "rgba(59,130,246,0.12)",
+          filter: "blur(120px)",
+          borderRadius: "50%",
+          bottom: "-100px",
+          right: "-100px",
+        }}
+      />
+
+      {/* Particules */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+          opacity: 0.2,
+        }}
+      />
+
+      {/* Carte */}
       <div
         style={{
           width: "100%",
-          maxWidth: "750px",
-          background: "rgba(10,15,30,0.85)",
+          maxWidth: "760px",
+
+          background: "rgba(10,15,30,0.82)",
+
           border: "1px solid rgba(0,198,255,0.25)",
-          borderRadius: "24px",
-          padding: "35px",
-          backdropFilter: "blur(14px)",
-          boxShadow: "0 0 40px rgba(0,198,255,0.15)",
+
+          borderRadius: "28px",
+
+          padding: "40px",
+
+          backdropFilter: "blur(16px)",
+
+          boxShadow: `
+            0 0 50px rgba(0,198,255,0.12),
+            inset 0 0 30px rgba(255,255,255,0.02)
+          `,
+
+          position: "relative",
+          zIndex: 2,
         }}
       >
+        {/* Ligne glow */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "2px",
+            background:
+              "linear-gradient(to right, transparent, #00c6ff, transparent)",
+          }}
+        />
+
         <h1
           style={{
             color: "white",
-            fontSize: "38px",
+            fontSize: "42px",
             fontWeight: "bold",
             marginBottom: "10px",
+            textShadow: "0 0 20px rgba(0,198,255,0.35)",
           }}
         >
           🎬 Centre Mail Admin
@@ -69,10 +145,13 @@ export default function AdminMailPage() {
         <p
           style={{
             color: "#94a3b8",
-            marginBottom: "30px",
+            marginBottom: "35px",
+            fontSize: "16px",
+            lineHeight: "1.6",
           }}
         >
-          Envoyez des notifications et annonces aux membres CineZone HD.
+          Envoyez des annonces, alertes et notifications aux membres
+          CineZone HD avec un système mail moderne et immersif.
         </p>
 
         <input
@@ -107,18 +186,35 @@ export default function AdminMailPage() {
           onClick={sendMail}
           style={{
             width: "100%",
-            marginTop: "25px",
+            marginTop: "28px",
+
             padding: "18px",
-            borderRadius: "16px",
+
+            borderRadius: "18px",
             border: "none",
+
             cursor: "pointer",
+
             background:
-              "linear-gradient(to right, #06b6d4, #3b82f6)",
+              "linear-gradient(135deg, #06b6d4, #3b82f6, #2563eb)",
+
             color: "white",
+
             fontSize: "18px",
             fontWeight: "bold",
+
             transition: "0.25s",
-            boxShadow: "0 0 25px rgba(59,130,246,0.35)",
+
+            boxShadow: `
+              0 0 30px rgba(59,130,246,0.45),
+              0 0 60px rgba(0,198,255,0.15)
+            `,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.02)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
           }}
         >
           🚀 Envoyer le mail
@@ -130,12 +226,24 @@ export default function AdminMailPage() {
 
 const inputStyle = {
   width: "100%",
-  background: "#020617",
+
+  background: "rgba(2,6,23,0.85)",
+
   border: "1px solid rgba(0,198,255,0.25)",
-  borderRadius: "14px",
+
+  borderRadius: "16px",
+
   padding: "16px",
+
   color: "white",
+
   fontSize: "16px",
+
   marginBottom: "18px",
+
   outline: "none",
+
+  transition: "0.25s",
+
+  boxShadow: "inset 0 0 12px rgba(0,0,0,0.35)",
 };
