@@ -1,4 +1,60 @@
+"use client";
+
+import { useState } from "react";
+
 export default function ContactPage() {
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/send-mail", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          email,
+          subject,
+          message,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Message envoyé ✅");
+
+        setEmail("");
+        setSubject("");
+        setMessage("");
+      } else {
+        console.error(data);
+
+        alert("Erreur lors de l'envoi ❌");
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Erreur serveur ❌");
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
+
   return (
     <main style={pageStyle}>
       <section style={cardStyle}>
@@ -8,13 +64,50 @@ export default function ContactPage() {
           Une question, une demande ou un problème ? Contacte l’équipe CineZone.
         </p>
 
-        <form style={{ display: "grid", gap: "14px", marginTop: "22px" }}>
-          <input placeholder="Ton email" style={inputStyle} />
-          <input placeholder="Sujet" style={inputStyle} />
-          <textarea placeholder="Ton message" rows={6} style={inputStyle} />
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "grid",
+            gap: "14px",
+            marginTop: "22px",
+          }}
+        >
+          <input
+            type="email"
+            placeholder="Ton email"
+            style={inputStyle}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-          <button type="button" style={buttonStyle}>
-            Envoyer
+          <input
+            type="text"
+            placeholder="Sujet"
+            style={inputStyle}
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            required
+          />
+
+          <textarea
+            placeholder="Ton message"
+            rows={6}
+            style={inputStyle}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            required
+          />
+
+          <button
+            type="submit"
+            style={{
+              ...buttonStyle,
+              opacity: loading ? 0.7 : 1,
+            }}
+            disabled={loading}
+          >
+            {loading ? "Envoi..." : "Envoyer"}
           </button>
         </form>
       </section>
@@ -26,7 +119,8 @@ const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   padding: "40px",
   color: "#fff",
-  background: "radial-gradient(circle at top, rgba(0,120,255,0.18), #000 60%)",
+  background:
+    "radial-gradient(circle at top, rgba(0,120,255,0.18), #000 60%)",
 };
 
 const cardStyle: React.CSSProperties = {
