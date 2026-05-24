@@ -1297,11 +1297,11 @@ const liveRoleColor =
 const liveStatusText =
   liveProfile?.status_text || msg.status_text;
 
-// 🔴 Vérifie si le membre s'est mis hors ligne
+// 🔴 Vérifie si le membre est invisible
 const isStatusOffline =
-  liveStatusText === "🔴 Hors ligne";
+  liveStatusText === "🔴 Invisible";
 
-// ✅ Online seulement si PAS hors ligne + connecté realtime
+// ✅ Online seulement si pas invisible
 const userIsOnline =
   !isStatusOffline &&
   onlineUserIds.includes(msg.user_id);
@@ -1324,6 +1324,18 @@ const time = new Date(msg.created_at).toLocaleTimeString(
     minute: "2-digit",
   }
 );
+
+// ✅ Couleur dynamique du statut
+const statusColor =
+  liveStatusText === "🔴 Invisible"
+    ? "#ff4d6d"
+    : liveStatusText === "⛔ Occupé"
+    ? "#ff4d6d"
+    : liveStatusText === "🎬 Je regarde un film"
+    ? "#a855f7"
+    : liveStatusText === "👑 Admin disponible"
+    ? "#4ade80"
+    : "#4ade80";
 
                 return (
                   <article
@@ -1355,17 +1367,25 @@ const time = new Date(msg.created_at).toLocaleTimeString(
                         <span style={{ color: nameColor, fontWeight: 900 }}>{name}</span>
                         {liveRole === "admin" && <span style={adminBadge}>ADMIN</span>}
                         <span style={messageTime}>{time}</span>
-                        <span
-                          style={{
-                            ...messageStatus,
-                            color:
-                              isStatusOffline || !userIsOnline ? "#ff7777" : "#4cff9b",
-                          }}
-                        >
-                          {liveStatusText || (userIsOnline ? "en ligne" : "hors ligne")}
-                        </span>
+                        const statusColor =
+  liveStatusText === "🔴 Invisible"
+    ? "#ff4d6d"
+    : liveStatusText === "⛔ Occupé"
+    ? "#ff4d6d"
+    : liveStatusText === "🎬 Je regarde un film"
+    ? "#a855f7"
+    : liveStatusText === "👑 Admin disponible"
+    ? "#4ade80"
+    : "#4ade80";
                       </div>
-
+<span
+  style={{
+    ...messageStatus,
+    color: statusColor,
+  }}
+>
+  {liveStatusText || (userIsOnline ? "en ligne" : "hors ligne")}
+</span>
                       <div style={messageBubbleV2}>
                         {msg.reply_to && (
                           <div style={replyPreviewBoxClean}>
