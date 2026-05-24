@@ -992,7 +992,6 @@ export default function ChatPage() {
       }}
     />
 
-```
 <span
   style={{
     ...onlineDot,
@@ -1004,7 +1003,6 @@ export default function ChatPage() {
     )}`,
   }}
 />
-```
 
   </div>
 
@@ -1012,7 +1010,6 @@ export default function ChatPage() {
     <p style={miniProfileName}>
       {displayName}
 
-```
   {isAdmin && (
     <span style={adminBadge}>
       ADMIN
@@ -1030,7 +1027,6 @@ export default function ChatPage() {
 >
   {profile?.status_text || "🟢 En ligne"}
 </p>
-```
 
   </div>
 </div>
