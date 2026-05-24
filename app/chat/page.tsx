@@ -600,7 +600,7 @@ member.user_id === user.id
 username:
 updatedProfile?.username,
 
-```
+
       avatar:
         updatedProfile?.avatar,
 
@@ -610,7 +610,7 @@ updatedProfile?.username,
       status_text: safeStatus,
     }
   : member
-```
+
 
 )
 );
