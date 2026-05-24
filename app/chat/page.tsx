@@ -1345,47 +1345,59 @@ const statusColor =
                     style={messageLine}
                   >
                     <div style={avatarWrapMsg}>
-                      <img
-                        src={msgAvatar}
-                        alt="avatar"
-                        style={avatarMsg}
-                        onError={(e) => {
-                          e.currentTarget.src = DEFAULT_AVATAR;
-                        }}
-                      />
-                      <span
-                        style={{
-                          ...onlineDotSmall,
-                          background:
-                            isStatusOffline || !userIsOnline ? "#ff5c5c" : "#4cff9b",
-                        }}
-                      />
-                    </div>
+  <img
+    src={msgAvatar}
+    alt="avatar"
+    style={avatarMsg}
+    onError={(e) => {
+      e.currentTarget.src = DEFAULT_AVATAR;
+    }}
+  />
 
-                    <div style={messageContent}>
-                      <div style={messageMeta}>
-                        <span style={{ color: nameColor, fontWeight: 900 }}>{name}</span>
-                        {liveRole === "admin" && <span style={adminBadge}>ADMIN</span>}
-                        <span style={messageTime}>{time}</span>
-                        const statusColor =
-  liveStatusText === "🔴 Invisible"
-    ? "#ff4d6d"
-    : liveStatusText === "⛔ Occupé"
-    ? "#ff4d6d"
-    : liveStatusText === "🎬 Je regarde un film"
-    ? "#a855f7"
-    : liveStatusText === "👑 Admin disponible"
-    ? "#4ade80"
-    : "#4ade80";
-                      </div>
-<span
-  style={{
-    ...messageStatus,
-    color: statusColor,
-  }}
->
-  {liveStatusText || (userIsOnline ? "en ligne" : "hors ligne")}
-</span>
+  <span
+    style={{
+      ...onlineDotSmall,
+
+      background:
+        liveStatusText === "🔴 Invisible"
+          ? "#ff5c5c"
+          : liveStatusText === "⛔ Occupé"
+          ? "#ff5c5c"
+          : liveStatusText === "🎬 Je regarde un film"
+          ? "#a855f7"
+          : "#4cff9b",
+    }}
+  />
+</div>
+
+<div style={messageContent}>
+  <div style={messageMeta}>
+  <span
+    style={{
+      color: nameColor,
+      fontWeight: 900,
+    }}
+  >
+    {name}
+  </span>
+
+  {liveRole === "admin" && (
+    <span style={adminBadge}>ADMIN</span>
+  )}
+
+  <span style={messageTime}>
+    {time}
+  </span>
+
+  <span
+    style={{
+      ...messageStatus,
+      color: statusColor,
+    }}
+  >
+    {liveStatusText || (userIsOnline ? "🟢 En ligne" : "🔴 Hors ligne")}
+  </span>
+</div>
                       <div style={messageBubbleV2}>
                         {msg.reply_to && (
                           <div style={replyPreviewBoxClean}>
