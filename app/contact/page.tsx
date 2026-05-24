@@ -58,11 +58,49 @@ export default function ContactPage() {
   return (
     <main style={pageStyle}>
       <section style={cardStyle}>
-        <h1>📩 Contactez-nous</h1>
+        <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    marginBottom: "12px",
+  }}
+>
+  <img
+    src="https://i.imgur.com/8Km9tLL.png"
+    alt="CineZone HD"
+    style={{
+      width: "68px",
+      height: "68px",
+      borderRadius: "50%",
+      objectFit: "cover",
+      border: "2px solid rgba(0,198,255,0.35)",
+      boxShadow: "0 0 20px rgba(0,198,255,0.25)",
+      background: "#111827",
+    }}
+  />
 
-        <p style={{ color: "#aab6c8" }}>
-          Une question, une demande ou un problème ? Contacte l’équipe CineZone.
-        </p>
+  <div>
+    <h1
+      style={{
+        margin: 0,
+        fontSize: "34px",
+        color: "white",
+      }}
+    >
+      📩 Contactez-nous
+    </h1>
+
+    <p
+      style={{
+        color: "#aab6c8",
+        marginTop: "8px",
+      }}
+    >
+      Une question, une demande ou un problème ? Contacte l’équipe CineZone HD.
+    </p>
+  </div>
+</div>
 
         <form
           onSubmit={handleSubmit}
@@ -130,6 +168,9 @@ const cardStyle: React.CSSProperties = {
   borderRadius: "24px",
   background: "rgba(10,15,25,0.9)",
   border: "1px solid rgba(0,198,255,0.25)",
+
+  backdropFilter: "blur(14px)",
+  boxShadow: "0 0 40px rgba(0,198,255,0.12)",
 };
 
 const inputStyle: React.CSSProperties = {
