@@ -544,18 +544,23 @@ export default function ChatPage() {
       safeStatus = "🟢 En ligne";
     }
 
-    const { data: updatedProfile, error } = await supabase
-      .from("profiles")
-      .update({
-        username: editUsername || user.email,
-        status_text:
-  updatedProfile?.status_text ||
-  safeStatus ||
-  "🟢 En ligne",
-      })
-      .eq("id", user.id)
-      .select("id, username, avatar, role, role_color, status_text")
-      .single();
+    const {
+  data: updatedProfile,
+  error,
+}: any = await supabase
+  .from("profiles")
+  .update({
+    username:
+      editUsername || user.email,
+
+    status_text:
+      safeStatus || "🟢 En ligne",
+  })
+  .eq("id", user.id)
+  .select(
+    "id, username, avatar, role, role_color, status_text"
+  )
+  .single();
 
     if (error) {
       alert("Erreur sauvegarde : " + error.message);
