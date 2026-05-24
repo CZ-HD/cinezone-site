@@ -21,12 +21,12 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           sender: {
             name: "CineZone HD",
-            email: "dragov.kamarov15@gmail.com",
+            email: "contact@cinezone-hd.fr",
           },
 
           to: [
             {
-              email: "dragov.kamarov15@gmail.com",
+              email: "contact@cinezone-hd.fr",
             },
           ],
 
