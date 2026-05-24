@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 const getStatusColor = (status?: string) => {
   switch (status) {
-    case "🔴 Invisible":
-      return "#ff4d6d";
+    case "👻 Invisible":
+    return "#7c3aed";
+
 
     case "⛔ Occupé":
-      return "#ff4d6d";
+return "#f59e0b";
+
 
     case "🎬 Je regarde un film":
       return "#a855f7";
@@ -406,13 +408,13 @@ export default function ChatPage() {
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
-          await presenceChannel.track({
-            user_id: user.id,
-            username: profile.username,
-            avatar: profile.avatar,
-            role: profile.role,
-            status_text: profile.status_text || "🟢 En ligne",
-          });
+        await presenceChannel.track({
+  user_id: user.id,
+  username: profile.username,
+  avatar: profile.avatar,
+  role: profile.role,
+  status_text: profile.status_text || "🟢 En ligne",
+});  
         }
       });
 
@@ -980,44 +982,68 @@ export default function ChatPage() {
           </div>
 
           <div style={miniProfileCard}>
-            <div style={avatarWrap}>
-              <img
-                src={avatarUrl}
-                alt="avatar"
-                style={avatarSmall}
-                onError={(e) => {
-                  e.currentTarget.src = DEFAULT_AVATAR;
-                }}
-              />
-              <span
-                style={{
-                  ...onlineDot,
-                  background:
-                    profile?.status_text === "🔴 Hors ligne" ? "#ff5c5c" : "#4cff9b",
-                }}
-              />
-            </div>
+  <div style={avatarWrap}>
+    <img
+      src={avatarUrl}
+      alt="avatar"
+      style={avatarSmall}
+      onError={(e) => {
+        e.currentTarget.src = DEFAULT_AVATAR;
+      }}
+    />
 
-            <div style={{ minWidth: 0 }}>
-              <p style={miniProfileName}>
-                {displayName}
-                {isAdmin && <span style={adminBadge}>ADMIN</span>}
-              </p>
-              <p
-                style={{
-                  ...miniProfileStatus,
-                  color:
-                    profile?.status_text === "🔴 Hors ligne" ? "#ff7777" : "#4cff9b",
-                }}
-              >
-                {profile?.status_text || "🟢 En ligne"}
-              </p>
-            </div>
-          </div>
+```
+<span
+  style={{
+    ...onlineDot,
+    background: getStatusColor(
+      profile?.status_text
+    ),
+    boxShadow: `0 0 10px ${getStatusColor(
+      profile?.status_text
+    )}`,
+  }}
+/>
+```
 
-          <div
-            style={{
-              marginTop: "22px",
+  </div>
+
+  <div style={{ minWidth: 0 }}>
+    <p style={miniProfileName}>
+      {displayName}
+
+```
+  {isAdmin && (
+    <span style={adminBadge}>
+      ADMIN
+    </span>
+  )}
+</p>
+
+<p
+  style={{
+    ...miniProfileStatus,
+    color: getStatusColor(
+      profile?.status_text
+    ),
+  }}
+>
+  {profile?.status_text || "🟢 En ligne"}
+</p>
+```
+
+  </div>
+</div>
+
+<div
+  style={{
+    marginTop: "22px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
+  }}
+>
+
               display: "flex",
               flexDirection: "column",
               gap: "18px",
@@ -1666,7 +1692,7 @@ const statusColor =
           </div>
         </section>
 
-        <aside style={onlinePanel}>
+              <aside style={onlinePanel}>
           <div style={onlineHeaderV2}>
             <div>
               <h2 style={onlineTitle}>Membres</h2>
@@ -1680,53 +1706,58 @@ const statusColor =
             {onlineMembers.length === 0 ? (
               <p style={{ color: "#888" }}>Aucun membre en ligne.</p>
             ) : (
-              onlineMembers.map((member) => (
-                <div key={member.user_id} style={onlineMemberCard}>
-                  <div style={avatarWrapSmall}>
-                    <img
-                      src={member.avatar || DEFAULT_AVATAR}
-                      alt="avatar"
-                      style={avatarMember}
-                      onError={(e) => {
-                        e.currentTarget.src = DEFAULT_AVATAR;
-                      }}
-                    />
-                    <span
-                      style={{
-                        ...onlineDotSmall,
-                        background:
-                          member.status_text === "🔴 Hors ligne" ? "#ff5c5c" : "#4cff9b",
-                      }}
-                    />
-                  </div>
+              onlineMembers.map((member) => {
+                const statusColor = getStatusColor(member.status_text);
+                const isInvisible = member.status_text === "🔴 Invisible";
 
-                  <div style={{ minWidth: 0 }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontWeight: 900,
-                        color: member.role === "admin" ? "gold" : "#fff",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {member.username || "Utilisateur"}
-                      {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
-                    </p>
-                    <p
-                      style={{
-                        margin: "4px 0 0",
-                        fontSize: "12px",
-                        color:
-                          member.status_text === "🔴 Hors ligne" ? "#ff7777" : "#4cff9b",
-                      }}
-                    >
-                      {member.status_text || "🟢 En ligne"}
-                    </p>
+                return (
+                  <div key={member.user_id} style={onlineMemberCard}>
+                    <div style={avatarWrapSmall}>
+                      <img
+                        src={member.avatar || DEFAULT_AVATAR}
+                        alt="avatar"
+                        style={avatarMember}
+                        onError={(e) => {
+                          e.currentTarget.src = DEFAULT_AVATAR;
+                        }}
+                      />
+                      <span
+                        style={{
+                          ...onlineDotSmall,
+                          background: statusColor,
+                          boxShadow: `0 0 8px ${statusColor}`,
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ minWidth: 0 }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontWeight: 900,
+                          color: member.role === "admin" ? "gold" : "#fff",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {member.username || "Utilisateur"}
+                        {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
+                      </p>
+                      <p
+                        style={{
+                          margin: "4px 0 0",
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          color: statusColor,
+                        }}
+                      >
+                        {member.status_text || "🟢 En ligne"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -1736,7 +1767,7 @@ const statusColor =
             <p>📥 Les demandes se font depuis le bouton dédié</p>
             <p>🔥 Les nouveautés peuvent être annoncées ici</p>
           </div>
-        </aside>
+        </aside>  
       </div>
     </main>
   );
