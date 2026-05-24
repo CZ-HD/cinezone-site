@@ -14,7 +14,7 @@ export default function ContactPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/send-mail", {
+      const res = await fetch("/api/contact", {
         method: "POST",
 
         headers: {
