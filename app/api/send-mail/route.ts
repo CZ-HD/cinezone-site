@@ -2,9 +2,11 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const emails = Array.isArray(body.to)
-      ? body.to
-      : body.to.split(",");
+    const emails = body.to
+      ? Array.isArray(body.to)
+        ? body.to
+        : body.to.split(",")
+      : ["dragov.kamarov15@gmail.com"];
 
     const response = await fetch(
       "https://api.brevo.com/v3/smtp/email",
@@ -47,11 +49,21 @@ export async function POST(req: Request) {
                 border-radius:12px;
                 margin-top:20px;
               ">
-                ${body.message.replace(/\n/g, "<br>")}
+
+                ${
+                  body.email
+                    ? `<p><b>Email du visiteur :</b> ${body.email}</p>`
+                    : ""
+                }
+
+                <div style="margin-top:15px;">
+                  ${body.message.replace(/\n/g, "<br>")}
+                </div>
+
               </div>
 
               <p style="margin-top:20px;color:#999;">
-                Message envoyé par l'administration CineZone HD
+                Message envoyé depuis CineZone HD
               </p>
 
             </div>
