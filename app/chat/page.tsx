@@ -570,23 +570,11 @@ export default function ChatPage() {
 
     addProfileToMap(user.id, updatedProfile);
 
-setOnlineMembers((prev) =>
-prev.map((member) =>
-member.user_id === user.id
-? {
-...member,
-username:
-updatedProfile?.username,
-avatar:
-updatedProfile?.avatar,
-role:
-updatedProfile?.role,
-status_text:
-updatedProfile?.status_text,
-}
-: member
-)
-);
+addProfileToMap(user.id, updatedProfile);
+
+await fetchOnlineUsers();
+
+setShowProfile(false);
 
 setShowProfile(false);
 
