@@ -2,6 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+const getStatusColor = (status?: string) => {
+  switch (status) {
+    case "🔴 Invisible":
+      return "#ff4d6d";
+
+    case "⛔ Occupé":
+      return "#ff4d6d";
+
+    case "🎬 Je regarde un film":
+      return "#a855f7";
+
+    case "👑 Admin disponible":
+      return "#4ade80";
+
+    case "🟢 En ligne":
+      return "#4ade80";
+
+    default:
+      return "#4ade80";
+  }
+};
 
 const DEFAULT_AVATAR =
   "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png";
