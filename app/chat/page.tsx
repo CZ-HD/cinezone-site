@@ -569,7 +569,27 @@ export default function ChatPage() {
     }));
 
     addProfileToMap(user.id, updatedProfile);
-    setShowProfile(false);
+
+setOnlineMembers((prev) =>
+prev.map((member) =>
+member.user_id === user.id
+? {
+...member,
+username:
+updatedProfile?.username,
+avatar:
+updatedProfile?.avatar,
+role:
+updatedProfile?.role,
+status_text:
+updatedProfile?.status_text,
+}
+: member
+)
+);
+
+setShowProfile(false);
+
   };
 
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
