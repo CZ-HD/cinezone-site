@@ -1362,7 +1362,11 @@ const time = new Date(msg.created_at).toLocaleTimeString(
                               isStatusOffline || !userIsOnline ? "#ff7777" : "#4cff9b",
                           }}
                         >
-                          {isStatusOffline || !userIsOnline ? "hors ligne" : "en ligne"}
+                          {isStatusOffline
+  ? "invisible"
+  : userIsOnline
+    ? "en ligne"
+    : "hors ligne"}
                         </span>
                       </div>
 
