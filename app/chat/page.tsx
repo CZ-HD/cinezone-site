@@ -1192,7 +1192,7 @@ export default function ChatPage() {
                 style={inputStyle}
               >
                 <option value="🟢 En ligne">🟢 En ligne</option>
-                <option value="🔴 Hors ligne">🔴 Hors ligne</option>
+                <option value="🔴 Invisible">🔴 Invisible </option>
                 <option value="⛔ Occupé">⛔ Occupé</option>
                 <option value="🎬 Je regarde un film">🎬 Je regarde un film</option>
                 {isAdmin && <option value="👑 Admin disponible">👑 Admin disponible</option>}
@@ -1272,25 +1272,58 @@ export default function ChatPage() {
             ) : (
               messages.map((msg) => {
                 const isMe = msg.user_id === user?.id;
-                const liveProfile = profilesMap[msg.user_id];
-                const name = isMe
-                  ? displayName
-                  : liveProfile?.username || msg.username || msg.email || "Utilisateur";
-                const msgAvatar = isMe
-                  ? avatarUrl
-                  : liveProfile?.avatar || msg.avatar || DEFAULT_AVATAR;
-                const liveRole = liveProfile?.role || msg.role;
-                const liveRoleColor = liveProfile?.role_color || msg.role_color;
-                const liveStatusText = liveProfile?.status_text || msg.status_text;
-                const userIsOnline = onlineUserIds.includes(msg.user_id);
-                const isStatusOffline = liveStatusText === "🔴 Hors ligne";
-                const nameColor = liveRole === "admin" ? "gold" : liveRoleColor || "#00c6ff";
-                const msgReactions = getMessageReactions(msg.id);
-                const repliedMessage = getReplyMessage(msg.reply_to);
-                const time = new Date(msg.created_at).toLocaleTimeString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
+
+const liveProfile = profilesMap[msg.user_id];
+
+const name = isMe
+  ? displayName
+  : liveProfile?.username ||
+    msg.username ||
+    msg.email ||
+    "Utilisateur";
+
+const msgAvatar = isMe
+  ? avatarUrl
+  : liveProfile?.avatar ||
+    msg.avatar ||
+    DEFAULT_AVATAR;
+
+const liveRole =
+  liveProfile?.role || msg.role;
+
+const liveRoleColor =
+  liveProfile?.role_color || msg.role_color;
+
+const liveStatusText =
+  liveProfile?.status_text || msg.status_text;
+
+// 🔴 Vérifie si le membre s'est mis hors ligne
+const isStatusOffline =
+  liveStatusText === "🔴 Hors ligne";
+
+// ✅ Online seulement si PAS hors ligne + connecté realtime
+const userIsOnline =
+  !isStatusOffline &&
+  onlineUserIds.includes(msg.user_id);
+
+const nameColor =
+  liveRole === "admin"
+    ? "gold"
+    : liveRoleColor || "#00c6ff";
+
+const msgReactions =
+  getMessageReactions(msg.id);
+
+const repliedMessage =
+  getReplyMessage(msg.reply_to);
+
+const time = new Date(msg.created_at).toLocaleTimeString(
+  "fr-FR",
+  {
+    hour: "2-digit",
+    minute: "2-digit",
+  }
+);
 
                 return (
                   <article
