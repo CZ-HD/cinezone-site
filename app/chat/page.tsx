@@ -548,7 +548,10 @@ export default function ChatPage() {
       .from("profiles")
       .update({
         username: editUsername || user.email,
-        status_text: safeStatus || "🟢 En ligne",
+        status_text:
+  updatedProfile?.status_text ||
+  safeStatus ||
+  "🟢 En ligne",
       })
       .eq("id", user.id)
       .select("id, username, avatar, role, role_color, status_text")
@@ -559,26 +562,62 @@ export default function ChatPage() {
       return;
     }
 
-    setProfile((prev) => ({
-      ...prev,
-      username: updatedProfile?.username || editUsername || user.email,
-      avatar: updatedProfile?.avatar || prev?.avatar || DEFAULT_AVATAR,
-      role: updatedProfile?.role || prev?.role || "user",
-      role_color: updatedProfile?.role_color || prev?.role_color || "#00c6ff",
-      status_text: updatedProfile?.status_text || safeStatus || "🟢 En ligne",
-    }));
+setProfile((prev) => ({
+...prev,
+username:
+updatedProfile?.username ||
+editUsername ||
+user.email,
 
-    addProfileToMap(user.id, updatedProfile);
+avatar:
+updatedProfile?.avatar ||
+prev?.avatar ||
+DEFAULT_AVATAR,
+
+role:
+updatedProfile?.role ||
+prev?.role ||
+"user",
+
+role_color:
+updatedProfile?.role_color ||
+prev?.role_color ||
+"#00c6ff",
+
+status_text:
+updatedProfile?.status_text ||
+safeStatus ||
+"🟢 En ligne",
+}));
 
 addProfileToMap(user.id, updatedProfile);
 
-await fetchOnlineUsers();
+setOnlineMembers((prev) =>
+prev.map((member) =>
+member.user_id === user.id
+? {
+...member,
+username:
+updatedProfile?.username,
+
+```
+      avatar:
+        updatedProfile?.avatar,
+
+      role:
+        updatedProfile?.role,
+
+      status_text: safeStatus,
+    }
+  : member
+```
+
+)
+);
 
 setShowProfile(false);
 
-setShowProfile(false);
 
-  };
 
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !e.target.files?.[0]) return;
