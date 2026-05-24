@@ -1043,12 +1043,6 @@ export default function ChatPage() {
     gap: "18px",
   }}
 >
-
-              display: "flex",
-              flexDirection: "column",
-              gap: "18px",
-            }}
-          >
             <div
               style={{
                 padding: "14px",
