@@ -1355,21 +1355,16 @@ const statusColor =
   />
 
   <span
-    style={{
-      ...onlineDotSmall,
+  style={{
+    ...onlineDotSmall,
 
-      background:
-  liveStatusText === "🔴 Invisible"
-    ? "#ff4d6d"
-    : liveStatusText === "⛔ Occupé"
-    ? "#ff4d6d"
-    : liveStatusText === "🎬 Je regarde un film"
-    ? "#a855f7"
-    : liveStatusText === "👑 Admin disponible"
-    ? "#4ade80"
-    : "#4ade80",
-    }}
-  />
+    background: getStatusColor(liveStatusText),
+
+    boxShadow: `0 0 10px ${getStatusColor(
+      liveStatusText
+    )}`,
+  }}
+/>
 </div>
 
 <div style={messageContent}>
