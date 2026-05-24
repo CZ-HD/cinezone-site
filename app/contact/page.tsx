@@ -67,18 +67,17 @@ export default function ContactPage() {
   }}
 >
   <img
-    src="https://i.imgur.com/8Km9tLL.png"
-    alt="CineZone HD"
-    style={{
-      width: "68px",
-      height: "68px",
-      borderRadius: "50%",
-      objectFit: "cover",
-      border: "2px solid rgba(0,198,255,0.35)",
-      boxShadow: "0 0 20px rgba(0,198,255,0.25)",
-      background: "#111827",
-    }}
-  />
+  src="/contact.jpeg"
+  alt="Contact CineZone HD"
+  style={{
+    width: "72px",
+    height: "72px",
+    borderRadius: "18px",
+    objectFit: "cover",
+    border: "1px solid rgba(0,198,255,0.25)",
+    boxShadow: "0 0 25px rgba(0,198,255,0.15)",
+  }}
+/>
 
   <div>
     <h1
