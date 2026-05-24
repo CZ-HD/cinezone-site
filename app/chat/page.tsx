@@ -597,9 +597,9 @@ prev.map((member) =>
 member.user_id === user.id
 ? {
 ...member,
-username:
-updatedProfile?.username,
 
+      username:
+        updatedProfile?.username,
 
       avatar:
         updatedProfile?.avatar,
@@ -611,13 +611,11 @@ updatedProfile?.username,
     }
   : member
 
-
 )
 );
 
 setShowProfile(false);
-
-
+};
 
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !e.target.files?.[0]) return;
