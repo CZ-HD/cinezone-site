@@ -1359,13 +1359,15 @@ const statusColor =
       ...onlineDotSmall,
 
       background:
-        liveStatusText === "🔴 Invisible"
-          ? "#ff5c5c"
-          : liveStatusText === "⛔ Occupé"
-          ? "#ff5c5c"
-          : liveStatusText === "🎬 Je regarde un film"
-          ? "#a855f7"
-          : "#4cff9b",
+  liveStatusText === "🔴 Invisible"
+    ? "#ff4d6d"
+    : liveStatusText === "⛔ Occupé"
+    ? "#ff4d6d"
+    : liveStatusText === "🎬 Je regarde un film"
+    ? "#a855f7"
+    : liveStatusText === "👑 Admin disponible"
+    ? "#4ade80"
+    : "#4ade80",
     }}
   />
 </div>
