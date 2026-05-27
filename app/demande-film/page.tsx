@@ -92,25 +92,32 @@ export default function DemandeFilmPage() {
   }
 
   async function envoyerDemande() {
-    if (!tmdbLink.trim() || !annee.trim() || !codec || !commentaire.trim()) {
-      setMessage("❌ Tous les champs sont obligatoires.");
-      return;
-    }
 
-    setLoading(true);
+  const tmdbValue = tmdbLink.trim();
 
-    const { error } = await supabase.from("demandes_films").insert({
-    user_id: user.id,
-    email: user.email,
-  tmdb_link: tmdbLink.trim(),
-  annee: annee.trim(),
-  codec,
-  langue,
-  commentaire: commentaire.trim(),
-});
+  const isValidTMDB =
+  /^https?:\/\/(www\.)?themoviedb\.org\/movie\/\d+/i.test(tmdbValue);
 
-    setLoading(false);
+  if (tmdbValue.includes("cinezone-hd.fr")) {
+    setMessage(
+      "❌ Les liens CineZone sont interdits. Merci d’envoyer un vrai lien TMDB."
+    );
+    return;
+  }
 
+  if (!isValidTMDB) {
+    setMessage(
+      "❌ Vous devez fournir un lien TMDB complet valide."
+    );
+    return;
+  }
+
+  if (!annee.trim() || !codec || !commentaire.trim()) {
+    setMessage("❌ Tous les champs sont obligatoires.");
+    return;
+  }
+
+  setLoading(true);`
     if (error) {
       setMessage("❌ Erreur : " + error.message);
       return;
@@ -220,17 +227,31 @@ export default function DemandeFilmPage() {
 
           <div style={tmdbRow}>
             <div style={{ flex: 1 }}>
-              <label style={labelStyle}>Lien ou ID TMDB</label>
-              <div style={inputWithIcon}>
-                <span style={inputIcon}>🔗</span>
-                <input
-                  value={tmdbLink}
-                  onChange={(e) => setTmdbLink(e.target.value)}
-                  placeholder="Ex : https://www.themoviedb.org/movie/12345 ou 12345"
-                  style={inputInside}
-                />
-              </div>
-            </div>
+  <label style={labelStyle}>Lien ou ID TMDB</label>
+
+  <div style={tmdbWarningBox}>
+  ⚠️ Un lien TMDB complet valide est obligatoire.
+  <br />
+  ❌ Les liens CineZone sont refusés.
+  <br />
+  ❌ Les IDs seuls sont refusés.
+  <br />
+  ✅ Exemple :
+  <br />
+  https://www.themoviedb.org/movie/606462
+</div>
+
+  <div style={inputWithIcon}>
+    <span style={inputIcon}>🔗</span>
+
+    <input
+      value={tmdbLink}
+      onChange={(e) => setTmdbLink(e.target.value)}
+      placeholder="Ex : https://www.themoviedb.org/movie/12345 ou 12345"
+      style={inputInside}
+    />
+  </div>
+</div>
 
             <button
   type="button"
@@ -1101,4 +1122,15 @@ const mentionUsername: React.CSSProperties = {
 const mentionEmail: React.CSSProperties = {
   fontSize: "11px",
   color: "#94a3b8",
+};
+const tmdbWarningBox: React.CSSProperties = {
+  marginBottom: "12px",
+  padding: "12px 14px",
+  borderRadius: "14px",
+  background: "rgba(255,140,0,0.10)",
+  border: "1px solid rgba(255,140,0,0.35)",
+  color: "#ffd089",
+  fontSize: "13px",
+  lineHeight: 1.6,
+  fontWeight: 700,
 };
