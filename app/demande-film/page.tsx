@@ -117,7 +117,7 @@ export default function DemandeFilmPage() {
     return;
   }
 
-  setLoading(true);`
+  setLoading(true);
     if (error) {
       setMessage("❌ Erreur : " + error.message);
       return;
@@ -492,13 +492,13 @@ export default function DemandeFilmPage() {
           style={mentionItem}
           onClick={() => {
             const newText = replyText.replace(
-              /@([^\s]*)$/,
-              `@${
-                u.username ||
-                u.email?.split("@")[0] ||
-                "Utilisateur"
-              } `
-            );
+  /@([^\s]*)$/,
+  `@${
+    u.username ||
+    u.email?.split("@")[0] ||
+    "Utilisateur"
+  } `
+);
 
             setReplyText(newText);
             setShowMentions(false);
