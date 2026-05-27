@@ -118,18 +118,29 @@ export default function DemandeFilmPage() {
   }
 
   setLoading(true);
-    if (error) {
-      setMessage("❌ Erreur : " + error.message);
-      return;
-    }
+
+const { error } = await supabase.from("demandes_films").insert({
+  user_id: user.id,
+  email: user.email,
+  tmdb_link: tmdbLink.trim(),
+  annee: annee.trim(),
+  codec,
+  langue,
+  commentaire: commentaire.trim(),
+});
+
+if (error) {
+  setMessage("❌ Erreur : " + error.message);
+  return;
+}
 
     setMessage("✅ Demande envoyée avec succès !");
-    setTmdbLink("");
-    setAnnee("");
-    setCodec("H264");
-    setLangue("VF / VOSTFR");
-    setCommentaire("");
-    loadDemandes();
+setTmdbLink("");
+setAnnee("");
+setCodec("H264");
+setLangue("VF / VOSTFR");
+setCommentaire("");
+loadDemandes();
   }
 
   function startEdit(demande: any) {
