@@ -24,7 +24,13 @@ export default async function MoviePage({ params }: any) {
     .maybeSingle();
 
   const localMovie = localResult.data;
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
+const isAdmin =
+  user?.email === "blackph4tom@gmail.com" ||
+  user?.email === "lafooteusedu54@hotmail.fr";
   const res = await fetch(
     `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`,
     { cache: "no-store" }
@@ -59,7 +65,9 @@ export default async function MoviePage({ params }: any) {
       backdrop_path: localMovie.backdrop_path || localMovie.poster_path,
       vote_average: localMovie.vote_average,
       release_date: localMovie.release_date,
-      overview: localMovie.overview || "Film ajouté manuellement.",
+      overview:
+  localMovie.overview ||
+  (isAdmin ? "⚠️ Film ajouté manuellement." : ""),
       imdb_id: localMovie.imdb_id,
       link: localMovie.link,
     };
