@@ -98,30 +98,30 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
       ...baseStyle,
       position: "relative",
       overflow: "hidden",
-      padding: "14px 26px",
-      borderRadius: "22px",
-      border: "1px solid rgba(120,220,255,0.35)",
+      padding: "12px 20px",
+      borderRadius: "18px",
+      border: "1px solid rgba(120,220,255,0.28)",
       background: `
         linear-gradient(
           135deg,
-          rgba(0,198,255,0.18),
-          rgba(0,114,255,0.22),
-          rgba(138,43,226,0.28)
+          rgba(0,198,255,0.14),
+          rgba(0,114,255,0.16),
+          rgba(138,43,226,0.18)
         )
       `,
-      backdropFilter: "blur(14px)",
-      WebkitBackdropFilter: "blur(14px)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
       color: "#fff",
-      transition: "all 0.28s ease",
+      transition: "all 0.25s ease",
       boxShadow: hover
         ? `
-          0 0 18px rgba(0,198,255,0.8),
-          0 0 38px rgba(138,43,226,0.45),
-          inset 0 0 18px rgba(255,255,255,0.08)
+          0 0 16px rgba(0,198,255,0.65),
+          0 0 30px rgba(138,43,226,0.30),
+          inset 0 0 14px rgba(255,255,255,0.06)
         `
         : `
-          0 0 10px rgba(0,198,255,0.35),
-          inset 0 0 10px rgba(255,255,255,0.04)
+          0 0 10px rgba(0,198,255,0.22),
+          inset 0 0 10px rgba(255,255,255,0.03)
         `,
       transform: hover
         ? "translateY(-2px) scale(1.03)"
@@ -134,7 +134,7 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
         position: "absolute",
         inset: 0,
         background:
-          "linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.16) 50%, transparent 80%)",
+          "linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.10) 50%, transparent 80%)",
         transform: hover
           ? "translateX(180%)"
           : "translateX(-180%)",
@@ -147,16 +147,16 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
       style={{
         position: "relative",
         zIndex: 2,
-        width: "42px",
-        height: "42px",
+        width: "36px",
+        height: "36px",
         borderRadius: "50%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "rgba(255,255,255,0.08)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "0 0 14px rgba(0,198,255,0.35)",
-        fontSize: "20px",
+        background: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 0 12px rgba(0,198,255,0.25)",
+        fontSize: "18px",
       }}
     >
       ⬇
@@ -175,9 +175,9 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     >
       <span
         style={{
-          fontSize: "18px",
+          fontSize: "16px",
           fontWeight: 900,
-          letterSpacing: "1px",
+          letterSpacing: "0.8px",
         }}
       >
         TÉLÉCHARGER
@@ -187,32 +187,13 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
         style={{
           fontSize: "11px",
           color: "#8be9ff",
-          marginTop: "4px",
-          letterSpacing: "0.6px",
+          marginTop: "3px",
+          letterSpacing: "0.4px",
         }}
       >
-        ACCÈS RAPIDE • QUALITÉ HD
+        Téléchargement rapide
       </span>
     </div>
-
-    {/* Badge HD */}
-    <div
-      style={{
-        position: "relative",
-        zIndex: 2,
-        marginLeft: "8px",
-        padding: "6px 10px",
-        borderRadius: "10px",
-        border: "1px solid rgba(120,220,255,0.35)",
-        background: "rgba(255,255,255,0.05)",
-        fontSize: "12px",
-        fontWeight: 900,
-        color: "#8be9ff",
-        boxShadow: "0 0 12px rgba(0,198,255,0.25)",
-      }}
-    >
-      HD
-    </div>
-    </button>
+  </button>
 );
 }
