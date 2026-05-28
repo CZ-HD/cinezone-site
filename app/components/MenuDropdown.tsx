@@ -12,19 +12,19 @@ export default function MenuDropdown() {
         onClick={() => setOpen(!open)}
         style={menuBtn}
       >
-        <span style={{ fontSize: "18px" }}>☰</span>
+        <span style={{ fontSize: "15px" }}>☰</span>
 
         <span>Menu</span>
 
         <span
           style={{
-            fontSize: "12px",
+            fontSize: "10px",
             color: "#8be9ff",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "0.25s ease",
           }}
         >
-          ▼
+          ▲
         </span>
       </button>
 
@@ -40,7 +40,7 @@ export default function MenuDropdown() {
                 style={{
                   ...iconBubble,
                   boxShadow:
-                    "0 0 18px rgba(0,198,255,0.25)",
+                    "0 0 14px rgba(0,198,255,0.18)",
                 }}
               >
                 🏠
@@ -62,7 +62,7 @@ export default function MenuDropdown() {
                 style={{
                   ...iconBubble,
                   boxShadow:
-                    "0 0 18px rgba(255,200,0,0.22)",
+                    "0 0 14px rgba(255,200,0,0.18)",
                 }}
               >
                 ⭐
@@ -84,7 +84,7 @@ export default function MenuDropdown() {
                 style={{
                   ...iconBubble,
                   boxShadow:
-                    "0 0 18px rgba(170,120,255,0.22)",
+                    "0 0 14px rgba(170,120,255,0.18)",
                 }}
               >
                 📰
@@ -106,13 +106,13 @@ export default function MenuDropdown() {
                 style={{
                   ...iconBubble,
                   boxShadow:
-                    "0 0 18px rgba(255,120,255,0.22)",
+                    "0 0 14px rgba(255,120,255,0.18)",
                 }}
               >
                 ✉️
               </div>
 
-              <span>Contactez-nous</span>
+              <span>Contact</span>
             </div>
 
             <span style={arrow}>›</span>
@@ -126,26 +126,26 @@ export default function MenuDropdown() {
 const menuBtn: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
-  gap: "12px",
+  gap: "10px",
   color: "#fff",
-  fontSize: "15px",
+  fontSize: "14px",
   fontWeight: 800,
-  padding: "13px 24px",
+  padding: "11px 20px",
   borderRadius: "999px",
   background: `
     linear-gradient(
       135deg,
-      rgba(0,198,255,0.14),
-      rgba(10,18,35,0.88),
-      rgba(138,43,226,0.16)
+      rgba(0,198,255,0.12),
+      rgba(10,18,35,0.90),
+      rgba(138,43,226,0.12)
     )
   `,
-  border: "1px solid rgba(120,220,255,0.28)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(120,220,255,0.22)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
   boxShadow: `
-    inset 0 0 14px rgba(255,255,255,0.04),
-    0 0 22px rgba(0,198,255,0.16)
+    inset 0 0 10px rgba(255,255,255,0.03),
+    0 0 14px rgba(0,198,255,0.10)
   `,
   cursor: "pointer",
   transition: "all 0.25s ease",
@@ -153,19 +153,19 @@ const menuBtn: React.CSSProperties = {
 
 const dropdown: React.CSSProperties = {
   position: "absolute",
-  top: "62px",
+  top: "56px",
   right: 0,
-  minWidth: "250px",
-  padding: "16px",
-  borderRadius: "24px",
-  background: "rgba(5,10,20,0.94)",
-  border: "1px solid rgba(120,220,255,0.22)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
+  minWidth: "220px",
+  padding: "10px",
+  borderRadius: "20px",
+  background: "rgba(5,10,20,0.95)",
+  border: "1px solid rgba(120,220,255,0.18)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
   boxShadow: `
-    0 35px 90px rgba(0,0,0,0.88),
-    0 0 40px rgba(0,198,255,0.12),
-    inset 0 0 22px rgba(255,255,255,0.03)
+    0 25px 60px rgba(0,0,0,0.82),
+    0 0 28px rgba(0,198,255,0.08),
+    inset 0 0 14px rgba(255,255,255,0.02)
   `,
   zIndex: 9999,
 };
@@ -174,50 +174,51 @@ const item: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  padding: "14px",
-  marginBottom: "10px",
-  borderRadius: "18px",
+  padding: "11px",
+  marginBottom: "8px",
+  borderRadius: "14px",
   textDecoration: "none",
   color: "#fff",
   fontWeight: 800,
-  fontSize: "15px",
+  fontSize: "13px",
   background: `
     linear-gradient(
       135deg,
-      rgba(0,198,255,0.08),
-      rgba(255,255,255,0.02)
+      rgba(0,198,255,0.06),
+      rgba(255,255,255,0.015)
     )
   `,
-  border: "1px solid rgba(255,255,255,0.04)",
-  boxShadow: "0 0 16px rgba(0,198,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.03)",
+  boxShadow: "0 0 10px rgba(0,198,255,0.04)",
   transition: "all 0.22s ease",
 };
+
 const leftSide: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: "12px",
+  gap: "10px",
 };
 
 const iconBubble: React.CSSProperties = {
-  width: "42px",
-  height: "42px",
-  borderRadius: "14px",
+  width: "34px",
+  height: "34px",
+  borderRadius: "10px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   background: `
     linear-gradient(
       135deg,
-      rgba(255,255,255,0.06),
-      rgba(255,255,255,0.02)
+      rgba(255,255,255,0.05),
+      rgba(255,255,255,0.015)
     )
   `,
-  border: "1px solid rgba(255,255,255,0.05)",
-  fontSize: "18px",
+  border: "1px solid rgba(255,255,255,0.04)",
+  fontSize: "15px",
 };
 
 const arrow: React.CSSProperties = {
   color: "#72e3ff",
-  fontSize: "28px",
+  fontSize: "22px",
   fontWeight: 300,
 };
