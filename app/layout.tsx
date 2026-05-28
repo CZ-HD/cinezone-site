@@ -179,7 +179,7 @@ const headerStyle: React.CSSProperties = {
 };
 
 const topHeaderStyle: React.CSSProperties = {
-  minHeight: "82px",
+  minHeight: "90px",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
@@ -210,7 +210,7 @@ const navCenter: React.CSSProperties = {
   backdropFilter: "blur(18px)",
   WebkitBackdropFilter: "blur(18px)",
   boxShadow: `
-    0 0 32px rgba(0,198,255,0.08),
+    0 0 42px rgba(0,198,255,0.14),
     inset 0 0 18px rgba(255,255,255,0.03)
   `,
 };
@@ -272,7 +272,7 @@ const logoBoxStyle: React.CSSProperties = {
 
 const logoTextStyle: React.CSSProperties = {
   fontWeight: 950,
-  fontSize: "30px",
+  fontSize: "34px",
   letterSpacing: "-1px",
   background:
     "linear-gradient(135deg, #ffffff 0%, #b6e0ff 40%, #00c6ff 70%, #0072ff 100%)",
