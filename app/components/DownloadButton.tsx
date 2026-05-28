@@ -213,5 +213,6 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     >
       HD
     </div>
-  </button>
+    </button>
 );
+}
