@@ -15,25 +15,26 @@ export const metadata: Metadata = {
   title: "CineZone HD",
   description: "Films gratuits et catalogue CineZone HD",
 
- icons: {
-  icon: [
-    { url: "/favicon.ico" },
-    {
-      url: "/android-chrome-192x192.png",
-      sizes: "192x192",
-      type: "image/png",
-    },
-    {
-      url: "/android-chrome-512x512.png",
-      sizes: "512x512",
-      type: "image/png",
-    },
-  ],
-  shortcut: ["/favicon.ico"],
-  apple: ["/apple-touch-icon.png"],
-},
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      {
+        url: "/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/android-chrome-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: ["/apple-touch-icon.png"],
+  },
 
   manifest: "/site.webmanifest",
+
   verification: {
     google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
   },
@@ -65,11 +66,11 @@ export default function RootLayout({
   const showSeries = false;
 
   const navLinks = [
-  ["Films", "/films"],
-  ["🎞️ Sagas", "/sagas"],
-  ...(showSeries ? [["Séries", "/series"]] : []),
-  ["🎬 Demande film", "/demande-film"],
-];
+    ["Films", "/films"],
+    ["🎞️ Sagas", "/sagas"],
+    ...(showSeries ? [["Séries", "/series"]] : []),
+    ["🎬 Demande film", "/demande-film"],
+  ];
 
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -87,27 +88,41 @@ export default function RootLayout({
 
         <header style={headerStyle}>
           <div style={topHeaderStyle}>
+            {/* Logo */}
             <Link href="/" style={logoLinkStyle}>
               <div style={logoBoxStyle}>CZ</div>
+
               <span style={logoTextStyle}>CineZone</span>
             </Link>
 
-            <nav style={navStyle}>
-              <MenuDropdown />
+            {/* Navbar */}
+            <nav style={navWrapper}>
+              {/* Navigation principale */}
+              <div style={navCenter}>
+                <MenuDropdown />
 
-              {navLinks.map(([label, href]) => (
-                <Link key={href} href={href} style={navLinkStyle}>
-                  {label}
-                </Link>
-              ))}
+                {navLinks.map(([label, href]) => (
+                  <Link key={href} href={href} style={navLinkStyle}>
+                    {label}
+                  </Link>
+                ))}
+              </div>
 
-              <ChatNavLink />
-              <NotificationsBell />
-              <AdminButton />
-              <UserMenu />
+              {/* Actions */}
+              <div style={navActions}>
+                <ChatNavLink />
+                <NotificationsBell />
+              </div>
+
+              {/* Profil */}
+              <div style={profileSection}>
+                <AdminButton />
+                <UserMenu />
+              </div>
             </nav>
           </div>
 
+          {/* Bandeau */}
           <div style={marqueeContainer}>
             <div style={marqueeText}>
               👋 Bonjour et bienvenue sur CineZone HD ! Merci de prendre quelques secondes pour choisir un pseudo et un avatar dans votre profil afin que le staff puisse vous notifier et répondre plus facilement à vos demandes. Merci 🎭🔔
@@ -116,7 +131,9 @@ export default function RootLayout({
         </header>
 
         <AuthGuard>
-          <div style={{ paddingTop: "112px" }}>{children}</div>
+          <div style={{ paddingTop: "118px" }}>
+            {children}
+          </div>
 
           <footer style={footerStyle}>
             <h2 style={footerTitle}>CineZone HD</h2>
@@ -137,7 +154,9 @@ export default function RootLayout({
               </Link>
             </div>
 
-            <p style={footerLegal}>Made with ❤️ by CineZone — 2026.</p>
+            <p style={footerLegal}>
+              Made with ❤️ by CineZone — 2026.
+            </p>
           </footer>
         </AuthGuard>
       </body>
@@ -152,19 +171,60 @@ const headerStyle: React.CSSProperties = {
   right: 0,
   zIndex: 100,
   background:
-    "linear-gradient(180deg, rgba(3,10,22,0.96), rgba(0,0,0,0.78))",
-  backdropFilter: "blur(18px)",
-  borderBottom: "1px solid rgba(0,198,255,0.25)",
+    "linear-gradient(180deg, rgba(2,8,18,0.94), rgba(0,0,0,0.72))",
+  backdropFilter: "blur(22px)",
+  borderBottom: "1px solid rgba(0,198,255,0.14)",
   boxShadow:
-    "0 12px 45px rgba(0,0,0,0.85), 0 0 28px rgba(0,120,255,0.15)",
+    "0 18px 55px rgba(0,0,0,0.82), 0 0 30px rgba(0,120,255,0.10)",
 };
 
 const topHeaderStyle: React.CSSProperties = {
-  height: "76px",
+  minHeight: "82px",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "0 34px",
+  padding: "0 26px",
+};
+
+const navWrapper: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "16px",
+};
+
+const navCenter: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  padding: "8px",
+  borderRadius: "999px",
+  background: `
+    linear-gradient(
+      135deg,
+      rgba(0,198,255,0.08),
+      rgba(10,18,35,0.88),
+      rgba(138,43,226,0.08)
+    )
+  `,
+  border: "1px solid rgba(120,220,255,0.14)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+  boxShadow: `
+    0 0 32px rgba(0,198,255,0.08),
+    inset 0 0 18px rgba(255,255,255,0.03)
+  `,
+};
+
+const navActions: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+};
+
+const profileSection: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
 };
 
 const marqueeContainer: React.CSSProperties = {
@@ -172,13 +232,13 @@ const marqueeContainer: React.CSSProperties = {
   overflow: "hidden",
   whiteSpace: "nowrap",
   background:
-    "linear-gradient(90deg, rgba(0,198,255,0.10), rgba(0,114,255,0.08), rgba(0,198,255,0.10))",
-  borderTop: "1px solid rgba(0,198,255,0.18)",
-  padding: "6px 0",
+    "linear-gradient(90deg, rgba(0,198,255,0.08), rgba(0,114,255,0.05), rgba(0,198,255,0.08))",
+  borderTop: "1px solid rgba(0,198,255,0.12)",
+  padding: "5px 0",
   color: "#67e8f9",
   fontWeight: 800,
-  fontSize: "13px",
-  textShadow: "0 0 6px rgba(0,198,255,0.45)",
+  fontSize: "12px",
+  textShadow: "0 0 6px rgba(0,198,255,0.35)",
 };
 
 const marqueeText: React.CSSProperties = {
@@ -207,24 +267,18 @@ const logoBoxStyle: React.CSSProperties = {
   fontWeight: 950,
   fontSize: "18px",
   boxShadow:
-    "0 0 25px rgba(0,198,255,0.45), inset 0 1px 0 rgba(255,255,255,0.2)",
+    "0 0 22px rgba(0,198,255,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
 };
 
 const logoTextStyle: React.CSSProperties = {
   fontWeight: 950,
-  fontSize: "28px",
-  letterSpacing: "-0.8px",
+  fontSize: "30px",
+  letterSpacing: "-1px",
   background:
     "linear-gradient(135deg, #ffffff 0%, #b6e0ff 40%, #00c6ff 70%, #0072ff 100%)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
-  filter: "drop-shadow(0 0 12px rgba(0,198,255,0.35))",
-};
-
-const navStyle: React.CSSProperties = {
-  display: "flex",
-  gap: "12px",
-  alignItems: "center",
+  filter: "drop-shadow(0 0 10px rgba(0,198,255,0.25))",
 };
 
 const navLinkStyle: React.CSSProperties = {
@@ -235,10 +289,10 @@ const navLinkStyle: React.CSSProperties = {
   padding: "10px 18px",
   borderRadius: "999px",
   background:
-    "linear-gradient(135deg, rgba(0,198,255,0.16), rgba(6,20,40,0.72), rgba(255,255,255,0.05))",
-  border: "1px solid rgba(0,198,255,0.28)",
+    "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(6,20,40,0.55), rgba(255,255,255,0.03))",
+  border: "1px solid rgba(0,198,255,0.18)",
   boxShadow:
-    "inset 0 1px 0 rgba(255,255,255,0.1), 0 0 16px rgba(0,140,255,0.2)",
+    "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 14px rgba(0,140,255,0.10)",
 };
 
 const footerStyle: React.CSSProperties = {
