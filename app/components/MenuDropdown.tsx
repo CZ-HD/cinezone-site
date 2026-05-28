@@ -155,9 +155,9 @@ const dropdown: React.CSSProperties = {
   position: "absolute",
   top: "62px",
   right: 0,
-  minWidth: "320px",
+  minWidth: "250px",
   padding: "16px",
-  borderRadius: "30px",
+  borderRadius: "24px",
   background: "rgba(5,10,20,0.94)",
   border: "1px solid rgba(120,220,255,0.22)",
   backdropFilter: "blur(20px)",
@@ -174,13 +174,13 @@ const item: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  padding: "18px",
-  marginBottom: "12px",
-  borderRadius: "24px",
+  padding: "14px",
+  marginBottom: "10px",
+  borderRadius: "18px",
   textDecoration: "none",
   color: "#fff",
   fontWeight: 800,
-  fontSize: "17px",
+  fontSize: "15px",
   background: `
     linear-gradient(
       135deg,
@@ -189,20 +189,19 @@ const item: React.CSSProperties = {
     )
   `,
   border: "1px solid rgba(255,255,255,0.04)",
-  boxShadow: "0 0 20px rgba(0,198,255,0.08)",
+  boxShadow: "0 0 16px rgba(0,198,255,0.06)",
   transition: "all 0.22s ease",
 };
-
 const leftSide: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: "16px",
+  gap: "12px",
 };
 
 const iconBubble: React.CSSProperties = {
-  width: "56px",
-  height: "56px",
-  borderRadius: "18px",
+  width: "42px",
+  height: "42px",
+  borderRadius: "14px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -214,7 +213,7 @@ const iconBubble: React.CSSProperties = {
     )
   `,
   border: "1px solid rgba(255,255,255,0.05)",
-  fontSize: "24px",
+  fontSize: "18px",
 };
 
 const arrow: React.CSSProperties = {
