@@ -155,7 +155,7 @@ const dropdown: React.CSSProperties = {
   position: "absolute",
   top: "56px",
   right: 0,
-  minWidth: "220px",
+  minWidth: "235px",
   padding: "10px",
   borderRadius: "20px",
   background: "rgba(5,10,20,0.95)",
@@ -163,9 +163,9 @@ const dropdown: React.CSSProperties = {
   backdropFilter: "blur(18px)",
   WebkitBackdropFilter: "blur(18px)",
   boxShadow: `
-    0 25px 60px rgba(0,0,0,0.82),
-    0 0 28px rgba(0,198,255,0.08),
-    inset 0 0 14px rgba(255,255,255,0.02)
+    0 30px 70px rgba(0,0,0,0.88),
+    0 0 35px rgba(0,198,255,0.12),
+    inset 0 0 18px rgba(255,255,255,0.03)
   `,
   zIndex: 9999,
 };
@@ -184,12 +184,15 @@ const item: React.CSSProperties = {
   background: `
     linear-gradient(
       135deg,
-      rgba(0,198,255,0.06),
-      rgba(255,255,255,0.015)
+      rgba(0,198,255,0.08),
+      rgba(255,255,255,0.025)
     )
   `,
   border: "1px solid rgba(255,255,255,0.03)",
-  boxShadow: "0 0 10px rgba(0,198,255,0.04)",
+  boxShadow: `
+    0 0 14px rgba(0,198,255,0.08),
+    inset 0 0 10px rgba(255,255,255,0.02)
+  `,
   transition: "all 0.22s ease",
 };
 
@@ -209,8 +212,8 @@ const iconBubble: React.CSSProperties = {
   background: `
     linear-gradient(
       135deg,
-      rgba(255,255,255,0.05),
-      rgba(255,255,255,0.015)
+      rgba(255,255,255,0.08),
+      rgba(255,255,255,0.025)
     )
   `,
   border: "1px solid rgba(255,255,255,0.04)",
