@@ -26,21 +26,21 @@ export async function GET(
       .maybeSingle();
 
     if (error || !data?.link) {
-  return NextResponse.json(
-    { error: "Lien introuvable" },
-    { status: 404 }
-  );
-}
+      return NextResponse.json(
+        { error: "Lien introuvable" },
+        { status: 404 }
+      );
+    }
 
-await supabase.from("download_logs").insert({
-  movie_id: movieId,
-});
+    await supabase.from("download_logs").insert({
+      movie_id: movieId,
+    });
 
-const finalLink = addAffiliate(data.link);
+    const finalLink = addAffiliate(data.link);
 
-return NextResponse.json({
-  url: finalLink,
-});
+    return NextResponse.json({
+      url: finalLink,
+    });
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message },
