@@ -383,16 +383,15 @@ for (const [movieId, count] of topIds) {
     .single();
 
   if (movie) {
-  result.push({
-    ...movie,
-    count,
-  });
+    result.push({
+      ...movie,
+      count,
+    });
+  }
 }
 
 console.log("LOGS", logs);
 console.log("RESULT", result);
-
-setTopDownloads(result);
 
 setTopDownloads(result);
 };
