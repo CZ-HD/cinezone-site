@@ -32,9 +32,14 @@ export async function GET(
       );
     }
 
-    await supabase.from("download_logs").insert({
-      movie_id: movieId,
-    });
+    // Comptage du clic téléchargement
+    const { error: logError } = await supabase
+      .from("download_logs")
+      .insert({
+        movie_id: movieId,
+      });
+
+    console.log("DOWNLOAD LOG:", logError);
 
     const finalLink = addAffiliate(data.link);
 
