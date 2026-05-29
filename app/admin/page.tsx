@@ -133,7 +133,7 @@ const [sagaLoading, setSagaLoading] = useState(false);
     }, 15000);
 
     return () => clearInterval(timer);
-  }, [isAdmin]);
+  }, [isAdmin]);ou
 
   const addAffiliate = (url: string) => {
     const affiliate = "af=5257374";
@@ -358,11 +358,25 @@ const loadDownloadStats = async () => {
   setTodayDownloads(todayCount || 0);
 };
 
+const loadSagas = async () => {
+  const { data, error } = await supabase
+    .from("sagas")
+    .select("*")
+    .order("title", { ascending: true });
+
+  if (error) {
+    setMessage("❌ Erreur chargement sagas : " + error.message);
+    return;
+  }
+
+  setSagas(data || []);
+};
+
 const createSaga = async () => {
-    if (!sagaTitle.trim()) {
-      setMessage("❌ Ajoute un titre de saga.");
-      return;
-    }
+  if (!sagaTitle.trim()) {
+    setMessage("❌ Ajoute un titre de saga.");
+    return;
+  }
 
     const finalSlug = sagaSlug.trim() || makeSlug(sagaTitle);
 
