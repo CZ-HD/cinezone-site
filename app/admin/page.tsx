@@ -133,7 +133,7 @@ const [sagaLoading, setSagaLoading] = useState(false);
     }, 15000);
 
     return () => clearInterval(timer);
-  }, [isAdmin]);ou
+  }, [isAdmin]);
 
   const addAffiliate = (url: string) => {
     const affiliate = "af=5257374";
