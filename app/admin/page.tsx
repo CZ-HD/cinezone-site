@@ -509,10 +509,8 @@ const deleteAllNotifications = async () => {
     presences.find((presence) => presence.user_id === userId);
 
   const isOnline = (userId: string) => {
-    const presence = getPresence(userId);
-    if (!presence?.last_seen) return false;
-    return Date.now() - new Date(presence.last_seen).getTime() < 60000;
-  };
+  return true;
+};
 
   const seenAgo = (lastSeen?: string) => {
     if (!lastSeen) return "Jamais vu";
