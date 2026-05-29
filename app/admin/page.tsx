@@ -88,23 +88,29 @@ export default function AdminPage() {
   const [manualLink, setManualLink] = useState("");
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [presences, setPresences] = useState<Presence[]>([]);
-  const [memberCount, setMemberCount] = useState(0);
-  const [searchMember, setSearchMember] = useState("");
+const [presences, setPresences] = useState<Presence[]>([]);
 
-  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
-  const [notificationFilter, setNotificationFilter] = useState("all");
+const [memberCount, setMemberCount] = useState(0);
+const [totalDownloads, setTotalDownloads] = useState(0);
+const [todayDownloads, setTodayDownloads] = useState(0);
 
-  const [sagas, setSagas] = useState<Saga[]>([]);
-  const [adminMovies, setAdminMovies] = useState<DownloadMovie[]>([]);
-  const [sagaTitle, setSagaTitle] = useState("");
-  const [sagaSlug, setSagaSlug] = useState("");
-  const [sagaPoster, setSagaPoster] = useState("");
-  const [sagaBackdrop, setSagaBackdrop] = useState("");
-  const [sagaDescription, setSagaDescription] = useState("");
-  const [selectedSagaId, setSelectedSagaId] = useState("");
-  const [filmSearch, setFilmSearch] = useState("");
-  const [sagaLoading, setSagaLoading] = useState(false);
+const [searchMember, setSearchMember] = useState("");
+
+const [notifications, setNotifications] = useState<NotificationRow[]>([]);
+const [notificationFilter, setNotificationFilter] = useState("all");
+
+const [sagas, setSagas] = useState<Saga[]>([]);
+const [adminMovies, setAdminMovies] = useState<DownloadMovie[]>([]);
+
+const [sagaTitle, setSagaTitle] = useState("");
+const [sagaSlug, setSagaSlug] = useState("");
+const [sagaPoster, setSagaPoster] = useState("");
+const [sagaBackdrop, setSagaBackdrop] = useState("");
+const [sagaDescription, setSagaDescription] = useState("");
+const [selectedSagaId, setSelectedSagaId] = useState("");
+
+const [filmSearch, setFilmSearch] = useState("");
+const [sagaLoading, setSagaLoading] = useState(false);
 
   useEffect(() => {
     checkAdmin();
@@ -118,7 +124,8 @@ export default function AdminPage() {
     loadSagas();
     loadAdminMovies();
     loadNotifications();
-
+    loadDownloadStats();
+    
     const timer = setInterval(() => {
       loadPresence();
       loadUsers();
@@ -298,20 +305,6 @@ const deleteAllNotifications = async () => {
     setPresences(data || []);
   };
 
-  const loadSagas = async () => {
-    const { data, error } = await supabase
-      .from("sagas")
-      .select("*")
-      .order("title", { ascending: true });
-
-    if (error) {
-      setMessage("❌ Erreur chargement sagas : " + error.message);
-      return;
-    }
-
-    setSagas(data || []);
-  };
-
   const loadAdminMovies = async () => {
   let allMovies: DownloadMovie[] = [];
   let from = 0;
@@ -341,7 +334,31 @@ const deleteAllNotifications = async () => {
   setAdminMovies(allMovies);
 };
 
-  const createSaga = async () => {
+const loadDownloadStats = async () => {
+  const { count: total } = await supabase
+    .from("download_logs")
+    .select("*", {
+      count: "exact",
+      head: true,
+    });
+
+  setTotalDownloads(total || 0);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const { count: todayCount } = await supabase
+    .from("download_logs")
+    .select("*", {
+      count: "exact",
+      head: true,
+    })
+    .gte("created_at", today.toISOString());
+
+  setTodayDownloads(todayCount || 0);
+};
+
+const createSaga = async () => {
     if (!sagaTitle.trim()) {
       setMessage("❌ Ajoute un titre de saga.");
       return;
@@ -873,11 +890,28 @@ const deleteAllNotifications = async () => {
     </a>
   </div>
 </div>
+<div
+  style={{
+    display: "flex",
+    gap: "15px",
+    flexWrap: "wrap",
+  }}
+>
+  <div style={counterStyle}>
+    <strong>{memberCount}</strong>
+    <span>Membres</span>
+  </div>
 
-        <div style={counterStyle}>
-          <strong>{memberCount}</strong>
-          <span>membres inscrits</span>
-        </div>
+  <div style={counterStyle}>
+    <strong>{totalDownloads}</strong>
+    <span>Téléchargements</span>
+  </div>
+
+  <div style={counterStyle}>
+    <strong>{todayDownloads}</strong>
+    <span>Aujourd'hui</span>
+  </div>
+</div>
       </section>
 
       <section style={cardStyle}>
