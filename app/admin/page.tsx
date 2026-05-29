@@ -93,7 +93,7 @@ const [presences, setPresences] = useState<Presence[]>([]);
 const [memberCount, setMemberCount] = useState(0);
 const [totalDownloads, setTotalDownloads] = useState(0);
 const [todayDownloads, setTodayDownloads] = useState(0);
-
+const [topDownloads, setTopDownloads] = useState<any[]>([]);
 const [searchMember, setSearchMember] = useState("");
 
 const [notifications, setNotifications] = useState<NotificationRow[]>([]);
@@ -356,6 +356,45 @@ const loadDownloadStats = async () => {
     .gte("created_at", today.toISOString());
 
   setTodayDownloads(todayCount || 0);
+
+const { data: logs } = await supabase
+  .from("download_logs")
+  .select("movie_id");
+
+if (!logs) return;
+
+const counts: Record<number, number> = {};
+
+logs.forEach((log) => {
+  counts[log.movie_id] = (counts[log.movie_id] || 0) + 1;
+});
+
+const topIds = Object.entries(counts)
+  .sort((a, b) => Number(b[1]) - Number(a[1]))
+  .slice(0, 10);
+
+const result = [];
+
+for (const [movieId, count] of topIds) {
+  const { data: movie } = await supabase
+    .from("downloads")
+    .select("id,title")
+    .eq("id", Number(movieId))
+    .single();
+
+  if (movie) {
+  result.push({
+    ...movie,
+    count,
+  });
+}
+
+console.log("LOGS", logs);
+console.log("RESULT", result);
+
+setTopDownloads(result);
+
+setTopDownloads(result);
 };
 
 const loadSagas = async () => {
@@ -927,7 +966,32 @@ const createSaga = async () => {
   </div>
 </div>
       </section>
+<section style={cardStyle}>
+  <h2>🏆 Top téléchargements</h2>
 
+  {topDownloads.length === 0 ? (
+    <p style={subText}>Aucun téléchargement enregistré.</p>
+  ) : (
+    topDownloads.map((movie, index) => (
+      <div
+        key={movie.id}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "10px 0",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <span>
+          #{index + 1} {movie.title}
+        </span>
+
+        <strong>{movie.count}</strong>
+      </div>
+    ))
+  )}
+</section>
       <section style={cardStyle}>
         <h2>🎬 Ajout automatique TMDB</h2>
         <p style={subText}>
