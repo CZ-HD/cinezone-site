@@ -18,12 +18,22 @@ export default async function MoviePage({ params }: any) {
   let trailer: any = null;
 
   const localResult = await supabase
-    .from("downloads")
-    .select("*")
-    .eq("id", params.id)
-    .maybeSingle();
+  .from("downloads")
+  .select(`
+    id,
+    title,
+    poster_path,
+    backdrop_path,
+    vote_average,
+    release_date,
+    overview,
+    imdb_id
+  `)
+  .eq("id", params.id)
+  .maybeSingle();
 
-  const localMovie = localResult.data;
+const localMovie = localResult.data;
+
 const {
   data: { user },
 } = await supabase.auth.getUser();
@@ -31,63 +41,75 @@ const {
 const isAdmin =
   user?.email === "blackph4tom@gmail.com" ||
   user?.email === "lafooteusedu54@hotmail.fr";
-  const res = await fetch(
-    `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`,
+
+const res = await fetch(
+  `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`,
+  { cache: "no-store" }
+);
+
+if (res.ok) {
+  const tmdbMovie = await res.json();
+
+  movie = {
+    ...tmdbMovie,
+  };
+
+  const videoRes = await fetch(
+    `${BASE_URL}/movie/${params.id}/videos?api_key=${API_KEY}&language=fr-FR`,
     { cache: "no-store" }
   );
 
-  if (res.ok) {
-    const tmdbMovie = await res.json();
+  if (videoRes.ok) {
+    const videosData = await videoRes.json();
+    const videos = videosData?.results || [];
 
-    movie = {
-      ...tmdbMovie,
-      link: localMovie?.link || null,
-    };
-
-    const videoRes = await fetch(
-      `${BASE_URL}/movie/${params.id}/videos?api_key=${API_KEY}&language=fr-FR`,
-      { cache: "no-store" }
-    );
-
-    if (videoRes.ok) {
-      const videosData = await videoRes.json();
-      const videos = videosData?.results || [];
-
-      trailer =
-        videos.find((v: any) => v.type === "Trailer" && v.site === "YouTube") ||
-        videos.find((v: any) => v.site === "YouTube");
-    }
-  } else if (localMovie) {
-    movie = {
-      id: localMovie.id,
-      title: localMovie.title || "Film sans titre",
-      poster_path: localMovie.poster_path,
-      backdrop_path: localMovie.backdrop_path || localMovie.poster_path,
-      vote_average: localMovie.vote_average,
-      release_date: localMovie.release_date,
-      overview:
-  localMovie.overview ||
-  (isAdmin ? "⚠️ Film ajouté manuellement." : ""),
-      imdb_id: localMovie.imdb_id,
-      link: localMovie.link,
-    };
-  } else {
-    return (
-      <main
-        style={{
-          background: "#000",
-          color: "#fff",
-          minHeight: "100vh",
-          padding: "40px",
-        }}
-      >
-        <Link href="/films" style={{ color: "#00c6ff" }}>
-          ← Retour aux films
-        </Link>
-        <h1>Film introuvable</h1>
-      </main>
-    );
+    trailer =
+      videos.find(
+        (v: any) =>
+          v.type === "Trailer" &&
+          v.site === "YouTube"
+      ) ||
+      videos.find(
+        (v: any) =>
+          v.site === "YouTube"
+      );
   }
+} else if (localMovie) {
+  movie = {
+    id: localMovie.id,
+    title: localMovie.title || "Film sans titre",
+    poster_path: localMovie.poster_path,
+    backdrop_path:
+      localMovie.backdrop_path ||
+      localMovie.poster_path,
+    vote_average: localMovie.vote_average,
+    release_date: localMovie.release_date,
+    overview:
+      localMovie.overview ||
+      (isAdmin
+        ? "⚠️ Film ajouté manuellement."
+        : ""),
+    imdb_id: localMovie.imdb_id,
+  };
+}
+
+if (!movie) {
+  return (
+    <main
+      style={{
+        background: "#000",
+        color: "#fff",
+        minHeight: "100vh",
+        padding: "40px",
+      }}
+    >
+      <Link href="/films" style={{ color: "#00c6ff" }}>
+        ← Retour aux films
+      </Link>
+      <h1>Film introuvable</h1>
+    </main>
+  );
+}
 
   return (
     <main
