@@ -1643,12 +1643,10 @@ const filteredNotifications = notifications.filter((notif) => {
               </button>
             )}
 
-            {!isCreator && (
+                        {!isCreator && (
               <button
                 style={btnRed}
-                onClick={() =>
-                  deleteProfile(member.id)
-                }
+                onClick={() => deleteProfile(member.id)}
               >
                 🗑 Supprimer
               </button>
@@ -1659,6 +1657,17 @@ const filteredNotifications = notifications.filter((notif) => {
     </div>
   );
 })}
+        </div>
+      )}
+    </>
+  )}
+</section>
+
+</main>
+);
+}
+
+const pageStyle: React.CSSProperties = {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "radial-gradient(circle at top, rgba(0,120,255,0.2), #000 62%)",
