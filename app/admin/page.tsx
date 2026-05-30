@@ -1515,227 +1515,150 @@ const filteredNotifications = notifications.filter((notif) => {
       ) : (
         <div style={memberGrid}>
           {displayedProfiles.map((member) => {
-            const presence = getPresence(member.id);
-            const connected = isOnline(member.id);
-            const isCreator =
-              !!member.email &&
-              CREATOR_EMAILS.includes(member.email);
+  const presence = getPresence(member.id);
+  const connected = isOnline(member.id);
+  const isCreator =
+    !!member.email && CREATOR_EMAILS.includes(member.email);
 
-            const isMemberAdmin = member.role === "admin";
+  const isMemberAdmin = member.role === "admin";
 
-            return (
-              <div
-                key={member.id}
-                style={{
-                  borderBottom: "1px solid rgba(255,255,255,0.08)",
-                  padding: "18px 14px",
-                  display: "grid",
-                  gridTemplateColumns:
-                    "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
+  return (
+    <div
+      key={member.id}
+      style={{
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        padding: "18px 14px",
+      }}
+    >
+      <details>
+        <summary
+          style={{
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            listStyle: "none",
+          }}
+        >
+          <img
+            src={member.avatar || DEFAULT_AVATAR}
+            alt="avatar"
+            style={{
+              width: "54px",
+              height: "54px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: connected
+                ? "2px solid #22c55e"
+                : "2px solid rgba(255,255,255,0.15)",
+            }}
+          />
+
+          <div>
+            <strong style={{ color: "#00d2ff" }}>
+              {member.username || "Nouveau membre"}
+            </strong>
+
+            <div
+              style={{
+                color: "#9ca3af",
+                fontSize: "13px",
+              }}
+            >
+              {member.email}
+            </div>
+          </div>
+        </summary>
+
+        <div
+          style={{
+            marginTop: "15px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+          }}
+        >
+          <div>👑 Rôle : {member.role || "user"}</div>
+
+          <div>📌 Statut : {member.status || "pending"}</div>
+
+          <div>
+            🌐 Page : {presence?.current_page || "/"}
+          </div>
+
+          <div>
+            ⏱ {connected
+              ? "Actif maintenant"
+              : seenAgo(presence?.last_seen)}
+          </div>
+
+          <div>
+            📅 Inscrit le :{" "}
+            {member.created_at
+              ? new Date(member.created_at).toLocaleDateString("fr-FR")
+              : "-"}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              style={btnGreen}
+              onClick={() =>
+                updateUser(member.id, {
+                  status: "approved",
+                })
+              }
+            >
+              ✅ Valider
+            </button>
+
+            <button
+              style={btnOrange}
+              onClick={() =>
+                updateUser(member.id, {
+                  status: "blocked",
+                })
+              }
+            >
+              🚫 Bannir
+            </button>
+
+            {!isCreator && (
+              <button
+                style={btnGold}
+                onClick={() =>
+                  updateUser(member.id, {
+                    role: isMemberAdmin
+                      ? "user"
+                      : "admin",
+                  })
+                }
               >
-                {/* Le reste de ton code membre actuel reste inchangé */}
-              </div>
-            );
-          })}
+                👑 Admin
+              </button>
+            )}
+
+            {!isCreator && (
+              <button
+                style={btnRed}
+                onClick={() =>
+                  deleteProfile(member.id)
+                }
+              >
+                🗑 Supprimer
+              </button>
+            )}
+          </div>
         </div>
-      )}
-    </>
-  )}
-</section>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <img
-                      src={member.avatar || DEFAULT_AVATAR}
-                      alt="avatar"
-                      style={{
-                        width: "54px",
-                        height: "54px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        border: connected
-                          ? "2px solid #22c55e"
-                          : "2px solid rgba(255,255,255,0.15)",
-                      }}
-                      onError={(e) => {
-                        e.currentTarget.src = DEFAULT_AVATAR;
-                      }}
-                    />
-
-                    <div>
-                      <div
-                        style={{
-                          fontWeight: 800,
-                          color: "#00d2ff",
-                          fontSize: "18px",
-                        }}
-                      >
-                        {member.username || "Nouveau membre"}
-                      </div>
-
-                      <div
-                        style={{
-                          color: "#9ca3af",
-                          fontSize: "13px",
-                          marginTop: "4px",
-                        }}
-                      >
-                        {member.email}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    <span style={rolePill}>{member.role || "user"}</span>
-                    {isCreator && <span style={creatorBadge}>CRÉATEUR</span>}
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <span
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: "999px",
-                        fontWeight: 700,
-                        fontSize: "12px",
-                        width: "fit-content",
-                        background:
-                          member.status === "approved"
-                            ? "rgba(34,197,94,0.18)"
-                            : member.status === "blocked"
-                            ? "rgba(255,80,80,0.18)"
-                            : "rgba(255,215,0,0.18)",
-                        color:
-                          member.status === "approved"
-                            ? "#4ade80"
-                            : member.status === "blocked"
-                            ? "#ff9b9b"
-                            : "#facc15",
-                      }}
-                    >
-                      {member.status || "pending"}
-                    </span>
-
-                    <span
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: "999px",
-                        fontWeight: 700,
-                        fontSize: "12px",
-                        width: "fit-content",
-                        background: connected
-                          ? "rgba(34,197,94,0.18)"
-                          : "rgba(255,80,80,0.14)",
-                        color: connected ? "#4ade80" : "#ff9b9b",
-                      }}
-                    >
-                      {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
-                    </span>
-                  </div>
-
-                  <div style={{ color: "#d1d5db", fontSize: "14px" }}>
-                    {presence?.current_page || "/"}
-                  </div>
-
-                  <div
-                    style={{
-                      color: connected ? "#4ade80" : "#cbd5e1",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {connected ? "Actif maintenant" : seenAgo(presence?.last_seen)}
-                  </div>
-
-                  <div style={{ color: "#cbd5e1", fontSize: "14px" }}>
-                    {member.created_at
-                      ? new Date(member.created_at).toLocaleDateString("fr-FR")
-                      : "-"}
-                  </div>
-
-                  <div style={{ position: "relative" }}>
-                    <details>
-                      <summary
-                        style={{
-                          cursor: "pointer",
-                          listStyle: "none",
-                          background: "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.12)",
-                          width: "42px",
-                          height: "42px",
-                          borderRadius: "12px",
-                          display: "grid",
-                          placeItems: "center",
-                          fontSize: "20px",
-                        }}
-                      >
-                        ⋮
-                      </summary>
-
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: 0,
-                          top: "50px",
-                          width: "180px",
-                          background: "#060b16",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                          borderRadius: "16px",
-                          padding: "10px",
-                          zIndex: 50,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "10px",
-                          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-                        }}
-                      >
-                        <button
-                          style={btnGreen}
-                          onClick={() => updateUser(member.id, { status: "approved" })}
-                        >
-                          ✅ Valider
-                        </button>
-
-                        <button
-                          style={btnOrange}
-                          onClick={() => updateUser(member.id, { status: "blocked" })}
-                        >
-                          🚫 Bannir
-                        </button>
-
-                        {!isCreator && (
-                          <button
-                            style={btnGold}
-                            onClick={() =>
-                              updateUser(member.id, {
-                                role: isMemberAdmin ? "user" : "admin",
-                              })
-                            }
-                          >
-                            👑 Admin
-                          </button>
-                        )}
-
-                        {!isCreator && (
-                          <button style={btnRed} onClick={() => deleteProfile(member.id)}>
-                            🗑 Supprimer
-                          </button>
-                        )}
-                      </div>
-                    </details>
-                  </div>
-                </div>
-              );
-                    })}
-      </div>
-    )}
-  </>
-)}
-</section>
-</main>
-);
-}
-
+      </details>
+    </div>
+  );
+})}
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "radial-gradient(circle at top, rgba(0,120,255,0.2), #000 62%)",
