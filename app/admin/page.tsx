@@ -1491,26 +1491,27 @@ const filteredNotifications = notifications.filter((notif) => {
 />
 
 {showAllMembers && (
+  <>
     <div
       style={{
         display: "grid",
         gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
-            padding: "18px 14px",
-            background: "rgba(255,255,255,0.04)",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-            fontWeight: 800,
-            color: "#dbeafe",
-            gap: "12px",
-          }}
-        >
-          <div>Membre</div>
-          <div>Rôle</div>
-          <div>Statut</div>
-          <div>Page actuelle</div>
-          <div>Dernière activité</div>
-          <div>Inscrit le</div>
-          <div>Actions</div>
-        </div>
+        padding: "18px 14px",
+        background: "rgba(255,255,255,0.04)",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        fontWeight: 800,
+        color: "#dbeafe",
+        gap: "12px",
+      }}
+    >
+      <div>Membre</div>
+      <div>Rôle</div>
+      <div>Statut</div>
+      <div>Page actuelle</div>
+      <div>Dernière activité</div>
+      <div>Inscrit le</div>
+      <div>Actions</div>
+    </div>
 
         {filteredProfiles.length === 0 ? (
           <p style={{ color: "#aaa" }}>Aucun membre trouvé.</p>
@@ -1715,12 +1716,14 @@ const filteredNotifications = notifications.filter((notif) => {
                   </div>
                 </div>
               );
-            })}
-          </div>
-        )}
-      </section>
-    </main>
-  );
+                    })}
+      </div>
+    )}
+  </>
+)}
+</section>
+</main>
+);
 }
 
 const pageStyle: React.CSSProperties = {
