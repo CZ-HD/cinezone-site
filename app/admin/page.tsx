@@ -96,8 +96,7 @@ const [totalDownloads, setTotalDownloads] = useState(0);
 const [todayDownloads, setTodayDownloads] = useState(0);
 const [topDownloads, setTopDownloads] = useState<any[]>([]);
 const [searchMember, setSearchMember] = useState("");
-const [showAllMembers, setShowAllMembers] = useState(false);
-  
+
 const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 const [notificationFilter, setNotificationFilter] = useState("all");
 
@@ -876,21 +875,17 @@ const createSaga = async () => {
   };
 
   const filteredProfiles = profiles.filter((profile) => {
-  const q = searchMember.toLowerCase();
+    const q = searchMember.toLowerCase();
 
-  return (
-    (profile.email || "").toLowerCase().includes(q) ||
-    (profile.username || "").toLowerCase().includes(q) ||
-    (profile.role || "").toLowerCase().includes(q) ||
-    (profile.status || "").toLowerCase().includes(q)
-  );
-});
+    return (
+      (profile.email || "").toLowerCase().includes(q) ||
+      (profile.username || "").toLowerCase().includes(q) ||
+      (profile.role || "").toLowerCase().includes(q) ||
+      (profile.status || "").toLowerCase().includes(q)
+    );
+  });
 
-const displayedProfiles = showAllMembers
-  ? filteredProfiles
-  : [];
-
-const filteredNotifications = notifications.filter((notif) => {
+  const filteredNotifications = notifications.filter((notif) => {
     if (notificationFilter === "read") return notif.read;
     if (notificationFilter === "unread") return !notif.read;
     return true;
@@ -1456,218 +1451,252 @@ const filteredNotifications = notifications.filter((notif) => {
       </section>
 
       <section style={cardStyle}>
-  <div style={memberHeader}>
-    <div>
-      <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
-
-      <p style={subText}>
-        Statut réel, page actuelle et dernière activité.
-      </p>
-
-      <button
-        onClick={() => setShowAllMembers(!showAllMembers)}
-        style={{
-          ...btnBlue,
-          marginTop: "10px",
-        }}
-      >
-        {showAllMembers
-          ? "▲ Masquer les membres"
-          : `▼ Voir les membres (${filteredProfiles.length})`}
-      </button>
-    </div>
-
-    <input
-      value={searchMember}
-      onChange={(e) => setSearchMember(e.target.value)}
-      placeholder="Rechercher un membre..."
-      style={searchInput}
-    />
-  </div>
-
-  {showAllMembers && (
-    <>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
-          padding: "18px 14px",
-          background: "rgba(255,255,255,0.04)",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          fontWeight: 800,
-          color: "#dbeafe",
-          gap: "12px",
-        }}
-      >
-        <div>Membre</div>
-        <div>Rôle</div>
-        <div>Statut</div>
-        <div>Page actuelle</div>
-        <div>Dernière activité</div>
-        <div>Inscrit le</div>
-        <div>Actions</div>
-      </div>
-
-      {filteredProfiles.length === 0 ? (
-        <p style={{ color: "#aaa", marginTop: "15px" }}>
-          Aucun membre trouvé.
-        </p>
-      ) : (
-        <div style={memberGrid}>
-          {displayedProfiles.map((member) => {
-  const presence = getPresence(member.id);
-  const connected = isOnline(member.id);
-  const isCreator =
-    !!member.email && CREATOR_EMAILS.includes(member.email);
-
-  const isMemberAdmin = member.role === "admin";
-
-  return (
-    <div
-      key={member.id}
-      style={{
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        padding: "18px 14px",
-      }}
-    >
-      <details>
-        <summary
-          style={{
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            listStyle: "none",
-          }}
-        >
-          <img
-            src={member.avatar || DEFAULT_AVATAR}
-            alt="avatar"
-            style={{
-              width: "54px",
-              height: "54px",
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: connected
-                ? "2px solid #22c55e"
-                : "2px solid rgba(255,255,255,0.15)",
-            }}
-          />
-
+        <div style={memberHeader}>
           <div>
-            <strong style={{ color: "#00d2ff" }}>
-              {member.username || "Nouveau membre"}
-            </strong>
-
-            <div
-              style={{
-                color: "#9ca3af",
-                fontSize: "13px",
-              }}
-            >
-              {member.email}
-            </div>
+            <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
+            <p style={subText}>Statut réel, page actuelle et dernière activité.</p>
           </div>
-        </summary>
+
+          <input
+            value={searchMember}
+            onChange={(e) => setSearchMember(e.target.value)}
+            placeholder="Rechercher un membre..."
+            style={searchInput}
+          />
+        </div>
 
         <div
           style={{
-            marginTop: "15px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
+            display: "grid",
+            gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+            padding: "18px 14px",
+            background: "rgba(255,255,255,0.04)",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            fontWeight: 800,
+            color: "#dbeafe",
+            gap: "12px",
           }}
         >
-          <div>👑 Rôle : {member.role || "user"}</div>
+          <div>Membre</div>
+          <div>Rôle</div>
+          <div>Statut</div>
+          <div>Page actuelle</div>
+          <div>Dernière activité</div>
+          <div>Inscrit le</div>
+          <div>Actions</div>
+        </div>
 
-          <div>📌 Statut : {member.status || "pending"}</div>
+        {filteredProfiles.length === 0 ? (
+          <p style={{ color: "#aaa" }}>Aucun membre trouvé.</p>
+        ) : (
+          <div style={memberGrid}>
+            {filteredProfiles.map((member) => {
+              const presence = getPresence(member.id);
+              const connected = isOnline(member.id);
+              const isCreator = !!member.email && CREATOR_EMAILS.includes(member.email);
+              const isMemberAdmin = member.role === "admin";
 
-          <div>
-            🌐 Page : {presence?.current_page || "/"}
-          </div>
+              return (
+                <div
+                  key={member.id}
+                  style={{
+                    borderBottom: "1px solid rgba(255,255,255,0.08)",
+                    padding: "18px 14px",
+                    display: "grid",
+                    gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <img
+                      src={member.avatar || DEFAULT_AVATAR}
+                      alt="avatar"
+                      style={{
+                        width: "54px",
+                        height: "54px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: connected
+                          ? "2px solid #22c55e"
+                          : "2px solid rgba(255,255,255,0.15)",
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.src = DEFAULT_AVATAR;
+                      }}
+                    />
 
-          <div>
-            ⏱ {connected
-              ? "Actif maintenant"
-              : seenAgo(presence?.last_seen)}
-          </div>
+                    <div>
+                      <div
+                        style={{
+                          fontWeight: 800,
+                          color: "#00d2ff",
+                          fontSize: "18px",
+                        }}
+                      >
+                        {member.username || "Nouveau membre"}
+                      </div>
 
-          <div>
-            📅 Inscrit le :{" "}
-            {member.created_at
-              ? new Date(member.created_at).toLocaleDateString("fr-FR")
-              : "-"}
-          </div>
+                      <div
+                        style={{
+                          color: "#9ca3af",
+                          fontSize: "13px",
+                          marginTop: "4px",
+                        }}
+                      >
+                        {member.email}
+                      </div>
+                    </div>
+                  </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            <button
-              style={btnGreen}
-              onClick={() =>
-                updateUser(member.id, {
-                  status: "approved",
-                })
-              }
-            >
-              ✅ Valider
-            </button>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <span style={rolePill}>{member.role || "user"}</span>
+                    {isCreator && <span style={creatorBadge}>CRÉATEUR</span>}
+                  </div>
 
-            <button
-              style={btnOrange}
-              onClick={() =>
-                updateUser(member.id, {
-                  status: "blocked",
-                })
-              }
-            >
-              🚫 Bannir
-            </button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <span
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "999px",
+                        fontWeight: 700,
+                        fontSize: "12px",
+                        width: "fit-content",
+                        background:
+                          member.status === "approved"
+                            ? "rgba(34,197,94,0.18)"
+                            : member.status === "blocked"
+                            ? "rgba(255,80,80,0.18)"
+                            : "rgba(255,215,0,0.18)",
+                        color:
+                          member.status === "approved"
+                            ? "#4ade80"
+                            : member.status === "blocked"
+                            ? "#ff9b9b"
+                            : "#facc15",
+                      }}
+                    >
+                      {member.status || "pending"}
+                    </span>
 
-            {!isCreator && (
-              <button
-                style={btnGold}
-                onClick={() =>
-                  updateUser(member.id, {
-                    role: isMemberAdmin
-                      ? "user"
-                      : "admin",
-                  })
-                }
-              >
-                👑 Admin
-              </button>
-            )}
+                    <span
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "999px",
+                        fontWeight: 700,
+                        fontSize: "12px",
+                        width: "fit-content",
+                        background: connected
+                          ? "rgba(34,197,94,0.18)"
+                          : "rgba(255,80,80,0.14)",
+                        color: connected ? "#4ade80" : "#ff9b9b",
+                      }}
+                    >
+                      {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
+                    </span>
+                  </div>
+
+                  <div style={{ color: "#d1d5db", fontSize: "14px" }}>
+                    {presence?.current_page || "/"}
+                  </div>
+
+                  <div
+                    style={{
+                      color: connected ? "#4ade80" : "#cbd5e1",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {connected ? "Actif maintenant" : seenAgo(presence?.last_seen)}
+                  </div>
+
+                  <div style={{ color: "#cbd5e1", fontSize: "14px" }}>
+                    {member.created_at
+                      ? new Date(member.created_at).toLocaleDateString("fr-FR")
+                      : "-"}
+                  </div>
+
+                  <div style={{ position: "relative" }}>
+                    <details>
+                      <summary
+                        style={{
+                          cursor: "pointer",
+                          listStyle: "none",
+                          background: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "12px",
+                          display: "grid",
+                          placeItems: "center",
+                          fontSize: "20px",
+                        }}
+                      >
+                        ⋮
+                      </summary>
+
+                      <div
+                        style={{
+                          position: "absolute",
+                          right: 0,
+                          top: "50px",
+                          width: "180px",
+                          background: "#060b16",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          borderRadius: "16px",
+                          padding: "10px",
+                          zIndex: 50,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "10px",
+                          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                        }}
+                      >
+                        <button
+                          style={btnGreen}
+                          onClick={() => updateUser(member.id, { status: "approved" })}
+                        >
+                          ✅ Valider
+                        </button>
+
+                        <button
+                          style={btnOrange}
+                          onClick={() => updateUser(member.id, { status: "blocked" })}
+                        >
+                          🚫 Bannir
+                        </button>
 
                         {!isCreator && (
-              <button
-                style={btnRed}
-                onClick={() => deleteProfile(member.id)}
-              >
-                🗑 Supprimer
-              </button>
-            )}
-          </div>
-        </div>
-      </details>
-    </div>
-  );
-})}
-        </div>
-      )}
-    </>
-  )}
-</section>
+                          <button
+                            style={btnGold}
+                            onClick={() =>
+                              updateUser(member.id, {
+                                role: isMemberAdmin ? "user" : "admin",
+                              })
+                            }
+                          >
+                            👑 Admin
+                          </button>
+                        )}
 
-</main>
-);
+                        {!isCreator && (
+                          <button style={btnRed} onClick={() => deleteProfile(member.id)}>
+                            🗑 Supprimer
+                          </button>
+                        )}
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </main>
+  );
 }
 
-const pageStyle: React.CSSProperties = {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "radial-gradient(circle at top, rgba(0,120,255,0.2), #000 62%)",
