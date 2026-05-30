@@ -96,6 +96,7 @@ const [totalDownloads, setTotalDownloads] = useState(0);
 const [todayDownloads, setTodayDownloads] = useState(0);
 const [topDownloads, setTopDownloads] = useState<any[]>([]);
 const [searchMember, setSearchMember] = useState("");
+const [showAllMembers, setShowAllMembers] = useState(false);
   
 const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 const [notificationFilter, setNotificationFilter] = useState("all");
@@ -885,7 +886,9 @@ const createSaga = async () => {
   );
 });
 
-const displayedProfiles = filteredProfiles;
+const displayedProfiles = showAllMembers
+  ? filteredProfiles
+  : filteredProfiles.slice(0, 20);
 
 const filteredNotifications = notifications.filter((notif) => {
     if (notificationFilter === "read") return notif.read;
@@ -1453,35 +1456,46 @@ const filteredNotifications = notifications.filter((notif) => {
       </section>
 
       <section style={cardStyle}>
-  <div style={memberHeader}>
-    <div>
-      <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
+        <div style={memberHeader}>
+  <div>
+    <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
+    <p style={subText}>
+      Statut réel, page actuelle et dernière activité.
+    </p>
 
-      <p style={subText}>
-        Statut réel, page actuelle et dernière activité.
-      </p>
-    </div>
-
-    <input
-      value={searchMember}
-      onChange={(e) => setSearchMember(e.target.value)}
-      placeholder="Rechercher un membre..."
-      style={searchInput}
-    />
+    <button
+      onClick={() => setShowAllMembers(!showAllMembers)}
+      style={{
+        ...btnBlue,
+        marginTop: "10px",
+      }}
+    >
+      {showAllMembers
+        ? "▲ Réduire la liste"
+        : `▼ Voir tous les membres (${filteredProfiles.length})`}
+    </button>
   </div>
 
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
-      padding: "18px 14px",
-      background: "rgba(255,255,255,0.04)",
-      borderBottom: "1px solid rgba(255,255,255,0.08)",
-      fontWeight: 800,
-      color: "#dbeafe",
-      gap: "12px",
-    }}
-  >
+  <input
+    value={searchMember}
+    onChange={(e) => setSearchMember(e.target.value)}
+    placeholder="Rechercher un membre..."
+    style={searchInput}
+  />
+</div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+            padding: "18px 14px",
+            background: "rgba(255,255,255,0.04)",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            fontWeight: 800,
+            color: "#dbeafe",
+            gap: "12px",
+          }}
+        >
           <div>Membre</div>
           <div>Rôle</div>
           <div>Statut</div>
