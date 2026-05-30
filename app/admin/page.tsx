@@ -1483,10 +1483,18 @@ const filteredNotifications = notifications.filter((notif) => {
   />
 </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+        <input
+  value={searchMember}
+  onChange={(e) => setSearchMember(e.target.value)}
+  placeholder="Rechercher un membre..."
+  style={searchInput}
+/>
+
+{showAllMembers && (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
             padding: "18px 14px",
             background: "rgba(255,255,255,0.04)",
             borderBottom: "1px solid rgba(255,255,255,0.08)",
