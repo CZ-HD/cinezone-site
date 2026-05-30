@@ -1456,77 +1456,86 @@ const filteredNotifications = notifications.filter((notif) => {
       </section>
 
       <section style={cardStyle}>
-        <div style={memberHeader}>
-  <div>
-    <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
-    <p style={subText}>
-      Statut réel, page actuelle et dernière activité.
-    </p>
+  <div style={memberHeader}>
+    <div>
+      <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
 
-    <button
-      onClick={() => setShowAllMembers(!showAllMembers)}
-      style={{
-        ...btnBlue,
-        marginTop: "10px",
-      }}
-    >
-      {showAllMembers
-        ? "▲ Réduire la liste"
-        : `▼ Voir tous les membres (${filteredProfiles.length})`}
-    </button>
+      <p style={subText}>
+        Statut réel, page actuelle et dernière activité.
+      </p>
+
+      <button
+        onClick={() => setShowAllMembers(!showAllMembers)}
+        style={{
+          ...btnBlue,
+          marginTop: "10px",
+        }}
+      >
+        {showAllMembers
+          ? "▲ Masquer les membres"
+          : `▼ Voir tous les membres (${filteredProfiles.length})`}
+      </button>
+    </div>
+
+    <input
+      value={searchMember}
+      onChange={(e) => setSearchMember(e.target.value)}
+      placeholder="Rechercher un membre..."
+      style={searchInput}
+    />
   </div>
 
-  <input
-    value={searchMember}
-    onChange={(e) => setSearchMember(e.target.value)}
-    placeholder="Rechercher un membre..."
-    style={searchInput}
-  />
-</div>
+  {showAllMembers && (
+    <>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+          padding: "18px 14px",
+          background: "rgba(255,255,255,0.04)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          fontWeight: 800,
+          color: "#dbeafe",
+          gap: "12px",
+        }}
+      >
+        <div>Membre</div>
+        <div>Rôle</div>
+        <div>Statut</div>
+        <div>Page actuelle</div>
+        <div>Dernière activité</div>
+        <div>Inscrit le</div>
+        <div>Actions</div>
+      </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
-            padding: "18px 14px",
-            background: "rgba(255,255,255,0.04)",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-            fontWeight: 800,
-            color: "#dbeafe",
-            gap: "12px",
-          }}
-        >
-          <div>Membre</div>
-          <div>Rôle</div>
-          <div>Statut</div>
-          <div>Page actuelle</div>
-          <div>Dernière activité</div>
-          <div>Inscrit le</div>
-          <div>Actions</div>
-        </div>
+              {filteredProfiles.length === 0 ? (
+        <p style={{ color: "#aaa" }}>Aucun membre trouvé.</p>
+      ) : (
+        <div style={memberGrid}>
+          {filteredProfiles.map((member) => {
+            const presence = getPresence(member.id);
+            const connected = isOnline(member.id);
+            const isCreator =
+              !!member.email &&
+              CREATOR_EMAILS.includes(member.email);
 
-        {filteredProfiles.length === 0 ? (
-          <p style={{ color: "#aaa" }}>Aucun membre trouvé.</p>
-        ) : (
-          <div style={memberGrid}>
-            {displayedProfiles.map((member) => {
-              const presence = getPresence(member.id);
-              const connected = isOnline(member.id);
-              const isCreator = !!member.email && CREATOR_EMAILS.includes(member.email);
-              const isMemberAdmin = member.role === "admin";
+            const isMemberAdmin =
+              member.role === "admin";
 
-              return (
-                <div
-                  key={member.id}
-                  style={{
-                    borderBottom: "1px solid rgba(255,255,255,0.08)",
-                    padding: "18px 14px",
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
+            return (
+              <div
+                key={member.id}
+                style={{
+                  borderBottom:
+                    "1px solid rgba(255,255,255,0.08)",
+                  padding: "18px 14px",
+                  display: "grid",
+                  gridTemplateColumns:
+                    "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <img
                       src={member.avatar || DEFAULT_AVATAR}
