@@ -96,7 +96,8 @@ const [totalDownloads, setTotalDownloads] = useState(0);
 const [todayDownloads, setTodayDownloads] = useState(0);
 const [topDownloads, setTopDownloads] = useState<any[]>([]);
 const [searchMember, setSearchMember] = useState("");
-
+const [showAllMembers, setShowAllMembers] = useState(false);
+  
 const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 const [notificationFilter, setNotificationFilter] = useState("all");
 
@@ -875,17 +876,21 @@ const createSaga = async () => {
   };
 
   const filteredProfiles = profiles.filter((profile) => {
-    const q = searchMember.toLowerCase();
+  const q = searchMember.toLowerCase();
 
-    return (
-      (profile.email || "").toLowerCase().includes(q) ||
-      (profile.username || "").toLowerCase().includes(q) ||
-      (profile.role || "").toLowerCase().includes(q) ||
-      (profile.status || "").toLowerCase().includes(q)
-    );
-  });
+  return (
+    (profile.email || "").toLowerCase().includes(q) ||
+    (profile.username || "").toLowerCase().includes(q) ||
+    (profile.role || "").toLowerCase().includes(q) ||
+    (profile.status || "").toLowerCase().includes(q)
+  );
+});
 
-  const filteredNotifications = notifications.filter((notif) => {
+const displayedProfiles = showAllMembers
+  ? filteredProfiles
+  : filteredProfiles.slice(0, 20);
+
+const filteredNotifications = notifications.filter((notif) => {
     if (notificationFilter === "read") return notif.read;
     if (notificationFilter === "unread") return !notif.read;
     return true;
@@ -1452,18 +1457,32 @@ const createSaga = async () => {
 
       <section style={cardStyle}>
         <div style={memberHeader}>
-          <div>
-            <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
-            <p style={subText}>Statut réel, page actuelle et dernière activité.</p>
-          </div>
+  <div>
+    <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
+    <p style={subText}>
+      Statut réel, page actuelle et dernière activité.
+    </p>
 
-          <input
-            value={searchMember}
-            onChange={(e) => setSearchMember(e.target.value)}
-            placeholder="Rechercher un membre..."
-            style={searchInput}
-          />
-        </div>
+    <button
+      onClick={() => setShowAllMembers(!showAllMembers)}
+      style={{
+        ...btnBlue,
+        marginTop: "10px",
+      }}
+    >
+      {showAllMembers
+        ? "▲ Réduire la liste"
+        : `▼ Voir tous les membres (${filteredProfiles.length})`}
+    </button>
+  </div>
+
+  <input
+    value={searchMember}
+    onChange={(e) => setSearchMember(e.target.value)}
+    placeholder="Rechercher un membre..."
+    style={searchInput}
+  />
+</div>
 
         <div
           style={{
@@ -1490,7 +1509,7 @@ const createSaga = async () => {
           <p style={{ color: "#aaa" }}>Aucun membre trouvé.</p>
         ) : (
           <div style={memberGrid}>
-            {filteredProfiles.map((member) => {
+            {displayedProfiles.map((member) => {
               const presence = getPresence(member.id);
               const connected = isOnline(member.id);
               const isCreator = !!member.email && CREATOR_EMAILS.includes(member.email);
