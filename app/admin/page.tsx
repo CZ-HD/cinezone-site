@@ -886,9 +886,7 @@ const createSaga = async () => {
   );
 });
 
-const displayedProfiles = showAllMembers
-  ? filteredProfiles
-  : filteredProfiles.slice(0, 20);
+const displayedProfiles = filteredProfiles;
 
 const filteredNotifications = notifications.filter((notif) => {
     if (notificationFilter === "read") return notif.read;
@@ -1464,17 +1462,16 @@ const filteredNotifications = notifications.filter((notif) => {
     </p>
 
     <button
-      onClick={() => setShowAllMembers(!showAllMembers)}
-      style={{
-        ...btnBlue,
-        marginTop: "10px",
-      }}
-    >
-      {showAllMembers
-        ? "▲ Réduire la liste"
-        : `▼ Voir tous les membres (${filteredProfiles.length})`}
-    </button>
-  </div>
+  onClick={() => setShowAllMembers(!showAllMembers)}
+  style={{
+    ...btnBlue,
+    marginTop: "10px",
+  }}
+>
+  {showAllMembers
+    ? `▲ Masquer les membres`
+    : `▼ Voir les membres (${filteredProfiles.length})`}
+</button>
 
   <input
     value={searchMember}
