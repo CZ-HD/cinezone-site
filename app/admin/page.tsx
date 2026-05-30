@@ -1475,12 +1475,6 @@ const filteredNotifications = notifications.filter((notif) => {
     : `▼ Voir les membres (${filteredProfiles.length})`}
 </button>
 
-{showAllMembers && (
-  <div>
-    {/* TABLEAU MEMBRES */}
-  </div>
-)}
-
   <input
     value={searchMember}
     onChange={(e) => setSearchMember(e.target.value)}
