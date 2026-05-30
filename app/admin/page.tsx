@@ -86,7 +86,8 @@ export default function AdminPage() {
   const [manualVote, setManualVote] = useState("");
   const [manualImdb, setManualImdb] = useState("");
   const [manualLink, setManualLink] = useState("");
-
+ const [showTopDownloads, setShowTopDownloads] = useState(false);
+  
   const [profiles, setProfiles] = useState<Profile[]>([]);
 const [presences, setPresences] = useState<Presence[]>([]);
 
@@ -966,29 +967,43 @@ const createSaga = async () => {
 </div>
       </section>
 <section style={cardStyle}>
-  <h2>🏆 Top téléchargements</h2>
+  <button
+    onClick={() => setShowTopDownloads(!showTopDownloads)}
+    style={{
+      ...btnBlue,
+      width: "100%",
+      marginBottom: showTopDownloads ? "16px" : "0",
+    }}
+  >
+    🏆 Top téléchargements ({topDownloads.length})
+    {showTopDownloads ? " ▲" : " ▼"}
+  </button>
 
-  {topDownloads.length === 0 ? (
-    <p style={subText}>Aucun téléchargement enregistré.</p>
-  ) : (
-    topDownloads.map((movie, index) => (
-      <div
-        key={movie.id}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "10px 0",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        <span>
-          #{index + 1} {movie.title}
-        </span>
+  {showTopDownloads && (
+    <>
+      {topDownloads.length === 0 ? (
+        <p style={subText}>Aucun téléchargement enregistré.</p>
+      ) : (
+        topDownloads.map((movie, index) => (
+          <div
+            key={movie.id}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "10px 0",
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <span>
+              #{index + 1} {movie.title}
+            </span>
 
-        <strong>{movie.count}</strong>
-      </div>
-    ))
+            <strong>{movie.count}</strong>
+          </div>
+        ))
+      )}
+    </>
   )}
 </section>
       <section style={cardStyle}>
