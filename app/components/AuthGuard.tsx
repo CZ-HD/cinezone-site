@@ -27,12 +27,13 @@ export default function AuthGuard({
       setAllowed(false);
 
       const publicPages = [
-        "/login",
-        "/register",
-        "/waiting",
-        "/forgot-password",
-        "/reset-password",
-      ];
+  "/login",
+  "/register",
+  "/waiting",
+  "/forgot-password",
+  "/reset-password",
+  "/contact",
+];
 
       if (publicPages.includes(pathname)) {
         setAllowed(true);
