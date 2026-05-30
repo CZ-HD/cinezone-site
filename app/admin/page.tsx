@@ -96,7 +96,6 @@ const [totalDownloads, setTotalDownloads] = useState(0);
 const [todayDownloads, setTodayDownloads] = useState(0);
 const [topDownloads, setTopDownloads] = useState<any[]>([]);
 const [searchMember, setSearchMember] = useState("");
-const [showAllMembers, setShowAllMembers] = useState(false);
   
 const [notifications, setNotifications] = useState<NotificationRow[]>([]);
 const [notificationFilter, setNotificationFilter] = useState("all");
@@ -1454,45 +1453,35 @@ const filteredNotifications = notifications.filter((notif) => {
       </section>
 
       <section style={cardStyle}>
-        <div style={memberHeader}>
-  <div>
-    <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
-    <p style={subText}>
-      Statut réel, page actuelle et dernière activité.
-    </p>
+  <div style={memberHeader}>
+    <div>
+      <h2 style={{ margin: 0 }}>👥 Membres inscrits</h2>
 
-    <button
-  onClick={() => setShowAllMembers(!showAllMembers)}
-  style={{
-    ...btnBlue,
-    marginTop: "10px",
-  }}
->
-  {showAllMembers
-    ? `▲ Masquer les membres`
-    : `▼ Voir les membres (${filteredProfiles.length})`}
-</button>
+      <p style={subText}>
+        Statut réel, page actuelle et dernière activité.
+      </p>
+    </div>
 
-  <input
-    value={searchMember}
-    onChange={(e) => setSearchMember(e.target.value)}
-    placeholder="Rechercher un membre..."
-    style={searchInput}
-  />
-</div>
+    <input
+      value={searchMember}
+      onChange={(e) => setSearchMember(e.target.value)}
+      placeholder="Rechercher un membre..."
+      style={searchInput}
+    />
+  </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
-            padding: "18px 14px",
-            background: "rgba(255,255,255,0.04)",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-            fontWeight: 800,
-            color: "#dbeafe",
-            gap: "12px",
-          }}
-        >
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "2fr 1fr 1fr 1.2fr 1.2fr 1fr 80px",
+      padding: "18px 14px",
+      background: "rgba(255,255,255,0.04)",
+      borderBottom: "1px solid rgba(255,255,255,0.08)",
+      fontWeight: 800,
+      color: "#dbeafe",
+      gap: "12px",
+    }}
+  >
           <div>Membre</div>
           <div>Rôle</div>
           <div>Statut</div>
