@@ -34,40 +34,32 @@ body {
    Effet titre type Spider-Noir
    =========================== */
 
-@keyframes spiderNoirGlow {
+@keyframes spiderNoirMove {
   0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
+    background-position: 0% center;
   }
 
   100% {
-    background-position: 0% 50%;
+    background-position: 200% center;
   }
 }
 
 .cinezoneTitle {
   background: linear-gradient(
     90deg,
-    #ff7b88 0%,
-    #ffb0b8 35%,
-    #ffffff 65%,
+    #ff6b7d 0%,
+    #ff8f9d 25%,
+    #ffffff 45%,
     #ffffff 100%
   );
 
-  background-size: 200% auto;
+  background-size: 250% 100%;
 
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
-
-  animation: spiderNoirGlow 18s ease-in-out infinite;
+  -webkit-text-fill-color: transparent;
 
   font-weight: 900;
 
-  text-shadow:
-    0 0 8px rgba(255, 123, 136, 0.15),
-    0 0 18px rgba(255, 255, 255, 0.08);
+  animation: spiderNoirMove 6s linear infinite;
 }
