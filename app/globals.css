@@ -48,9 +48,9 @@ body {
   background-image: linear-gradient(
     120deg,
     #ffffff 0%,
-    #ffffff 40%,
-    #ef4444 50%,
-    #ffffff 60%,
+    #ffffff 44%,
+    #67e8f9 50%,
+    #ffffff 56%,
     #ffffff 100%
   );
 
@@ -60,7 +60,7 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  animation: cinezoneShine 8s linear infinite;
+  animation: cinezoneShine 22s linear infinite;
 
   font-weight: 900;
 }
