@@ -20,15 +20,14 @@ export default async function MoviePage({ params }: any) {
   const localResult = await supabase
   .from("downloads")
   .select(`
-    id,
-    title,
-    poster_path,
-    backdrop_path,
-    vote_average,
-    release_date,
-    overview,
-    imdb_id
-  `)
+  id,
+  title,
+  poster_path,
+  backdrop_path,
+  vote_average,
+  release_date,
+  imdb_id
+`)
   .eq("id", Number(params.id))
   .maybeSingle();
 
@@ -82,8 +81,7 @@ if (res.ok) {
     vote_average: localMovie.vote_average,
     release_date: localMovie.release_date,
     overview:
-      localMovie.overview ||
-      "⚠️ Film ajouté manuellement.",
+  "⚠️ Film ajouté manuellement.",
     imdb_id: localMovie.imdb_id,
   };
 }
