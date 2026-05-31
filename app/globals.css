@@ -35,12 +35,16 @@ body {
    ========================================== */
 
 @keyframes cinezoneShine {
-  from {
+  0% {
     background-position: -200% center;
   }
 
-  to {
+  50% {
     background-position: 200% center;
+  }
+
+  100% {
+    background-position: -200% center;
   }
 }
 
@@ -62,7 +66,7 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  animation: cinezoneShine 25s linear infinite;
+  animation: cinezoneShine 10s ease-in-out infinite;
 
   font-weight: 900;
 }
