@@ -83,9 +83,7 @@ if (res.ok) {
     release_date: localMovie.release_date,
     overview:
       localMovie.overview ||
-      (isAdmin
-        ? "⚠️ Film ajouté manuellement."
-        : ""),
+      "⚠️ Film ajouté manuellement.",
     imdb_id: localMovie.imdb_id,
   };
 }
