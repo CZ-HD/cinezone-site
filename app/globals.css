@@ -29,3 +29,37 @@ body {
     transform: translateX(-100%);
   }
 }
+@keyframes cinezoneGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.cinezoneTitle {
+  background: linear-gradient(
+    90deg,
+    #ff4d4d,
+    #ff9f43,
+    #ffffff,
+    #00c6ff,
+    #7c3aed,
+    #ff4d4d
+  );
+
+  background-size: 400% 400%;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: cinezoneGradient 8s ease infinite;
+
+  filter: drop-shadow(0 0 20px rgba(255,255,255,0.15));
+}
