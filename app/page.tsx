@@ -87,7 +87,12 @@ export default function Home() {
           <div style={heroContent}>
             <span style={badge}>🔥 FILM EN VEDETTE</span>
 
-            <h1 style={heroTitle}>{hero.title}</h1>
+            <h1
+  className="cinezoneTitle"
+  style={heroTitle}
+>
+  {hero.title}
+</h1>
 
             <div style={metaRow}>
               <span>⭐ {hero.vote_average?.toFixed(1)} / 10</span>
