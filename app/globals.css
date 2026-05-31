@@ -30,9 +30,9 @@ body {
   }
 }
 
-/* ===========================
-   Effet titre type Spider-Noir
-   =========================== */
+/* ==========================================
+   Effet titre premium type "Obsession"
+   ========================================== */
 
 @keyframes cinezoneShine {
   from {
@@ -48,19 +48,21 @@ body {
   background-image: linear-gradient(
     120deg,
     #ffffff 0%,
-    #ffffff 44%,
+    #ffffff 46%,
+    #38bdf8 49%,
     #67e8f9 50%,
-    #ffffff 56%,
+    #38bdf8 51%,
+    #ffffff 54%,
     #ffffff 100%
   );
 
-  background-size: 200% auto;
+  background-size: 250% auto;
 
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  animation: cinezoneShine 22s linear infinite;
+  animation: cinezoneShine 25s linear infinite;
 
   font-weight: 900;
 }
