@@ -29,18 +29,15 @@ export default async function MoviePage({ params }: any) {
     overview,
     imdb_id
   `)
-  .eq("id", params.id)
+  .eq("id", Number(params.id))
   .maybeSingle();
 
 const localMovie = localResult.data;
 
-const {
-  data: { user },
-} = await supabase.auth.getUser();
-
-const isAdmin =
-  user?.email === "blackph4tom@gmail.com" ||
-  user?.email === "lafooteusedu54@hotmail.fr";
+console.log("PARAMS ID =", params.id);
+console.log("PARAMS TYPE =", typeof params.id);
+console.log("LOCAL MOVIE =", localMovie);
+console.log("SUPABASE ERROR =", localResult.error);
 
 const res = await fetch(
   `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`,
