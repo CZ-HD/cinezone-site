@@ -50,15 +50,13 @@ body {
 
 .cinezoneTitle {
   background-image: linear-gradient(
-    120deg,
-    #ffffff 0%,
-    #ffffff 46%,
-    #38bdf8 49%,
-    #67e8f9 50%,
-    #38bdf8 51%,
-    #ffffff 54%,
-    #ffffff 100%
-  );
+  120deg,
+  #ffffff 0%,
+  #ffffff 42%,
+  #fbbf24 50%,
+  #ffffff 58%,
+  #ffffff 100%
+);
 
   background-size: 250% auto;
 
@@ -66,7 +64,7 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  animation: cinezoneShine 16s ease-in-out infinite;
+  animation: cinezoneShine 14s ease-in-out infinite;
 
   font-weight: 900;
 }
