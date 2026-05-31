@@ -29,7 +29,12 @@ body {
     transform: translateX(-100%);
   }
 }
-@keyframes cinezoneGradient {
+
+/* ===========================
+   Effet titre type Spider-Noir
+   =========================== */
+
+@keyframes spiderNoirGlow {
   0% {
     background-position: 0% 50%;
   }
@@ -46,20 +51,23 @@ body {
 .cinezoneTitle {
   background: linear-gradient(
     90deg,
-    #ff4d4d,
-    #ff9f43,
-    #ffffff,
-    #00c6ff,
-    #7c3aed,
-    #ff4d4d
+    #ff7b88 0%,
+    #ffb0b8 35%,
+    #ffffff 65%,
+    #ffffff 100%
   );
 
-  background-size: 400% 400%;
+  background-size: 200% auto;
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 
-  animation: cinezoneGradient 8s ease infinite;
+  animation: spiderNoirGlow 18s ease-in-out infinite;
 
-  filter: drop-shadow(0 0 20px rgba(255,255,255,0.15));
+  font-weight: 900;
+
+  text-shadow:
+    0 0 8px rgba(255, 123, 136, 0.15),
+    0 0 18px rgba(255, 255, 255, 0.08);
 }
