@@ -73,116 +73,122 @@ export default function Home() {
             `,
           }}
         >
-          <button
-            onClick={() =>
-              setHeroIndex((prev) =>
-                prev === 0 ? trending.length - 1 : prev - 1
-              )
-            }
-            style={{ ...arrowBtn, left: "22px" }}
-          >
-            ‹
-          </button>
+<button
+  onClick={() =>
+    setHeroIndex((prev) =>
+      prev === 0 ? trending.length - 1 : prev - 1
+    )
+  }
+  style={{ ...arrowBtn, left: "22px" }}
+>
+  ‹
+</button>
 
-          <div style={heroContent}>
-            <span style={badge}>🔥 FILM EN VEDETTE</span>
+<div style={heroContent}>
+  <span style={badge}>🔥 FILM EN VEDETTE</span>
 
-            <h1 className="cinezoneTitle" style={heroTitle}>
-  {hero.title}
-</h1>
+  <h1 className="cinezoneTitle" style={heroTitle}>
+    {hero.title}
+  </h1>
 
-            <div style={metaRow}>
-              <span>⭐ {hero.vote_average?.toFixed(1)} / 10</span>
-              <span>🎬 {hero.release_date?.slice(0, 4) || "N/A"}</span>
-              <span style={qualityBadge}>HD</span>
-            </div>
+  <div style={metaRow}>
+    <span>⭐ {hero.vote_average?.toFixed(1)} / 10</span>
+    <span>🎬 {hero.release_date?.slice(0, 4) || "N/A"}</span>
+    <span style={qualityBadge}>HD</span>
+  </div>
 
-            <p style={heroText}>
-              {hero.overview || "Aucune description disponible pour ce film."}
-            </p>
+  <p style={heroText}>
+    {hero.overview || "Aucune description disponible pour ce film."}
+  </p>
 
-            <div style={buttonRow}>
-              <Link href={`/movie/${hero.id}`} style={primaryBtn}>
-                🎬 Accéder au film
-              </Link>
+  <div style={buttonRow}>
+    <Link href={`/movie/${hero.id}`} style={primaryBtn}>
+      🎬 Accéder au film
+    </Link>
 
-              <Link href="/films" style={secondaryBtn}>
-                Explorer le catalogue
-              </Link>
-            </div>
-          </div>
+    <Link href="/films" style={secondaryBtn}>
+      Explorer le catalogue
+    </Link>
+  </div>
 
-                    <button
-            onClick={() =>
-              setHeroIndex((prev) => (prev + 1) % trending.length)
-            }
-            style={{ ...arrowBtn, right: "22px" }}
-          >
-            ›
-          </button>
-        </section>
-      )}
-
-     <div style={announcementStyle}>
+  {/* Bandeau H.265 */}
   <div
     style={{
-      width: "44px",
-      height: "44px",
-      borderRadius: "50%",
-      background: "rgba(0,114,255,0.28)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "22px",
-      flexShrink: 0,
+      marginTop: "28px",
+      maxWidth: "900px",
     }}
   >
-    📦
-  </div>
+    <div style={announcementStyle}>
+      <div
+        style={{
+          width: "44px",
+          height: "44px",
+          borderRadius: "50%",
+          background: "rgba(0,114,255,0.28)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "22px",
+          flexShrink: 0,
+        }}
+      >
+        📦
+      </div>
 
-  <div style={{ flex: 1 }}>
-    <div
-      style={{
-        color: "#67e8f9",
-        fontWeight: 800,
-        fontSize: "15px",
-        marginBottom: "4px",
-        textTransform: "uppercase",
-      }}
-    >
-      📢 INFORMATION CINEZONE HD
+      <div style={{ flex: 1 }}>
+        <div
+          style={{
+            color: "#67e8f9",
+            fontWeight: 800,
+            fontSize: "15px",
+            marginBottom: "4px",
+            textTransform: "uppercase",
+          }}
+        >
+          📢 INFORMATION CINEZONE HD
+        </div>
+
+        <div
+          style={{
+            color: "#dbeafe",
+            lineHeight: 1.55,
+            fontSize: "13px",
+          }}
+        >
+          Afin d'améliorer votre expérience et de réduire la taille des
+          fichiers, CineZone HD proposera progressivement davantage de films
+          et séries encodés en <strong>H.265 (HEVC)</strong>.
+          <br />
+          💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une qualité
+          similaire tout en conservant une excellente qualité vidéo.
+        </div>
+      </div>
+
+      <span
+        style={{
+          padding: "8px 14px",
+          borderRadius: "12px",
+          border: "1px solid rgba(0,198,255,0.35)",
+          color: "#67e8f9",
+          fontWeight: 700,
+          fontSize: "13px",
+          whiteSpace: "nowrap",
+        }}
+      >
+        H.265 / HEVC
+      </span>
     </div>
-
-    <div
-      style={{
-        color: "#dbeafe",
-        lineHeight: 1.55,
-        fontSize: "13px",
-      }}
-    >
-      Afin d'améliorer votre expérience et de réduire la taille des fichiers,
-      CineZone HD proposera progressivement davantage de films et séries
-      encodés en <strong>H.265 (HEVC)</strong>.
-      <br />
-      💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une qualité
-      similaire.
-    </div>
   </div>
-
-  <span
-    style={{
-      padding: "8px 14px",
-      borderRadius: "12px",
-      border: "1px solid rgba(0,198,255,0.35)",
-      color: "#67e8f9",
-      fontWeight: 700,
-      fontSize: "13px",
-      whiteSpace: "nowrap",
-    }}
-  >
-    H.265 / HEVC
-  </span>
 </div>
+
+<button
+  onClick={() =>
+    setHeroIndex((prev) => (prev + 1) % trending.length)
+  }
+  style={{ ...arrowBtn, right: "22px" }}
+>
+  ›
+</button>
 
 <section style={quickCards}>
   <QuickCard
@@ -235,6 +241,7 @@ function QuickCard({ href, icon, title, text }: any) {
 
       <div>
         <strong>{title}</strong>
+
         <p
           style={{
             margin: "5px 0 0",
@@ -392,18 +399,18 @@ const arrowBtn: React.CSSProperties = {
 };
 
 const announcementStyle: React.CSSProperties = {
-  margin: "-45px 20px 22px",
-  padding: "14px 18px",
-  borderRadius: "18px",
+  marginTop: "25px",
+  maxWidth: "980px",
+  padding: "16px 20px",
+  borderRadius: "16px",
   border: "1px solid rgba(0,198,255,0.30)",
   background:
-    "linear-gradient(135deg, rgba(0,35,70,0.96), rgba(0,15,35,0.98))",
+    "linear-gradient(90deg, rgba(0,35,70,0.92), rgba(0,15,35,0.95))",
+  backdropFilter: "blur(8px)",
   boxShadow: "0 0 25px rgba(0,198,255,0.12)",
   display: "flex",
   alignItems: "center",
-  gap: "14px",
-  position: "relative",
-  zIndex: 5,
+  gap: "16px",
 };
 
 const announcementIcon: React.CSSProperties = {
