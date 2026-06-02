@@ -4,17 +4,17 @@ import { supabase } from "@/lib/supabase";
 export async function POST(req: Request) {
   try {
     const {
-      id,
-      link,
-      title,
-      poster_path,
-      backdrop_path,
-      vote_average,
-      release_date,
-      release_year,
-      imdb_id,
-    } = await req.json();
-
+  id,
+  link,
+  codec,
+  title,
+  poster_path,
+  backdrop_path,
+  vote_average,
+  release_date,
+  release_year,
+  imdb_id,
+} = await req.json();
     if (!link) {
       return NextResponse.json(
         { error: "Lien manquant" },
@@ -40,19 +40,20 @@ export async function POST(req: Request) {
       : null;
 
     const { error } = await supabase.from("downloads").upsert(
-      {
-        id: finalId,
-        link,
-        title: title || "Film sans titre",
-        poster_path: poster_path || null,
-        backdrop_path: backdrop_path || null,
-        vote_average: vote_average || null,
-        release_date: release_date || null,
-        release_year: finalReleaseYear,
-        imdb_id: cleanImdbId,
-      },
-      { onConflict: "id" }
-    );
+  {
+    id: finalId,
+    link,
+    codec: codec || "H264",
+    title: title || "Film sans titre",
+    poster_path: poster_path || null,
+    backdrop_path: backdrop_path || null,
+    vote_average: vote_average || null,
+    release_date: release_date || null,
+    release_year: finalReleaseYear,
+    imdb_id: cleanImdbId,
+  },
+  { onConflict: "id" }
+);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
