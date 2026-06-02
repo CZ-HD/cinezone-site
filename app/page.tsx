@@ -353,16 +353,16 @@ const arrowBtn: React.CSSProperties = {
 };
 
 const announcementStyle: React.CSSProperties = {
-  margin: "0 40px 24px",
-  padding: "18px 22px",
+  margin: "20px 40px 20px",
+  padding: "14px 20px",
   borderRadius: "18px",
-  border: "1px solid rgba(0,198,255,0.35)",
+  border: "1px solid rgba(0,198,255,0.25)",
   background:
     "linear-gradient(135deg, rgba(0,35,70,0.92), rgba(0,15,35,0.96))",
-  boxShadow: "0 0 30px rgba(0,198,255,0.15)",
+  boxShadow: "0 0 20px rgba(0,198,255,0.10)",
   display: "flex",
   alignItems: "center",
-  gap: "18px",
+  gap: "16px",
   position: "relative",
   zIndex: 5,
 };
@@ -372,7 +372,7 @@ const quickCards: React.CSSProperties = {
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: "16px",
   padding: "0 40px",
-  marginTop: "-65px",
+  marginTop: "10px",
   position: "relative",
   zIndex: 4,
   scrollMarginTop: "120px",
