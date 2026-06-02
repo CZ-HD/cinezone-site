@@ -124,32 +124,67 @@ export default function Home() {
       )}
 
      <div style={announcementStyle}>
-  <div style={announcementIcon}>
+  <div
+    style={{
+      width: "44px",
+      height: "44px",
+      borderRadius: "50%",
+      background: "rgba(0,114,255,0.28)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "22px",
+      flexShrink: 0,
+    }}
+  >
     📦
   </div>
 
   <div style={{ flex: 1 }}>
-    <div style={announcementTitle}>
+    <div
+      style={{
+        color: "#67e8f9",
+        fontWeight: 800,
+        fontSize: "15px",
+        marginBottom: "4px",
+        textTransform: "uppercase",
+      }}
+    >
       📢 INFORMATION CINEZONE HD
     </div>
 
-    <div style={announcementText}>
+    <div
+      style={{
+        color: "#dbeafe",
+        lineHeight: 1.55,
+        fontSize: "13px",
+      }}
+    >
       Afin d'améliorer votre expérience et de réduire la taille des fichiers,
       CineZone HD proposera progressivement davantage de films et séries
       encodés en <strong>H.265 (HEVC)</strong>.
       <br />
       💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une qualité
-      similaire, tout en conservant une excellente qualité vidéo.
+      similaire.
     </div>
   </div>
 
-  <div>
-    <span style={announcementBadge}>
-      H.265 / HEVC
-    </span>
-  </div>
+  <span
+    style={{
+      padding: "8px 14px",
+      borderRadius: "12px",
+      border: "1px solid rgba(0,198,255,0.35)",
+      color: "#67e8f9",
+      fontWeight: 700,
+      fontSize: "13px",
+      whiteSpace: "nowrap",
+    }}
+  >
+    H.265 / HEVC
+  </span>
 </div>
-      <section style={quickCards}>
+
+<section style={quickCards}>
   <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
   <QuickCard href="#nouveautes" icon="🆕" title="Nouveautés" text="Voir les derniers ajouts" />
   <QuickCard href="/films" icon="🎬" title="Catalogue" text="Accéder à tous les films" />
@@ -168,18 +203,6 @@ export default function Home() {
 
 </main>
 );
-}
-
-function QuickCard({ href, icon, title, text }: any) {
-  return (
-    <Link href={href} style={quickCard}>
-      <div style={quickIcon}>{icon}</div>
-      <div>
-        <strong>{title}</strong>
-        <p style={{ margin: "5px 0 0", color: "#cbd5e1" }}>{text}</p>
-      </div>
-    </Link>
-  );
 }
 
 function Row({ id, title, movies }: any) {
@@ -319,60 +342,63 @@ const arrowBtn: React.CSSProperties = {
 };
 
 const announcementStyle: React.CSSProperties = {
-  margin: "-60px 40px 30px",
-  padding: "22px 28px",
-  borderRadius: "20px",
-  border: "1px solid rgba(0,198,255,0.35)",
+  margin: "-45px 20px 22px",
+  padding: "14px 18px",
+  borderRadius: "18px",
+  border: "1px solid rgba(0,198,255,0.30)",
   background:
-    "linear-gradient(135deg, rgba(0,35,70,0.95), rgba(0,15,35,0.98))",
-  boxShadow: "0 0 30px rgba(0,198,255,0.15)",
+    "linear-gradient(135deg, rgba(0,35,70,0.96), rgba(0,15,35,0.98))",
+  boxShadow: "0 0 25px rgba(0,198,255,0.12)",
   display: "flex",
   alignItems: "center",
-  gap: "22px",
+  gap: "14px",
   position: "relative",
   zIndex: 5,
 };
 
 const announcementIcon: React.CSSProperties = {
-  width: "62px",
-  height: "62px",
+  width: "46px",
+  height: "46px",
   borderRadius: "50%",
   background: "rgba(0,114,255,0.25)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: "30px",
+  fontSize: "22px",
   flexShrink: 0,
 };
 
 const announcementTitle: React.CSSProperties = {
   color: "#67e8f9",
-  fontWeight: 900,
-  fontSize: "22px",
-  marginBottom: "8px",
+  fontWeight: 800,
+  fontSize: "15px",
+  marginBottom: "4px",
+  textTransform: "uppercase",
 };
 
 const announcementText: React.CSSProperties = {
   color: "#dbeafe",
-  lineHeight: 1.8,
-  fontSize: "15px",
+  lineHeight: 1.5,
+  fontSize: "13px",
 };
 
 const announcementBadge: React.CSSProperties = {
-  padding: "12px 18px",
-  borderRadius: "14px",
-  border: "1px solid rgba(0,198,255,0.35)",
+  padding: "8px 14px",
+  borderRadius: "12px",
+  border: "1px solid rgba(0,198,255,0.30)",
   color: "#67e8f9",
-  fontWeight: 800,
+  fontWeight: 700,
+  fontSize: "13px",
   whiteSpace: "nowrap",
+  flexShrink: 0,
 };
 
 const quickCards: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: "16px",
-  padding: "0 40px",
-  marginTop: "10px",
+  padding: "0 20px",
+  marginTop: "0px",
   position: "relative",
   zIndex: 4,
   scrollMarginTop: "120px",
@@ -402,7 +428,7 @@ const quickIcon: React.CSSProperties = {
 };
 
 const contentStyle: React.CSSProperties = {
-  padding: "35px 28px 70px",
+  padding: "35px 20px 70px",
 };
 
 const rowStyle: React.CSSProperties = {
