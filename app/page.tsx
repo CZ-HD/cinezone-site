@@ -389,8 +389,8 @@ const announcementStyle: React.CSSProperties = {
   padding: "20px 24px",
   borderRadius: "18px",
   background:
-    "linear-gradient(135deg, rgba(0,25,60,.70), rgba(0,45,95,.60))",
-  backdropFilter: "blur(12px)",
+  "linear-gradient(135deg, rgba(0,25,60,.55), rgba(0,45,95,.45))",
+backdropFilter: "blur(14px)",
   border: "1px solid rgba(0,198,255,.35)",
   boxShadow:
     "0 0 35px rgba(0,198,255,.15), inset 0 0 20px rgba(0,198,255,.04)",
