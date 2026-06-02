@@ -225,16 +225,18 @@ export default function Home() {
     </section>
 
     <div style={contentStyle}>
-      <Row id="tendances" title="🔥 Tendances" movies={trending} />
-      <Row id="nouveautes" title="🆕 Nouveautés" movies={trending} />
-      <Row title="⭐ Top Rated" movies={topRated} />
-      <Row title="⚔️ Action" movies={action} />
-      <Row title="😂 Comédie" movies={comedy} />
-      <Row title="😱 Horreur" movies={horror} />
-      <Row title="💗 Romance" movies={romance} />
-    </div>
-  </main>
+  <Row id="tendances" title="🔥 Tendances" movies={trending} />
+  <Row id="nouveautes" title="🆕 Nouveautés" movies={trending} />
+  <Row title="⭐ Top Rated" movies={topRated} />
+  <Row title="⚔️ Action" movies={action} />
+  <Row title="😂 Comédie" movies={comedy} />
+  <Row title="😱 Horreur" movies={horror} />
+  <Row title="💗 Romance" movies={romance} />
+</div>
+
+</main>
 );
+}
 
 function QuickCard({ href, icon, title, text }: any) {
   return (
