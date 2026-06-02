@@ -154,8 +154,11 @@ export default function Home() {
   </div>
 
   <div style={announcementBadge}>
-    H.265 / HEVC
-  </div>
+  H.265 / HEVC
+</div>
+
+</div>
+
 </div>
 
 </div>
@@ -168,38 +171,38 @@ export default function Home() {
 >
   ›
 </button>
-      </section>
-    )}
+</section>
+)}
 
-    <section style={quickCards}>
-      <QuickCard
-        href="#tendances"
-        icon="🔥"
-        title="Tendances"
-        text="Voir les films populaires"
-      />
+<section style={quickCards}>
+  <QuickCard
+    href="#tendances"
+    icon="🔥"
+    title="Tendances"
+    text="Voir les films populaires"
+  />
 
-      <QuickCard
-        href="#nouveautes"
-        icon="🆕"
-        title="Nouveautés"
-        text="Voir les derniers ajouts"
-      />
+  <QuickCard
+    href="#nouveautes"
+    icon="🆕"
+    title="Nouveautés"
+    text="Voir les derniers ajouts"
+  />
 
-      <QuickCard
-        href="/films"
-        icon="🎬"
-        title="Catalogue"
-        text="Accéder à tous les films"
-      />
+  <QuickCard
+    href="/films"
+    icon="🎬"
+    title="Catalogue"
+    text="Accéder à tous les films"
+  />
 
-      <QuickCard
-        href="/chat"
-        icon="💬"
-        title="Chat"
-        text="Communauté CineZone"
-      />
-    </section>
+  <QuickCard
+    href="/chat"
+    icon="💬"
+    title="Chat"
+    text="Communauté CineZone"
+  />
+</section>
 
     <div style={contentStyle}>
   <Row id="tendances" title="🔥 Tendances" movies={trending} />
