@@ -61,178 +61,180 @@ export default function Home() {
   const hero = trending[heroIndex];
 
   return (
-    <main style={pageStyle}>
-      {hero && (
-        <section
-          style={{
-            ...heroStyle,
-            backgroundImage: `
-              linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.72) 34%, rgba(0,0,0,0.25) 65%, rgba(0,0,0,0.78) 100%),
-              linear-gradient(to top, #000 0%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.35) 100%),
-              url(${IMG}/original${hero.backdrop_path})
-            `,
-          }}
-        >
-<button
-  onClick={() =>
-    setHeroIndex((prev) =>
-      prev === 0 ? trending.length - 1 : prev - 1
-    )
-  }
-  style={{ ...arrowBtn, left: "22px" }}
->
-  ‹
-</button>
-
-<div style={heroContent}>
-  <span style={badge}>🔥 FILM EN VEDETTE</span>
-
-  <h1 className="cinezoneTitle" style={heroTitle}>
-    {hero.title}
-  </h1>
-
-  <div style={metaRow}>
-    <span>⭐ {hero.vote_average?.toFixed(1)} / 10</span>
-    <span>🎬 {hero.release_date?.slice(0, 4) || "N/A"}</span>
-    <span style={qualityBadge}>HD</span>
-  </div>
-
-  <p style={heroText}>
-    {hero.overview || "Aucune description disponible pour ce film."}
-  </p>
-
-  <div style={buttonRow}>
-    <Link href={`/movie/${hero.id}`} style={primaryBtn}>
-      🎬 Accéder au film
-    </Link>
-
-    <Link href="/films" style={secondaryBtn}>
-      Explorer le catalogue
-    </Link>
-  </div>
-
-  {/* Bandeau H.265 */}
-  <div
-    style={{
-      marginTop: "28px",
-      maxWidth: "900px",
-    }}
-  >
-    <div style={announcementStyle}>
-      <div
+  <main style={pageStyle}>
+    {hero && (
+      <section
         style={{
-          width: "44px",
-          height: "44px",
-          borderRadius: "50%",
-          background: "rgba(0,114,255,0.28)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "22px",
-          flexShrink: 0,
+          ...heroStyle,
+          backgroundImage: `
+            linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.72) 34%, rgba(0,0,0,0.25) 65%, rgba(0,0,0,0.78) 100%),
+            linear-gradient(to top, #000 0%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.35) 100%),
+            url(${IMG}/original${hero.backdrop_path})
+          `,
         }}
       >
-        📦
-      </div>
-
-      <div style={{ flex: 1 }}>
-        <div
-          style={{
-            color: "#67e8f9",
-            fontWeight: 800,
-            fontSize: "15px",
-            marginBottom: "4px",
-            textTransform: "uppercase",
-          }}
+        <button
+          onClick={() =>
+            setHeroIndex((prev) =>
+              prev === 0 ? trending.length - 1 : prev - 1
+            )
+          }
+          style={{ ...arrowBtn, left: "22px" }}
         >
-          📢 INFORMATION CINEZONE HD
+          ‹
+        </button>
+
+        <div style={heroContent}>
+          <span style={badge}>🔥 FILM EN VEDETTE</span>
+
+          <h1 className="cinezoneTitle" style={heroTitle}>
+            {hero.title}
+          </h1>
+
+          <div style={metaRow}>
+            <span>⭐ {hero.vote_average?.toFixed(1)} / 10</span>
+            <span>🎬 {hero.release_date?.slice(0, 4) || "N/A"}</span>
+            <span style={qualityBadge}>HD</span>
+          </div>
+
+          <p style={heroText}>
+            {hero.overview ||
+              "Aucune description disponible pour ce film."}
+          </p>
+
+          <div style={buttonRow}>
+            <Link href={`/movie/${hero.id}`} style={primaryBtn}>
+              🎬 Accéder au film
+            </Link>
+
+            <Link href="/films" style={secondaryBtn}>
+              Explorer le catalogue
+            </Link>
+          </div>
+
+          <div
+            style={{
+              marginTop: "28px",
+              maxWidth: "900px",
+            }}
+          >
+            <div style={announcementStyle}>
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  background: "rgba(0,114,255,0.28)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "22px",
+                  flexShrink: 0,
+                }}
+              >
+                📦
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    color: "#67e8f9",
+                    fontWeight: 800,
+                    fontSize: "15px",
+                    marginBottom: "4px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  📢 INFORMATION CINEZONE HD
+                </div>
+
+                <div
+                  style={{
+                    color: "#dbeafe",
+                    lineHeight: 1.55,
+                    fontSize: "13px",
+                  }}
+                >
+                  Afin d'améliorer votre expérience et de réduire la taille
+                  des fichiers, CineZone HD proposera progressivement
+                  davantage de films et séries encodés en{" "}
+                  <strong>H.265 (HEVC)</strong>.
+                  <br />
+                  💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une
+                  qualité similaire tout en conservant une excellente
+                  qualité vidéo.
+                </div>
+              </div>
+
+              <span
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(0,198,255,0.35)",
+                  color: "#67e8f9",
+                  fontWeight: 700,
+                  fontSize: "13px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                H.265 / HEVC
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div
-          style={{
-            color: "#dbeafe",
-            lineHeight: 1.55,
-            fontSize: "13px",
-          }}
+        <button
+          onClick={() =>
+            setHeroIndex((prev) => (prev + 1) % trending.length)
+          }
+          style={{ ...arrowBtn, right: "22px" }}
         >
-          Afin d'améliorer votre expérience et de réduire la taille des
-          fichiers, CineZone HD proposera progressivement davantage de films
-          et séries encodés en <strong>H.265 (HEVC)</strong>.
-          <br />
-          💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une qualité
-          similaire tout en conservant une excellente qualité vidéo.
-        </div>
-      </div>
+          ›
+        </button>
+      </section>
+    )}
 
-      <span
-        style={{
-          padding: "8px 14px",
-          borderRadius: "12px",
-          border: "1px solid rgba(0,198,255,0.35)",
-          color: "#67e8f9",
-          fontWeight: 700,
-          fontSize: "13px",
-          whiteSpace: "nowrap",
-        }}
-      >
-        H.265 / HEVC
-      </span>
+    <section style={quickCards}>
+      <QuickCard
+        href="#tendances"
+        icon="🔥"
+        title="Tendances"
+        text="Voir les films populaires"
+      />
+
+      <QuickCard
+        href="#nouveautes"
+        icon="🆕"
+        title="Nouveautés"
+        text="Voir les derniers ajouts"
+      />
+
+      <QuickCard
+        href="/films"
+        icon="🎬"
+        title="Catalogue"
+        text="Accéder à tous les films"
+      />
+
+      <QuickCard
+        href="/chat"
+        icon="💬"
+        title="Chat"
+        text="Communauté CineZone"
+      />
+    </section>
+
+    <div style={contentStyle}>
+      <Row id="tendances" title="🔥 Tendances" movies={trending} />
+      <Row id="nouveautes" title="🆕 Nouveautés" movies={trending} />
+      <Row title="⭐ Top Rated" movies={topRated} />
+      <Row title="⚔️ Action" movies={action} />
+      <Row title="😂 Comédie" movies={comedy} />
+      <Row title="😱 Horreur" movies={horror} />
+      <Row title="💗 Romance" movies={romance} />
     </div>
-  </div>
-</div>
-
-<button
-  onClick={() =>
-    setHeroIndex((prev) => (prev + 1) % trending.length)
-  }
-  style={{ ...arrowBtn, right: "22px" }}
->
-  ›
-</button>
-
-<section style={quickCards}>
-  <QuickCard
-    href="#tendances"
-    icon="🔥"
-    title="Tendances"
-    text="Voir les films populaires"
-  />
-
-  <QuickCard
-    href="#nouveautes"
-    icon="🆕"
-    title="Nouveautés"
-    text="Voir les derniers ajouts"
-  />
-
-  <QuickCard
-    href="/films"
-    icon="🎬"
-    title="Catalogue"
-    text="Accéder à tous les films"
-  />
-
-  <QuickCard
-    href="/chat"
-    icon="💬"
-    title="Chat"
-    text="Communauté CineZone"
-  />
-</section>
-
-<div style={contentStyle}>
-  <Row id="tendances" title="🔥 Tendances" movies={trending} />
-  <Row id="nouveautes" title="🆕 Nouveautés" movies={trending} />
-  <Row title="⭐ Top Rated" movies={topRated} />
-  <Row title="⚔️ Action" movies={action} />
-  <Row title="😂 Comédie" movies={comedy} />
-  <Row title="😱 Horreur" movies={horror} />
-  <Row title="💗 Romance" movies={romance} />
-</div>
-
-</main>
+  </main>
 );
-}
 
 function QuickCard({ href, icon, title, text }: any) {
   return (
