@@ -23,30 +23,30 @@ export default function Home() {
   const [heroIndex, setHeroIndex] = useState(0);
 
   useEffect(() => {
-    async function loadHome() {
-      try {
-        const [trend, top, act, com, hor, rom] = await Promise.all([
-          fetchMovies(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}&language=fr-FR`),
-          fetchMovies(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}&language=fr-FR`),
-          fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=28&language=fr-FR`),
-          fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=35&language=fr-FR`),
-          fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27&language=fr-FR`),
-          fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=10749&language=fr-FR`),
-        ]);
+  async function loadHome() {
+    try {
+      const [trend, top, act, com, hor, rom] = await Promise.all([
+        fetchMovies(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}&language=fr-FR`),
+        fetchMovies(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}&language=fr-FR`),
+        fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=28&language=fr-FR`),
+        fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=35&language=fr-FR`),
+        fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=27&language=fr-FR`),
+        fetchMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=10749&language=fr-FR`),
+      ]);
 
-        setTrending(trend);
-        setTopRated(top);
-        setAction(act);
-        setComedy(com);
-        setHorror(hor);
-        setRomance(rom);
-      } catch (error) {
-        console.error(error);
-      }
+      setTrending(trend);
+      setTopRated(top);
+      setAction(act);
+      setComedy(com);
+      setHorror(hor);
+      setRomance(rom);
+    } catch (error) {
+      console.error(error);
     }
+  }
 
-    loadHome();
-  }, []);
+  loadHome();
+}, []);
 
   useEffect(() => {
     if (trending.length === 0) return;
