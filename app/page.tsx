@@ -144,7 +144,7 @@ export default function Home() {
   </strong>{" "}
   afin d'offrir une meilleure qualité tout en réduisant la taille des fichiers.
   <br />
-  📢 Le codec x264 sera progressivement remplacé sur les nouveaux films et séries ajoutés à la plateforme.
+  📢 Le codec x264 sera progressivement remplacé sur les nouveaux films ajoutés à la plateforme.
   <br />
   ℹ️ Les contenus encodés en H.265 (HEVC) sont clairement signalés sur les fiches, les liens de téléchargement ou dans les informations associées.
   <br />
