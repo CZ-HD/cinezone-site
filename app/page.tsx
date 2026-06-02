@@ -120,32 +120,41 @@ export default function Home() {
   }}
 >
   <div style={announcementStyle}>
-    <div style={announcementIcon}>📢</div>
+  <div style={announcementIcon}>
+    <img
+      src="/speaker.png"
+      alt="Information"
+      style={{
+        width: "28px",
+        height: "28px",
+        objectFit: "contain",
+      }}
+    />
+  </div>
 
-    <div style={{ flex: 1 }}>
-      <div style={announcementTitle}>
-        📢 INFORMATION CINEZONE HD
-      </div>
-
-      <div style={announcementText}>
-        🎬 CineZone HD adopte progressivement le codec nouvelle génération{" "}
-        <strong style={{ color: "#67e8f9" }}>
-          H.265 (HEVC)
-        </strong>{" "}
-        afin d'optimiser la qualité et la taille des fichiers.
-        <br />
-        📢 Le codec x264 laissera progressivement sa place au H.265
-        sur les nouveaux films et séries ajoutés à la plateforme.
-        <br />
-        💡 Jusqu'à 50 % de gain d'espace pour une qualité vidéo
-        équivalente, avec des téléchargements plus rapides et un
-        stockage optimisé.
-      </div>
+  <div style={{ flex: 1 }}>
+    <div style={announcementTitle}>
+      📢 INFORMATION CINEZONE HD
     </div>
 
-    <div style={announcementBadge}>
-  H.265 / HEVC
-</div>
+    <div style={announcementText}>
+      🎬 CineZone HD adopte progressivement le codec nouvelle génération{" "}
+      <strong style={{ color: "#67e8f9" }}>
+        H.265 (HEVC)
+      </strong>{" "}
+      afin d'optimiser la qualité et la taille des fichiers.
+      <br />
+      📢 Le codec x264 laissera progressivement sa place au H.265
+      sur les nouveaux films et séries ajoutés à la plateforme.
+      <br />
+      💡 Jusqu'à 50 % de gain d'espace pour une qualité vidéo
+      équivalente, avec des téléchargements plus rapides et un
+      stockage optimisé.
+    </div>
+  </div>
+
+  <div style={announcementBadge}>
+    H.265 / HEVC
   </div>
 </div>
 
@@ -386,15 +395,15 @@ const announcementStyle: React.CSSProperties = {
 };
 
 const announcementIcon: React.CSSProperties = {
-  width: "46px",
-  height: "46px",
+  width: "58px",
+  height: "58px",
   borderRadius: "50%",
-  background: "rgba(0,114,255,0.25)",
+  background: "linear-gradient(135deg,#1976ff,#0a58ca)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: "22px",
   flexShrink: 0,
+  boxShadow: "0 0 20px rgba(25,118,255,.35)",
 };
 
 const announcementTitle: React.CSSProperties = {
