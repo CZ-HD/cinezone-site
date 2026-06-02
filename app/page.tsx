@@ -151,7 +151,8 @@ export default function Home() {
   💡 Si aucun codec n'est indiqué, il s'agit généralement d'une version x264 / H.264 comme actuellement.
   <br />
   🚀 Jusqu'à 50 % d'espace économisé, des téléchargements plus rapides et un stockage optimisé.
-</div>
+</div> 
+  </div>
 
   <div style={announcementBadge}>
   H.265 / HEVC
