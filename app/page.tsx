@@ -176,24 +176,26 @@ export default function Home() {
     </div>
 
     <div
-      style={{
-        color: "#dbeafe",
-        lineHeight: 1.7,
-        fontSize: "14px",
-      }}
-    >
-      Afin d'améliorer votre expérience et de réduire la taille
-      des fichiers, CineZone HD proposera progressivement
-      davantage de films et séries encodés en{" "}
-      <strong style={{ color: "#67e8f9" }}>
-        H.265 (HEVC)
-      </strong>.
-      <br />
-      💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une
-      qualité similaire tout en conservant une excellente
-      qualité vidéo.
-    </div>
-  </div>
+  style={{
+    color: "#dbeafe",
+    lineHeight: 1.7,
+    fontSize: "14px",
+  }}
+>
+  🎬 CineZone HD adopte progressivement le codec nouvelle
+  génération{" "}
+  <strong style={{ color: "#67e8f9" }}>
+    H.265 (HEVC)
+  </strong>{" "}
+  afin d'optimiser la qualité et la taille des fichiers.
+  <br />
+  📢 Le codec x264 laissera progressivement sa place au H.265
+  sur les nouveaux films et séries ajoutés à la plateforme.
+  <br />
+  💡 Jusqu'à 50 % de gain d'espace pour une qualité vidéo
+  équivalente, avec des téléchargements plus rapides et un
+  stockage optimisé.
+</div>
 
   <div
     style={{
