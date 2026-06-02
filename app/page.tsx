@@ -113,11 +113,12 @@ export default function Home() {
           </div>
 
           <div
-            style={{
-              marginTop: "28px",
-              maxWidth: "900px",
-            }}
-          >
+  style={{
+    marginTop: "35px",
+    width: "100%",
+    maxWidth: "1100px",
+  }}
+>
             <div style={announcementStyle}>
               <div
                 style={{
@@ -132,7 +133,7 @@ export default function Home() {
                   flexShrink: 0,
                 }}
               >
-                📦
+                📢
               </div>
 
               <div style={{ flex: 1 }}>
@@ -313,7 +314,7 @@ const heroStyle: React.CSSProperties = {
 };
 
 const heroContent: React.CSSProperties = {
-  maxWidth: "620px",
+  maxWidth: "1100px",
   zIndex: 2,
 };
 
@@ -404,17 +405,22 @@ const arrowBtn: React.CSSProperties = {
 
 const announcementStyle: React.CSSProperties = {
   marginTop: "25px",
-  maxWidth: "980px",
-  padding: "16px 20px",
-  borderRadius: "16px",
-  border: "1px solid rgba(0,198,255,0.30)",
+  width: "100%",
+  padding: "20px 24px",
+
+  borderRadius: "18px",
+
   background:
-    "linear-gradient(90deg, rgba(0,35,70,0.92), rgba(0,15,35,0.95))",
-  backdropFilter: "blur(8px)",
-  boxShadow: "0 0 25px rgba(0,198,255,0.12)",
+    "linear-gradient(135deg, rgba(0,25,60,.95), rgba(0,45,95,.90))",
+
+  border: "1px solid rgba(0,198,255,.40)",
+
+  boxShadow:
+    "0 0 35px rgba(0,198,255,.18), inset 0 0 20px rgba(0,198,255,.05)",
+
   display: "flex",
   alignItems: "center",
-  gap: "16px",
+  gap: "18px",
 };
 
 const announcementIcon: React.CSSProperties = {
