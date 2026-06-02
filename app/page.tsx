@@ -319,7 +319,7 @@ const arrowBtn: React.CSSProperties = {
 };
 
 const announcementStyle: React.CSSProperties = {
-  margin: "25px 40px 30px",
+  margin: "-60px 40px 30px",
   padding: "22px 28px",
   borderRadius: "20px",
   border: "1px solid rgba(0,198,255,0.35)",
