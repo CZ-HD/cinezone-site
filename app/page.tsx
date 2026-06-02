@@ -185,10 +185,33 @@ export default function Home() {
 </div>
 
 <section style={quickCards}>
-  <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
-  <QuickCard href="#nouveautes" icon="🆕" title="Nouveautés" text="Voir les derniers ajouts" />
-  <QuickCard href="/films" icon="🎬" title="Catalogue" text="Accéder à tous les films" />
-  <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
+  <QuickCard
+    href="#tendances"
+    icon="🔥"
+    title="Tendances"
+    text="Voir les films populaires"
+  />
+
+  <QuickCard
+    href="#nouveautes"
+    icon="🆕"
+    title="Nouveautés"
+    text="Voir les derniers ajouts"
+  />
+
+  <QuickCard
+    href="/films"
+    icon="🎬"
+    title="Catalogue"
+    text="Accéder à tous les films"
+  />
+
+  <QuickCard
+    href="/chat"
+    icon="💬"
+    title="Chat"
+    text="Communauté CineZone"
+  />
 </section>
 
 <div style={contentStyle}>
@@ -205,6 +228,27 @@ export default function Home() {
 );
 }
 
+function QuickCard({ href, icon, title, text }: any) {
+  return (
+    <Link href={href} style={quickCard}>
+      <div style={quickIcon}>{icon}</div>
+
+      <div>
+        <strong>{title}</strong>
+        <p
+          style={{
+            margin: "5px 0 0",
+            color: "#cbd5e1",
+            fontSize: "13px",
+          }}
+        >
+          {text}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
 function Row({ id, title, movies }: any) {
   return (
     <section id={id} style={rowStyle}>
@@ -212,7 +256,11 @@ function Row({ id, title, movies }: any) {
 
       <div style={sliderStyle}>
         {movies.slice(0, 18).map((movie: any) => (
-          <Link key={movie.id} href={`/movie/${movie.id}`} style={movieCard}>
+          <Link
+            key={movie.id}
+            href={`/movie/${movie.id}`}
+            style={movieCard}
+          >
             <img
               src={
                 movie.poster_path
@@ -225,7 +273,9 @@ function Row({ id, title, movies }: any) {
 
             <div style={movieInfo}>
               <strong>{movie.title}</strong>
-              <span>⭐ {movie.vote_average?.toFixed(1) || "N/A"}</span>
+              <span>
+                ⭐ {movie.vote_average?.toFixed(1) || "N/A"}
+              </span>
             </div>
           </Link>
         ))}
