@@ -113,7 +113,8 @@ const [selectedSagaId, setSelectedSagaId] = useState("");
 
 const [filmSearch, setFilmSearch] = useState("");
 const [sagaLoading, setSagaLoading] = useState(false);
-
+const [codec, setCodec] = useState("H264");
+  
   useEffect(() => {
     checkAdmin();
   }, []);
@@ -644,18 +645,19 @@ const createSaga = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: Number(id),
-          link: addAffiliate(link),
-          title: movie.title,
-          poster_path: movie.poster_path,
-          backdrop_path: movie.backdrop_path,
-          vote_average: movie.vote_average,
-          release_date: movie.release_date,
-          release_year: movie.release_date
-            ? Number(movie.release_date.substring(0, 4))
-            : null,
-          imdb_id: movie.imdb_id || null,
-        }),
+  id: Number(id),
+  link: addAffiliate(link),
+  codec,
+  title: movie.title,
+  poster_path: movie.poster_path,
+  backdrop_path: movie.backdrop_path,
+  vote_average: movie.vote_average,
+  release_date: movie.release_date,
+  release_year: movie.release_date
+    ? Number(movie.release_date.substring(0, 4))
+    : null,
+  imdb_id: movie.imdb_id || null,
+}),
       });
 
       const result = await res.json();
@@ -730,6 +732,7 @@ const createSaga = async () => {
           body: JSON.stringify({
             id: Number(tmdbId),
             link: addAffiliate(downloadLink),
+            codec,
             title: movie.title,
             poster_path: movie.poster_path,
             backdrop_path: movie.backdrop_path,
@@ -774,15 +777,16 @@ const createSaga = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        link: addAffiliate(manualLink),
-        title: manualTitle,
-        poster_path: manualPoster,
-        backdrop_path: manualBackdrop || manualPoster,
-        vote_average: manualVote ? Number(manualVote) : null,
-        release_date: `${manualYear}-01-01`,
-        release_year: Number(manualYear),
-        imdb_id: manualImdb ? cleanImdb(manualImdb) : null,
-      }),
+  link: addAffiliate(manualLink),
+  codec,
+  title: manualTitle,
+  poster_path: manualPoster,
+  backdrop_path: manualBackdrop || manualPoster,
+  vote_average: manualVote ? Number(manualVote) : null,
+  release_date: `${manualYear}-01-01`,
+  release_year: Number(manualYear),
+  imdb_id: manualImdb ? cleanImdb(manualImdb) : null,
+})
     });
 
     const result = await res.json();
@@ -1049,7 +1053,14 @@ const filteredNotifications = notifications.filter((notif) => {
           placeholder="Lien de téléchargement"
           style={inputStyle}
         />
-
+<select
+  value={codec}
+  onChange={(e) => setCodec(e.target.value)}
+  style={inputStyle}
+>
+  <option value="H264">🎬 H264 / x264</option>
+  <option value="H265">⚡ H265 / HEVC</option>
+</select>
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <button onClick={saveDownload} style={btnBlue}>
             💾 Enregistrer avec TMDB
