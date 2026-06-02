@@ -120,8 +120,65 @@ export default function Home() {
           >
             ›
           </button>
-        </section>
-      )}
+              <div style={announcementStyle}>
+        <div
+          style={{
+            width: "58px",
+            height: "58px",
+            borderRadius: "50%",
+            background: "rgba(0,114,255,0.25)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "28px",
+            flexShrink: 0,
+          }}
+        >
+          📦
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              color: "#67e8f9",
+              fontWeight: 900,
+              fontSize: "20px",
+              marginBottom: "6px",
+            }}
+          >
+            📢 INFORMATION CINEZONE HD
+          </div>
+
+          <div
+            style={{
+              color: "#dbeafe",
+              lineHeight: 1.7,
+              fontSize: "14px",
+            }}
+          >
+            Afin d'améliorer votre expérience et de réduire la taille des
+            fichiers, CineZone HD proposera progressivement davantage de films
+            et séries encodés en <strong>H.265 (HEVC)</strong>.
+            <br />
+            💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une qualité
+            similaire.
+          </div>
+        </div>
+
+        <div>
+          <span
+            style={{
+              padding: "10px 16px",
+              borderRadius: "12px",
+              border: "1px solid rgba(0,198,255,0.35)",
+              color: "#67e8f9",
+              fontWeight: 700,
+            }}
+          >
+            H.265 / HEVC
+          </span>
+        </div>
+      </div>
 
       <section style={quickCards}>
         <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
@@ -137,11 +194,8 @@ export default function Home() {
         <Row title="⚔️ Action" movies={action} />
         <Row title="😂 Comédie" movies={comedy} />
         <Row title="😱 Horreur" movies={horror} />
-        <Row title="❤️ Romance" movies={romance} />
+        <Row title="💗 Romance" movies={romance} />
       </div>
-    </main>
-  );
-}
 
 function QuickCard({ href, icon, title, text }: any) {
   return (
@@ -291,6 +345,21 @@ const arrowBtn: React.CSSProperties = {
   cursor: "pointer",
 };
 
+const announcementStyle: React.CSSProperties = {
+  margin: "0 40px 24px",
+  padding: "18px 22px",
+  borderRadius: "18px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  background:
+    "linear-gradient(135deg, rgba(0,35,70,0.92), rgba(0,15,35,0.96))",
+  boxShadow: "0 0 30px rgba(0,198,255,0.15)",
+  display: "flex",
+  alignItems: "center",
+  gap: "18px",
+  position: "relative",
+  zIndex: 5,
+};
+
 const quickCards: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -301,21 +370,6 @@ const quickCards: React.CSSProperties = {
   zIndex: 4,
   scrollMarginTop: "120px",
 };
-
-const quickCard: React.CSSProperties = {
-  display: "flex",
-  gap: "14px",
-  alignItems: "center",
-  padding: "18px",
-  borderRadius: "18px",
-  background: "rgba(15,23,42,0.82)",
-  border: "1px solid rgba(0,198,255,0.18)",
-  backdropFilter: "blur(14px)",
-  boxShadow: "0 20px 55px rgba(0,0,0,0.45)",
-  color: "#fff",
-  textDecoration: "none",
-};
-
 const quickIcon: React.CSSProperties = {
   width: "48px",
   height: "48px",
