@@ -123,66 +123,32 @@ export default function Home() {
         </section>
       )}
 
-      <div style={announcementStyle}>
-        <div
-          style={{
-            width: "58px",
-            height: "58px",
-            borderRadius: "50%",
-            background: "rgba(0,114,255,0.25)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "28px",
-            flexShrink: 0,
-          }}
-        >
-          📦
-        </div>
+     <div style={announcementStyle}>
+  <div style={announcementIcon}>
+    📦
+  </div>
 
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              color: "#67e8f9",
-              fontWeight: 900,
-              fontSize: "20px",
-              marginBottom: "6px",
-            }}
-          >
-            📢 INFORMATION CINEZONE HD
-          </div>
+  <div style={{ flex: 1 }}>
+    <div style={announcementTitle}>
+      📢 INFORMATION CINEZONE HD
+    </div>
 
-          <div
-            style={{
-              color: "#dbeafe",
-              lineHeight: 1.7,
-              fontSize: "14px",
-            }}
-          >
-            Afin d'améliorer votre expérience et de réduire la taille des
-            fichiers, CineZone HD proposera progressivement davantage de films
-            et séries encodés en <strong>H.265 (HEVC)</strong>.
-            <br />
-            💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une qualité
-            similaire.
-          </div>
-        </div>
+    <div style={announcementText}>
+      Afin d'améliorer votre expérience et de réduire la taille des fichiers,
+      CineZone HD proposera progressivement davantage de films et séries
+      encodés en <strong>H.265 (HEVC)</strong>.
+      <br />
+      💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une qualité
+      similaire, tout en conservant une excellente qualité vidéo.
+    </div>
+  </div>
 
-        <div>
-          <span
-            style={{
-              padding: "10px 16px",
-              borderRadius: "12px",
-              border: "1px solid rgba(0,198,255,0.35)",
-              color: "#67e8f9",
-              fontWeight: 700,
-            }}
-          >
-            H.265 / HEVC
-          </span>
-        </div>
-      </div>
-
+  <div>
+    <span style={announcementBadge}>
+      H.265 / HEVC
+    </span>
+  </div>
+</div>
       <section style={quickCards}>
   <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
   <QuickCard href="#nouveautes" icon="🆕" title="Nouveautés" text="Voir les derniers ajouts" />
@@ -353,18 +319,52 @@ const arrowBtn: React.CSSProperties = {
 };
 
 const announcementStyle: React.CSSProperties = {
-  margin: "20px 40px 20px",
-  padding: "14px 20px",
-  borderRadius: "18px",
-  border: "1px solid rgba(0,198,255,0.25)",
+  margin: "25px 40px 30px",
+  padding: "22px 28px",
+  borderRadius: "20px",
+  border: "1px solid rgba(0,198,255,0.35)",
   background:
-    "linear-gradient(135deg, rgba(0,35,70,0.92), rgba(0,15,35,0.96))",
-  boxShadow: "0 0 20px rgba(0,198,255,0.10)",
+    "linear-gradient(135deg, rgba(0,35,70,0.95), rgba(0,15,35,0.98))",
+  boxShadow: "0 0 30px rgba(0,198,255,0.15)",
   display: "flex",
   alignItems: "center",
-  gap: "16px",
+  gap: "22px",
   position: "relative",
   zIndex: 5,
+};
+
+const announcementIcon: React.CSSProperties = {
+  width: "62px",
+  height: "62px",
+  borderRadius: "50%",
+  background: "rgba(0,114,255,0.25)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "30px",
+  flexShrink: 0,
+};
+
+const announcementTitle: React.CSSProperties = {
+  color: "#67e8f9",
+  fontWeight: 900,
+  fontSize: "22px",
+  marginBottom: "8px",
+};
+
+const announcementText: React.CSSProperties = {
+  color: "#dbeafe",
+  lineHeight: 1.8,
+  fontSize: "15px",
+};
+
+const announcementBadge: React.CSSProperties = {
+  padding: "12px 18px",
+  borderRadius: "14px",
+  border: "1px solid rgba(0,198,255,0.35)",
+  color: "#67e8f9",
+  fontWeight: 800,
+  whiteSpace: "nowrap",
 };
 
 const quickCards: React.CSSProperties = {
