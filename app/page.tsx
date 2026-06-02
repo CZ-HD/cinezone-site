@@ -119,13 +119,6 @@ export default function Home() {
     maxWidth: "1100px",
   }}
 >
-            <div
-  style={{
-    marginTop: "35px",
-    width: "100%",
-    maxWidth: "1100px",
-  }}
->
   <div style={announcementStyle}>
     <div style={announcementIcon}>📢</div>
 
@@ -151,19 +144,21 @@ export default function Home() {
     </div>
 
     <div style={announcementBadge}>
-      H.265 / HEVC
-    </div>
+  H.265 / HEVC
+</div>
   </div>
 </div>
 
+</div>
+
 <button
-          onClick={() =>
-            setHeroIndex((prev) => (prev + 1) % trending.length)
-          }
-          style={{ ...arrowBtn, right: "22px" }}
-        >
-          ›
-        </button>
+  onClick={() =>
+    setHeroIndex((prev) => (prev + 1) % trending.length)
+  }
+  style={{ ...arrowBtn, right: "22px" }}
+>
+  ›
+</button>
       </section>
     )}
 
