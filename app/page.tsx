@@ -134,7 +134,7 @@ export default function Home() {
 
   <div style={{ flex: 1 }}>
     <div style={announcementTitle}>
-      📢 INFORMATION CINEZONE HD
+      📢 ÉVOLUTION DE CINEZONE HD
     </div>
 
     <div style={announcementText}>
