@@ -206,27 +206,29 @@ if (!movie) {
     ⭐ {movie.vote_average} / 10
 
     <span
-  style={{
-    padding: "6px 14px",
-    borderRadius: "999px",
-    background:
-      movie.codec === "H265"
-        ? "rgba(0,255,170,.15)"
-        : "rgba(255,255,255,.08)",
-    border:
-      movie.codec === "H265"
-        ? "1px solid rgba(0,255,170,.4)"
-        : "1px solid rgba(255,255,255,.15)",
-    color:
-      movie.codec === "H265"
-        ? "#00ffaa"
-        : "#ffffff",
-    fontSize: "13px",
-    fontWeight: 900,
-  }}
->
-  {movie.codec || "H264"}
-</span>
+      style={{
+        padding: "6px 14px",
+        borderRadius: "999px",
+        background:
+          movie.codec === "H265"
+            ? "rgba(0,255,170,.15)"
+            : "rgba(255,255,255,.08)",
+        border:
+          movie.codec === "H265"
+            ? "1px solid rgba(0,255,170,.4)"
+            : "1px solid rgba(255,255,255,.15)",
+        color:
+          movie.codec === "H265"
+            ? "#00ffaa"
+            : "#ffffff",
+        fontSize: "13px",
+        fontWeight: 900,
+      }}
+    >
+      {movie.codec || "H264"}
+    </span>
+  </p>
+)}
             <div
               style={{
                 display: "flex",
