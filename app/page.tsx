@@ -119,99 +119,41 @@ export default function Home() {
     maxWidth: "1100px",
   }}
 >
-            <div style={announcementStyle}>
-  <div
-    style={{
-      width: "58px",
-      height: "58px",
-      borderRadius: "16px",
-      background:
-        "linear-gradient(135deg, rgba(0,198,255,.25), rgba(0,114,255,.18))",
-      border: "1px solid rgba(0,198,255,.35)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "28px",
-      flexShrink: 0,
-      boxShadow: "0 0 20px rgba(0,198,255,.15)",
-    }}
-  >
-    📢
-  </div>
-
-  <div style={{ flex: 1 }}>
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      marginBottom: "8px",
-      flexWrap: "wrap",
-    }}
-  >
-    <span
-      style={{
-        color: "#67e8f9",
-        fontWeight: 900,
-        fontSize: "16px",
-        letterSpacing: "0.5px",
-      }}
-    >
-      📢 INFORMATION CINEZONE HD
-    </span>
-
-    <span
-      style={{
-        padding: "4px 10px",
-        borderRadius: "999px",
-        background: "rgba(0,198,255,.12)",
-        border: "1px solid rgba(0,198,255,.25)",
-        color: "#67e8f9",
-        fontSize: "11px",
-        fontWeight: 700,
-      }}
-    >
-      NOUVEAU
-    </span>
-  </div>
-
-  <div
-    style={{
-      color: "#dbeafe",
-      lineHeight: 1.7,
-      fontSize: "14px",
-    }}
-  >
-    🎬 CineZone HD adopte progressivement le codec nouvelle
-    génération{" "}
-    <strong style={{ color: "#67e8f9" }}>
-      H.265 (HEVC)
-    </strong>{" "}
-    afin d'optimiser la qualité et la taille des fichiers.
-    <br />
-    📢 Le codec x264 laissera progressivement sa place au H.265
-    sur les nouveaux films et séries ajoutés à la plateforme.
-    <br />
-    💡 Jusqu'à 50 % de gain d'espace pour une qualité vidéo
-    équivalente, avec des téléchargements plus rapides et un
-    stockage optimisé.
-  </div>
-</div>
-
-<div
+            <div
   style={{
-    padding: "10px 16px",
-    borderRadius: "14px",
-    background: "rgba(0,198,255,.08)",
-    border: "1px solid rgba(0,198,255,.30)",
-    color: "#67e8f9",
-    fontWeight: 800,
-    fontSize: "13px",
-    whiteSpace: "nowrap",
-    boxShadow: "0 0 15px rgba(0,198,255,.10)",
+    marginTop: "35px",
+    width: "100%",
+    maxWidth: "1100px",
   }}
 >
-  H.265 / HEVC
+  <div style={announcementStyle}>
+    <div style={announcementIcon}>📢</div>
+
+    <div style={{ flex: 1 }}>
+      <div style={announcementTitle}>
+        📢 INFORMATION CINEZONE HD
+      </div>
+
+      <div style={announcementText}>
+        🎬 CineZone HD adopte progressivement le codec nouvelle génération{" "}
+        <strong style={{ color: "#67e8f9" }}>
+          H.265 (HEVC)
+        </strong>{" "}
+        afin d'optimiser la qualité et la taille des fichiers.
+        <br />
+        📢 Le codec x264 laissera progressivement sa place au H.265
+        sur les nouveaux films et séries ajoutés à la plateforme.
+        <br />
+        💡 Jusqu'à 50 % de gain d'espace pour une qualité vidéo
+        équivalente, avec des téléchargements plus rapides et un
+        stockage optimisé.
+      </div>
+    </div>
+
+    <div style={announcementBadge}>
+      H.265 / HEVC
+    </div>
+  </div>
 </div>
 
 <button
