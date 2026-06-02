@@ -120,69 +120,97 @@ export default function Home() {
   }}
 >
             <div style={announcementStyle}>
-              <div
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "50%",
-                  background: "rgba(0,114,255,0.28)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "22px",
-                  flexShrink: 0,
-                }}
-              >
-                📢
-              </div>
+  <div
+    style={{
+      width: "58px",
+      height: "58px",
+      borderRadius: "16px",
+      background:
+        "linear-gradient(135deg, rgba(0,198,255,.25), rgba(0,114,255,.18))",
+      border: "1px solid rgba(0,198,255,.35)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "28px",
+      flexShrink: 0,
+      boxShadow: "0 0 20px rgba(0,198,255,.15)",
+    }}
+  >
+    📢
+  </div>
 
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    color: "#67e8f9",
-                    fontWeight: 800,
-                    fontSize: "15px",
-                    marginBottom: "4px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  📢 INFORMATION CINEZONE HD
-                </div>
+  <div style={{ flex: 1 }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        marginBottom: "8px",
+        flexWrap: "wrap",
+      }}
+    >
+      <span
+        style={{
+          color: "#67e8f9",
+          fontWeight: 900,
+          fontSize: "16px",
+          letterSpacing: "0.5px",
+        }}
+      >
+        📢 INFORMATION CINEZONE HD
+      </span>
 
-                <div
-                  style={{
-                    color: "#dbeafe",
-                    lineHeight: 1.55,
-                    fontSize: "13px",
-                  }}
-                >
-                  Afin d'améliorer votre expérience et de réduire la taille
-                  des fichiers, CineZone HD proposera progressivement
-                  davantage de films et séries encodés en{" "}
-                  <strong>H.265 (HEVC)</strong>.
-                  <br />
-                  💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une
-                  qualité similaire tout en conservant une excellente
-                  qualité vidéo.
-                </div>
-              </div>
+      <span
+        style={{
+          padding: "4px 10px",
+          borderRadius: "999px",
+          background: "rgba(0,198,255,.12)",
+          border: "1px solid rgba(0,198,255,.25)",
+          color: "#67e8f9",
+          fontSize: "11px",
+          fontWeight: 700,
+        }}
+      >
+        NOUVEAU
+      </span>
+    </div>
 
-              <span
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: "12px",
-                  border: "1px solid rgba(0,198,255,0.35)",
-                  color: "#67e8f9",
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                H.265 / HEVC
-              </span>
-            </div>
-          </div>
-        </div>
+    <div
+      style={{
+        color: "#dbeafe",
+        lineHeight: 1.7,
+        fontSize: "14px",
+      }}
+    >
+      Afin d'améliorer votre expérience et de réduire la taille
+      des fichiers, CineZone HD proposera progressivement
+      davantage de films et séries encodés en{" "}
+      <strong style={{ color: "#67e8f9" }}>
+        H.265 (HEVC)
+      </strong>.
+      <br />
+      💡 Jusqu'à 50 % plus léger qu'un encodage x264 pour une
+      qualité similaire tout en conservant une excellente
+      qualité vidéo.
+    </div>
+  </div>
+
+  <div
+    style={{
+      padding: "10px 16px",
+      borderRadius: "14px",
+      background: "rgba(0,198,255,.08)",
+      border: "1px solid rgba(0,198,255,.30)",
+      color: "#67e8f9",
+      fontWeight: 800,
+      fontSize: "13px",
+      whiteSpace: "nowrap",
+      boxShadow: "0 0 15px rgba(0,198,255,.10)",
+    }}
+  >
+    H.265 / HEVC
+  </div>
+</div>
 
         <button
           onClick={() =>
@@ -407,17 +435,12 @@ const announcementStyle: React.CSSProperties = {
   marginTop: "25px",
   width: "100%",
   padding: "20px 24px",
-
   borderRadius: "18px",
-
   background:
     "linear-gradient(135deg, rgba(0,25,60,.95), rgba(0,45,95,.90))",
-
   border: "1px solid rgba(0,198,255,.40)",
-
   boxShadow:
     "0 0 35px rgba(0,198,255,.18), inset 0 0 20px rgba(0,198,255,.05)",
-
   display: "flex",
   alignItems: "center",
   gap: "18px",
