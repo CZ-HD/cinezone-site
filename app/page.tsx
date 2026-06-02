@@ -207,12 +207,14 @@ export default function Home() {
       whiteSpace: "nowrap",
       boxShadow: "0 0 15px rgba(0,198,255,.10)",
     }}
-  >
+    >
     H.265 / HEVC
   </div>
 </div>
+</div>
+</div>
 
-        <button
+<button
           onClick={() =>
             setHeroIndex((prev) => (prev + 1) % trending.length)
           }
