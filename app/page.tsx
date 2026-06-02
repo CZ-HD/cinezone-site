@@ -112,7 +112,7 @@ export default function Home() {
             </div>
           </div>
 
-          <button
+                    <button
             onClick={() =>
               setHeroIndex((prev) => (prev + 1) % trending.length)
             }
@@ -120,7 +120,10 @@ export default function Home() {
           >
             ›
           </button>
-              <div style={announcementStyle}>
+        </section>
+      )}
+
+      <div style={announcementStyle}>
         <div
           style={{
             width: "58px",
@@ -181,21 +184,25 @@ export default function Home() {
       </div>
 
       <section style={quickCards}>
-        <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
-        <QuickCard href="#nouveautes" icon="🆕" title="Nouveautés" text="Voir les derniers ajouts" />
-        <QuickCard href="/films" icon="🎬" title="Catalogue" text="Accéder à tous les films" />
-        <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
-      </section>
+  <QuickCard href="#tendances" icon="🔥" title="Tendances" text="Voir les films populaires" />
+  <QuickCard href="#nouveautes" icon="🆕" title="Nouveautés" text="Voir les derniers ajouts" />
+  <QuickCard href="/films" icon="🎬" title="Catalogue" text="Accéder à tous les films" />
+  <QuickCard href="/chat" icon="💬" title="Chat" text="Communauté CineZone" />
+</section>
 
-      <div style={contentStyle}>
-        <Row id="tendances" title="🔥 Tendances" movies={trending} />
-        <Row id="nouveautes" title="🆕 Nouveautés" movies={trending} />
-        <Row title="⭐ Top Rated" movies={topRated} />
-        <Row title="⚔️ Action" movies={action} />
-        <Row title="😂 Comédie" movies={comedy} />
-        <Row title="😱 Horreur" movies={horror} />
-        <Row title="💗 Romance" movies={romance} />
-      </div>
+<div style={contentStyle}>
+  <Row id="tendances" title="🔥 Tendances" movies={trending} />
+  <Row id="nouveautes" title="🆕 Nouveautés" movies={trending} />
+  <Row title="⭐ Top Rated" movies={topRated} />
+  <Row title="⚔️ Action" movies={action} />
+  <Row title="😂 Comédie" movies={comedy} />
+  <Row title="😱 Horreur" movies={horror} />
+  <Row title="💗 Romance" movies={romance} />
+</div>
+
+</main>
+);
+}
 
 function QuickCard({ href, icon, title, text }: any) {
   return (
