@@ -377,6 +377,20 @@ const quickCards: React.CSSProperties = {
   zIndex: 4,
   scrollMarginTop: "120px",
 };
+
+const quickCard: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "14px",
+  padding: "18px",
+  borderRadius: "18px",
+  background: "rgba(0,15,40,0.92)",
+  border: "1px solid rgba(0,198,255,0.18)",
+  color: "#ffffff",
+  textDecoration: "none",
+  boxShadow: "0 0 20px rgba(0,198,255,0.08)",
+};
+
 const quickIcon: React.CSSProperties = {
   width: "48px",
   height: "48px",
