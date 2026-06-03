@@ -407,26 +407,27 @@ console.log("ONLINE MEMBERS", uniqueMembers);
 setOnlineMembers(uniqueMembers);
       })
       .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
+  if (status === "SUBSCRIBED") {
 
-  console.log(
-    "TRACK STATUS:",
-    profile.status_text
-  );
+    console.log(
+      "TRACK STATUS:",
+      profile.status_text
+    );
 
-  await presenceChannel.track({
-    user_id: user.id,
-    username: profile.username,
-    avatar: profile.avatar,
-    role: profile.role,
-    status_text: profile.status_text || "🟢 En ligne",
-  });
-}
+    await presenceChannel.track({
+      user_id: user.id,
+      username: profile.username,
+      avatar: profile.avatar,
+      role: profile.role,
+      status_text: profile.status_text || "🟢 En ligne",
+    });
+  }
+});
 
-    return () => {
-      supabase.removeChannel(presenceChannel);
-    };
-  }, [user, profile]);
+return () => {
+  supabase.removeChannel(presenceChannel);
+};
+}, [user, profile]);
 
   useEffect(() => {
     if (!user || !profile) return;
