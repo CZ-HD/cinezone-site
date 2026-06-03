@@ -586,6 +586,7 @@ const createSaga = async () => {
 
   const getPresence = (userId: string) =>
     presences.find((presence) => presence.user_id === userId);
+  console.log("PRESENCES", presences);
 
   const isOnline = (userId: string) => {
   const presence = getPresence(userId);
@@ -1583,7 +1584,8 @@ const filteredNotifications = notifications.filter((notif) => {
             {displayedProfiles.map((member) => {
               const presence = getPresence(member.id);
 
-const connected = isOnline(member.id);
+const connected =
+  member.status_text === "🟢 En ligne";
 
 console.log(
   member.username,
@@ -1688,15 +1690,21 @@ const isMemberAdmin =
     fontWeight: 700,
     fontSize: "12px",
     width: "fit-content",
-    background: connected
-      ? "rgba(34,197,94,0.18)"
-      : "rgba(255,80,80,0.14)",
-    color: connected
-      ? "#4ade80"
-      : "#ff9b9b",
+    background:
+      member.status_text === "🟢 En ligne"
+        ? "rgba(34,197,94,0.18)"
+        : member.status_text === "🟣 Invisible"
+        ? "rgba(168,85,247,0.18)"
+        : "rgba(255,80,80,0.14)",
+    color:
+      member.status_text === "🟢 En ligne"
+        ? "#4ade80"
+        : member.status_text === "🟣 Invisible"
+        ? "#c084fc"
+        : "#ff9b9b",
   }}
 >
-  {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
+  {member.status_text || "🔴 Hors ligne"}
 </span>
                   </div>
 
