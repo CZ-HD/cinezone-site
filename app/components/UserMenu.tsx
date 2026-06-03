@@ -39,7 +39,7 @@ export default function UserMenu() {
 
     const { data: profileData } = await supabase
       .from("profiles")
-      .select("username, avatar, role, status")
+      .select("username, avatar, role, status_text")
       .eq("id", data.user.id)
       .maybeSingle();
 
@@ -47,7 +47,10 @@ export default function UserMenu() {
   username: profileData?.username || data.user.email,
   avatar: profileData?.avatar || DEFAULT_AVATAR,
   role: profileData?.role || "user",
-  status: profileData?.status || "online",
+  status:
+  profileData?.status_text === "En ligne"
+    ? "online"
+    : "offline",
 };
 
     setProfile(fixedProfile);
@@ -243,7 +246,7 @@ export default function UserMenu() {
 
         await supabase
           .from("profiles")
-          .update({ status: "online" })
+          .update({ status_text: "En ligne" })
           .eq("id", user.id);
       }}
     >
@@ -258,7 +261,7 @@ export default function UserMenu() {
 
         await supabase
           .from("profiles")
-          .update({ status: "offline" })
+          .update({ status_text: "Hors ligne" })
           .eq("id", user.id);
       }}
     >
