@@ -13,6 +13,8 @@ export default function UserMenu() {
   const [profile, setProfile] = useState<any>(null);
   const [username, setUsername] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState<"online" | "offline">("online");
+  const [statusOpen, setStatusOpen] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -37,18 +39,20 @@ export default function UserMenu() {
 
     const { data: profileData } = await supabase
       .from("profiles")
-      .select("username, avatar, role")
+      .select("username, avatar, role, status")
       .eq("id", data.user.id)
       .maybeSingle();
 
     const fixedProfile = {
-      username: profileData?.username || data.user.email,
-      avatar: profileData?.avatar || DEFAULT_AVATAR,
-      role: profileData?.role || "user",
-    };
+  username: profileData?.username || data.user.email,
+  avatar: profileData?.avatar || DEFAULT_AVATAR,
+  role: profileData?.role || "user",
+  status: profileData?.status || "online",
+};
 
     setProfile(fixedProfile);
     setUsername(fixedProfile.username);
+    setStatus(fixedProfile.status);
   };
 
   const saveProfile = async () => {
@@ -163,8 +167,10 @@ export default function UserMenu() {
             e.currentTarget.src = DEFAULT_AVATAR;
           }}
         />
-        <span>👤 Mon compte • {profile.username}</span>
-        <span>▾</span>
+        <span>
+  {status === "online" ? "🟢" : "🔴"} 👤 Mon compte • {profile.username}
+</span>
+<span>▾</span>
       </button>
 
             {open && (
@@ -197,64 +203,110 @@ export default function UserMenu() {
           </div>
 
                     {!editing ? (
-            <>
-              <button
-                style={itemBtn}
-                onClick={() => setEditing(true)}
-              >
-                ✏️ Modifier le profil
-              </button>
+  <>
+    <button
+      style={itemBtn}
+      onClick={() => setEditing(true)}
+    >
+      ✏️ Modifier le profil
+    </button>
 
-              <button style={itemBtn}>
-                🟢 Statut ▼
-              </button>
+    <div style={{ position: "relative" }}>
+      <button
+        style={itemBtn}
+        onClick={() => setStatusOpen(!statusOpen)}
+      >
+        {status === "online" ? "🟢" : "🔴"} Statut ▼
+      </button>
 
-              <button
-                style={logoutBtn}
-                onClick={logout}
-              >
-                🚪 Déconnexion
-              </button>
-            </>
-          ) : (
-            <div style={editBox}>
-              <label style={labelStyle}>Avatar</label>
+      {statusOpen && (
+        <div
+          style={{
+            background: "rgba(255,255,255,0.05)",
+            borderRadius: "10px",
+            marginTop: "4px",
+            overflow: "hidden",
+          }}
+        >
+          <button
+            style={itemBtn}
+            onClick={async () => {
+              setStatus("online");
+              setStatusOpen(false);
 
-              <label style={uploadBtn}>
-                📷 Changer avatar
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                  onChange={uploadAvatar}
-                  style={{ display: "none" }}
-                />
-              </label>
+              await supabase
+                .from("profiles")
+                .update({ status: "online" })
+                .eq("id", user.id);
+            }}
+          >
+            🟢 En ligne
+          </button>
 
-              {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
+          <button
+            style={itemBtn}
+            onClick={async () => {
+              setStatus("offline");
+              setStatusOpen(false);
 
-              <label style={labelStyle}>Pseudo</label>
-
-              <input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                style={inputStyle}
-              />
-
-              <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-                <button onClick={saveProfile} style={saveBtn}>
-                  💾 Sauvegarder
-                </button>
-
-                <button onClick={() => setEditing(false)} style={cancelBtn}>
-                  Annuler
-                </button>
-              </div>
-            </div>
-          )}
+              await supabase
+                .from("profiles")
+                .update({ status: "offline" })
+                .eq("id", user.id);
+            }}
+          >
+            🔴 Hors ligne
+          </button>
         </div>
       )}
     </div>
-  );
+
+    <button
+      style={logoutBtn}
+      onClick={logout}
+    >
+      🚪 Déconnexion
+    </button>
+  </>
+) : (
+  <div style={editBox}>
+    <label style={labelStyle}>Avatar</label>
+
+    <label style={uploadBtn}>
+      📷 Changer avatar
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+        onChange={uploadAvatar}
+        style={{ display: "none" }}
+      />
+    </label>
+
+    {uploading && <p style={{ color: "#00c6ff" }}>Upload...</p>}
+
+    <label style={labelStyle}>Pseudo</label>
+
+    <input
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
+      style={inputStyle}
+    />
+
+    <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+  <button onClick={saveProfile} style={saveBtn}>
+    💾 Sauvegarder
+  </button>
+
+  <button onClick={() => setEditing(false)} style={cancelBtn}>
+    Annuler
+  </button>
+</div>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+);
 }
 
 const userBtn: React.CSSProperties = {
