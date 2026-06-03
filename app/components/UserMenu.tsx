@@ -163,11 +163,11 @@ export default function UserMenu() {
             e.currentTarget.src = DEFAULT_AVATAR;
           }}
         />
-        <span>{profile.username}</span>
+        <span>👤 Mon compte • {profile.username}</span>
         <span>▾</span>
       </button>
 
-      {open && (
+            {open && (
         <div style={dropdown}>
           <div style={profileTop}>
             <img
@@ -181,21 +181,38 @@ export default function UserMenu() {
 
             <div>
               <strong>{profile.username}</strong>
-              <p style={muted}>{user.email}</p>
 
-              <span style={profile.role === "admin" ? adminBadge : userBadge}>
-                {profile.role === "admin" ? "ADMIN" : "USER"}
-              </span>
+              <p style={muted}>
+                {profile.role === "admin"
+                  ? "Administration CineZone HD"
+                  : "Membre CineZone HD"}
+              </p>
+
+              {profile.role === "admin" && (
+                <span style={adminBadge}>
+                  👑 Administrateur
+                </span>
+              )}
             </div>
           </div>
 
-          {!editing ? (
+                    {!editing ? (
             <>
-              <button style={itemBtn} onClick={() => setEditing(true)}>
-                🖊️ Modifier profil
+              <button
+                style={itemBtn}
+                onClick={() => setEditing(true)}
+              >
+                ✏️ Modifier le profil
               </button>
 
-              <button style={logoutBtn} onClick={logout}>
+              <button style={itemBtn}>
+                🟢 Statut ▼
+              </button>
+
+              <button
+                style={logoutBtn}
+                onClick={logout}
+              >
                 🚪 Déconnexion
               </button>
             </>
@@ -362,16 +379,6 @@ const cancelBtn: React.CSSProperties = {
   color: "#fff",
   fontWeight: 900,
   cursor: "pointer",
-};
-
-const userBadge: React.CSSProperties = {
-  display: "inline-block",
-  background: "#3b82f6",
-  color: "#fff",
-  padding: "3px 8px",
-  borderRadius: "999px",
-  fontSize: "10px",
-  fontWeight: 900,
 };
 
 const adminBadge: React.CSSProperties = {
