@@ -235,37 +235,37 @@ export default function UserMenu() {
       gap: "4px",
     }}
   >
-            style={itemBtn}
-            onClick={async () => {
-              setStatus("online");
-              setStatusOpen(false);
+    <button
+      style={itemBtn}
+      onClick={async () => {
+        setStatus("online");
+        setStatusOpen(false);
 
-              await supabase
-                .from("profiles")
-                .update({ status: "online" })
-                .eq("id", user.id);
-            }}
-          >
-            🟢 En ligne
-          </button>
+        await supabase
+          .from("profiles")
+          .update({ status: "online" })
+          .eq("id", user.id);
+      }}
+    >
+      🟢 En ligne
+    </button>
 
-          <button
-            style={itemBtn}
-            onClick={async () => {
-              setStatus("offline");
-              setStatusOpen(false);
+    <button
+      style={itemBtn}
+      onClick={async () => {
+        setStatus("offline");
+        setStatusOpen(false);
 
-              await supabase
-                .from("profiles")
-                .update({ status: "offline" })
-                .eq("id", user.id);
-            }}
-          >
-            🔴 Hors ligne
-          </button>
-        </div>
-      )}
-    </div>
+        await supabase
+          .from("profiles")
+          .update({ status: "offline" })
+          .eq("id", user.id);
+      }}
+    >
+      🔴 Hors ligne
+    </button>
+  </div>
+)}
 
     <button
       style={logoutBtn}
