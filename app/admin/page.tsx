@@ -1584,18 +1584,17 @@ const filteredNotifications = notifications.filter((notif) => {
             {displayedProfiles.map((member) => {
               const presence = getPresence(member.id);
 
-const connected = isOnline(member.id);
+const connected = member.status_text === "🟢 En ligne";
 
 console.log(
   member.username,
-  presence?.last_seen,
+  member.status_text,
   connected
 );
 
 const isCreator =
   !!member.email &&
   CREATOR_EMAILS.includes(member.email);
-
 const isMemberAdmin =
   member.role === "admin";
 
