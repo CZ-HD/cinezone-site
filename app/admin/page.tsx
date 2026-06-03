@@ -1690,21 +1690,15 @@ const isMemberAdmin =
     fontWeight: 700,
     fontSize: "12px",
     width: "fit-content",
-    background:
-      member.status_text === "🟢 En ligne"
-        ? "rgba(34,197,94,0.18)"
-        : member.status_text === "🟣 Invisible"
-        ? "rgba(168,85,247,0.18)"
-        : "rgba(255,80,80,0.14)",
-    color:
-      member.status_text === "🟢 En ligne"
-        ? "#4ade80"
-        : member.status_text === "🟣 Invisible"
-        ? "#c084fc"
-        : "#ff9b9b",
+    background: connected
+      ? "rgba(34,197,94,0.18)"
+      : "rgba(255,80,80,0.14)",
+    color: connected
+      ? "#4ade80"
+      : "#ff9b9b",
   }}
 >
-  {member.status_text || "🔴 Hors ligne"}
+  {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
 </span>
                   </div>
 
