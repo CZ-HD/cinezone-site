@@ -48,15 +48,19 @@ export default function UserMenu() {
   avatar: profileData?.avatar || DEFAULT_AVATAR,
   role: profileData?.role || "user",
   status:
-  profileData?.status_text === "En ligne"
-    ? "online"
-    : "offline",
+    profileData?.status_text === "En ligne"
+      ? ("online" as const)
+      : ("offline" as const),
 };
 
     setProfile(fixedProfile);
-    setUsername(fixedProfile.username);
-    setStatus(fixedProfile.status);
-  };
+setUsername(fixedProfile.username);
+
+setStatus(
+  fixedProfile.status === "online"
+    ? "online"
+    : "offline"
+);
 
   const saveProfile = async () => {
     if (!user) return;
