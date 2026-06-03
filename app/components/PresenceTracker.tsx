@@ -39,7 +39,7 @@ export default function PresenceTracker() {
     }
 
     updatePresence();
-    interval = setInterval(updatePresence, 10000);
+    interval = setInterval(updatePresence, 5000);
 
     return () => clearInterval(interval);
   }, [pathname]);
