@@ -214,21 +214,27 @@ export default function UserMenu() {
     <div style={{ position: "relative" }}>
       <button
         style={itemBtn}
-        onClick={() => setStatusOpen(!statusOpen)}
+        onClick={() => {
+  console.log("Status menu:", !statusOpen);
+  setStatusOpen(!statusOpen);
+}}
       >
         {status === "online" ? "🟢" : "🔴"} Statut ▼
       </button>
 
       {statusOpen && (
-        <div
-          style={{
-            background: "rgba(255,255,255,0.05)",
-            borderRadius: "10px",
-            marginTop: "4px",
-            overflow: "hidden",
-          }}
-        >
-          <button
+  <div
+    style={{
+      background: "#0f172a",
+      border: "1px solid rgba(0,198,255,0.3)",
+      borderRadius: "10px",
+      marginTop: "6px",
+      padding: "4px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "4px",
+    }}
+  >
             style={itemBtn}
             onClick={async () => {
               setStatus("online");
