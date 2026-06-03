@@ -61,8 +61,9 @@ setStatus(
     ? "online"
     : "offline"
 );
+};
 
-  const saveProfile = async () => {
+const saveProfile = async () => {
     if (!user) return;
 
     const newUsername = username || user.email;
