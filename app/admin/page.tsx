@@ -113,7 +113,10 @@ const [selectedSagaId, setSelectedSagaId] = useState("");
 
 const [filmSearch, setFilmSearch] = useState("");
 const [sagaLoading, setSagaLoading] = useState(false);
+
 const [codec, setCodec] = useState("H264");
+const [bulkCodec, setBulkCodec] = useState("H264");
+const [manualCodec, setManualCodec] = useState("H264");  
   
   useEffect(() => {
     checkAdmin();
@@ -647,7 +650,7 @@ const createSaga = async () => {
         body: JSON.stringify({
   id: Number(id),
   link: addAffiliate(link),
-  codec,
+  codec: codec,
   title: movie.title,
   poster_path: movie.poster_path,
   backdrop_path: movie.backdrop_path,
@@ -730,19 +733,19 @@ const createSaga = async () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: Number(tmdbId),
-            link: addAffiliate(downloadLink),
-            codec,
-            title: movie.title,
-            poster_path: movie.poster_path,
-            backdrop_path: movie.backdrop_path,
-            vote_average: movie.vote_average,
-            release_date: movie.release_date,
-            release_year: movie.release_date
-              ? Number(movie.release_date.substring(0, 4))
-              : null,
-            imdb_id: movie.imdb_id || null,
-          }),
+  id: Number(tmdbId),
+  link: addAffiliate(downloadLink),
+  codec: bulkCodec,
+  title: movie.title,
+  poster_path: movie.poster_path,
+  backdrop_path: movie.backdrop_path,
+  vote_average: movie.vote_average,
+  release_date: movie.release_date,
+  release_year: movie.release_date
+    ? Number(movie.release_date.substring(0, 4))
+    : null,
+  imdb_id: movie.imdb_id || null,
+}),
         });
 
         if (res.ok) {
@@ -778,7 +781,7 @@ const createSaga = async () => {
       },
       body: JSON.stringify({
   link: addAffiliate(manualLink),
-  codec,
+  codec: manualCodec,
   title: manualTitle,
   poster_path: manualPoster,
   backdrop_path: manualBackdrop || manualPoster,
@@ -1081,11 +1084,20 @@ const filteredNotifications = notifications.filter((notif) => {
         </p>
 
         <textarea
-          value={bulkInput}
-          onChange={(e) => setBulkInput(e.target.value)}
-          placeholder={`12345 | https://lien-film-1.com\n67890 | https://lien-film-2.com\n11223 | https://lien-film-3.com`}
-          style={textareaStyle}
-        />
+  value={bulkInput}
+  onChange={(e) => setBulkInput(e.target.value)}
+  placeholder={`12345 | https://lien-film-1.com\n67890 | https://lien-film-2.com\n11223 | https://lien-film-3.com`}
+  style={textareaStyle}
+/>
+
+<select
+  value={bulkCodec}
+  onChange={(e) => setBulkCodec(e.target.value)}
+  style={inputStyle}
+>
+  <option value="H264">🎬 H264 / x264</option>
+  <option value="H265">⚡ H265 / HEVC</option>
+</select>
 
         <button
           onClick={saveBulkDownloads}
@@ -1101,66 +1113,76 @@ const filteredNotifications = notifications.filter((notif) => {
       </section>
 
       <section style={cardStyle}>
-        <h2>✍️ Ajout manuel</h2>
-        <p style={subText}>
-          À utiliser seulement si TMDB ne trouve pas le film. IMDb est optionnel.
-        </p>
+  <h2>✍️ Ajout manuel</h2>
 
-        <input
-          value={manualTitle}
-          onChange={(e) => setManualTitle(e.target.value)}
-          placeholder="Titre du film"
-          style={inputStyle}
-        />
+  <p style={subText}>
+    À utiliser seulement si TMDB ne trouve pas le film. IMDb est optionnel.
+  </p>
 
-        <div style={twoColumns}>
-          <input
-            value={manualYear}
-            onChange={(e) => setManualYear(e.target.value)}
-            placeholder="Année ex: 2026"
-            style={inputStyle}
-          />
+  <input
+    value={manualTitle}
+    onChange={(e) => setManualTitle(e.target.value)}
+    placeholder="Titre du film"
+    style={inputStyle}
+  />
 
-          <input
-            value={manualVote}
-            onChange={(e) => setManualVote(e.target.value)}
-            placeholder="Note ex: 7.5"
-            style={inputStyle}
-          />
-        </div>
+  <div style={twoColumns}>
+    <input
+      value={manualYear}
+      onChange={(e) => setManualYear(e.target.value)}
+      placeholder="Année ex: 2026"
+      style={inputStyle}
+    />
 
-        <input
-          value={manualPoster}
-          onChange={(e) => setManualPoster(e.target.value)}
-          placeholder="URL affiche / poster"
-          style={inputStyle}
-        />
+    <input
+      value={manualVote}
+      onChange={(e) => setManualVote(e.target.value)}
+      placeholder="Note ex: 7.5"
+      style={inputStyle}
+    />
+  </div>
 
-        <input
-          value={manualBackdrop}
-          onChange={(e) => setManualBackdrop(e.target.value)}
-          placeholder="URL image de fond optionnelle"
-          style={inputStyle}
-        />
+  <input
+    value={manualPoster}
+    onChange={(e) => setManualPoster(e.target.value)}
+    placeholder="URL affiche / poster"
+    style={inputStyle}
+  />
 
-        <input
-          value={manualImdb}
-          onChange={(e) => setManualImdb(e.target.value)}
-          placeholder="ID IMDb optionnel ex: tt0111161"
-          style={inputStyle}
-        />
+  <input
+    value={manualBackdrop}
+    onChange={(e) => setManualBackdrop(e.target.value)}
+    placeholder="URL image de fond optionnelle"
+    style={inputStyle}
+  />
 
-        <input
-          value={manualLink}
-          onChange={(e) => setManualLink(e.target.value)}
-          placeholder="Lien de téléchargement"
-          style={inputStyle}
-        />
+  <input
+    value={manualImdb}
+    onChange={(e) => setManualImdb(e.target.value)}
+    placeholder="ID IMDb optionnel ex: tt0111161"
+    style={inputStyle}
+  />
 
-        <button onClick={saveManualDownload} style={btnGreen}>
-          ✅ Enregistrer manuellement
-        </button>
-      </section>
+  <input
+    value={manualLink}
+    onChange={(e) => setManualLink(e.target.value)}
+    placeholder="Lien de téléchargement"
+    style={inputStyle}
+  />
+
+  <select
+    value={manualCodec}
+    onChange={(e) => setManualCodec(e.target.value)}
+    style={inputStyle}
+  >
+    <option value="H264">🎬 H264 / x264</option>
+    <option value="H265">⚡ H265 / HEVC</option>
+  </select>
+
+  <button onClick={saveManualDownload} style={btnGreen}>
+    ✅ Enregistrer manuellement
+  </button>
+</section>
 
       <section style={cardStyle}>
         <h2>🎞️ Gestion des sagas</h2>
