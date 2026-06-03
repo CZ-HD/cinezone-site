@@ -1087,12 +1087,12 @@ const filteredNotifications = notifications.filter((notif) => {
     💾 Enregistrer avec TMDB
   </button>
 
-          <button onClick={updateAllMovies} style={btnPurple}>
-            🔄 Mettre à jour toutes les affiches
-          </button>
-        </div>
+  <button onClick={updateAllMovies} style={btnPurple}>
+    🔄 Mettre à jour toutes les affiches
+  </button>
+</div>
 
-        {message && <p style={{ marginTop: "16px" }}>{message}</p>}
+{message && <p style={{ marginTop: "16px" }}>{message}</p>}
       </section>
 
       <section style={cardStyle}>
@@ -1220,8 +1220,10 @@ const filteredNotifications = notifications.filter((notif) => {
   ✅ Enregistrer manuellement
 </button>
 
-      <section style={cardStyle}>
-        <h2>🎞️ Gestion des sagas</h2>
+</section>
+
+<section style={cardStyle}>
+  <h2>🎞️ Gestion des sagas</h2>
         <p style={subText}>
           Crée une saga et range tes films sans passer par Supabase. Les films gardent leur fonctionnement actuel.
         </p>
