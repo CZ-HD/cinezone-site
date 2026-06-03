@@ -1390,21 +1390,7 @@ const liveRoleColor =
 const liveStatusText =
   liveProfile?.status_text ||
   msg.status_text;
-
-const isStatusOffline =
-  liveStatusText === "🔴 Invisible";
-
-const userIsOnline =
-  !isStatusOffline &&
-  onlineUserIds.includes(msg.user_id);
-
-console.log(
-  "CHAT STATUS:",
-  msg.username,
-  liveStatusText,
-  userIsOnline
-);
-                
+            
 const nameColor =
   liveRole === "admin"
     ? "gold"
@@ -1491,11 +1477,7 @@ const statusColor =
       color: statusColor,
     }}
   >
-    {liveStatusText
-  ? liveStatusText
-  : userIsOnline
-    ? "🟢 En ligne"
-    : "🔴 Hors ligne"}
+    {liveStatusText || "🟢 En ligne"}
   </span>
 </div>
                       <div style={messageBubbleV2}>
