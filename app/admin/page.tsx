@@ -1584,8 +1584,7 @@ const filteredNotifications = notifications.filter((notif) => {
             {displayedProfiles.map((member) => {
               const presence = getPresence(member.id);
 
-const connected =
-  member.status_text === "🟢 En ligne";
+const connected = isOnline(member.id);
 
 console.log(
   member.username,
