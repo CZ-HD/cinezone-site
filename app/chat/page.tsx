@@ -1396,7 +1396,7 @@ const isStatusOffline =
 
 const userIsOnline =
   !isStatusOffline &&
-  onlineUsersIds.includes(msg.user_id);
+  onlineUserIds.includes(msg.user_id);
 
 console.log(
   "CHAT STATUS:",
