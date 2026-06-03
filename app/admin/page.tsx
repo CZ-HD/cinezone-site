@@ -591,6 +591,13 @@ const createSaga = async () => {
   const isOnline = (userId: string) => {
   const presence = getPresence(userId);
 
+  console.log(
+    "ONLINE CHECK",
+    userId,
+    presence?.last_seen,
+    Date.now() - new Date(presence?.last_seen || 0).getTime()
+  );
+
   if (!presence?.last_seen) return false;
 
   return Date.now() - new Date(presence.last_seen).getTime() < 30000;
