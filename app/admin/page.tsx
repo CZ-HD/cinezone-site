@@ -140,7 +140,7 @@ const [manualAudio, setManualAudio] = useState("VF");
       loadPresence();
       loadUsers();
       loadNotifications();
-    }, 15000);
+    }, 5000);
 
     return () => clearInterval(timer);
   }, [isAdmin]);
