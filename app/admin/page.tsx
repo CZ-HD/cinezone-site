@@ -1670,20 +1670,32 @@ const filteredNotifications = notifications.filter((notif) => {
                     </span>
 
                     <span
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: "999px",
-                        fontWeight: 700,
-                        fontSize: "12px",
-                        width: "fit-content",
-                        background: connected
-                          ? "rgba(34,197,94,0.18)"
-                          : "rgba(255,80,80,0.14)",
-                        color: connected ? "#4ade80" : "#ff9b9b",
-                      }}
-                    >
-                      {connected ? "🟢 En ligne" : "🔴 Hors ligne"}
-                    </span>
+  style={{
+    padding: "6px 12px",
+    borderRadius: "999px",
+    fontWeight: 700,
+    fontSize: "12px",
+    width: "fit-content",
+    background:
+      member.status_text === "En ligne"
+        ? "rgba(34,197,94,0.18)"
+        : member.status_text === "Invisible"
+        ? "rgba(168,85,247,0.18)"
+        : "rgba(255,80,80,0.14)",
+    color:
+      member.status_text === "En ligne"
+        ? "#4ade80"
+        : member.status_text === "Invisible"
+        ? "#c084fc"
+        : "#ff9b9b",
+  }}
+>
+  {member.status_text === "En ligne"
+    ? "🟢 En ligne"
+    : member.status_text === "Invisible"
+    ? "🟣 Invisible"
+    : "🔴 Hors ligne"}
+</span>
                   </div>
 
                   <div style={{ color: "#d1d5db", fontSize: "14px" }}>
