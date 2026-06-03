@@ -4,13 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 const getStatusColor = (status?: string) => {
   switch (status) {
-    case "👻 Invisible":
-    return "#7c3aed";
+    case "🔴 Invisible":
+      return "#ef4444";
 
-
-    case "⛔ Occupé":
-return "#f59e0b";
-
+    case "🔴 Occupé":
+      return "#f59e0b";
 
     case "🎬 Je regarde un film":
       return "#a855f7";
@@ -400,23 +398,30 @@ export default function ChatPage() {
           }));
 
         const uniqueMembers = members.filter(
-          (member, index, self) =>
-            index === self.findIndex((m) => m.user_id === member.user_id)
-        );
+  (member, index, self) =>
+    index === self.findIndex((m) => m.user_id === member.user_id)
+);
 
-        setOnlineMembers(uniqueMembers);
+console.log("ONLINE MEMBERS", uniqueMembers);
+
+setOnlineMembers(uniqueMembers);
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
-        await presenceChannel.track({
-  user_id: user.id,
-  username: profile.username,
-  avatar: profile.avatar,
-  role: profile.role,
-  status_text: profile.status_text || "🟢 En ligne",
-});  
-        }
-      });
+
+  console.log(
+    "TRACK STATUS:",
+    profile.status_text
+  );
+
+  await presenceChannel.track({
+    user_id: user.id,
+    username: profile.username,
+    avatar: profile.avatar,
+    role: profile.role,
+    status_text: profile.status_text || "🟢 En ligne",
+  });
+}
 
     return () => {
       supabase.removeChannel(presenceChannel);
@@ -1382,17 +1387,23 @@ const liveRoleColor =
   liveProfile?.role_color || msg.role_color;
 
 const liveStatusText =
-  liveProfile?.status_text || msg.status_text;
+  liveProfile?.status_text ||
+  msg.status_text;
 
-// 🔴 Vérifie si le membre est invisible
 const isStatusOffline =
   liveStatusText === "🔴 Invisible";
 
-// ✅ Online seulement si pas invisible
 const userIsOnline =
   !isStatusOffline &&
-  onlineUserIds.includes(msg.user_id);
+  onlineUsersIds.includes(msg.user_id);
 
+console.log(
+  "CHAT STATUS:",
+  msg.username,
+  liveStatusText,
+  userIsOnline
+);
+                
 const nameColor =
   liveRole === "admin"
     ? "gold"
@@ -1479,7 +1490,11 @@ const statusColor =
       color: statusColor,
     }}
   >
-    {liveStatusText || (userIsOnline ? "🟢 En ligne" : "🔴 Hors ligne")}
+    {liveStatusText
+  ? liveStatusText
+  : userIsOnline
+    ? "🟢 En ligne"
+    : "🔴 Hors ligne"}
   </span>
 </div>
                       <div style={messageBubbleV2}>
