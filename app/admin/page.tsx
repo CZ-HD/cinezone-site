@@ -592,7 +592,7 @@ const createSaga = async () => {
 
   if (!presence?.last_seen) return false;
 
-  return Date.now() - new Date(presence.last_seen).getTime() < 600000;
+  return Date.now() - new Date(presence.last_seen).getTime() < 30000;
 };
 
   const seenAgo = (lastSeen?: string) => {
@@ -1582,9 +1582,21 @@ const filteredNotifications = notifications.filter((notif) => {
           <div style={memberGrid}>
             {displayedProfiles.map((member) => {
               const presence = getPresence(member.id);
+
 const connected = isOnline(member.id);
-const isCreator = !!member.email && CREATOR_EMAILS.includes(member.email);
-const isMemberAdmin = member.role === "admin";
+
+console.log(
+  member.username,
+  presence?.last_seen,
+  connected
+);
+
+const isCreator =
+  !!member.email &&
+  CREATOR_EMAILS.includes(member.email);
+
+const isMemberAdmin =
+  member.role === "admin";
 
               return (
                 <div
