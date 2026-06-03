@@ -20,15 +20,16 @@ export default async function MoviePage({ params }: any) {
   const localResult = await supabase
   .from("downloads")
   .select(`
-    id,
-    title,
-    poster_path,
-    backdrop_path,
-    vote_average,
-    release_date,
-    imdb_id,
-    codec
-  `)
+  id,
+  title,
+  poster_path,
+  backdrop_path,
+  vote_average,
+  release_date,
+  imdb_id,
+  codec,
+  audio
+`)
   .eq("id", Number(params.id))
   .maybeSingle();
 
@@ -50,6 +51,7 @@ if (res.ok) {
   movie = {
   ...tmdbMovie,
   codec: localMovie?.codec || "H264",
+  audio: localMovie?.audio || "VF",
 };
 
   const videoRes = await fetch(
@@ -84,9 +86,10 @@ if (res.ok) {
     release_date: localMovie.release_date,
     overview:
       "⚠️ Film ajouté manuellement.",
-    imdb_id: localMovie.imdb_id,
-    codec: localMovie.codec,
-  };
+imdb_id: localMovie.imdb_id,
+codec: localMovie.codec,
+audio: localMovie.audio,
+};
 }
 
 if (!movie) {
@@ -201,6 +204,7 @@ if (!movie) {
       gap: "10px",
       fontSize: "20px",
       fontWeight: 700,
+      flexWrap: "wrap",
     }}
   >
     ⭐ {movie.vote_average} / 10
@@ -226,6 +230,20 @@ if (!movie) {
       }}
     >
       {movie.codec || "H264"}
+    </span>
+
+    <span
+      style={{
+        padding: "6px 14px",
+        borderRadius: "999px",
+        background: "rgba(0,198,255,.15)",
+        border: "1px solid rgba(0,198,255,.4)",
+        color: "#67e8f9",
+        fontSize: "13px",
+        fontWeight: 900,
+      }}
+    >
+      {movie.audio || "VF"}
     </span>
   </p>
 )}
