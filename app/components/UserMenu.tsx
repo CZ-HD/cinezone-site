@@ -47,20 +47,13 @@ export default function UserMenu() {
   username: profileData?.username || data.user.email,
   avatar: profileData?.avatar || DEFAULT_AVATAR,
   role: profileData?.role || "user",
-  status:
-  profileData?.status_text === "Hors ligne"
-    ? ("offline" as const)
-    : ("online" as const),
+  status: "online" as const,
 };
 
     setProfile(fixedProfile);
 setUsername(fixedProfile.username);
 
-setStatus(
-  fixedProfile.status === "online"
-    ? "online"
-    : "offline"
-);
+setStatus("online");
 };
 
 const saveProfile = async () => {
@@ -230,58 +223,19 @@ const saveProfile = async () => {
         {status === "online" ? "🟢" : "🔴"} Statut ▼
       </button>
 
-      {statusOpen && (
+    {statusOpen && (
   <div
     style={{
       background: "#0f172a",
       border: "1px solid rgba(0,198,255,0.3)",
       borderRadius: "10px",
       marginTop: "6px",
-      padding: "4px",
-      display: "flex",
-      flexDirection: "column",
-      gap: "4px",
+      padding: "10px",
+      color: "#9ca3af",
+      textAlign: "center",
     }}
   >
-    <button
-  style={itemBtn}
-  onClick={async () => {
-    setStatus("online");
-    setStatusOpen(false);
-
-    await supabase
-      .from("profiles")
-      .update({ status_text: "En ligne" })
-      .eq("id", user.id);
-
-    setProfile((prev: any) => ({
-      ...prev,
-      status: "online",
-    }));
-  }}
->
-  🟢 En ligne
-</button>
-
-    <button
-  style={itemBtn}
-  onClick={async () => {
-    setStatus("offline");
-    setStatusOpen(false);
-
-    await supabase
-      .from("profiles")
-      .update({ status_text: "Hors ligne" })
-      .eq("id", user.id);
-
-    setProfile((prev: any) => ({
-      ...prev,
-      status: "offline",
-    }));
-  }}
->
-  🔴 Hors ligne
-</button>
+    Statut automatique
   </div>
 )}
 
