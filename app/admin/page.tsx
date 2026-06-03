@@ -600,7 +600,7 @@ const createSaga = async () => {
 
   if (!presence?.last_seen) return false;
 
-  return Date.now() - new Date(presence.last_seen).getTime() < 30000;
+  return Date.now() - new Date(presence.last_seen).getTime() < 10000;
 };
 
   const seenAgo = (lastSeen?: string) => {
