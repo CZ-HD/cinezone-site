@@ -306,15 +306,16 @@ export default function UserMenu() {
   </button>
 
   <button onClick={() => setEditing(false)} style={cancelBtn}>
-    Annuler
-  </button>
-311 </div>
-312       </div>
-313     )}
-314   </div>
-315 </div>
-316 );
-317 }
+  Annuler
+</button>
+</div>
+  </div>
+)}
+      </div>
+    )}
+  </div>
+);
+}
 
 const userBtn: React.CSSProperties = {
   display: "flex",
