@@ -267,13 +267,16 @@ export default function UserMenu() {
   </div>
 )}
 
-    <button
-      style={logoutBtn}
-      onClick={logout}
-    >
-      🚪 Déconnexion
-    </button>
-  </>
+</div>
+
+<button
+  style={logoutBtn}
+  onClick={logout}
+>
+  🚪 Déconnexion
+</button>
+
+</>
 ) : (
   <div style={editBox}>
     <label style={labelStyle}>Avatar</label>
@@ -297,7 +300,6 @@ export default function UserMenu() {
       onChange={(e) => setUsername(e.target.value)}
       style={inputStyle}
     />
-
     <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
   <button onClick={saveProfile} style={saveBtn}>
     💾 Sauvegarder
@@ -306,14 +308,13 @@ export default function UserMenu() {
   <button onClick={() => setEditing(false)} style={cancelBtn}>
     Annuler
   </button>
-</div>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-);
-}
+311 </div>
+312       </div>
+313     )}
+314   </div>
+315 </div>
+316 );
+317 }
 
 const userBtn: React.CSSProperties = {
   display: "flex",
