@@ -116,7 +116,11 @@ const [sagaLoading, setSagaLoading] = useState(false);
 
 const [codec, setCodec] = useState("H264");
 const [bulkCodec, setBulkCodec] = useState("H264");
-const [manualCodec, setManualCodec] = useState("H264");  
+const [manualCodec, setManualCodec] = useState("H264");
+
+const [audio, setAudio] = useState("VF");
+const [bulkAudio, setBulkAudio] = useState("VF");
+const [manualAudio, setManualAudio] = useState("VF");  
   
   useEffect(() => {
     checkAdmin();
@@ -651,6 +655,7 @@ const createSaga = async () => {
   id: Number(id),
   link: addAffiliate(link),
   codec: codec,
+  audio: audio,
   title: movie.title,
   poster_path: movie.poster_path,
   backdrop_path: movie.backdrop_path,
@@ -736,6 +741,7 @@ const createSaga = async () => {
   id: Number(tmdbId),
   link: addAffiliate(downloadLink),
   codec: bulkCodec,
+  audio: bulkAudio,
   title: movie.title,
   poster_path: movie.poster_path,
   backdrop_path: movie.backdrop_path,
@@ -782,6 +788,7 @@ const createSaga = async () => {
       body: JSON.stringify({
   link: addAffiliate(manualLink),
   codec: manualCodec,
+  audio: manualAudio,
   title: manualTitle,
   poster_path: manualPoster,
   backdrop_path: manualBackdrop || manualPoster,
@@ -1064,10 +1071,21 @@ const filteredNotifications = notifications.filter((notif) => {
   <option value="H264">🎬 H264 / x264</option>
   <option value="H265">⚡ H265 / HEVC</option>
 </select>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button onClick={saveDownload} style={btnBlue}>
-            💾 Enregistrer avec TMDB
-          </button>
+
+<select
+  value={audio}
+  onChange={(e) => setAudio(e.target.value)}
+  style={inputStyle}
+>
+  <option value="VF">🇫🇷 VF</option>
+  <option value="VFQ">🇨🇦 VFQ</option>
+  <option value="VOSTFR">💬 VOSTFR</option>
+</select>
+
+<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+  <button onClick={saveDownload} style={btnBlue}>
+    💾 Enregistrer avec TMDB
+  </button>
 
           <button onClick={updateAllMovies} style={btnPurple}>
             🔄 Mettre à jour toutes les affiches
@@ -1099,20 +1117,29 @@ const filteredNotifications = notifications.filter((notif) => {
   <option value="H265">⚡ H265 / HEVC</option>
 </select>
 
-        <button
-          onClick={saveBulkDownloads}
-          style={{
-            ...btnBlue,
-            opacity: bulkLoading ? 0.6 : 1,
-            cursor: bulkLoading ? "not-allowed" : "pointer",
-          }}
-          disabled={bulkLoading}
-        >
-          {bulkLoading ? "📦 Ajout en cours..." : "📦 Ajouter plusieurs films"}
-        </button>
-      </section>
+<select
+  value={bulkAudio}
+  onChange={(e) => setBulkAudio(e.target.value)}
+  style={inputStyle}
+>
+  <option value="VF">🇫🇷 VF</option>
+  <option value="VFQ">🇨🇦 VFQ</option>
+  <option value="VOSTFR">💬 VOSTFR</option>
+</select>
 
-      <section style={cardStyle}>
+<button
+  onClick={saveBulkDownloads}
+  style={{
+    ...btnBlue,
+    opacity: bulkLoading ? 0.6 : 1,
+    cursor: bulkLoading ? "not-allowed" : "pointer",
+  }}
+  disabled={bulkLoading}
+>
+  {bulkLoading ? "📦 Ajout en cours..." : "📦 Ajouter plusieurs films"}
+</button>
+</section>
+        <section style={cardStyle}>
   <h2>✍️ Ajout manuel</h2>
 
   <p style={subText}>
@@ -1171,18 +1198,27 @@ const filteredNotifications = notifications.filter((notif) => {
   />
 
   <select
-    value={manualCodec}
-    onChange={(e) => setManualCodec(e.target.value)}
-    style={inputStyle}
-  >
-    <option value="H264">🎬 H264 / x264</option>
-    <option value="H265">⚡ H265 / HEVC</option>
-  </select>
+  value={manualCodec}
+  onChange={(e) => setManualCodec(e.target.value)}
+  style={inputStyle}
+>
+  <option value="H264">🎬 H264 / x264</option>
+  <option value="H265">⚡ H265 / HEVC</option>
+</select>
 
-  <button onClick={saveManualDownload} style={btnGreen}>
-    ✅ Enregistrer manuellement
-  </button>
-</section>
+<select
+  value={manualAudio}
+  onChange={(e) => setManualAudio(e.target.value)}
+  style={inputStyle}
+>
+  <option value="VF">🇫🇷 VF</option>
+  <option value="VFQ">🇨🇦 VFQ</option>
+  <option value="VOSTFR">💬 VOSTFR</option>
+</select>
+
+<button onClick={saveManualDownload} style={btnGreen}>
+  ✅ Enregistrer manuellement
+</button>
 
       <section style={cardStyle}>
         <h2>🎞️ Gestion des sagas</h2>
