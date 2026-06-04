@@ -1,8 +1,41 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type MessageType = {
+  id: string;
+  username: string;
+  avatar: string;
+  content: string;
+};
 
 export default function HomeMiniChat() {
+  const [messages, setMessages] = useState<MessageType[]>([]);
+
+  useEffect(() => {
+    loadMessages();
+
+    const interval = setInterval(() => {
+      loadMessages();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  async function loadMessages() {
+    const { data } = await supabase
+      .from("messages")
+      .select("id, username, avatar, content")
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    if (data && data.length > 0) {
+      setMessages(data.reverse());
+    }
+  }
+
   return (
     <div
       style={{
@@ -12,15 +45,11 @@ export default function HomeMiniChat() {
         borderRadius: "18px",
         background:
           "linear-gradient(135deg, rgba(0,20,50,.62), rgba(0,35,70,.52))",
-
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
-
         border: "1px solid rgba(0,198,255,.22)",
-
         boxShadow:
           "0 0 30px rgba(0,198,255,.08), inset 0 0 20px rgba(255,255,255,.02)",
-
         boxSizing: "border-box",
       }}
     >
@@ -41,7 +70,7 @@ export default function HomeMiniChat() {
             gap: "10px",
           }}
         >
-          <span style={{ fontSize: "21px" }}>💬</span>
+          <span style={{ fontSize: "22px" }}>💬</span>
 
           <span
             style={{
@@ -65,39 +94,34 @@ export default function HomeMiniChat() {
         </div>
       </div>
 
-      <Message
-        letter="V"
-        pseudo="Vadrox"
-        color="#ffd54a"
-        badge="ADMIN"
-        message="Bienvenue sur CineZone !"
-      />
-
-      <Message
-        letter="M"
-        pseudo="Membre"
-        color="#47c7ff"
-        badge="MEMBRE"
-        message="Merci pour le dernier upload 👍"
-      />
-
-      <Message
-        letter="S"
-        pseudo="Staff"
-        color="#d68dff"
-        badge="STAFF"
-        message="Les nouveautés arrivent bientôt."
-      />
+      {messages.length === 0 ? (
+        <div
+          style={{
+            color: "#94a3b8",
+            textAlign: "center",
+            padding: "20px 0",
+          }}
+        >
+          Aucun message pour le moment.
+        </div>
+      ) : (
+        messages.map((msg) => (
+          <Message
+            key={msg.id}
+            avatar={msg.avatar}
+            pseudo={msg.username}
+            message={msg.content}
+          />
+        ))
+      )}
 
       <div
         style={{
           height: "1px",
           background: "rgba(255,255,255,.06)",
-          margin: "10px 0 12px 0",
+          margin: "12px 0",
         }}
       />
-
-      {/* BAS */}
 
       <div
         style={{
@@ -112,9 +136,9 @@ export default function HomeMiniChat() {
             flex: 1,
             height: "38px",
             borderRadius: "10px",
-            border: "1px solid rgba(255,255,255,.06)",
+            border: "1px solid rgba(255,255,255,.08)",
             background: "rgba(255,255,255,.04)",
-            color: "#ffffff",
+            color: "#fff",
             padding: "0 14px",
             outline: "none",
             fontSize: "15px",
@@ -129,17 +153,15 @@ export default function HomeMiniChat() {
             borderRadius: "10px",
             background:
               "linear-gradient(135deg,#12c8ff,#1f7dff)",
-
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-
             textDecoration: "none",
             color: "#fff",
-            fontWeight: "bold",
+            fontWeight: 700,
             fontSize: "20px",
-
-            boxShadow: "0 0 15px rgba(0,180,255,.20)",
+            boxShadow:
+              "0 0 12px rgba(0,180,255,.25)",
           }}
         >
           ➜
@@ -150,89 +172,64 @@ export default function HomeMiniChat() {
 }
 
 function Message({
-  letter,
+  avatar,
   pseudo,
-  color,
-  badge,
   message,
 }: {
-  letter: string;
+  avatar: string;
   pseudo: string;
-  color: string;
-  badge: string;
   message: string;
 }) {
   return (
     <div
       style={{
         display: "flex",
-        alignItems: "center",
-        gap: "14px",
-        marginBottom: "10px",
+        gap: "12px",
+        marginBottom: "12px",
       }}
     >
+      <img
+        src={
+          avatar ||
+          "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png"
+        }
+        alt={pseudo}
+        style={{
+          width: "42px",
+          height: "42px",
+          borderRadius: "50%",
+          objectFit: "cover",
+          border: "2px solid rgba(255,255,255,.12)",
+          flexShrink: 0,
+        }}
+      />
+
       <div
         style={{
-          width: "40px",
-          height: "40px",
-          borderRadius: "50%",
-          background:
-            "linear-gradient(135deg,#15c8ff,#1985ff)",
-
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-
-          color: "#fff",
-          fontWeight: "bold",
-          fontSize: "18px",
-
-          flexShrink: 0,
-
-          boxShadow:
-            "0 0 12px rgba(0,180,255,.22)",
+          flex: 1,
+          overflow: "hidden",
         }}
       >
-        {letter}
-      </div>
-
-      <div>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
+            color: "#67e8f9",
+            fontWeight: 800,
+            fontSize: "16px",
+            marginBottom: "3px",
           }}
         >
-          <span
-            style={{
-              color,
-              fontWeight: 800,
-              fontSize: "16px",
-            }}
-          >
-            {pseudo}
-          </span>
-
-          <span
-            style={{
-              padding: "2px 7px",
-              borderRadius: "6px",
-              background: "rgba(255,255,255,.10)",
-              color: "#fff",
-              fontSize: "10px",
-              fontWeight: 700,
-            }}
-          >
-            {badge}
-          </span>
+          {pseudo}
         </div>
 
         <div
           style={{
-            color: "#e3eefc",
-            marginTop: "2px",
-            fontSize: "15px",
+            color: "#dbeafe",
+            fontSize: "14px",
+            lineHeight: "20px",
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
           }}
         >
           {message}
