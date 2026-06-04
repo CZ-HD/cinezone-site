@@ -56,12 +56,14 @@ export default function HomeMiniChat() {
         boxSizing: "border-box",
       }}
     >
+      {/* Header */}
+
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "14px",
+          marginBottom: "16px",
         }}
       >
         <div
@@ -95,12 +97,14 @@ export default function HomeMiniChat() {
         </div>
       </div>
 
+      {/* Messages */}
+
       {messages.length === 0 ? (
         <div
           style={{
             color: "#94a3b8",
             textAlign: "center",
-            padding: "20px 0",
+            padding: "18px 0",
           }}
         >
           Aucun message pour le moment.
@@ -120,37 +124,55 @@ export default function HomeMiniChat() {
         style={{
           height: "1px",
           background: "rgba(255,255,255,.06)",
-          margin: "12px 0",
+          margin: "14px 0",
         }}
       />
 
-      <Link
-        href="/chat"
+      {/* Zone d'accès au chat */}
+
+      <div
         style={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          textDecoration: "none",
-          padding: "0 16px",
-          height: "42px",
-          borderRadius: "12px",
-          background: "rgba(255,255,255,.04)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: "#94a3b8",
+          gap: "10px",
         }}
       >
-        <span>Rejoindre la discussion...</span>
-
-        <span
+        <input
+          disabled
+          placeholder="Cliquez sur ➜ pour participer..."
           style={{
-            color: "#38bdf8",
-            fontSize: "22px",
+            flex: 1,
+            height: "42px",
+            borderRadius: "12px",
+            border: "1px solid rgba(255,255,255,.08)",
+            background: "rgba(255,255,255,.04)",
+            color: "#94a3b8",
+            padding: "0 14px",
+            outline: "none",
+            fontSize: "15px",
+          }}
+        />
+
+        <Link
+          href="/chat"
+          style={{
+            width: "48px",
+            height: "42px",
+            borderRadius: "12px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textDecoration: "none",
+            background:
+              "linear-gradient(135deg,#00b7ff,#2563eb)",
+            color: "#fff",
+            fontSize: "24px",
             fontWeight: "bold",
+            boxShadow: "0 0 18px rgba(0,198,255,.35)",
           }}
         >
           ➜
-        </span>
-      </Link>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -169,7 +191,7 @@ function Message({
       style={{
         display: "flex",
         gap: "12px",
-        marginBottom: "12px",
+        marginBottom: "14px",
       }}
     >
       <img
