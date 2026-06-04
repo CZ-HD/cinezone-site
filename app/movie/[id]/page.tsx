@@ -48,7 +48,7 @@ const res = await fetch(
   { cache: "no-store" }
 );
 
-if (res.ok) {
+ if (res.ok) {
   const tmdbMovie = await res.json();
 
   movie = {
@@ -66,24 +66,7 @@ if (res.ok) {
     { cache: "no-store" }
   );
 
-  if (videoRes.ok) {
-    const videosData = await videoRes.json();
-    const videos = videosData?.results || [];
-
-    trailer =
-      videos.find(
-        (v: any) =>
-          v.type === "Trailer" &&
-          v.site === "YouTube"
-      ) ||
-      videos.find(
-        (v: any) =>
-          v.site === "YouTube"
-      );
-  }
-}
-
-  if (videoRes.ok) {
+      if (videoRes.ok) {
     const videosData = await videoRes.json();
     const videos = videosData?.results || [];
 
@@ -108,12 +91,11 @@ if (res.ok) {
       localMovie.poster_path,
     vote_average: localMovie.vote_average,
     release_date: localMovie.release_date,
-    overview:
-      "⚠️ Film ajouté manuellement.",
-imdb_id: localMovie.imdb_id,
-codec: localMovie.codec,
-audio: localMovie.audio,
-};
+    overview: "⚠️ Film ajouté manuellement.",
+    imdb_id: localMovie.imdb_id,
+    codec: localMovie.codec,
+    audio: localMovie.audio,
+  };
 }
 
 if (!movie) {
