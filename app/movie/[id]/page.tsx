@@ -35,10 +35,13 @@ export default async function MoviePage({ params }: any) {
 
 const localMovie = localResult.data;
 
-console.log("PARAMS ID =", params.id);
-console.log("PARAMS TYPE =", typeof params.id);
+console.log("========== DEBUG FILM ==========");
+console.log("PARAM ID =", params.id);
+console.log("PARAM TYPE =", typeof params.id);
 console.log("LOCAL MOVIE =", localMovie);
+console.log("LOCAL CODEC =", localMovie?.codec);
 console.log("SUPABASE ERROR =", localResult.error);
+console.log("================================");
 
 const res = await fetch(
   `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`,
@@ -49,15 +52,36 @@ if (res.ok) {
   const tmdbMovie = await res.json();
 
   movie = {
-  ...tmdbMovie,
-  codec: localMovie?.codec || "H264",
-  audio: localMovie?.audio || "VF",
-};
+    ...tmdbMovie,
+    codec: localMovie?.codec || "H264",
+    audio: localMovie?.audio || "VF",
+  };
+
+  console.log("TMDB TITLE =", tmdbMovie.title);
+  console.log("MOVIE CODEC =", movie.codec);
+  console.log("MOVIE AUDIO =", movie.audio);
 
   const videoRes = await fetch(
     `${BASE_URL}/movie/${params.id}/videos?api_key=${API_KEY}&language=fr-FR`,
     { cache: "no-store" }
   );
+
+  if (videoRes.ok) {
+    const videosData = await videoRes.json();
+    const videos = videosData?.results || [];
+
+    trailer =
+      videos.find(
+        (v: any) =>
+          v.type === "Trailer" &&
+          v.site === "YouTube"
+      ) ||
+      videos.find(
+        (v: any) =>
+          v.site === "YouTube"
+      );
+  }
+}
 
   if (videoRes.ok) {
     const videosData = await videoRes.json();
