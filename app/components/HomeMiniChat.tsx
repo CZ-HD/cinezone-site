@@ -146,30 +146,31 @@ export default function HomeMiniChat() {
         />
 
         <Link
-          href="/chat"
-          style={{
-            width: "38px",
-            height: "38px",
-            borderRadius: "10px",
-            background:
-              "linear-gradient(135deg,#12c8ff,#1f7dff)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textDecoration: "none",
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: "20px",
-            boxShadow:
-              "0 0 12px rgba(0,180,255,.25)",
-          }}
-        >
-          ➜
-        </Link>
-      </div>
-    </div>
-  );
-}
+  href="/chat"
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    textDecoration: "none",
+    padding: "0 16px",
+    height: "42px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,.04)",
+    border: "1px solid rgba(255,255,255,.06)",
+    color: "#94a3b8",
+  }}
+>
+  <span>Rejoindre la discussion...</span>
+  <span
+    style={{
+      color: "#38bdf8",
+      fontSize: "22px",
+      fontWeight: "bold",
+    }}
+  >
+    ➜
+  </span>
+</Link>
 
 function Message({
   avatar,
