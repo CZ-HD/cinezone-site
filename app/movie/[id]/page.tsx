@@ -4,6 +4,9 @@ import DownloadButton from "../../components/DownloadButton";
 import Comments from "../../components/Comments";
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
 
