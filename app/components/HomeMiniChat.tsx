@@ -5,17 +5,30 @@ import Link from "next/link";
 export default function HomeMiniChat() {
   return (
     <div
-      style={{
-        padding: "20px 24px",
-        borderRadius: "18px",
-        background:
-          "linear-gradient(135deg, rgba(0,25,60,.55), rgba(0,45,95,.45))",
-        backdropFilter: "blur(14px)",
-        border: "1px solid rgba(0,198,255,.35)",
-        boxShadow:
-          "0 0 35px rgba(0,198,255,.15), inset 0 0 20px rgba(0,198,255,.04)",
-      }}
-    >
+  style={{
+    width: "100%",
+    maxWidth: "1050px",
+    minHeight: "220px",
+    boxSizing: "border-box",
+
+    padding: "20px 24px",
+    borderRadius: "18px",
+
+    background:
+      "linear-gradient(135deg, rgba(0,25,60,.55), rgba(0,45,95,.45))",
+
+    backdropFilter: "blur(14px)",
+
+    border: "1px solid rgba(0,198,255,.35)",
+
+    boxShadow:
+      "0 0 35px rgba(0,198,255,.15), inset 0 0 20px rgba(0,198,255,.04)",
+
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  }}
+>
       <div
         style={{
           display: "flex",
