@@ -44,26 +44,26 @@ export default function HomeMiniChat() {
       style={{
         width: "100%",
         maxWidth: "1050px",
-        padding: "16px",
-        borderRadius: "18px",
+        padding: "18px",
+        borderRadius: "22px",
         background:
-          "linear-gradient(135deg, rgba(0,20,50,.62), rgba(0,35,70,.52))",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
-        border: "1px solid rgba(0,198,255,.22)",
+          "linear-gradient(135deg, rgba(0,15,35,.42), rgba(0,30,55,.32))",
+        backdropFilter: "blur(22px)",
+        WebkitBackdropFilter: "blur(22px)",
+        border: "1px solid rgba(0,198,255,.18)",
         boxShadow:
-          "0 0 30px rgba(0,198,255,.08), inset 0 0 20px rgba(255,255,255,.02)",
+          "0 0 25px rgba(0,198,255,.08), inset 0 0 15px rgba(255,255,255,.02)",
         boxSizing: "border-box",
       }}
     >
-      {/* Header */}
+      {/* HEADER */}
 
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "16px",
+          marginBottom: "18px",
         }}
       >
         <div
@@ -73,11 +73,11 @@ export default function HomeMiniChat() {
             gap: "10px",
           }}
         >
-          <span style={{ fontSize: "22px" }}>💬</span>
+          <span style={{ fontSize: "24px" }}>💬</span>
 
           <span
             style={{
-              color: "#69eaff",
+              color: "#74eaff",
               fontSize: "20px",
               fontWeight: 800,
             }}
@@ -88,9 +88,9 @@ export default function HomeMiniChat() {
 
         <div
           style={{
-            color: "#58f28b",
-            fontSize: "15px",
+            color: "#62f39c",
             fontWeight: 700,
+            fontSize: "15px",
           }}
         >
           🟢 Communauté active
@@ -102,12 +102,12 @@ export default function HomeMiniChat() {
       {messages.length === 0 ? (
         <div
           style={{
-            color: "#94a3b8",
             textAlign: "center",
-            padding: "18px 0",
+            color: "#94a3b8",
+            padding: "20px 0",
           }}
         >
-          Aucun message pour le moment.
+          Aucun message.
         </div>
       ) : (
         messages.map((msg) => (
@@ -122,13 +122,14 @@ export default function HomeMiniChat() {
 
       <div
         style={{
+          marginTop: "14px",
+          marginBottom: "14px",
           height: "1px",
-          background: "rgba(255,255,255,.06)",
-          margin: "14px 0",
+          background: "rgba(255,255,255,.05)",
         }}
       />
 
-      {/* Zone d'accès au chat */}
+      {/* BARRE CLIQUABLE */}
 
       <div
         style={{
@@ -136,38 +137,43 @@ export default function HomeMiniChat() {
           gap: "10px",
         }}
       >
-        <input
-          disabled
-          placeholder="Cliquez sur ➜ pour participer..."
+        <Link
+          href="/chat"
           style={{
             flex: 1,
-            height: "42px",
-            borderRadius: "12px",
-            border: "1px solid rgba(255,255,255,.08)",
-            background: "rgba(255,255,255,.04)",
+            height: "44px",
+            borderRadius: "14px",
+            background: "rgba(255,255,255,.035)",
+            border: "1px solid rgba(255,255,255,.06)",
+            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
+            padding: "0 16px",
             color: "#94a3b8",
-            padding: "0 14px",
-            outline: "none",
             fontSize: "15px",
+            transition: ".2s",
           }}
-        />
+        >
+          Cliquez ici ou sur ➜ pour participer...
+        </Link>
 
         <Link
           href="/chat"
           style={{
-            width: "48px",
-            height: "42px",
-            borderRadius: "12px",
+            width: "50px",
+            height: "44px",
+            borderRadius: "14px",
+            background:
+              "linear-gradient(135deg,#18bfff,#2563eb)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             textDecoration: "none",
-            background:
-              "linear-gradient(135deg,#00b7ff,#2563eb)",
             color: "#fff",
             fontSize: "24px",
             fontWeight: "bold",
-            boxShadow: "0 0 18px rgba(0,198,255,.35)",
+            boxShadow:
+              "0 0 15px rgba(0,198,255,.25)",
           }}
         >
           ➜
@@ -191,7 +197,7 @@ function Message({
       style={{
         display: "flex",
         gap: "12px",
-        marginBottom: "14px",
+        marginBottom: "15px",
       }}
     >
       <img
@@ -202,23 +208,21 @@ function Message({
           height: "42px",
           borderRadius: "50%",
           objectFit: "cover",
-          border: "2px solid rgba(255,255,255,.12)",
+          border: "2px solid rgba(255,255,255,.10)",
           flexShrink: 0,
+        }}
+        onError={(e) => {
+          e.currentTarget.src = DEFAULT_AVATAR;
         }}
       />
 
-      <div
-        style={{
-          flex: 1,
-          overflow: "hidden",
-        }}
-      >
+      <div style={{ flex: 1 }}>
         <div
           style={{
-            color: "#67e8f9",
+            color: "#69eaff",
             fontWeight: 800,
-            fontSize: "16px",
-            marginBottom: "3px",
+            fontSize: "17px",
+            marginBottom: "2px",
           }}
         >
           {pseudo}
@@ -227,12 +231,12 @@ function Message({
         <div
           style={{
             color: "#dbeafe",
+            lineHeight: "21px",
             fontSize: "14px",
-            lineHeight: "20px",
-            overflow: "hidden",
             display: "-webkit-box",
-            WebkitLineClamp: 2,
+            overflow: "hidden",
             WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
           }}
         >
           {message}
