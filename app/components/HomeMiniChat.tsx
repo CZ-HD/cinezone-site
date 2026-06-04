@@ -8,24 +8,30 @@ export default function HomeMiniChat() {
       style={{
         width: "100%",
         maxWidth: "1050px",
-        padding: "18px",
+        padding: "16px",
         borderRadius: "18px",
         background:
-          "linear-gradient(135deg, rgba(0,18,45,.92), rgba(0,35,70,.82))",
-        border: "1px solid rgba(0,198,255,.25)",
-        backdropFilter: "blur(12px)",
+          "linear-gradient(135deg, rgba(0,20,50,.62), rgba(0,35,70,.52))",
+
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+
+        border: "1px solid rgba(0,198,255,.22)",
+
         boxShadow:
-          "0 0 30px rgba(0,198,255,.10), inset 0 0 15px rgba(0,198,255,.03)",
+          "0 0 30px rgba(0,198,255,.08), inset 0 0 20px rgba(255,255,255,.02)",
+
         boxSizing: "border-box",
       }}
     >
-      {/* Header */}
+      {/* HEADER */}
+
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "18px",
+          marginBottom: "14px",
         }}
       >
         <div
@@ -35,11 +41,11 @@ export default function HomeMiniChat() {
             gap: "10px",
           }}
         >
-          <span style={{ fontSize: "22px" }}>💬</span>
+          <span style={{ fontSize: "21px" }}>💬</span>
 
           <span
             style={{
-              color: "#67e8f9",
+              color: "#69eaff",
               fontSize: "20px",
               fontWeight: 800,
             }}
@@ -50,19 +56,19 @@ export default function HomeMiniChat() {
 
         <div
           style={{
-            color: "#4ade80",
+            color: "#58f28b",
+            fontSize: "15px",
             fontWeight: 700,
-            fontSize: "16px",
           }}
         >
-          ● 1 connecté
+          🟢 Communauté active
         </div>
       </div>
 
       <Message
         letter="V"
         pseudo="Vadrox"
-        color="#facc15"
+        color="#ffd54a"
         badge="ADMIN"
         message="Bienvenue sur CineZone !"
       />
@@ -70,7 +76,7 @@ export default function HomeMiniChat() {
       <Message
         letter="M"
         pseudo="Membre"
-        color="#38bdf8"
+        color="#47c7ff"
         badge="MEMBRE"
         message="Merci pour le dernier upload 👍"
       />
@@ -78,14 +84,23 @@ export default function HomeMiniChat() {
       <Message
         letter="S"
         pseudo="Staff"
-        color="#c084fc"
+        color="#d68dff"
         badge="STAFF"
         message="Les nouveautés arrivent bientôt."
       />
 
       <div
         style={{
-          marginTop: "16px",
+          height: "1px",
+          background: "rgba(255,255,255,.06)",
+          margin: "10px 0 12px 0",
+        }}
+      />
+
+      {/* BAS */}
+
+      <div
+        style={{
           display: "flex",
           gap: "10px",
         }}
@@ -97,8 +112,8 @@ export default function HomeMiniChat() {
             flex: 1,
             height: "38px",
             borderRadius: "10px",
-            border: "1px solid rgba(255,255,255,.08)",
-            background: "rgba(255,255,255,.05)",
+            border: "1px solid rgba(255,255,255,.06)",
+            background: "rgba(255,255,255,.04)",
             color: "#ffffff",
             padding: "0 14px",
             outline: "none",
@@ -112,15 +127,19 @@ export default function HomeMiniChat() {
             width: "38px",
             height: "38px",
             borderRadius: "10px",
-            background: "linear-gradient(135deg,#00c6ff,#0072ff)",
+            background:
+              "linear-gradient(135deg,#12c8ff,#1f7dff)",
+
             display: "flex",
-            alignItems: "center",
             justifyContent: "center",
-            color: "#fff",
+            alignItems: "center",
+
             textDecoration: "none",
-            fontSize: "20px",
+            color: "#fff",
             fontWeight: "bold",
-            flexShrink: 0,
+            fontSize: "20px",
+
+            boxShadow: "0 0 15px rgba(0,180,255,.20)",
           }}
         >
           ➜
@@ -149,7 +168,7 @@ function Message({
         display: "flex",
         alignItems: "center",
         gap: "14px",
-        marginBottom: "14px",
+        marginBottom: "10px",
       }}
     >
       <div
@@ -157,15 +176,21 @@ function Message({
           width: "40px",
           height: "40px",
           borderRadius: "50%",
-          background: "linear-gradient(135deg,#00c6ff,#0072ff)",
+          background:
+            "linear-gradient(135deg,#15c8ff,#1985ff)",
+
           display: "flex",
-          alignItems: "center",
           justifyContent: "center",
+          alignItems: "center",
+
           color: "#fff",
           fontWeight: "bold",
           fontSize: "18px",
+
           flexShrink: 0,
-          boxShadow: "0 0 10px rgba(0,198,255,.25)",
+
+          boxShadow:
+            "0 0 12px rgba(0,180,255,.22)",
         }}
       >
         {letter}
@@ -193,11 +218,10 @@ function Message({
             style={{
               padding: "2px 7px",
               borderRadius: "6px",
-              background: "rgba(255,255,255,.12)",
+              background: "rgba(255,255,255,.10)",
               color: "#fff",
               fontSize: "10px",
               fontWeight: 700,
-              letterSpacing: ".3px",
             }}
           >
             {badge}
@@ -206,7 +230,7 @@ function Message({
 
         <div
           style={{
-            color: "#dbeafe",
+            color: "#e3eefc",
             marginTop: "2px",
             fontSize: "15px",
           }}
