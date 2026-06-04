@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import HomeMiniChat from "@/components/HomeMiniChat";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -103,63 +104,23 @@ export default function Home() {
           </p>
 
           <div style={buttonRow}>
-            <Link href={`/movie/${hero.id}`} style={primaryBtn}>
-              🎬 Accéder au film
-            </Link>
+  <Link href={`/movie/${hero.id}`} style={primaryBtn}>
+    🎬 Accéder au film
+  </Link>
 
-            <Link href="/films" style={secondaryBtn}>
-              Explorer le catalogue
-            </Link>
-          </div>
+  <Link href="/films" style={secondaryBtn}>
+    Explorer le catalogue
+  </Link>
+</div>
 
-          <div
+<div
   style={{
     marginTop: "35px",
     width: "100%",
     maxWidth: "1100px",
   }}
 >
-  <div style={announcementStyle}>
-  <div style={announcementIcon}>
-    <img
-      src="/speaker.png"
-      alt="Information"
-      style={{
-        width: "28px",
-        height: "28px",
-        objectFit: "contain",
-      }}
-    />
-  </div>
-
-  <div style={{ flex: 1 }}>
-    <div style={announcementTitle}>
-      📢 ÉVOLUTION DE CINEZONE HD
-    </div>
-
-    <div style={announcementText}>
-  🎬 CineZone HD adopte progressivement le codec nouvelle génération{" "}
-  <strong style={{ color: "#67e8f9" }}>
-    H.265 (HEVC)
-  </strong>{" "}
-  afin d'offrir une meilleure qualité tout en réduisant la taille des fichiers.
-  <br />
-  📢 Le codec x264 sera progressivement remplacé sur les nouveaux films ajoutés à la plateforme.
-  <br />
-  ℹ️ Les contenus encodés en H.265 (HEVC) sont clairement signalés sur les fiches, les liens de téléchargement ou dans les informations associées.
-  <br />
-  💡 Si aucun codec n'est indiqué, il s'agit généralement d'une version x264 / H.264 comme actuellement.
-  <br />
-  🚀 Jusqu'à 50 % d'espace économisé, des téléchargements plus rapides et un stockage optimisé.
-</div> 
-  </div>
-
-  <div style={announcementBadge}>
-  H.265 / HEVC
-</div>
-
-</div>
-
+  <HomeMiniChat />
 </div>
 
 </div>
