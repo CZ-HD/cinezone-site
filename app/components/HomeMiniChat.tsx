@@ -123,29 +123,34 @@ export default function HomeMiniChat() {
         }}
       />
 
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-        }}
-      >
-        <input
-          disabled
-          placeholder="Rejoindre la discussion..."
-          style={{
-            flex: 1,
-            height: "38px",
-            borderRadius: "10px",
-            border: "1px solid rgba(255,255,255,.08)",
-            background: "rgba(255,255,255,.04)",
-            color: "#fff",
-            padding: "0 14px",
-            outline: "none",
-            fontSize: "15px",
-          }}
-        />
+      <Link
+  href="/chat"
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    textDecoration: "none",
+    padding: "0 16px",
+    height: "42px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,.04)",
+    border: "1px solid rgba(255,255,255,.06)",
+    color: "#94a3b8",
+    marginTop: "10px",
+  }}
+>
+  <span>Rejoindre la discussion...</span>
 
-        <Link
+  <span
+    style={{
+      color: "#38bdf8",
+      fontSize: "22px",
+      fontWeight: "bold",
+    }}
+  >
+    ➜
+  </span>
+</Link>
   href="/chat"
   style={{
     display: "flex",
