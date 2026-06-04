@@ -8,38 +8,51 @@ export default function HomeMiniChat() {
       style={{
         width: "100%",
         maxWidth: "1050px",
-        padding: "18px",
+        padding: "20px",
         borderRadius: "18px",
         background:
-          "linear-gradient(135deg, rgba(0,18,45,.90), rgba(0,35,70,.80))",
-        border: "1px solid rgba(0,198,255,.30)",
-        backdropFilter: "blur(10px)",
+          "linear-gradient(135deg, rgba(0,18,45,.92), rgba(0,35,70,.82))",
+        border: "1px solid rgba(0,198,255,.25)",
+        backdropFilter: "blur(12px)",
         boxShadow:
-          "0 0 30px rgba(0,198,255,.12), inset 0 0 15px rgba(0,198,255,.03)",
+          "0 0 30px rgba(0,198,255,.10), inset 0 0 15px rgba(0,198,255,.03)",
+        boxSizing: "border-box",
       }}
     >
+      {/* Header */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "15px",
+          marginBottom: "18px",
         }}
       >
         <div
           style={{
-            fontSize: "28px",
-            fontWeight: 800,
-            color: "#67e8f9",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
           }}
         >
-          💬 Chat CineZone
+          <span style={{ fontSize: "24px" }}>💬</span>
+
+          <span
+            style={{
+              color: "#67e8f9",
+              fontSize: "22px",
+              fontWeight: 800,
+            }}
+          >
+            Chat CineZone
+          </span>
         </div>
 
         <div
           style={{
             color: "#4ade80",
             fontWeight: 700,
+            fontSize: "18px",
           }}
         >
           ● 1 connecté
@@ -47,24 +60,24 @@ export default function HomeMiniChat() {
       </div>
 
       <Message
-        avatar="/avatar.png"
         pseudo="Vadrox"
+        letter="V"
         color="#facc15"
         badge="ADMIN"
         message="Bienvenue sur CineZone !"
       />
 
       <Message
-        avatar="/avatar.png"
         pseudo="Membre"
+        letter="M"
         color="#38bdf8"
         badge="MEMBRE"
         message="Merci pour le dernier upload 👍"
       />
 
       <Message
-        avatar="/avatar.png"
         pseudo="Staff"
+        letter="S"
         color="#c084fc"
         badge="STAFF"
         message="Les nouveautés arrivent bientôt."
@@ -79,31 +92,34 @@ export default function HomeMiniChat() {
       >
         <input
           disabled
-          placeholder="Tapez votre message..."
+          placeholder="Voir les derniers messages..."
           style={{
             flex: 1,
-            height: "42px",
+            height: "44px",
             borderRadius: "12px",
             border: "1px solid rgba(255,255,255,.08)",
             background: "rgba(255,255,255,.05)",
-            color: "#fff",
-            padding: "0 15px",
+            color: "#ffffff",
+            padding: "0 16px",
+            outline: "none",
+            fontSize: "16px",
           }}
         />
 
         <Link
           href="/chat"
           style={{
-            width: "42px",
-            height: "42px",
+            width: "44px",
+            height: "44px",
             borderRadius: "12px",
-            background: "#00b7ff",
+            background: "linear-gradient(135deg,#00c6ff,#0072ff)",
             display: "flex",
-            justifyContent: "center",
             alignItems: "center",
+            justifyContent: "center",
             color: "#fff",
             textDecoration: "none",
-            fontSize: "20px",
+            fontSize: "22px",
+            fontWeight: "bold",
           }}
         >
           ➜
@@ -114,8 +130,8 @@ export default function HomeMiniChat() {
 }
 
 function Message({
-  avatar,
   pseudo,
+  letter,
   color,
   badge,
   message,
@@ -125,27 +141,42 @@ function Message({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "12px",
-        marginBottom: "12px",
+        gap: "14px",
+        marginBottom: "14px",
       }}
     >
-      <img
-        src={avatar}
-        width={38}
-        height={38}
+      <div
         style={{
+          width: "42px",
+          height: "42px",
           borderRadius: "50%",
-          objectFit: "cover",
-          border: "2px solid rgba(255,255,255,.15)",
+          background: "linear-gradient(135deg,#00c6ff,#0072ff)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontWeight: "bold",
+          fontSize: "18px",
+          flexShrink: 0,
+          boxShadow: "0 0 12px rgba(0,198,255,.30)",
         }}
-      />
+      >
+        {letter}
+      </div>
 
       <div>
-        <div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
           <span
             style={{
               color,
               fontWeight: 800,
+              fontSize: "16px",
             }}
           >
             {pseudo}
@@ -153,11 +184,12 @@ function Message({
 
           <span
             style={{
-              marginLeft: "8px",
-              padding: "2px 6px",
+              padding: "2px 7px",
               borderRadius: "6px",
-              fontSize: "10px",
               background: "rgba(255,255,255,.12)",
+              fontSize: "10px",
+              color: "#fff",
+              fontWeight: 700,
             }}
           >
             {badge}
@@ -167,7 +199,8 @@ function Message({
         <div
           style={{
             color: "#dbeafe",
-            marginTop: "2px",
+            marginTop: "3px",
+            fontSize: "15px",
           }}
         >
           {message}
