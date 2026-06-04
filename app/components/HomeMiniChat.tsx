@@ -11,6 +11,9 @@ type MessageType = {
   content: string;
 };
 
+const DEFAULT_AVATAR =
+  "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png";
+
 export default function HomeMiniChat() {
   const [messages, setMessages] = useState<MessageType[]>([]);
 
@@ -31,7 +34,7 @@ export default function HomeMiniChat() {
       .order("created_at", { ascending: false })
       .limit(3);
 
-    if (data && data.length > 0) {
+    if (data) {
       setMessages(data.reverse());
     }
   }
@@ -53,8 +56,6 @@ export default function HomeMiniChat() {
         boxSizing: "border-box",
       }}
     >
-      {/* HEADER */}
-
       <div
         style={{
           display: "flex",
@@ -124,58 +125,35 @@ export default function HomeMiniChat() {
       />
 
       <Link
-  href="/chat"
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    textDecoration: "none",
-    padding: "0 16px",
-    height: "42px",
-    borderRadius: "12px",
-    background: "rgba(255,255,255,.04)",
-    border: "1px solid rgba(255,255,255,.06)",
-    color: "#94a3b8",
-    marginTop: "10px",
-  }}
->
-  <span>Rejoindre la discussion...</span>
+        href="/chat"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          textDecoration: "none",
+          padding: "0 16px",
+          height: "42px",
+          borderRadius: "12px",
+          background: "rgba(255,255,255,.04)",
+          border: "1px solid rgba(255,255,255,.06)",
+          color: "#94a3b8",
+        }}
+      >
+        <span>Rejoindre la discussion...</span>
 
-  <span
-    style={{
-      color: "#38bdf8",
-      fontSize: "22px",
-      fontWeight: "bold",
-    }}
-  >
-    ➜
-  </span>
-</Link>
-  href="/chat"
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    textDecoration: "none",
-    padding: "0 16px",
-    height: "42px",
-    borderRadius: "12px",
-    background: "rgba(255,255,255,.04)",
-    border: "1px solid rgba(255,255,255,.06)",
-    color: "#94a3b8",
-  }}
->
-  <span>Rejoindre la discussion...</span>
-  <span
-    style={{
-      color: "#38bdf8",
-      fontSize: "22px",
-      fontWeight: "bold",
-    }}
-  >
-    ➜
-  </span>
-</Link>
+        <span
+          style={{
+            color: "#38bdf8",
+            fontSize: "22px",
+            fontWeight: "bold",
+          }}
+        >
+          ➜
+        </span>
+      </Link>
+    </div>
+  );
+}
 
 function Message({
   avatar,
@@ -195,10 +173,7 @@ function Message({
       }}
     >
       <img
-        src={
-          avatar ||
-          "https://kafxrsktznrbuvwlkdeg.supabase.co/storage/v1/object/public/avatars/adult-7.png"
-        }
+        src={avatar || DEFAULT_AVATAR}
         alt={pseudo}
         style={{
           width: "42px",
