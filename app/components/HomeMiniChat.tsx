@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import Link from "next/link";
@@ -8,7 +9,7 @@ export default function HomeMiniChat() {
       style={{
         width: "100%",
         maxWidth: "1050px",
-        padding: "20px",
+        padding: "18px",
         borderRadius: "18px",
         background:
           "linear-gradient(135deg, rgba(0,18,45,.92), rgba(0,35,70,.82))",
@@ -35,12 +36,12 @@ export default function HomeMiniChat() {
             gap: "10px",
           }}
         >
-          <span style={{ fontSize: "24px" }}>💬</span>
+          <span style={{ fontSize: "22px" }}>💬</span>
 
           <span
             style={{
               color: "#67e8f9",
-              fontSize: "22px",
+              fontSize: "20px",
               fontWeight: 800,
             }}
           >
@@ -52,7 +53,7 @@ export default function HomeMiniChat() {
           style={{
             color: "#4ade80",
             fontWeight: 700,
-            fontSize: "18px",
+            fontSize: "16px",
           }}
         >
           ● 1 connecté
@@ -60,24 +61,24 @@ export default function HomeMiniChat() {
       </div>
 
       <Message
-        pseudo="Vadrox"
         letter="V"
+        pseudo="Vadrox"
         color="#facc15"
         badge="ADMIN"
         message="Bienvenue sur CineZone !"
       />
 
       <Message
-        pseudo="Membre"
         letter="M"
+        pseudo="Membre"
         color="#38bdf8"
         badge="MEMBRE"
         message="Merci pour le dernier upload 👍"
       />
 
       <Message
-        pseudo="Staff"
         letter="S"
+        pseudo="Staff"
         color="#c084fc"
         badge="STAFF"
         message="Les nouveautés arrivent bientôt."
@@ -85,41 +86,42 @@ export default function HomeMiniChat() {
 
       <div
         style={{
-          marginTop: "18px",
+          marginTop: "16px",
           display: "flex",
           gap: "10px",
         }}
       >
         <input
           disabled
-          placeholder="Voir les derniers messages..."
+          placeholder="Rejoindre la discussion..."
           style={{
             flex: 1,
-            height: "44px",
-            borderRadius: "12px",
+            height: "38px",
+            borderRadius: "10px",
             border: "1px solid rgba(255,255,255,.08)",
             background: "rgba(255,255,255,.05)",
             color: "#ffffff",
-            padding: "0 16px",
+            padding: "0 14px",
             outline: "none",
-            fontSize: "16px",
+            fontSize: "15px",
           }}
         />
 
         <Link
           href="/chat"
           style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "12px",
+            width: "38px",
+            height: "38px",
+            borderRadius: "10px",
             background: "linear-gradient(135deg,#00c6ff,#0072ff)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: "#fff",
             textDecoration: "none",
-            fontSize: "22px",
+            fontSize: "20px",
             fontWeight: "bold",
+            flexShrink: 0,
           }}
         >
           ➜
@@ -130,12 +132,18 @@ export default function HomeMiniChat() {
 }
 
 function Message({
-  pseudo,
   letter,
+  pseudo,
   color,
   badge,
   message,
-}: any) {
+}: {
+  letter: string;
+  pseudo: string;
+  color: string;
+  badge: string;
+  message: string;
+}) {
   return (
     <div
       style={{
@@ -147,8 +155,8 @@ function Message({
     >
       <div
         style={{
-          width: "42px",
-          height: "42px",
+          width: "40px",
+          height: "40px",
           borderRadius: "50%",
           background: "linear-gradient(135deg,#00c6ff,#0072ff)",
           display: "flex",
@@ -158,7 +166,7 @@ function Message({
           fontWeight: "bold",
           fontSize: "18px",
           flexShrink: 0,
-          boxShadow: "0 0 12px rgba(0,198,255,.30)",
+          boxShadow: "0 0 10px rgba(0,198,255,.25)",
         }}
       >
         {letter}
@@ -187,9 +195,10 @@ function Message({
               padding: "2px 7px",
               borderRadius: "6px",
               background: "rgba(255,255,255,.12)",
-              fontSize: "10px",
               color: "#fff",
+              fontSize: "10px",
               fontWeight: 700,
+              letterSpacing: ".3px",
             }}
           >
             {badge}
@@ -199,7 +208,7 @@ function Message({
         <div
           style={{
             color: "#dbeafe",
-            marginTop: "3px",
+            marginTop: "2px",
             fontSize: "15px",
           }}
         >
@@ -209,3 +218,4 @@ function Message({
     </div>
   );
 }
+```
