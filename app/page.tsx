@@ -255,6 +255,7 @@ const heroStyle: React.CSSProperties = {
 };
 
 const heroContent: React.CSSProperties = {
+  width: "100%",
   maxWidth: "1100px",
   zIndex: 2,
 };
