@@ -816,53 +816,44 @@ setShowProfile(false);
       }
 
       safeContent = safeContent
-  .replaceAll("@everyone", "@tout le monde")
-  .replaceAll("@toutlemonde", "@tout le monde");
-}
+        .replaceAll("@everyone", "@tout le monde")
+        .replaceAll("@toutlemonde", "@tout le monde");
+    }
 
-const matches = [...content.matchAll(/@([^\s]+)/g)];
+    const matches = [...content.matchAll(/@([^\s]+)/g)];
 
-for (const match of matches) {
-  const rawMention = match[0];
-  const value = match[1].trim();
+    for (const match of matches) {
+      const rawMention = match[0];
+      const value = match[1].trim();
 
-  if (!value) continue;
-  if (value.toLowerCase() === "everyone") continue;
-  if (value.toLowerCase() === "toutlemonde") continue;
-  if (value.toLowerCase() === "tout") continue;
+      if (!value) continue;
+      if (value.toLowerCase() === "everyone") continue;
+      if (value.toLowerCase() === "toutlemonde") continue;
+      if (value.toLowerCase() === "tout") continue;
 
-  const { data: users } = await supabase
-  .from("profiles")
-  .select("id, username, email")
-  .or(
-    `username.ilike.${value}%,email.ilike.${value}%`
-  )
-  .limit(1);
+      const { data: mentionedUser } = await supabase
+        .from("profiles")
+        .select("id, username, email")
+        .or(`username.eq.${value},email.eq.${value}`)
+        .maybeSingle();
 
-  const { data: users } = await supabase
-  .from("profiles")
-  .select("id, username, email")
-  .or(
-    `username.ilike.${value}%,email.ilike.${value}%`
-  )
-  .limit(1);
+      if (!mentionedUser?.id) continue;
+      if (mentionedUser.id === user.id) continue;
+      if (alreadyMentioned.has(mentionedUser.id)) continue;
 
-const mentionedUser = users?.[0];
+      alreadyMentioned.add(mentionedUser.id);
+      mentionedUsers.push(mentionedUser);
 
-if (!mentionedUser?.id) continue;
-if (mentionedUser.id === user.id) continue;
-if (alreadyMentioned.has(mentionedUser.id)) continue;
+      if (value.includes("@")) {
+        safeContent = safeContent.replace(
+          rawMention,
+          mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
+        );
+      }
+    }
 
-alreadyMentioned.add(mentionedUser.id);
-mentionedUsers.push(mentionedUser);
-
-safeContent = safeContent.replace(
-  rawMention,
-  `@${mentionedUser.username || mentionedUser.email?.split("@")[0]}`
-);
-
-return { safeContent, mentionedUsers };
-};
+    return { safeContent, mentionedUsers };
+  };
 
   const createMentionNotifications = async (
     mentionedUsers: MentionProfile[],
@@ -1690,7 +1681,9 @@ const statusColor =
         const { data, error } = await supabase
   .from("profiles")
   .select("id, username, avatar, email")
-  .ilike("username", `${query}%`)
+  .or(
+    `username.ilike.%${query}%,email.ilike.%${query}%`
+  )
   .limit(12);
 
         if (!error) {
@@ -2651,7 +2644,6 @@ const adminBadge: React.CSSProperties = {
   borderRadius: "999px",
   boxShadow: "0 0 12px rgba(255,215,100,0.50)",
 };
-
 const mentionBox: React.CSSProperties = {
   position: "absolute",
   bottom: "62px",
@@ -2700,8 +2692,4 @@ const mentionUsername: React.CSSProperties = {
 const mentionEmail: React.CSSProperties = {
   fontSize: "11px",
   color: "#8fa3bd",
-};
-
-const mentionHover: React.CSSProperties = {
-  background: "rgba(0,198,255,0.08)",
 };
