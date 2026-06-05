@@ -839,21 +839,27 @@ for (const match of matches) {
   )
   .limit(1);
 
+  const { data: users } = await supabase
+  .from("profiles")
+  .select("id, username, email")
+  .or(
+    `username.ilike.${value}%,email.ilike.${value}%`
+  )
+  .limit(1);
+
 const mentionedUser = users?.[0];
-  const mentionedUser = users?.[0];
 
-  if (!mentionedUser?.id) continue;
-  if (mentionedUser.id === user.id) continue;
-  if (alreadyMentioned.has(mentionedUser.id)) continue;
+if (!mentionedUser?.id) continue;
+if (mentionedUser.id === user.id) continue;
+if (alreadyMentioned.has(mentionedUser.id)) continue;
 
-  alreadyMentioned.add(mentionedUser.id);
+alreadyMentioned.add(mentionedUser.id);
 mentionedUsers.push(mentionedUser);
 
 safeContent = safeContent.replace(
   rawMention,
   `@${mentionedUser.username || mentionedUser.email?.split("@")[0]}`
 );
-}
 
 return { safeContent, mentionedUsers };
 };
