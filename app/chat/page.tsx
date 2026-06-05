@@ -2700,3 +2700,7 @@ const mentionEmail: React.CSSProperties = {
   fontSize: "11px",
   color: "#8fa3bd",
 };
+
+const mentionHover: React.CSSProperties = {
+  background: "rgba(0,198,255,0.08)",
+};
