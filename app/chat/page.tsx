@@ -816,44 +816,47 @@ setShowProfile(false);
       }
 
       safeContent = safeContent
-        .replaceAll("@everyone", "@tout le monde")
-        .replaceAll("@toutlemonde", "@tout le monde");
-    }
+  .replaceAll("@everyone", "@tout le monde")
+  .replaceAll("@toutlemonde", "@tout le monde");
+}
 
-    const matches = [...content.matchAll(/@([^\s]+)/g)];
+const matches = [...content.matchAll(/@([^\s]+)/g)];
 
-    for (const match of matches) {
-      const rawMention = match[0];
-      const value = match[1].trim();
+for (const match of matches) {
+  const rawMention = match[0];
+  const value = match[1].trim();
 
-      if (!value) continue;
-      if (value.toLowerCase() === "everyone") continue;
-      if (value.toLowerCase() === "toutlemonde") continue;
-      if (value.toLowerCase() === "tout") continue;
+  if (!value) continue;
+  if (value.toLowerCase() === "everyone") continue;
+  if (value.toLowerCase() === "toutlemonde") continue;
+  if (value.toLowerCase() === "tout") continue;
 
-      const { data: mentionedUser } = await supabase
-        .from("profiles")
-        .select("id, username, email")
-        .or(`username.eq.${value},email.eq.${value}`)
-        .maybeSingle();
+  const { data: users } = await supabase
+  .from("profiles")
+  .select("id, username, email")
+  .or(
+    `username.ilike.${value}%,email.ilike.${value}%`
+  )
+  .limit(1);
 
-      if (!mentionedUser?.id) continue;
-      if (mentionedUser.id === user.id) continue;
-      if (alreadyMentioned.has(mentionedUser.id)) continue;
+const mentionedUser = users?.[0];
+  const mentionedUser = users?.[0];
 
-      alreadyMentioned.add(mentionedUser.id);
-      mentionedUsers.push(mentionedUser);
+  if (!mentionedUser?.id) continue;
+  if (mentionedUser.id === user.id) continue;
+  if (alreadyMentioned.has(mentionedUser.id)) continue;
 
-      if (value.includes("@")) {
-        safeContent = safeContent.replace(
-          rawMention,
-          mentionedUser.username ? `@${mentionedUser.username}` : "@membre"
-        );
-      }
-    }
+  alreadyMentioned.add(mentionedUser.id);
+mentionedUsers.push(mentionedUser);
 
-    return { safeContent, mentionedUsers };
-  };
+safeContent = safeContent.replace(
+  rawMention,
+  `@${mentionedUser.username || mentionedUser.email?.split("@")[0]}`
+);
+}
+
+return { safeContent, mentionedUsers };
+};
 
   const createMentionNotifications = async (
     mentionedUsers: MentionProfile[],
@@ -1681,9 +1684,7 @@ const statusColor =
         const { data, error } = await supabase
   .from("profiles")
   .select("id, username, avatar, email")
-  .or(
-    `username.ilike.%${query}%,email.ilike.%${query}%`
-  )
+  .ilike("username", `${query}%`)
   .limit(12);
 
         if (!error) {
