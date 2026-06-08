@@ -108,18 +108,20 @@ export default function HomeAnnouncements() {
           }}
         >
           <div
-            style={{
-              display: "inline-block",
-              color: "#dbeafe",
-              fontWeight: 600,
-              fontSize: "15px",
-              paddingLeft: "18px",
-              animation: "cinezoneTicker 11s linear infinite",
-            }}
-          >
-            {text.repeat(5)}
-          </div>
-        </div>
+  style={{
+    display: "inline-block",
+    color: "#dbeafe",
+    fontWeight: 600,
+    fontSize: "15px",
+    paddingLeft: "18px",
+    animation: `cinezoneTicker ${Math.max(
+      18,
+      announcement.content.length * 0.18
+    )}s linear infinite`,
+  }}
+>
+  {text.repeat(5)}
+</div>
 
         {/* Badge Staff */}
 
