@@ -125,7 +125,7 @@ export default function HomeAnnouncements() {
               boxShadow: "0 0 10px #59f38f",
             }}
           />
-          STAFF
+          🟢 Staff CineZone
         </div>
       </div>
     </>
