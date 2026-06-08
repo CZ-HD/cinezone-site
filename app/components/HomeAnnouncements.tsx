@@ -43,23 +43,22 @@ export default function HomeAnnouncements() {
         borderRadius: "18px",
         overflow: "hidden",
         background:
-          "linear-gradient(135deg, rgba(0,25,55,.55), rgba(0,12,30,.75))",
-        border: "1px solid rgba(0,198,255,.18)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+          "linear-gradient(135deg, rgba(0,22,50,.70), rgba(0,10,28,.88))",
+        border: "1px solid rgba(0,198,255,.15)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
         boxShadow:
-          "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
+          "0 0 25px rgba(0,198,255,.08), inset 0 0 25px rgba(255,255,255,.02)",
       }}
     >
-      {/* En-tête */}
+      {/* Header */}
 
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "16px 20px",
-          borderBottom: "1px solid rgba(255,255,255,.08)",
+          padding: "15px 22px",
         }}
       >
         <div
@@ -71,18 +70,19 @@ export default function HomeAnnouncements() {
         >
           <span
             style={{
-              fontSize: "24px",
+              fontSize: "22px",
             }}
           >
-            {announcement.icon || "🍿"}
+            {announcement.icon || "🎬"}
           </span>
 
           <span
             style={{
-              color: "#e8f5ff",
+              color: "#69eaff",
+              fontSize: "20px",
               fontWeight: 800,
-              fontSize: "24px",
-              textShadow: "0 0 10px rgba(0,198,255,.15)",
+              letterSpacing: ".3px",
+              textShadow: "0 0 10px rgba(0,198,255,.18)",
             }}
           >
             {announcement.title}
@@ -93,37 +93,48 @@ export default function HomeAnnouncements() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            background: "rgba(0,10,25,.85)",
-            padding: "6px 12px",
+            gap: "7px",
+            padding: "5px 12px",
             borderRadius: "999px",
-            border: "1px solid rgba(89,243,143,.25)",
-            color: "#6ef7a7",
-            fontSize: "12px",
-            fontWeight: 800,
+            background: "rgba(0,12,25,.65)",
+            border: "1px solid rgba(89,243,143,.18)",
+            color: "#7af7b0",
+            fontSize: "11px",
+            fontWeight: 700,
           }}
         >
           <span
             style={{
-              width: "8px",
-              height: "8px",
+              width: "7px",
+              height: "7px",
               borderRadius: "50%",
               background: "#59f38f",
               boxShadow: "0 0 8px #59f38f",
             }}
           />
+
           Staff CineZone
         </div>
       </div>
 
-      {/* Contenu */}
+      {/* Séparateur */}
 
       <div
         style={{
-          padding: "20px",
-          color: "#dbeafe",
-          fontSize: "17px",
-          lineHeight: "32px",
+          height: "1px",
+          background:
+            "linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent)",
+        }}
+      />
+
+      {/* Corps */}
+
+      <div
+        style={{
+          padding: "22px",
+          color: "#d4e2f0",
+          fontSize: "15px",
+          lineHeight: "30px",
           fontWeight: 500,
           whiteSpace: "pre-wrap",
         }}
