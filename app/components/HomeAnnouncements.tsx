@@ -34,7 +34,8 @@ export default function HomeAnnouncements() {
 
   if (!announcement) return null;
 
-  const text = `${announcement.icon || "🍿"} ${announcement.content} ✦ `;
+  // Texte du bandeau défilant
+  const text = `🍿 ${announcement.content} ✦ `;
 
   return (
     <>
@@ -66,7 +67,7 @@ export default function HomeAnnouncements() {
             "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
         }}
       >
-        {/* Bandeau titre */}
+        {/* Titre fixe */}
 
         <div
           style={{
@@ -82,7 +83,7 @@ export default function HomeAnnouncements() {
               fontSize: "20px",
             }}
           >
-            {announcement.icon || "🍿"}
+            📢
           </span>
 
           <span
@@ -116,7 +117,7 @@ export default function HomeAnnouncements() {
               animation: "cinezoneTicker 11s linear infinite",
             }}
           >
-            📢 {text.repeat(8)}
+            {text.repeat(5)}
           </div>
         </div>
 
