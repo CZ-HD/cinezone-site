@@ -34,7 +34,7 @@ export default function HomeAnnouncements() {
 
   if (!announcement) return null;
 
-  const text = `${announcement.icon || "📢"} ${announcement.content} • `;
+  const text = `${announcement.icon || "🍿"} ${announcement.content} ✦ `;
 
   return (
     <>
@@ -82,7 +82,7 @@ export default function HomeAnnouncements() {
               fontSize: "20px",
             }}
           >
-            {announcement.icon || "📢"}
+            {announcement.icon || "🍿"}
           </span>
 
           <span
