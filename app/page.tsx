@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import HomeMiniChat from "@/app/components/HomeMiniChat";
+import HomeMiniChat from "@/components/HomeMiniChat";
+import HomeAnnouncements from "@/components/HomeAnnouncements";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -118,11 +119,15 @@ export default function Home() {
     marginTop: "35px",
     width: "100%",
     maxWidth: "1100px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
   }}
 >
   <HomeMiniChat />
-</div>
 
+  <HomeAnnouncements />
+</div>
 </div>
 
 <button
