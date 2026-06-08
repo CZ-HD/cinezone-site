@@ -11,155 +11,119 @@ type Announcement = {
 };
 
 export default function HomeAnnouncements() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcement, setAnnouncement] =
+    useState<Announcement | null>(null);
 
   useEffect(() => {
-    loadAnnouncements();
+    loadAnnouncement();
   }, []);
 
-  async function loadAnnouncements() {
+  async function loadAnnouncement() {
     const { data } = await supabase
       .from("announcements")
-      .select("id, title, content, icon")
+      .select("id,title,content,icon")
       .eq("active", true)
       .order("created_at", { ascending: false })
-      .limit(3);
+      .limit(1)
+      .single();
 
     if (data) {
-      setAnnouncements(data);
+      setAnnouncement(data);
     }
   }
 
-  if (announcements.length === 0) return null;
+  if (!announcement) return null;
+
+  const text = `${announcement.icon || "📢"} ${
+    announcement.title
+  } • ${announcement.content} • `;
 
   return (
-    <div
-      style={{
-        marginTop: "22px",
-        width: "100%",
-        maxWidth: "1050px",
-        display: "grid",
-        gap: "14px",
-      }}
-    >
-      {announcements.map((item) => (
+    <>
+      <style jsx>{`
+        @keyframes cinezoneTicker {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+      `}</style>
+
+      <div
+        style={{
+          marginTop: "18px",
+          width: "100%",
+          maxWidth: "1050px",
+          overflow: "hidden",
+          borderRadius: "16px",
+          background:
+            "linear-gradient(90deg, rgba(0,25,55,.45), rgba(0,12,30,.55))",
+          border: "1px solid rgba(0,198,255,.18)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          boxShadow:
+            "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
+          padding: "14px 0",
+          position: "relative",
+        }}
+      >
         <div
-          key={item.id}
           style={{
-            padding: "18px",
-            borderRadius: "20px",
-            background:
-              "linear-gradient(135deg, rgba(0,25,55,.42), rgba(0,12,30,.52))",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid rgba(0,198,255,.18)",
-            boxShadow:
-              "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
+            position: "absolute",
+            left: "16px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 2,
+            color: "#69eaff",
+            fontWeight: 900,
+            fontSize: "18px",
+            textShadow: "0 0 10px rgba(0,198,255,.25)",
           }}
         >
-          {/* En-tête */}
+          📢
+        </div>
 
-          <div
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            paddingLeft: "55px",
+            color: "#dbeafe",
+            fontWeight: 600,
+            fontSize: "15px",
+            animation: "cinezoneTicker 35s linear infinite",
+          }}
+        >
+          {text.repeat(5)}
+        </div>
+
+        <div
+          style={{
+            position: "absolute",
+            right: "16px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            color: "#6ef7a7",
+            fontSize: "12px",
+            fontWeight: 800,
+          }}
+        >
+          <span
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "12px",
-              gap: "12px",
-              flexWrap: "wrap",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "24px",
-                }}
-              >
-                {item.icon || "📢"}
-              </span>
-
-              <span
-                style={{
-                  color: "#69eaff",
-                  fontWeight: 900,
-                  fontSize: "20px",
-                  textShadow: "0 0 10px rgba(0,198,255,.25)",
-                }}
-              >
-                {item.title}
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                color: "#6ef7a7",
-                fontSize: "12px",
-                fontWeight: 800,
-              }}
-            >
-              <span
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#59f38f",
-                  boxShadow: "0 0 10px #59f38f",
-                }}
-              />
-
-              Dernière annonce du staff
-            </div>
-          </div>
-
-          {/* Séparateur */}
-
-          <div
-            style={{
-              height: "1px",
-              background: "rgba(255,255,255,.08)",
-              marginBottom: "14px",
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
+              background: "#59f38f",
+              boxShadow: "0 0 10px #59f38f",
             }}
           />
-
-          {/* Contenu */}
-
-          <div
-            style={{
-              color: "#dbeafe",
-              lineHeight: "28px",
-              fontSize: "15px",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {item.content}
-          </div>
-
-          {/* Signature */}
-
-          <div
-            style={{
-              marginTop: "16px",
-              paddingTop: "12px",
-              borderTop: "1px solid rgba(255,255,255,.06)",
-              color: "#7dd3fc",
-              fontSize: "13px",
-              fontWeight: 700,
-              textAlign: "right",
-            }}
-          >
-            — Le Staff CineZone
-          </div>
+          STAFF
         </div>
-      ))}
-    </div>
+      </div>
+    </>
   );
 }
