@@ -131,12 +131,20 @@ export default function AdminAnnouncements() {
             Icône
           </label>
 
-          <input
-            value={icon}
-            onChange={(e) => setIcon(e.target.value)}
-            style={inputStyle}
-            placeholder="📢"
-          />
+          <select
+  value={icon}
+  onChange={(e) => setIcon(e.target.value)}
+  style={inputStyle}
+>
+  <option value="🍿">🍿 Popcorn</option>
+  <option value="🎬">🎬 Cinéma</option>
+  <option value="🎞️">🎞️ Bobine</option>
+  <option value="📽️">📽️ Projecteur</option>
+  <option value="⭐">⭐ Nouveauté</option>
+  <option value="🔥">🔥 À la une</option>
+  <option value="🚀">🚀 Sortie récente</option>
+  <option value="✨">✨ Exclusivité</option>
+</select>
         </div>
 
         <div style={{ marginBottom: "25px" }}>
