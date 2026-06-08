@@ -52,7 +52,7 @@ export default function HomeAnnouncements() {
         .ticker {
           display: inline-flex;
           width: max-content;
-          animation: tickerMove 45s linear infinite;
+          animation: tickerMove 60s linear infinite;
         }
 
         .ticker:hover {
