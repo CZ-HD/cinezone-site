@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import HomeMiniChat from "@/components/HomeMiniChat";
-import HomeAnnouncements from "@/components/HomeAnnouncements";
+import HomeMiniChat from "@/app/components/HomeMiniChat";
+import HomeAnnouncements from "@/app/components/HomeAnnouncements";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
