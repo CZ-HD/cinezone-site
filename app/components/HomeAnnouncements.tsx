@@ -34,9 +34,7 @@ export default function HomeAnnouncements() {
 
   if (!announcement) return null;
 
-  const text = `${announcement.icon || "📢"} ${
-    announcement.title
-  } • ${announcement.content} • `;
+  const text = `${announcement.content} • `;
 
   return (
     <>
@@ -57,7 +55,8 @@ export default function HomeAnnouncements() {
           width: "100%",
           maxWidth: "1050px",
           overflow: "hidden",
-          borderRadius: "16px",
+          position: "relative",
+          borderRadius: "18px",
           background:
             "linear-gradient(90deg, rgba(0,25,55,.45), rgba(0,12,30,.55))",
           border: "1px solid rgba(0,198,255,.18)",
@@ -65,57 +64,81 @@ export default function HomeAnnouncements() {
           WebkitBackdropFilter: "blur(14px)",
           boxShadow:
             "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
-          padding: "14px 0",
-          position: "relative",
         }}
       >
+        {/* Titre fixe */}
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "14px 18px",
+            borderBottom: "1px solid rgba(255,255,255,.08)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "22px",
+            }}
+          >
+            {announcement.icon || "📢"}
+          </span>
+
+          <span
+            style={{
+              color: "#dbeafe",
+              fontWeight: 800,
+              fontSize: "21px",
+            }}
+          >
+            {announcement.title}
+          </span>
+        </div>
+
+        {/* Texte défilant */}
+
+        <div
+          style={{
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            padding: "14px 0",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-block",
+              color: "#dbeafe",
+              fontWeight: 600,
+              fontSize: "15px",
+              paddingLeft: "18px",
+              animation: "cinezoneTicker 35s linear infinite",
+            }}
+          >
+            📢 {text.repeat(8)}
+          </div>
+        </div>
+
+        {/* Badge Staff */}
+
         <div
           style={{
             position: "absolute",
-            left: "16px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 2,
-            color: "#69eaff",
-            fontWeight: 900,
-            fontSize: "18px",
-            textShadow: "0 0 10px rgba(0,198,255,.25)",
+            right: "14px",
+            bottom: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "rgba(0,10,25,.92)",
+            padding: "6px 12px",
+            borderRadius: "999px",
+            border: "1px solid rgba(89,243,143,.25)",
+            color: "#6ef7a7",
+            fontSize: "12px",
+            fontWeight: 800,
+            zIndex: 10,
           }}
         >
-          📢
-        </div>
-
-        <div
-          style={{
-            whiteSpace: "nowrap",
-            paddingLeft: "55px",
-            color: "#dbeafe",
-            fontWeight: 600,
-            fontSize: "15px",
-            animation: "cinezoneTicker 35s linear infinite",
-          }}
-        >
-          {text.repeat(5)}
-        </div>
-
-        <div
-  style={{
-    position: "absolute",
-    right: "16px",
-    top: "12px",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    color: "#6ef7a7",
-    fontSize: "12px",
-    fontWeight: 800,
-    background: "rgba(0,10,25,.85)",
-    padding: "4px 10px",
-    borderRadius: "999px",
-    zIndex: 10,
-    border: "1px solid rgba(89,243,143,.25)",
-  }}
->
           <span
             style={{
               width: "8px",
@@ -125,7 +148,8 @@ export default function HomeAnnouncements() {
               boxShadow: "0 0 10px #59f38f",
             }}
           />
-          🟢 Staff CineZone
+
+          Staff CineZone
         </div>
       </div>
     </>
