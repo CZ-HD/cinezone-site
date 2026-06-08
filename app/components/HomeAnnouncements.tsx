@@ -11,8 +11,12 @@ type Announcement = {
 };
 
 export default function HomeAnnouncements() {
-  const [announcement, setAnnouncement] =
-    useState<Announcement | null>(null);
+  const [announcement, setAnnouncement] = useState<Announcement>({
+    id: "",
+    title: "Bienvenue sur CineZone HD",
+    content: "Chargement des dernières nouveautés...",
+    icon: "🎬",
+  });
 
   useEffect(() => {
     loadAnnouncement();
@@ -32,36 +36,18 @@ export default function HomeAnnouncements() {
     }
   }
 
-  // Affichage immédiat pendant le chargement
-  if (!announcement) {
-    return (
-      <div
-        style={{
-          marginTop: "18px",
-          width: "100%",
-          maxWidth: "1050px",
-          height: "95px",
-          borderRadius: "18px",
-          background:
-            "linear-gradient(90deg, rgba(0,25,55,.45), rgba(0,12,30,.55))",
-          border: "1px solid rgba(0,198,255,.18)",
-        }}
-      />
-    );
-  }
-
-  // Texte du bandeau
   const text = `🍿 ${announcement.content} ✦ `;
 
   return (
     <>
       <style jsx>{`
         @keyframes cinezoneTicker {
-          0% {
-            transform: translateX(100%);
+          from {
+            transform: translateX(0);
           }
-          100% {
-            transform: translateX(-100%);
+
+          to {
+            transform: translateX(-50%);
           }
         }
       `}</style>
@@ -75,7 +61,7 @@ export default function HomeAnnouncements() {
           position: "relative",
           borderRadius: "18px",
           background:
-            "linear-gradient(90deg, rgba(0,25,55,.45), rgba(0,12,30,.55))",
+            "linear-gradient(90deg, rgba(0, 25, 55, 0.45), rgba(0, 12, 30, 0.55))",
           border: "1px solid rgba(0,198,255,.18)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
@@ -83,7 +69,7 @@ export default function HomeAnnouncements() {
             "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
         }}
       >
-        {/* Titre */}
+        {/* En-tête */}
 
         <div
           style={{
@@ -114,7 +100,7 @@ export default function HomeAnnouncements() {
           </span>
         </div>
 
-        {/* Texte défilant */}
+        {/* Bandeau défilant */}
 
         <div
           style={{
@@ -130,13 +116,10 @@ export default function HomeAnnouncements() {
               fontWeight: 600,
               fontSize: "15px",
               paddingLeft: "18px",
-              animation: `cinezoneTicker ${Math.max(
-                35,
-                announcement.content.length * 0.40
-              )}s linear infinite`,
+              animation: "cinezoneTicker 45s linear infinite",
             }}
           >
-            {text.repeat(5)}
+            {text.repeat(12)}
           </div>
         </div>
 
