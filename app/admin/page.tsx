@@ -952,23 +952,46 @@ const filteredNotifications = notifications.filter((notif) => {
     Gestion des films, des membres, des sagas et des accès.
   </p>
 
-  <div style={{ marginTop: "18px" }}>
-    <a
-      href="/admin/mail"
-      style={{
-        display: "inline-block",
-        padding: "12px 18px",
-        borderRadius: "14px",
-        background: "linear-gradient(135deg, #00c6ff, #0072ff)",
-        color: "#fff",
-        fontWeight: 800,
-        textDecoration: "none",
-        boxShadow: "0 10px 30px rgba(0,198,255,0.35)",
-      }}
-    >
-      📧 Envoyer un mail
-    </a>
-  </div>
+  <div
+  style={{
+    marginTop: "18px",
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+  }}
+>
+  <a
+    href="/admin/mail"
+    style={{
+      display: "inline-block",
+      padding: "12px 18px",
+      borderRadius: "14px",
+      background: "linear-gradient(135deg, #00c6ff, #0072ff)",
+      color: "#fff",
+      fontWeight: 800,
+      textDecoration: "none",
+      boxShadow: "0 10px 30px rgba(0,198,255,0.35)",
+    }}
+  >
+    📧 Envoyer un mail
+  </a>
+
+  <a
+    href="/admin/announcements"
+    style={{
+      display: "inline-block",
+      padding: "12px 18px",
+      borderRadius: "14px",
+      background: "linear-gradient(135deg, #ffb300, #ff7b00)",
+      color: "#fff",
+      fontWeight: 800,
+      textDecoration: "none",
+      boxShadow: "0 10px 30px rgba(255,180,0,0.35)",
+    }}
+  >
+    📢 Annonce d'accueil
+  </a>
+</div>
 </div>
 <div
   style={{
