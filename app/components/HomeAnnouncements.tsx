@@ -66,20 +66,20 @@ export default function HomeAnnouncements() {
             "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
         }}
       >
-        {/* Titre fixe */}
+        {/* Bandeau titre */}
 
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            gap: "10px",
             padding: "14px 18px",
             borderBottom: "1px solid rgba(255,255,255,.08)",
           }}
         >
           <span
             style={{
-              fontSize: "22px",
+              fontSize: "20px",
             }}
           >
             {announcement.icon || "📢"}
@@ -88,8 +88,9 @@ export default function HomeAnnouncements() {
           <span
             style={{
               color: "#dbeafe",
-              fontWeight: 800,
-              fontSize: "21px",
+              fontWeight: 700,
+              fontSize: "16px",
+              letterSpacing: ".3px",
             }}
           >
             {announcement.title}
@@ -102,7 +103,7 @@ export default function HomeAnnouncements() {
           style={{
             overflow: "hidden",
             whiteSpace: "nowrap",
-            padding: "14px 0",
+            padding: "14px 0 22px 0",
           }}
         >
           <div
@@ -112,7 +113,7 @@ export default function HomeAnnouncements() {
               fontWeight: 600,
               fontSize: "15px",
               paddingLeft: "18px",
-              animation: "cinezoneTicker 35s linear infinite",
+              animation: "cinezoneTicker 18s linear infinite",
             }}
           >
             📢 {text.repeat(8)}
@@ -125,17 +126,17 @@ export default function HomeAnnouncements() {
           style={{
             position: "absolute",
             right: "14px",
-            bottom: "10px",
+            bottom: "6px",
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            background: "rgba(0,10,25,.92)",
-            padding: "6px 12px",
+            gap: "6px",
+            background: "rgba(0,10,25,.94)",
+            padding: "4px 10px",
             borderRadius: "999px",
             border: "1px solid rgba(89,243,143,.25)",
             color: "#6ef7a7",
-            fontSize: "12px",
-            fontWeight: 800,
+            fontSize: "11px",
+            fontWeight: 700,
             zIndex: 10,
           }}
         >
@@ -145,7 +146,7 @@ export default function HomeAnnouncements() {
               height: "8px",
               borderRadius: "50%",
               background: "#59f38f",
-              boxShadow: "0 0 10px #59f38f",
+              boxShadow: "0 0 8px #59f38f",
             }}
           />
 
