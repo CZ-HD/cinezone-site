@@ -992,14 +992,18 @@ const filteredNotifications = notifications.filter((notif) => {
     📢 Annonce d'accueil
   </a>
 </div>
-</div>
+
 <div
   style={{
-    display: "flex",
-    gap: "15px",
-    flexWrap: "wrap",
+    marginTop: "8px",
+    marginBottom: "18px",
+    color: "#8fa3bd",
+    fontSize: "13px",
+    lineHeight: "20px",
   }}
 >
+  Gérez les mails et les annonces visibles sur la page d'accueil.
+</div>
   <div style={counterStyle}>
     <strong>{memberCount}</strong>
     <span>Membres</span>
