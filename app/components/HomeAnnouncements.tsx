@@ -34,7 +34,7 @@ export default function HomeAnnouncements() {
 
   if (!announcement) return null;
 
-  // Texte du bandeau défilant
+  // Texte défilant
   const text = `🍿 ${announcement.content} ✦ `;
 
   return (
@@ -67,7 +67,7 @@ export default function HomeAnnouncements() {
             "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
         }}
       >
-        {/* Titre fixe */}
+        {/* Titre */}
 
         <div
           style={{
@@ -83,7 +83,7 @@ export default function HomeAnnouncements() {
               fontSize: "20px",
             }}
           >
-            📢
+            {announcement.icon || "📢"}
           </span>
 
           <span
@@ -108,20 +108,21 @@ export default function HomeAnnouncements() {
           }}
         >
           <div
-  style={{
-    display: "inline-block",
-    color: "#dbeafe",
-    fontWeight: 600,
-    fontSize: "15px",
-    paddingLeft: "18px",
-    animation: `cinezoneTicker ${Math.max(
-      18,
-      announcement.content.length * 0.18
-    )}s linear infinite`,
-  }}
->
-  {text.repeat(5)}
-</div>
+            style={{
+              display: "inline-block",
+              color: "#dbeafe",
+              fontWeight: 600,
+              fontSize: "15px",
+              paddingLeft: "18px",
+              animation: `cinezoneTicker ${Math.max(
+                18,
+                announcement.content.length * 0.18
+              )}s linear infinite`,
+            }}
+          >
+            {text.repeat(5)}
+          </div>
+        </div>
 
         {/* Badge Staff */}
 
