@@ -32,9 +32,25 @@ export default function HomeAnnouncements() {
     }
   }
 
-  if (!announcement) return null;
+  // Affichage immédiat pendant le chargement
+  if (!announcement) {
+    return (
+      <div
+        style={{
+          marginTop: "18px",
+          width: "100%",
+          maxWidth: "1050px",
+          height: "95px",
+          borderRadius: "18px",
+          background:
+            "linear-gradient(90deg, rgba(0,25,55,.45), rgba(0,12,30,.55))",
+          border: "1px solid rgba(0,198,255,.18)",
+        }}
+      />
+    );
+  }
 
-  // Texte défilant
+  // Texte du bandeau
   const text = `🍿 ${announcement.content} ✦ `;
 
   return (
@@ -115,8 +131,8 @@ export default function HomeAnnouncements() {
               fontSize: "15px",
               paddingLeft: "18px",
               animation: `cinezoneTicker ${Math.max(
-                18,
-                announcement.content.length * 0.18
+                35,
+                announcement.content.length * 0.40
               )}s linear infinite`,
             }}
           >
