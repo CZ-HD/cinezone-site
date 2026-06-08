@@ -99,19 +99,23 @@ export default function HomeAnnouncements() {
         </div>
 
         <div
-          style={{
-            position: "absolute",
-            right: "16px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            color: "#6ef7a7",
-            fontSize: "12px",
-            fontWeight: 800,
-          }}
-        >
+  style={{
+    position: "absolute",
+    right: "16px",
+    top: "12px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    color: "#6ef7a7",
+    fontSize: "12px",
+    fontWeight: 800,
+    background: "rgba(0,10,25,.85)",
+    padding: "4px 10px",
+    borderRadius: "999px",
+    zIndex: 10,
+    border: "1px solid rgba(89,243,143,.25)",
+  }}
+>
           <span
             style={{
               width: "8px",
