@@ -11,12 +11,8 @@ type Announcement = {
 };
 
 export default function HomeAnnouncements() {
-  const [announcement, setAnnouncement] = useState<Announcement>({
-    id: "",
-    title: "Bienvenue sur CineZone HD",
-    content: "Chargement des dernières nouveautés...",
-    icon: "🎬",
-  });
+  const [announcement, setAnnouncement] =
+    useState<Announcement | null>(null);
 
   useEffect(() => {
     loadAnnouncement();
@@ -36,16 +32,46 @@ export default function HomeAnnouncements() {
     }
   }
 
-  const text = `🍿 ${announcement.content} ✦ `;
+  if (!announcement) return null;
+
+  const message = `${announcement.icon || "🍿"} ${
+    announcement.content
+  }   ✦   `;
 
   return (
     <>
       <style jsx>{`
-        @keyframes cinezoneTicker {
-          from {
-            transform: translateX(0);
-          }
+        .ticker-wrap {
+          width: 100%;
+          overflow: hidden;
+          white-space: nowrap;
+          position: relative;
+          padding: 14px 0;
+        }
 
+        .ticker {
+          display: inline-flex;
+          width: max-content;
+          animation: tickerMove 45s linear infinite;
+        }
+
+        .ticker:hover {
+          animation-play-state: paused;
+        }
+
+        .ticker-item {
+          display: inline-flex;
+          align-items: center;
+          margin-right: 80px;
+          color: #dbeafe;
+          font-size: 15px;
+          font-weight: 600;
+        }
+
+        @keyframes tickerMove {
+          from {
+            transform: translateX(0%);
+          }
           to {
             transform: translateX(-50%);
           }
@@ -61,7 +87,7 @@ export default function HomeAnnouncements() {
           position: "relative",
           borderRadius: "18px",
           background:
-            "linear-gradient(90deg, rgba(0, 25, 55, 0.45), rgba(0, 12, 30, 0.55))",
+            "linear-gradient(90deg, rgba(0,25,55,.45), rgba(0,12,30,.55))",
           border: "1px solid rgba(0,198,255,.18)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
@@ -69,7 +95,7 @@ export default function HomeAnnouncements() {
             "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
         }}
       >
-        {/* En-tête */}
+        {/* Titre */}
 
         <div
           style={{
@@ -82,7 +108,7 @@ export default function HomeAnnouncements() {
         >
           <span
             style={{
-              fontSize: "20px",
+              fontSize: "18px",
             }}
           >
             {announcement.icon || "📢"}
@@ -93,33 +119,39 @@ export default function HomeAnnouncements() {
               color: "#dbeafe",
               fontWeight: 700,
               fontSize: "16px",
-              letterSpacing: ".3px",
             }}
           >
             {announcement.title}
           </span>
         </div>
 
-        {/* Bandeau défilant */}
+        {/* Texte défilant */}
 
         <div
           style={{
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-            padding: "14px 0 22px 0",
+            paddingRight: "135px",
           }}
         >
-          <div
-            style={{
-              display: "inline-block",
-              color: "#dbeafe",
-              fontWeight: 600,
-              fontSize: "15px",
-              paddingLeft: "18px",
-              animation: "cinezoneTicker 45s linear infinite",
-            }}
-          >
-            {text.repeat(12)}
+          <div className="ticker-wrap">
+            <div className="ticker">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span
+                  key={`a-${i}`}
+                  className="ticker-item"
+                >
+                  {message}
+                </span>
+              ))}
+
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span
+                  key={`b-${i}`}
+                  className="ticker-item"
+                >
+                  {message}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -129,18 +161,17 @@ export default function HomeAnnouncements() {
           style={{
             position: "absolute",
             right: "14px",
-            bottom: "6px",
+            bottom: "10px",
             display: "flex",
             alignItems: "center",
             gap: "6px",
             background: "rgba(0,10,25,.94)",
-            padding: "4px 10px",
+            padding: "5px 12px",
             borderRadius: "999px",
             border: "1px solid rgba(89,243,143,.25)",
             color: "#6ef7a7",
             fontSize: "11px",
             fontWeight: 700,
-            zIndex: 10,
           }}
         >
           <span
