@@ -34,7 +34,7 @@ export default function HomeAnnouncements() {
 
   if (!announcement) return null;
 
-  const text = `${announcement.content} • `;
+  const text = `${announcement.icon || "📢"} ${announcement.content} • `;
 
   return (
     <>
@@ -113,7 +113,7 @@ export default function HomeAnnouncements() {
               fontWeight: 600,
               fontSize: "15px",
               paddingLeft: "18px",
-              animation: "cinezoneTicker 18s linear infinite",
+              animation: "cinezoneTicker 11s linear infinite",
             }}
           >
             📢 {text.repeat(8)}
