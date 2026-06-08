@@ -949,10 +949,10 @@ const filteredNotifications = notifications.filter((notif) => {
   <h1 style={titleStyle}>Admin CineZone HD</h1>
 
   <p style={subText}>
-    Gestion des films, des membres, des sagas et des accès.
-  </p>
+  Gestion des films, des membres, des sagas et des accès.
+</p>
 
-  <div
+<div
   style={{
     marginTop: "18px",
     display: "flex",
@@ -995,15 +995,12 @@ const filteredNotifications = notifications.filter((notif) => {
 
 <div
   style={{
-    marginTop: "8px",
-    marginBottom: "18px",
-    color: "#8fa3bd",
-    fontSize: "13px",
-    lineHeight: "20px",
+    display: "flex",
+    gap: "15px",
+    flexWrap: "wrap",
+    marginTop: "22px",
   }}
 >
-  Gérez les mails et les annonces visibles sur la page d'accueil.
-</div>
   <div style={counterStyle}>
     <strong>{memberCount}</strong>
     <span>Membres</span>
@@ -1878,16 +1875,20 @@ const subText: React.CSSProperties = {
 };
 
 const counterStyle: React.CSSProperties = {
+  flex: 1,
   minWidth: "130px",
-  padding: "18px",
-  borderRadius: "20px",
+  maxWidth: "150px",
+  height: "100px",
+  borderRadius: "18px",
   background: "rgba(255,255,255,0.06)",
   border: "1px solid rgba(255,255,255,0.12)",
-  display: "grid",
-  placeItems: "center",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
   textAlign: "center",
 };
-
+      
 const cardStyle: React.CSSProperties = {
   maxWidth: "1100px",
   marginBottom: "28px",
