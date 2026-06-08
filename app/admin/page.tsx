@@ -1011,12 +1011,15 @@ const filteredNotifications = notifications.filter((notif) => {
     <span>Téléchargements</span>
   </div>
 
-  <div style={counterStyle}>
+    <div style={counterStyle}>
     <strong>{todayDownloads}</strong>
     <span>Aujourd'hui</span>
   </div>
 </div>
-      </section>
+
+</div>
+
+</section>
 <section style={cardStyle}>
   <button
     onClick={() => setShowTopDownloads(!showTopDownloads)}
