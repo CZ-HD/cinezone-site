@@ -38,102 +38,200 @@ export default function HomeAnnouncements() {
         marginTop: "18px",
         width: "100%",
         maxWidth: "980px",
-        borderRadius: "16px",
+        borderRadius: "22px",
         overflow: "hidden",
+        position: "relative",
         background:
-          "linear-gradient(135deg, rgba(0,22,50,.72), rgba(0,10,28,.90))",
-        border: "1px solid rgba(0,198,255,.15)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
+          "linear-gradient(135deg, rgba(5,15,40,.82), rgba(10,20,55,.95))",
+        border: "1px solid rgba(0,198,255,.25)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
         boxShadow:
-          "0 0 18px rgba(0,198,255,.08), inset 0 0 14px rgba(255,255,255,.02)",
+          "0 0 35px rgba(0,140,255,.18), 0 0 70px rgba(140,0,255,.08)",
       }}
     >
-      {/* HEADER */}
-
+      {/* Effet lumineux */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "14px 18px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "18px",
-            }}
-          >
-            {announcement.icon || "🎬"}
-          </span>
-
-          <span
-            style={{
-              color: "#74e8ff",
-              fontWeight: 800,
-              fontSize: "18px",
-              letterSpacing: ".3px",
-            }}
-          >
-            {announcement.title}
-          </span>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            padding: "4px 10px",
-            borderRadius: "999px",
-            background: "rgba(0,15,30,.75)",
-            border: "1px solid rgba(89,243,143,.18)",
-            color: "#6ef7a7",
-            fontSize: "11px",
-            fontWeight: 700,
-          }}
-        >
-          <span
-            style={{
-              width: "7px",
-              height: "7px",
-              borderRadius: "50%",
-              background: "#59f38f",
-              boxShadow: "0 0 8px #59f38f",
-            }}
-          />
-          Staff CineZone
-        </div>
-      </div>
-
-      {/* LIGNE */}
-
-      <div
-        style={{
-          height: "1px",
-          background: "rgba(255,255,255,.08)",
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at top left, rgba(0,198,255,.12), transparent 40%)",
+          pointerEvents: "none",
         }}
       />
 
-      {/* CONTENU */}
-
+      {/* HEADER */}
       <div
         style={{
-          padding: "16px 18px",
-          color: "#d8e5f2",
-          fontSize: "14px",
-          lineHeight: "26px",
+          padding: "20px 24px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "15px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
+          {/* Icône */}
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "30px",
+              background:
+                "linear-gradient(135deg, #00c6ff 0%, #6a5cff 100%)",
+              boxShadow:
+                "0 0 25px rgba(0,198,255,.45)",
+            }}
+          >
+            {announcement.icon || "📢"}
+          </div>
+
+          <div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "5px 12px",
+                borderRadius: "999px",
+                background: "rgba(140,0,255,.18)",
+                border: "1px solid rgba(140,0,255,.25)",
+                color: "#d8b4ff",
+                fontSize: "11px",
+                fontWeight: 700,
+                marginBottom: "8px",
+              }}
+            >
+              📢 ANNONCE OFFICIELLE
+            </div>
+
+            <h2
+              style={{
+                margin: 0,
+                color: "#ffffff",
+                fontSize: "28px",
+                fontWeight: 800,
+                lineHeight: 1.2,
+              }}
+            >
+              {announcement.title}
+            </h2>
+          </div>
+        </div>
+
+        {/* Staff */}
+        <div
+          style={{
+            textAlign: "right",
+          }}
+        >
+          <div
+            style={{
+              color: "#74e8ff",
+              fontWeight: 800,
+              fontSize: "15px",
+            }}
+          >
+            👑 Staff CineZone
+          </div>
+
+          <div
+            style={{
+              marginTop: "4px",
+              color: "#8fa8c7",
+              fontSize: "12px",
+            }}
+          >
+            {new Date().toLocaleDateString("fr-FR")}
+          </div>
+        </div>
+      </div>
+
+      {/* Séparateur */}
+      <div
+        style={{
+          height: "1px",
+          background:
+            "linear-gradient(to right, transparent, rgba(255,255,255,.15), transparent)",
+        }}
+      />
+
+      {/* Contenu */}
+      <div
+        style={{
+          padding: "24px",
+          color: "#e5eef8",
+          fontSize: "15px",
+          lineHeight: "30px",
           fontWeight: 500,
+          whiteSpace: "pre-wrap",
         }}
       >
         {announcement.content}
+      </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+          padding: "0 24px 20px",
+        }}
+      >
+        <div
+          style={{
+            background: "rgba(255,0,100,.15)",
+            border: "1px solid rgba(255,0,100,.20)",
+            padding: "6px 12px",
+            borderRadius: "999px",
+            color: "#ff84b7",
+            fontSize: "13px",
+            fontWeight: 600,
+          }}
+        >
+          ❤️ CineZone
+        </div>
+
+        <div
+          style={{
+            background: "rgba(0,198,255,.15)",
+            border: "1px solid rgba(0,198,255,.20)",
+            padding: "6px 12px",
+            borderRadius: "999px",
+            color: "#74e8ff",
+            fontSize: "13px",
+            fontWeight: 600,
+          }}
+        >
+          🎬 Nouveautés
+        </div>
+
+        <div
+          style={{
+            background: "rgba(89,243,143,.15)",
+            border: "1px solid rgba(89,243,143,.20)",
+            padding: "6px 12px",
+            borderRadius: "999px",
+            color: "#6ef7a7",
+            fontSize: "13px",
+            fontWeight: 600,
+          }}
+        >
+          🚀 Mise à jour
+        </div>
       </div>
     </div>
   );
