@@ -35,20 +35,24 @@ export default function HomeAnnouncements() {
   return (
     <div
       style={{
-        marginTop: "18px",
-        width: "100%",
-        maxWidth: "980px",
-        borderRadius: "22px",
-        overflow: "hidden",
-        position: "relative",
-        background:
-          "linear-gradient(135deg, rgba(5,15,40,.82), rgba(10,20,55,.95))",
-        border: "1px solid rgba(0,198,255,.25)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        boxShadow:
-          "0 0 35px rgba(0,140,255,.18), 0 0 70px rgba(140,0,255,.08)",
-      }}
+  marginTop: "18px",
+  width: "100%",
+  maxWidth: "980px",
+  borderRadius: "22px",
+  overflow: "hidden",
+  position: "relative",
+
+  background:
+  "linear-gradient(135deg, rgba(5,15,40,.25), rgba(10,20,55,.45))",
+
+  border: "1px solid rgba(0,198,255,.18)",
+
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+
+  boxShadow:
+    "0 0 30px rgba(0,140,255,.12), 0 0 60px rgba(140,0,255,.06)",
+}}
     >
       {/* Effet lumineux */}
       <div
@@ -56,7 +60,7 @@ export default function HomeAnnouncements() {
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(circle at top left, rgba(0,198,255,.12), transparent 40%)",
+  "radial-gradient(circle at top left, rgba(0,198,255,.08), transparent 45%)",
           pointerEvents: "none",
         }}
       />
