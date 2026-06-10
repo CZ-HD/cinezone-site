@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import HomeMiniChat from "@/app/components/HomeMiniChat";
 import HomeAnnouncements from "@/app/components/HomeAnnouncements";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
@@ -124,8 +123,6 @@ export default function Home() {
     gap: "18px",
   }}
 >
-  <HomeMiniChat />
-
   <HomeAnnouncements />
 </div>
 </div>
