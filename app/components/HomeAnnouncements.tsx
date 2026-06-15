@@ -184,28 +184,30 @@ export default function HomeAnnouncements() {
     whiteSpace: "pre-wrap",
   }}
 >
-  {announcement.content.split(/(\{[^}]+\})/g).map((part, index) => {
-    const isHighlighted =
-      part.startsWith("{") && part.endsWith("}");
+  {announcement.content.split(/(\[.*?\])/g).map((part, index) => {
+  if (part.startsWith("[") && part.endsWith("]")) {
+    return (
+      <span
+        key={index}
+        style={{
+          display: "inline-block",
+          margin: "2px 4px",
+          padding: "3px 10px",
+          borderRadius: "8px",
+          background: "rgba(0,198,255,.12)",
+          border: "1px solid rgba(0,198,255,.28)",
+          color: "#74e8ff",
+          fontWeight: 700,
+          boxShadow: "0 0 10px rgba(0,198,255,.25)",
+        }}
+      >
+        {part.slice(1, -1)}
+      </span>
+    );
+  }
 
-    if (isHighlighted) {
-      return (
-        <span
-          key={index}
-          style={{
-            color: "#ffb400",
-            fontWeight: 700,
-            textShadow:
-              "0 0 5px rgba(255,180,0,.8), 0 0 15px rgba(255,180,0,.6), 0 0 30px rgba(255,180,0,.4)",
-          }}
-        >
-          {part.slice(1, -1)}
-        </span>
-      );
-    }
-
-    return <span key={index}>{part}</span>;
-  })}
+  return <span key={index}>{part}</span>;
+})}
 </div>
 
       {/* Footer */}
