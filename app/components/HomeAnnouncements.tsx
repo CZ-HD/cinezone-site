@@ -209,26 +209,33 @@ export default function HomeAnnouncements() {
     }
 
     if (part.includes("🎬 Nouveautés sur CineZone HD !")) {
-      return (
-        <div
-          key={index}
-          style={{
-            color: "#74e8ff",
-            fontWeight: 800,
-            fontSize: "22px",
-            marginBottom: "12px",
-            textShadow:
-              "0 0 10px rgba(0,198,255,.55), 0 0 20px rgba(0,198,255,.25)",
-          }}
-        >
-          {part}
-        </div>
-      );
-    }
+  return (
+    <div
+      key={index}
+      style={{
+        color: "#ffbf3f",
+        fontWeight: 800,
+        fontSize: "22px",
+        marginBottom: "12px",
+        textShadow:
+          "0 0 10px rgba(255,191,63,.40), 0 0 20px rgba(255,191,63,.20)",
+      }}
+    >
+      {part}
+    </div>
+  );
+}
 
-    return <span key={index}>{part}</span>;
-  })}
-</div>
+return (
+  <span
+    key={index}
+    style={{
+      color: "#e5eef8",
+    }}
+  >
+    {part}
+  </span>
+);
 
       {/* Footer */}
       <div
