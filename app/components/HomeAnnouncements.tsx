@@ -186,53 +186,49 @@ export default function HomeAnnouncements() {
 >
   {announcement.content.split(/(\[.*?\])/g).map((part, index) => {
 
-  // Films en badge bleu néon
-  if (part.startsWith("[") && part.endsWith("]")) {
-    return (
-      <span
-        key={index}
-        style={{
-          display: "inline-block",
-          margin: "2px 4px",
-          padding: "2px 8px",
-          borderRadius: "6px",
-          background: "rgba(0,198,255,.10)",
-          border: "1px solid rgba(0,198,255,.25)",
-          color: "#74e8ff",
-          fontWeight: 700,
-          fontSize: "14px",
-          boxShadow: "0 0 8px rgba(0,198,255,.20)",
-          transition: "all .25s ease",
-        }}
-      >
-        {part.slice(1, -1)}
-      </span>
-    );
-  }
+    if (part.startsWith("[") && part.endsWith("]")) {
+      return (
+        <span
+          key={index}
+          style={{
+            display: "inline-block",
+            margin: "2px 4px",
+            padding: "2px 8px",
+            borderRadius: "6px",
+            background: "rgba(0,198,255,.10)",
+            border: "1px solid rgba(0,198,255,.25)",
+            color: "#74e8ff",
+            fontWeight: 700,
+            fontSize: "14px",
+            boxShadow: "0 0 8px rgba(0,198,255,.20)",
+          }}
+        >
+          {part.slice(1, -1)}
+        </span>
+      );
+    }
 
-  // Titre Nouveautés lumineux
-  if (part.includes("🎬 Nouveautés sur CineZone HD !")) {
-    return (
-      <div
-        key={index}
-        style={{
-          color: "#74e8ff",
-          fontWeight: 800,
-          fontSize: "22px",
-          marginBottom: "12px",
-          textShadow: `
-            0 0 10px rgba(0,198,255,.55),
-            0 0 20px rgba(0,198,255,.25)
-          `,
-        }}
-      >
-        {part}
-      </div>
-    );
-  }
+    if (part.includes("🎬 Nouveautés sur CineZone HD !")) {
+      return (
+        <div
+          key={index}
+          style={{
+            color: "#74e8ff",
+            fontWeight: 800,
+            fontSize: "22px",
+            marginBottom: "12px",
+            textShadow:
+              "0 0 10px rgba(0,198,255,.55), 0 0 20px rgba(0,198,255,.25)",
+          }}
+        >
+          {part}
+        </div>
+      );
+    }
 
-  return <span key={index}>{part}</span>;
-})}
+    return <span key={index}>{part}</span>;
+  })}
+</div>
 
       {/* Footer */}
       <div
