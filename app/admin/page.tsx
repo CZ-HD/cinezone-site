@@ -74,6 +74,7 @@ export default function AdminPage() {
 
   const [id, setId] = useState("");
   const [link, setLink] = useState("");
+  const [streamTmdbId, setStreamTmdbId] = useState("");
   const [streamLink, setStreamLink] = useState("");
   const [message, setMessage] = useState("");
 
