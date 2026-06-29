@@ -74,6 +74,7 @@ export default function AdminPage() {
 
   const [id, setId] = useState("");
   const [link, setLink] = useState("");
+  const [playerId, setPlayerId] = useState("");
   const [message, setMessage] = useState("");
 
   const [bulkInput, setBulkInput] = useState("");
@@ -662,6 +663,7 @@ const createSaga = async () => {
         body: JSON.stringify({
   id: Number(id),
   link: addAffiliate(link),
+  player_id: playerId || null,
   codec: codec,
   audio: audio,
   title: movie.title,
@@ -1093,11 +1095,19 @@ const filteredNotifications = notifications.filter((notif) => {
         </div>
 
         <input
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
-          placeholder="Lien de téléchargement"
-          style={inputStyle}
-        />
+  value={link}
+  onChange={(e) => setLink(e.target.value)}
+  placeholder="Lien de téléchargement"
+  style={inputStyle}
+/>
+
+<input
+  value={playerId}
+  onChange={(e) => setPlayerId(e.target.value)}
+  placeholder="🎬 Lien SeekStreaming (optionnel)"
+  style={inputStyle}
+/>
+
 <select
   value={codec}
   onChange={(e) => setCodec(e.target.value)}
