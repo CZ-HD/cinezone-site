@@ -87,6 +87,7 @@ export default function AdminPage() {
   const [manualVote, setManualVote] = useState("");
   const [manualImdb, setManualImdb] = useState("");
   const [manualLink, setManualLink] = useState("");
+  const [manualStreamLink, setManualStreamLink] = useState("");
  const [showTopDownloads, setShowTopDownloads] = useState(false);
   
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -686,9 +687,10 @@ const createSaga = async () => {
       }
 
       setMessage("✅ Film ajouté automatiquement avec TMDB !");
-      setId("");
-      setLink("");
-      loadAdminMovies();
+setId("");
+setLink("");
+setStreamLink("");
+loadAdminMovies();;
     } catch {
       setMessage("❌ Erreur lors de l'ajout du film.");
     }
