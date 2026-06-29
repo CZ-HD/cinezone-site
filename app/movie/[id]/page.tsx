@@ -31,7 +31,8 @@ export default async function MoviePage({ params }: any) {
   release_date,
   imdb_id,
   codec,
-  audio
+  audio,
+  player_id
 `)
   .eq("id", Number(params.id))
   .maybeSingle();
@@ -55,10 +56,11 @@ const res = await fetch(
   const tmdbMovie = await res.json();
 
   movie = {
-    ...tmdbMovie,
-    codec: localMovie?.codec || "H264",
-    audio: localMovie?.audio || "VF",
-  };
+  ...tmdbMovie,
+  codec: localMovie?.codec || "H264",
+  audio: localMovie?.audio || "VF",
+  player_id: localMovie?.player_id || null,
+};
 
   console.log("TMDB TITLE =", tmdbMovie.title);
   console.log("MOVIE CODEC =", movie.codec);
@@ -98,6 +100,7 @@ const res = await fetch(
     imdb_id: localMovie.imdb_id,
     codec: localMovie.codec,
     audio: localMovie.audio,
+    player_id: localMovie.player_id,
   };
 }
 
@@ -257,18 +260,39 @@ if (!movie) {
   </p>
 )}
             <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                marginTop: "16px",
-                marginBottom: "20px",
-                flexWrap: "wrap",
-              }}
-            >
-              <FavoriteButton item={movie} type="movie" />
-              <DownloadButton movieId={Number(params.id)} />
-            </div>
+  style={{
+    display: "flex",
+    gap: "10px",
+    marginTop: "16px",
+    marginBottom: "20px",
+    flexWrap: "wrap",
+  }}
+>
+  <FavoriteButton item={movie} type="movie" />
 
+  <DownloadButton movieId={Number(params.id)} />
+
+  {movie.player_id && (
+    <a
+      href={`https://cinezone.embedseek.com/#${movie.player_id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "14px 22px",
+        borderRadius: "12px",
+        background: "#16a34a",
+        color: "#fff",
+        fontWeight: "bold",
+        textDecoration: "none",
+      }}
+    >
+      🎬 Regarder
+    </a>
+  )}
+</div>
             {movie.release_date && (
               <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>
             )}
