@@ -17,12 +17,15 @@ export async function POST(req: Request) {
   release_year,
   imdb_id,
 } = await req.json();
-    if (!link) {
-      return NextResponse.json(
-        { error: "Lien manquant" },
-        { status: 400 }
-      );
-    }
+   if (!link && !stream_link) {
+  return NextResponse.json(
+    {
+      error:
+        "Au moins un lien est obligatoire (téléchargement ou streaming).",
+    },
+    { status: 400 }
+  );
+}
 
     if (!id && !title) {
       return NextResponse.json(
