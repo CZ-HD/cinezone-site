@@ -74,7 +74,7 @@ export default function AdminPage() {
 
   const [id, setId] = useState("");
   const [link, setLink] = useState("");
-  const [playerId, setPlayerId] = useState("");
+  const [streamLink, setStreamLink] = useState("");
   const [message, setMessage] = useState("");
 
   const [bulkInput, setBulkInput] = useState("");
@@ -663,7 +663,7 @@ const createSaga = async () => {
         body: JSON.stringify({
   id: Number(id),
   link: addAffiliate(link),
-  player_id: playerId || null,
+  stream_link: streamLink || null,
   codec: codec,
   audio: audio,
   title: movie.title,
@@ -1102,9 +1102,9 @@ const filteredNotifications = notifications.filter((notif) => {
 />
 
 <input
-  value={playerId}
-  onChange={(e) => setPlayerId(e.target.value)}
-  placeholder="🎬 Lien SeekStreaming (optionnel)"
+  value={streamLink}
+  onChange={(e) => setStreamLink(e.target.value)}
+  placeholder="🎬 Lien Streaming (optionnel)"
   style={inputStyle}
 />
 
