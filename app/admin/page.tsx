@@ -637,10 +637,10 @@ const createSaga = async () => {
   };
 
   const saveDownload = async () => {
-    if (!id || !link) {
-      setMessage("Remplis l'ID TMDB et le lien.");
-      return;
-    }
+    if (!id || (!link && !streamLink)) {
+  setMessage("Remplis l'ID TMDB et au moins un lien (téléchargement ou streaming).");
+  return;
+}
 
     setMessage("Ajout du film en cours...");
 
@@ -690,7 +690,7 @@ const createSaga = async () => {
 setId("");
 setLink("");
 setStreamLink("");
-loadAdminMovies();;
+loadAdminMovies();
     } catch {
       setMessage("❌ Erreur lors de l'ajout du film.");
     }
@@ -785,10 +785,17 @@ loadAdminMovies();;
   };
 
   const saveManualDownload = async () => {
-    if (!manualTitle || !manualYear || !manualPoster || !manualLink) {
-      setMessage("❌ Remplis au minimum : titre, année, affiche et lien.");
-      return;
-    }
+    if (
+  !manualTitle ||
+  !manualYear ||
+  !manualPoster ||
+  (!manualLink && !manualStreamLink)
+) {
+  setMessage(
+    "❌ Remplis le titre, l'année, l'affiche et au moins un lien (téléchargement ou streaming)."
+  );
+  return;
+}
 
     setMessage("Ajout manuel du film en cours...");
 
@@ -799,6 +806,7 @@ loadAdminMovies();;
       },
       body: JSON.stringify({
   link: addAffiliate(manualLink),
+  stream_link: manualStreamLink || null,
   codec: manualCodec,
   audio: manualAudio,
   title: manualTitle,
@@ -826,6 +834,7 @@ loadAdminMovies();;
     setManualVote("");
     setManualImdb("");
     setManualLink("");
+    setManualStreamLink("");
     loadAdminMovies();
   };
 
@@ -1099,7 +1108,7 @@ const filteredNotifications = notifications.filter((notif) => {
         <input
   value={link}
   onChange={(e) => setLink(e.target.value)}
-  placeholder="Lien de téléchargement"
+  placeholder="📥 Lien de téléchargement (optionnel)"
   style={inputStyle}
 />
 
@@ -1109,7 +1118,7 @@ const filteredNotifications = notifications.filter((notif) => {
   placeholder="🎬 Lien Streaming (optionnel)"
   style={inputStyle}
 />
-
+        
 <select
   value={codec}
   onChange={(e) => setCodec(e.target.value)}
@@ -1236,13 +1245,20 @@ const filteredNotifications = notifications.filter((notif) => {
     placeholder="ID IMDb optionnel ex: tt0111161"
     style={inputStyle}
   />
-
+          
+<input
+  value={manualLink}
+  onChange={(e) => setManualLink(e.target.value)}
+  placeholder="📥 Lien de téléchargement (optionnel)"
+  style={inputStyle}
+/>
+          
   <input
-    value={manualLink}
-    onChange={(e) => setManualLink(e.target.value)}
-    placeholder="Lien de téléchargement"
-    style={inputStyle}
-  />
+  value={manualStreamLink}
+  onChange={(e) => setManualStreamLink(e.target.value)}
+  placeholder="🎬 Lien Streaming (optionnel)"
+  style={inputStyle}
+/>
 
   <select
   value={manualCodec}
