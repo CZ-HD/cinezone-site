@@ -6,6 +6,7 @@ export async function POST(req: Request) {
     const {
   id,
   link,
+  player_id,
   codec,
   audio,
   title,
@@ -42,18 +43,19 @@ export async function POST(req: Request) {
 
     const { error } = await supabase.from("downloads").upsert(
   {
-    id: finalId,
-    link,
-    codec: codec || "H264",
-    audio: audio || "VF",
-    title: title || "Film sans titre",
-    poster_path: poster_path || null,
-    backdrop_path: backdrop_path || null,
-    vote_average: vote_average || null,
-    release_date: release_date || null,
-    release_year: finalReleaseYear,
-    imdb_id: cleanImdbId,
-  },
+  id: finalId,
+  link,
+  player_id: player_id || null,
+  codec: codec || "H264",
+  audio: audio || "VF",
+  title: title || "Film sans titre",
+  poster_path: poster_path || null,
+  backdrop_path: backdrop_path || null,
+  vote_average: vote_average || null,
+  release_date: release_date || null,
+  release_year: finalReleaseYear,
+  imdb_id: cleanImdbId,
+}
   { onConflict: "id" }
 );
 
