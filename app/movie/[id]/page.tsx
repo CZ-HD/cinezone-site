@@ -273,25 +273,25 @@ if (!movie) {
   <DownloadButton movieId={Number(params.id)} />
 
   {movie.stream_link && (
-    <a
-      href={`https://cinezone.embedseek.com/#${movie.stream_link}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "14px 22px",
-        borderRadius: "12px",
-        background: "#16a34a",
-        color: "#fff",
-        fontWeight: "bold",
-        textDecoration: "none",
-      }}
-    >
-      🎬 Regarder
-    </a>
-  )}
+  <a
+    href={movie.stream_link}
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "14px 22px",
+      borderRadius: "12px",
+      background: "#16a34a",
+      color: "#fff",
+      fontWeight: "bold",
+      textDecoration: "none",
+    }}
+  >
+    🎬 Regarder
+  </a>
+)}
 </div>
             {movie.release_date && (
               <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>
