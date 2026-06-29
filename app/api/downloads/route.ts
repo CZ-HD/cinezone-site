@@ -41,23 +41,25 @@ export async function POST(req: Request) {
       ? String(imdb_id).match(/tt\d+/)?.[0] || imdb_id
       : null;
 
-    const { error } = await supabase.from("downloads").upsert(
-  {
-  id: finalId,
-  link,
-  player_id: player_id || null,
-  codec: codec || "H264",
-  audio: audio || "VF",
-  title: title || "Film sans titre",
-  poster_path: poster_path || null,
-  backdrop_path: backdrop_path || null,
-  vote_average: vote_average || null,
-  release_date: release_date || null,
-  release_year: finalReleaseYear,
-  imdb_id: cleanImdbId,
-}
-  { onConflict: "id" }
-);
+    const { error } = await supabase
+  .from("downloads")
+  .upsert(
+    {
+      id: finalId,
+      link,
+      player_id: player_id || null,
+      codec: codec || "H264",
+      audio: audio || "VF",
+      title: title || "Film sans titre",
+      poster_path: poster_path || null,
+      backdrop_path: backdrop_path || null,
+      vote_average: vote_average || null,
+      release_date: release_date || null,
+      release_year: finalReleaseYear,
+      imdb_id: cleanImdbId,
+    },
+    { onConflict: "id" }
+  );
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
