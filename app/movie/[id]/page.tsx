@@ -32,7 +32,7 @@ export default async function MoviePage({ params }: any) {
   imdb_id,
   codec,
   audio,
-  player_id
+  stream_link
 `)
   .eq("id", Number(params.id))
   .maybeSingle();
@@ -59,7 +59,7 @@ const res = await fetch(
   ...tmdbMovie,
   codec: localMovie?.codec || "H264",
   audio: localMovie?.audio || "VF",
-  player_id: localMovie?.player_id || null,
+  stream_link: localMovie?.stream_link || null,
 };
 
   console.log("TMDB TITLE =", tmdbMovie.title);
@@ -100,7 +100,7 @@ const res = await fetch(
     imdb_id: localMovie.imdb_id,
     codec: localMovie.codec,
     audio: localMovie.audio,
-    player_id: localMovie.player_id,
+    stream_link: localMovie.stream_link,
   };
 }
 
@@ -272,9 +272,9 @@ if (!movie) {
 
   <DownloadButton movieId={Number(params.id)} />
 
-  {movie.player_id && (
+  {movie.stream_link && (
     <a
-      href={`https://cinezone.embedseek.com/#${movie.player_id}`}
+      href={`https://cinezone.embedseek.com/#${movie.stream_link}`}
       target="_blank"
       rel="noopener noreferrer"
       style={{
