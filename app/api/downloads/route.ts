@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     const {
   id,
   link,
-  player_id,
+  stream_link,
   codec,
   audio,
   title,
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     {
       id: finalId,
       link,
-      player_id: player_id || null,
+      stream_link: stream_link || null,
       codec: codec || "H264",
       audio: audio || "VF",
       title: title || "Film sans titre",
