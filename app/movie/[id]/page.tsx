@@ -11,8 +11,14 @@ const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
 
 function imageUrl(path?: string | null, size = "w500") {
-  if (!path) return "https://via.placeholder.com/220x330?text=No+Image";
-  if (path.startsWith("http")) return path;
+  if (!path) {
+    return "https://via.placeholder.com/220x330?text=No+Image";
+  }
+
+  if (path.startsWith("http")) {
+    return path;
+  }
+
   return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
@@ -20,107 +26,114 @@ export default async function MoviePage({ params }: any) {
   let movie: any = null;
   let trailer: any = null;
 
-  const localResult = await supabase
-  .from("downloads")
-  .select(`
-  id,
-  title,
-  poster_path,
-  backdrop_path,
-  vote_average,
-  release_date,
-  imdb_id,
-  codec,
-  audio,
-  stream_link
-`)
-  .eq("id", Number(params.id))
-  .maybeSingle();
+  const { data: localMovie, error } = await supabase
+    .from("downloads")
+    .select(`
+      id,
+      title,
+      poster_path,
+      backdrop_path,
+      vote_average,
+      release_date,
+      imdb_id,
+      codec,
+      audio,
+      stream_link
+    `)
+    .eq("id", Number(params.id))
+    .maybeSingle();
 
-const localMovie = localResult.data;
+  console.log("========== DEBUG FILM ==========");
+  console.log("PARAM ID =", params.id);
+  console.log("LOCAL MOVIE =", localMovie);
+  console.log("SUPABASE ERROR =", error);
+  console.log("================================");
 
-console.log("========== DEBUG FILM ==========");
-console.log("PARAM ID =", params.id);
-console.log("PARAM TYPE =", typeof params.id);
-console.log("LOCAL MOVIE =", localMovie);
-console.log("LOCAL CODEC =", localMovie?.codec);
-console.log("SUPABASE ERROR =", localResult.error);
-console.log("================================");
-
-const res = await fetch(
-  `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`,
-  { cache: "no-store" }
-);
-
- if (res.ok) {
-  const tmdbMovie = await res.json();
-
-  movie = {
-  ...tmdbMovie,
-  codec: localMovie?.codec || "H264",
-  audio: localMovie?.audio || "VF",
-  stream_link: localMovie?.stream_link || null,
-};
-
-  console.log("TMDB TITLE =", tmdbMovie.title);
-  console.log("MOVIE CODEC =", movie.codec);
-  console.log("MOVIE AUDIO =", movie.audio);
-
-  const videoRes = await fetch(
-    `${BASE_URL}/movie/${params.id}/videos?api_key=${API_KEY}&language=fr-FR`,
-    { cache: "no-store" }
+  const res = await fetch(
+    `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`
+    {
+      cache: "no-store",
+    }
   );
 
-      if (videoRes.ok) {
-    const videosData = await videoRes.json();
-    const videos = videosData?.results || [];
+  if (res.ok) {
+    const tmdbMovie = await res.json();
 
-    trailer =
-      videos.find(
-        (v: any) =>
-          v.type === "Trailer" &&
-          v.site === "YouTube"
-      ) ||
-      videos.find(
-        (v: any) =>
-          v.site === "YouTube"
-      );
+    movie = {
+      ...tmdbMovie,
+      codec: localMovie?.codec || "H264",
+      audio: localMovie?.audio || "VF",
+      stream_link: localMovie?.stream_link || null,
+    };
+
+    const videoRes = await fetch(
+      `${BASE_URL}/movie/${params.id}/videos?api_key=${API_KEY}&language=fr-FR`,
+      {
+        cache: "no-store",
+      }
+    );
+
+    if (videoRes.ok) {
+      const videosData = await videoRes.json();
+      const videos = videosData?.results || [];
+
+      trailer =
+        videos.find(
+          (v: any) =>
+            v.type === "Trailer" &&
+            v.site === "YouTube"
+        ) ||
+        videos.find(
+          (v: any) =>
+            v.site === "YouTube"
+        );
+    }
+  } else if (localMovie) {
+    movie = {
+      id: localMovie.id,
+      title: localMovie.title || "Film sans titre",
+      poster_path: localMovie.poster_path,
+      backdrop_path:
+        localMovie.backdrop_path ||
+        localMovie.poster_path,
+      vote_average: localMovie.vote_average,
+      release_date: localMovie.release_date,
+      overview: "⚠️ Film ajouté manuellement.",
+      imdb_id: localMovie.imdb_id,
+      codec: localMovie.codec,
+      audio: localMovie.audio,
+      stream_link: localMovie.stream_link,
+    };
   }
-} else if (localMovie) {
-  movie = {
-    id: localMovie.id,
-    title: localMovie.title || "Film sans titre",
-    poster_path: localMovie.poster_path,
-    backdrop_path:
-      localMovie.backdrop_path ||
-      localMovie.poster_path,
-    vote_average: localMovie.vote_average,
-    release_date: localMovie.release_date,
-    overview: "⚠️ Film ajouté manuellement.",
-    imdb_id: localMovie.imdb_id,
-    codec: localMovie.codec,
-    audio: localMovie.audio,
-    stream_link: localMovie.stream_link,
-  };
-}
 
-if (!movie) {
-  return (
-    <main
-      style={{
-        background: "#000",
-        color: "#fff",
-        minHeight: "100vh",
-        padding: "40px",
-      }}
-    >
-      <Link href="/films" style={{ color: "#00c6ff" }}>
-        ← Retour aux films
-      </Link>
-      <h1>Film introuvable</h1>
-    </main>
-  );
-}
+  if (!movie) {
+    return (
+      <main
+        style={{
+          background: "#000",
+          color: "#fff",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        <h1>Film introuvable</h1>
+
+        <Link
+          href="/films"
+          style={{
+            color: "#00c6ff",
+            marginTop: "20px",
+            textDecoration: "none",
+          }}
+        >
+          ← Retour aux films
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main
