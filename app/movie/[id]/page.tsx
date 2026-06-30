@@ -55,7 +55,6 @@ export default async function MoviePage({ params }: any) {
     cache: "no-store",
   }
 );
-
   if (res.ok) {
     const tmdbMovie = await res.json();
 
@@ -286,83 +285,74 @@ export default async function MoviePage({ params }: any) {
   <DownloadButton movieId={Number(params.id)} />
 
   {movie.stream_link && (
-  <a
-    href={`/player/${params.id}`}
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "14px",
-      width: "230px",
-      height: "62px",
-      padding: "0 18px",
-      borderRadius: "16px",
-      textDecoration: "none",
-      background:
-        "linear-gradient(180deg,#1f3a63 0%,#162847 100%)",
-      border: "1px solid rgba(0,220,140,.35)",
-      boxShadow:
-        "0 0 18px rgba(0,220,140,.20), inset 0 1px 0 rgba(255,255,255,.08)",
-      color: "#fff",
-      transition: "all .25s ease",
-      cursor: "pointer",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = "translateY(-2px)";
-      e.currentTarget.style.boxShadow =
-        "0 0 28px rgba(0,220,140,.40), inset 0 1px 0 rgba(255,255,255,.10)";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.boxShadow =
-        "0 0 18px rgba(0,220,140,.20), inset 0 1px 0 rgba(255,255,255,.08)";
-    }}
-  >
-    <div
+    <a
+      href={`/player/${params.id}`}
       style={{
-        width: "42px",
-        height: "42px",
-        borderRadius: "50%",
-        background: "rgba(0,220,140,.18)",
-        border: "1px solid rgba(0,220,140,.30)",
-        display: "flex",
-        justifyContent: "center",
+        display: "inline-flex",
         alignItems: "center",
-        fontSize: "22px",
-        flexShrink: 0,
+        gap: "14px",
+        width: "230px",
+        height: "62px",
+        padding: "0 18px",
+        borderRadius: "16px",
+        textDecoration: "none",
+        background:
+          "linear-gradient(180deg,#1f3a63 0%,#162847 100%)",
+        border: "1px solid rgba(0,220,140,.35)",
+        boxShadow:
+          "0 0 18px rgba(0,220,140,.20), inset 0 1px 0 rgba(255,255,255,.08)",
+        color: "#fff",
+        transition: "all .25s ease",
+        cursor: "pointer",
       }}
     >
-      ▶️
-    </div>
-
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        lineHeight: 1.1,
-      }}
-    >
-      <span
+      <div
         style={{
+          width: "42px",
+          height: "42px",
+          borderRadius: "50%",
+          background: "rgba(0,220,140,.18)",
+          border: "1px solid rgba(0,220,140,.30)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           fontSize: "22px",
-          fontWeight: 800,
-          letterSpacing: ".4px",
+          flexShrink: 0,
         }}
       >
-        REGARDER
-      </span>
+        ▶️
+      </div>
 
-      <span
+      <div
         style={{
-          fontSize: "13px",
-          color: "#8fffd1",
-          fontWeight: 500,
+          display: "flex",
+          flexDirection: "column",
+          lineHeight: 1.1,
         }}
       >
-        Streaming HD
-      </span>
-    </div>
-  </a>
-)}
+        <span
+          style={{
+            fontSize: "22px",
+            fontWeight: 800,
+            letterSpacing: ".4px",
+          }}
+        >
+          REGARDER
+        </span>
+
+        <span
+          style={{
+            fontSize: "13px",
+            color: "#8fffd1",
+            fontWeight: 500,
+          }}
+        >
+          Streaming HD
+        </span>
+      </div>
+    </a>
+  )}
+</div>
 
 {movie.release_date && (
   <p style={{ opacity: 0.7 }}>
