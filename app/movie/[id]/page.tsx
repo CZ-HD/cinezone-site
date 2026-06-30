@@ -275,24 +275,70 @@ if (!movie) {
   {movie.stream_link && (
   <a
     href={`/player/${movie.id}`}
-    target="_blank"
-    rel="noopener noreferrer"
     style={{
-      display: "inline-flex",
+      display: "flex",
       alignItems: "center",
-      justifyContent: "center",
-      padding: "14px 22px",
-      borderRadius: "12px",
-      background: "#16a34a",
-      color: "#fff",
-      fontWeight: "bold",
+      gap: "16px",
+      width: "250px",
+      height: "62px",
+      padding: "0 18px",
+      borderRadius: "18px",
       textDecoration: "none",
+      background:
+        "linear-gradient(135deg,#19d96d 0%,#16a34a 55%,#11883c 100%)",
+      border: "1px solid rgba(70,255,170,.30)",
+      boxShadow:
+        "0 0 25px rgba(22,163,74,.40), inset 0 1px 0 rgba(255,255,255,.10)",
+      transition: "all .25s ease",
+      color: "#fff",
+      cursor: "pointer",
     }}
   >
-    🎬 Regarder
+    <div
+      style={{
+        width: "42px",
+        height: "42px",
+        borderRadius: "50%",
+        background: "rgba(255,255,255,.18)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "20px",
+        flexShrink: 0,
+      }}
+    >
+      🎬
+    </div>
+
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        lineHeight: 1.05,
+      }}
+    >
+      <span
+        style={{
+          fontSize: "28px",
+          fontWeight: 900,
+          letterSpacing: ".5px",
+        }}
+      >
+        REGARDER
+      </span>
+
+      <span
+        style={{
+          fontSize: "14px",
+          opacity: 0.9,
+          fontWeight: 500,
+        }}
+      >
+        Streaming HD
+      </span>
+    </div>
   </a>
 )}
-</div>
             {movie.release_date && (
               <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>
             )}
