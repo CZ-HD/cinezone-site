@@ -22,10 +22,14 @@ export async function GET(
     console.log("FILM CLIQUE :", movieId);
 
     const { data, error } = await supabase
-      .from("downloads")
-      .select("link")
-      .eq("id", movieId)
-      .maybeSingle();
+  .from("downloads")
+  .select("*")
+  .eq("id", movieId)
+  .maybeSingle();
+
+console.log("ID recherché :", movieId);
+console.log("DATA :", data);
+console.log("ERROR :", error);
 
     if (error || !data?.link) {
       console.error("Lien introuvable :", error);
