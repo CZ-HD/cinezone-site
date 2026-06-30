@@ -72,7 +72,7 @@ export default function StreamWarning({ movieId }: Props) {
       </button>
 
       {/* Fenêtre */}
-      {open && (
+      {false && (
         <div
           style={{
             position: "fixed",
