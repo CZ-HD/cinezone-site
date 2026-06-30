@@ -273,75 +273,79 @@ if (!movie) {
   <DownloadButton movieId={Number(params.id)} />
 
   {movie.stream_link && (
-  <a
-    href={`/player/${movie.id}`}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "16px",
-      width: "250px",
-      height: "62px",
-      padding: "0 18px",
-      borderRadius: "18px",
-      textDecoration: "none",
-      background:
-        "linear-gradient(135deg,#19d96d 0%,#16a34a 55%,#11883c 100%)",
-      border: "1px solid rgba(70,255,170,.30)",
-      boxShadow:
-        "0 0 25px rgba(22,163,74,.40), inset 0 1px 0 rgba(255,255,255,.10)",
-      transition: "all .25s ease",
-      color: "#fff",
-      cursor: "pointer",
-    }}
-  >
-    <div
+    <a
+      href={`/player/${movie.id}`}
       style={{
-        width: "42px",
-        height: "42px",
-        borderRadius: "50%",
-        background: "rgba(255,255,255,.18)",
         display: "flex",
-        justifyContent: "center",
         alignItems: "center",
-        fontSize: "20px",
-        flexShrink: 0,
+        gap: "16px",
+        width: "250px",
+        height: "62px",
+        padding: "0 18px",
+        borderRadius: "18px",
+        textDecoration: "none",
+        background:
+          "linear-gradient(135deg,#19d96d 0%,#16a34a 55%,#11883c 100%)",
+        border: "1px solid rgba(70,255,170,.30)",
+        boxShadow:
+          "0 0 25px rgba(22,163,74,.40), inset 0 1px 0 rgba(255,255,255,.10)",
+        transition: "all .25s ease",
+        color: "#fff",
+        cursor: "pointer",
       }}
     >
-      🎬
-    </div>
-
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        lineHeight: 1.05,
-      }}
-    >
-      <span
+      <div
         style={{
-          fontSize: "28px",
-          fontWeight: 900,
-          letterSpacing: ".5px",
+          width: "42px",
+          height: "42px",
+          borderRadius: "50%",
+          background: "rgba(255,255,255,.18)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: "20px",
+          flexShrink: 0,
         }}
       >
-        REGARDER
-      </span>
+        🎬
+      </div>
 
-      <span
+      <div
         style={{
-          fontSize: "14px",
-          opacity: 0.9,
-          fontWeight: 500,
+          display: "flex",
+          flexDirection: "column",
+          lineHeight: 1.05,
         }}
       >
-        Streaming HD
-      </span>
-    </div>
-  </a>
+        <span
+          style={{
+            fontSize: "28px",
+            fontWeight: 900,
+            letterSpacing: ".5px",
+          }}
+        >
+          REGARDER
+        </span>
+
+        <span
+          style={{
+            fontSize: "14px",
+            opacity: 0.9,
+            fontWeight: 500,
+          }}
+        >
+          Streaming HD
+        </span>
+      </div>
+    </a>
+  )}
+</div>
+
+{movie.release_date && (
+  <p style={{ opacity: 0.7 }}>
+    Date : {movie.release_date}
+  </p>
 )}
-            {movie.release_date && (
-              <p style={{ opacity: 0.7 }}>Date : {movie.release_date}</p>
-            )}
 
             {/* IMDb caché */}
 
