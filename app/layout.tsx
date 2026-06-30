@@ -127,9 +127,9 @@ export default function RootLayout({
   <div
     style={{
       ...marqueeText,
-      color: "#ff3030",
-      fontWeight: "bold",
-      textShadow: "0 0 8px rgba(255,0,0,.9)",
+      color: "#ff0000",
+fontWeight: 900,
+textShadow: "0 0 12px #ff0000",
       letterSpacing: "0.3px",
     }}
   >
