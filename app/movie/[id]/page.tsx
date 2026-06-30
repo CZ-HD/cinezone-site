@@ -3,6 +3,7 @@ import FavoriteButton from "../../components/FavoriteButton";
 import DownloadButton from "../../components/DownloadButton";
 import Comments from "../../components/Comments";
 import { supabase } from "@/lib/supabase";
+import StreamWarning from "../../components/StreamWarning";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -285,75 +286,8 @@ export default async function MoviePage({ params }: any) {
   <DownloadButton movieId={Number(params.id)} />
 
   {movie.stream_link && (
-    <a
-      href={`/player/${params.id}`}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "14px",
-        width: "230px",
-        height: "62px",
-        padding: "0 18px",
-        borderRadius: "16px",
-        textDecoration: "none",
-        background:
-          "linear-gradient(180deg,#1f3a63 0%,#162847 100%)",
-        border: "1px solid rgba(0,220,140,.35)",
-        boxShadow:
-          "0 0 18px rgba(0,220,140,.20), inset 0 1px 0 rgba(255,255,255,.08)",
-        color: "#fff",
-        transition: "all .25s ease",
-        cursor: "pointer",
-      }}
-    >
-      <div
-        style={{
-          width: "42px",
-          height: "42px",
-          borderRadius: "50%",
-          background: "rgba(0,220,140,.18)",
-          border: "1px solid rgba(0,220,140,.30)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "22px",
-          flexShrink: 0,
-        }}
-      >
-        ▶️
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          lineHeight: 1.1,
-        }}
-      >
-        <span
-          style={{
-            fontSize: "22px",
-            fontWeight: 800,
-            letterSpacing: ".4px",
-          }}
-        >
-          REGARDER
-        </span>
-
-        <span
-          style={{
-            fontSize: "13px",
-            color: "#8fffd1",
-            fontWeight: 500,
-          }}
-        >
-          Streaming HD
-        </span>
-      </div>
-    </a>
-  )}
-</div>
-
+  <StreamWarning movieId={Number(params.id)} />
+)}
 {movie.release_date && (
   <p style={{ opacity: 0.7 }}>
     Date : {movie.release_date}
