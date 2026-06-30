@@ -123,11 +123,22 @@ export default function RootLayout({
           </div>
 
           {/* Bandeau */}
-          <div style={marqueeContainer}>
-            <div style={marqueeText}>
-              👋 Bonjour et bienvenue sur CineZone HD ! Merci de prendre quelques secondes pour choisir un pseudo et un avatar dans votre profil afin que le staff puisse vous notifier et répondre plus facilement à vos demandes. Merci 🎭🔔
-            </div>
-          </div>
+<div style={marqueeContainer}>
+  <div
+    style={{
+      ...marqueeText,
+      color: "#ff3030",
+      fontWeight: "bold",
+      textShadow: "0 0 8px rgba(255,0,0,.9)",
+      letterSpacing: "0.3px",
+    }}
+  >
+    🚀 INFO CINEZONE HD : Le streaming HD est actuellement en cours de
+    déploiement sur le site. Les films seront ajoutés progressivement.
+    Merci de votre patience, de votre compréhension et de votre fidélité.
+    ❤️ L'équipe d'administration de CineZone HD vous remercie ! 🎬
+  </div>
+</div>
         </header>
 
         <AuthGuard>
