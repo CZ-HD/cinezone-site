@@ -50,11 +50,11 @@ export default async function MoviePage({ params }: any) {
   console.log("================================");
 
   const res = await fetch(
-    `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`
-    {
-      cache: "no-store",
-    }
-  );
+  `${BASE_URL}/movie/${params.id}?api_key=${API_KEY}&language=fr-FR`,
+  {
+    cache: "no-store",
+  }
+);
 
   if (res.ok) {
     const tmdbMovie = await res.json();
@@ -287,7 +287,7 @@ export default async function MoviePage({ params }: any) {
 
   {movie.stream_link && (
     <a
-      href={`/player/${movie.id}`}
+      href={`/player/${params.id}`}
       style={{
         display: "flex",
         alignItems: "center",
