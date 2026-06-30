@@ -13,6 +13,7 @@ export default function StreamWarning({ movieId }: Props) {
     <>
       {/* Bouton Regarder */}
       <button
+        type="button"
         onClick={() => setOpen(true)}
         style={{
           display: "inline-flex",
@@ -143,8 +144,8 @@ export default function StreamWarning({ movieId }: Props) {
               Afin de garder <strong>CineZone HD gratuit</strong>, une publicité
               peut s'ouvrir avant le lecteur vidéo.
               <br />
-              Il suffit de la fermer puis de revenir sur CineZone HD pour
-              continuer votre visionnage.
+              Il suffit simplement de la fermer puis de revenir sur CineZone HD
+              pour continuer votre visionnage.
             </p>
 
             <div
@@ -212,6 +213,7 @@ export default function StreamWarning({ movieId }: Props) {
               }}
             >
               <button
+                type="button"
                 onClick={() => setOpen(false)}
                 style={{
                   padding: "14px 28px",
@@ -227,14 +229,14 @@ export default function StreamWarning({ movieId }: Props) {
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   window.location.href = `/player/${movieId}`;
                 }}
                 style={{
                   padding: "14px 30px",
                   borderRadius: "12px",
-                  background:
-                    "linear-gradient(135deg,#22c55e,#16a34a)",
+                  background: "linear-gradient(135deg,#22c55e,#16a34a)",
                   color: "#fff",
                   border: "none",
                   cursor: "pointer",
