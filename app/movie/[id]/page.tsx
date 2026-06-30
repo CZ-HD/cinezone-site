@@ -274,7 +274,7 @@ if (!movie) {
 
   {movie.stream_link && (
   <a
-    href={movie.stream_link}
+    href={`/player/${movie.id}`}
     target="_blank"
     rel="noopener noreferrer"
     style={{
