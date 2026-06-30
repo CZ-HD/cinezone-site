@@ -286,19 +286,19 @@ export default async function MoviePage({ params }: any) {
   <DownloadButton movieId={Number(params.id)} />
 
   {movie.stream_link && (
-  <StreamWarning movieId={Number(params.id)} />
-)}
+    <StreamWarning movieId={Number(params.id)} />
+  )}
+</div>
+
 {movie.release_date && (
   <p style={{ opacity: 0.7 }}>
     Date : {movie.release_date}
   </p>
 )}
 
-            {/* IMDb caché */}
-
-            <p style={{ color: "#ddd", lineHeight: 1.6 }}>
-              {movie.overview || "Pas de résumé disponible."}
-            </p>
+<p style={{ color: "#ddd", lineHeight: 1.6 }}>
+  {movie.overview || "Pas de résumé disponible."}
+</p>
           </div>
         </div>
 
