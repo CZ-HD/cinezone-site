@@ -44,8 +44,8 @@ export default async function PlayerPage({ params }: any) {
         <Link
           href={`/movie/${params.id}`}
           style={{
+            marginTop: 20,
             color: "#00c6ff",
-            marginTop: "20px",
             textDecoration: "none",
             fontWeight: "bold",
           }}
@@ -59,11 +59,11 @@ export default async function PlayerPage({ params }: any) {
   return (
     <main
       style={{
-        background: "#000",
-        color: "#fff",
         minHeight: "100vh",
+        color: "#fff",
+        backgroundColor: "#000",
         backgroundImage: movie.backdrop_path
-          ? `linear-gradient(rgba(0,0,0,.80),rgba(0,0,0,.95)), url(${imageUrl(
+          ? `linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.95)),url(${imageUrl(
               movie.backdrop_path
             )})`
           : undefined,
@@ -79,54 +79,61 @@ export default async function PlayerPage({ params }: any) {
           position: "sticky",
           top: 0,
           zIndex: 100,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "18px 35px",
-          background: "rgba(8,12,20,.92)",
           backdropFilter: "blur(12px)",
+          background: "rgba(0,0,0,.82)",
           borderBottom: "1px solid rgba(255,255,255,.08)",
         }}
       >
-        <Link
-          href="/"
-          style={{
-            color: "#fff",
-            fontSize: "30px",
-            fontWeight: 900,
-            textDecoration: "none",
-          }}
-        >
-          🎬 CineZone HD
-        </Link>
-
         <div
           style={{
+            maxWidth: "1700px",
+            margin: "0 auto",
+            padding: "18px 30px",
             display: "flex",
-            gap: "25px",
+            justifyContent: "space-between",
             alignItems: "center",
           }}
         >
           <Link
-            href="/films"
+            href="/"
             style={{
-              color: "#ddd",
+              color: "#fff",
               textDecoration: "none",
+              fontWeight: 900,
+              fontSize: "32px",
             }}
           >
-            Films
+            🎬 CineZone HD
           </Link>
 
-          <Link
-            href={`/movie/${params.id}`}
+          <div
             style={{
-              color: "#00c6ff",
-              fontWeight: "bold",
-              textDecoration: "none",
+              display: "flex",
+              gap: "30px",
+              alignItems: "center",
             }}
           >
-            ← Retour au film
-          </Link>
+            <Link
+              href="/films"
+              style={{
+                color: "#fff",
+                textDecoration: "none",
+              }}
+            >
+              Films
+            </Link>
+
+            <Link
+              href={`/movie/${params.id}`}
+              style={{
+                color: "#00c6ff",
+                textDecoration: "none",
+                fontWeight: "bold",
+              }}
+            >
+              ← Retour au film
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -134,20 +141,20 @@ export default async function PlayerPage({ params }: any) {
 
       <div
         style={{
-          maxWidth: "1600px",
+          maxWidth: "1700px",
           margin: "0 auto",
-          padding: "30px",
+          padding: "35px",
         }}
       >
-        {/* INFOS FILM */}
+        {/* INFOS */}
 
         <div
           style={{
             display: "flex",
             gap: "35px",
-            alignItems: "flex-start",
             flexWrap: "wrap",
-            marginBottom: "20px",
+            alignItems: "flex-start",
+            marginBottom: "30px",
           }}
         >
           {movie.poster_path && (
@@ -155,7 +162,7 @@ export default async function PlayerPage({ params }: any) {
               src={imageUrl(movie.poster_path, "w500")}
               alt={movie.title}
               style={{
-                width: "220px",
+                width: "230px",
                 borderRadius: "18px",
                 boxShadow: "0 25px 60px rgba(0,0,0,.8)",
               }}
@@ -165,31 +172,53 @@ export default async function PlayerPage({ params }: any) {
           <div style={{ flex: 1 }}>
             <h1
               style={{
-                fontSize: "48px",
-                marginBottom: "15px",
+                fontSize: "52px",
+                marginBottom: "20px",
               }}
             >
-              🎬 {movie.title}
+              {movie.title}
             </h1>
 
             <div
               style={{
                 display: "flex",
-                gap: "15px",
+                gap: "12px",
                 flexWrap: "wrap",
-                marginBottom: "15px",
+                marginBottom: "18px",
               }}
             >
-              <span>⭐ {movie.vote_average ?? "-"} /10</span>
-
-              <span>📅 {movie.release_date}</span>
+              <span
+                style={{
+                  background: "#111",
+                  padding: "8px 14px",
+                  borderRadius: "999px",
+                }}
+              >
+                ⭐ {movie.vote_average ?? "-"} /10
+              </span>
 
               <span
                 style={{
-                  padding: "6px 14px",
-                  borderRadius: "999px",
                   background: "#111",
-                  border: "1px solid #333",
+                  padding: "8px 14px",
+                  borderRadius: "999px",
+                }}
+              >
+                📅 {movie.release_date}
+              </span>
+
+              <span
+                style={{
+                  background:
+                    movie.codec === "H265"
+                      ? "rgba(0,255,170,.18)"
+                      : "rgba(255,255,255,.08)",
+                  color:
+                    movie.codec === "H265"
+                      ? "#00ffaa"
+                      : "#fff",
+                  borderRadius: "999px",
+                  padding: "8px 14px",
                 }}
               >
                 {movie.codec}
@@ -197,10 +226,10 @@ export default async function PlayerPage({ params }: any) {
 
               <span
                 style={{
-                  padding: "6px 14px",
+                  background: "rgba(0,198,255,.18)",
+                  color: "#67e8f9",
                   borderRadius: "999px",
-                  background: "#07263d",
-                  border: "1px solid #00c6ff",
+                  padding: "8px 14px",
                 }}
               >
                 {movie.audio}
@@ -213,18 +242,19 @@ export default async function PlayerPage({ params }: any) {
 
         <div
           style={{
-            borderRadius: "20px",
+            borderRadius: "18px",
             overflow: "hidden",
-            boxShadow: "0 30px 80px rgba(0,0,0,.8)",
+            boxShadow: "0 25px 80px rgba(0,0,0,.85)",
             background: "#000",
           }}
         >
           <iframe
             src={movie.stream_link}
             allowFullScreen
+            loading="lazy"
             style={{
               width: "100%",
-              height: "86vh",
+              height: "88vh",
               border: "none",
               display: "block",
             }}
