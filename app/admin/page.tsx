@@ -663,16 +663,17 @@ const createSaga = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  id: Number(id),
-  link: addAffiliate(link),
-  stream_link: streamLink || null,
-  codec: codec,
-  audio: audio,
+  id: Number(tmdbId),
+link: downloadLink ? addAffiliate(downloadLink) : null,
+stream_link: streamLink || null,
+codec: bulkCodec,
+audio: bulkAudio,
   title: movie.title,
   poster_path: movie.poster_path,
   backdrop_path: movie.backdrop_path,
   vote_average: movie.vote_average,
-  release_date: movie.release_date,
+  release_date: movie.release_date
+,
   release_year: movie.release_date
     ? Number(movie.release_date.substring(0, 4))
     : null,
@@ -717,18 +718,24 @@ loadAdminMovies();
     for (const line of lines) {
       let tmdbId = "";
       let downloadLink = "";
+      let streamLink = "";
 
       if (line.includes("|")) {
-        const parts = line.split("|");
-        tmdbId = parts[0]?.trim();
-        downloadLink = parts[1]?.trim();
-      } else {
-        const parts = line.trim().split(/\s+/);
-        tmdbId = parts[0];
-        downloadLink = parts.slice(1).join(" ");
-      }
+  const parts = line.split("|");
 
-      if (!tmdbId || !downloadLink) {
+  tmdbId = parts[0]?.trim();
+  downloadLink = parts[1]?.trim() || "";
+  streamLink = parts[2]?.trim() || "";
+};
+      } else {
+  const parts = line.trim().split(/\s+/);
+
+  tmdbId = parts[0];
+  downloadLink = parts.slice(1).join(" ");
+  streamLink = "";
+}
+
+      if (!tmdbId || (!downloadLink && !streamLink)) {
         errors++;
         continue;
       }
@@ -745,33 +752,34 @@ loadAdminMovies();
 
         const movie = await movieRes.json();
 
-        const res = await fetch("/api/downloads", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-  id: Number(tmdbId),
-  link: addAffiliate(downloadLink),
-  codec: bulkCodec,
-  audio: bulkAudio,
-  title: movie.title,
-  poster_path: movie.poster_path,
-  backdrop_path: movie.backdrop_path,
-  vote_average: movie.vote_average,
-  release_date: movie.release_date,
-  release_year: movie.release_date
-    ? Number(movie.release_date.substring(0, 4))
-    : null,
-  imdb_id: movie.imdb_id || null,
-}),
-        });
+const res = await fetch("/api/downloads", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    id: Number(tmdbId),
+    link: downloadLink ? addAffiliate(downloadLink) : null,
+    stream_link: streamLink || null,
+    codec: bulkCodec,
+    audio: bulkAudio,
+    title: movie.title,
+    poster_path: movie.poster_path,
+    backdrop_path: movie.backdrop_path,
+    vote_average: movie.vote_average,
+    release_date: movie.release_date,
+    release_year: movie.release_date
+      ? Number(movie.release_date.substring(0, 4))
+      : null,
+    imdb_id: movie.imdb_id || null,
+  }),
+});
 
-        if (res.ok) {
-          success++;
-        } else {
-          errors++;
-        }
+if (res.ok) {
+  success++;
+} else {
+  errors++;
+}
       } catch {
         errors++;
       }
@@ -1155,13 +1163,19 @@ const filteredNotifications = notifications.filter((notif) => {
       <section style={cardStyle}>
         <h2>📦 Ajout multiple TMDB</h2>
         <p style={subText}>
-          Format : ID TMDB | lien de téléchargement. Un film par ligne.
-        </p>
+  Format :
+  <br />
+  ID TMDB | Lien téléchargement | Lien streaming (optionnel)
+  <br />
+  Un film par ligne.
+</p>
 
         <textarea
   value={bulkInput}
   onChange={(e) => setBulkInput(e.target.value)}
-  placeholder={`12345 | https://lien-film-1.com\n67890 | https://lien-film-2.com\n11223 | https://lien-film-3.com`}
+  placeholder={`12345 | https://1fichier.com/... | https://player.com/...
+67890 | https://1fichier.com/... |
+11223 | | https://player.com/...`}
   style={textareaStyle}
 />
 
