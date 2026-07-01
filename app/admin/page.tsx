@@ -723,11 +723,10 @@ loadAdminMovies();
       if (line.includes("|")) {
   const parts = line.split("|");
 
-  tmdbId = parts[0]?.trim();
+  tmdbId = parts[0].trim();
   downloadLink = parts[1]?.trim() || "";
   streamLink = parts[2]?.trim() || "";
-};
-      } else {
+} else {
   const parts = line.trim().split(/\s+/);
 
   tmdbId = parts[0];
