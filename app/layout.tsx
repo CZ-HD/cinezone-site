@@ -92,7 +92,7 @@ export default function RootLayout({
             <Link href="/" style={logoLinkStyle}>
               <div style={logoBoxStyle}>CZ</div>
 
-              <span style={logoTextStyle}>CineZone</span>
+              <span style={logoTextStyle}>CineZone Stream</span>
             </Link>
 
             {/* Navbar */}
