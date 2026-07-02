@@ -1,53 +1,92 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function CursorTrail() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
   useEffect(() => {
     if (window.innerWidth < 768) return;
 
-    const particles: HTMLDivElement[] = [];
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext("2d")!;
 
-    const createParticle = (x: number, y: number) => {
-      const p = document.createElement("div");
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-      p.style.position = "fixed";
-      p.style.left = `${x}px`;
-      p.style.top = `${y}px`;
-      p.style.width = "8px";
-      p.style.height = "8px";
-      p.style.borderRadius = "50%";
-      p.style.pointerEvents = "none";
-      p.style.background = "#00c6ff";
-      p.style.boxShadow =
-        "0 0 10px #00c6ff, 0 0 20px #00c6ff";
-      p.style.zIndex = "99999";
-      p.style.transition =
-        "transform .8s ease-out, opacity .8s ease-out";
+    canvas.width = width;
+    canvas.height = height;
 
-      document.body.appendChild(p);
-
-      requestAnimationFrame(() => {
-        p.style.transform = "scale(0)";
-        p.style.opacity = "0";
-      });
-
-      setTimeout(() => {
-        p.remove();
-      }, 800);
+    const resize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     };
 
-    const move = (e: MouseEvent) => {
-      createParticle(e.clientX, e.clientY);
-    };
+    window.addEventListener("resize", resize);
 
-    window.addEventListener("mousemove", move);
+    const particles: any[] = [];
+
+    window.addEventListener("mousemove", (e) => {
+      for (let i = 0; i < 4; i++) {
+        particles.push({
+          x: e.clientX,
+          y: e.clientY,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          life: 1,
+          size: 2 + Math.random() * 4,
+        });
+      }
+    });
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        p.life -= 0.02;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+
+        ctx.fillStyle = `rgba(0,198,255,${p.life})`;
+
+        ctx.shadowColor = "#00c6ff";
+        ctx.shadowBlur = 20;
+
+        ctx.fill();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
 
     return () => {
-      window.removeEventListener("mousemove", move);
-      particles.forEach((p) => p.remove());
+      window.removeEventListener("resize", resize);
     };
   }, []);
 
-  return null;
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        pointerEvents: "none",
+        zIndex: 99999,
+      }}
+    />
+  );
 }
