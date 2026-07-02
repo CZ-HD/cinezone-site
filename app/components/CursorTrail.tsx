@@ -2,8 +2,17 @@
 
 import { useEffect, useRef } from "react";
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  size: number;
+}
+
 export default function CursorTrail() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (window.innerWidth < 768) return;
@@ -26,20 +35,30 @@ export default function CursorTrail() {
 
     window.addEventListener("resize", resize);
 
-    const particles: any[] = [];
+    const particles: Particle[] = [];
 
-    window.addEventListener("mousemove", (e) => {
-      for (let i = 0; i < 2; i++) {
-        particles.push({
-          x: e.clientX,
-          y: e.clientY,
-          vx: (Math.random() - 0.5) * 2,
-          vy: (Math.random() - 0.5) * 2,
-          life: 1,
-          size: 0.8 + Math.random() * 1.8,
-        });
-      }
-    });
+    let lastX = 0;
+    let lastY = 0;
+
+    const mouseMove = (e: MouseEvent) => {
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+
+      lastX = e.clientX;
+      lastY = e.clientY;
+
+      // Une seule particule par mouvement
+      particles.push({
+        x: e.clientX,
+        y: e.clientY,
+        vx: -dx * 0.08 + (Math.random() - 0.5) * 0.15,
+        vy: -dy * 0.08 + (Math.random() - 0.5) * 0.15,
+        life: 1,
+        size: 0.8 + Math.random() * 1.2,
+      });
+    };
+
+    window.addEventListener("mousemove", mouseMove);
 
     function animate() {
       ctx.clearRect(0, 0, width, height);
@@ -50,7 +69,12 @@ export default function CursorTrail() {
         p.x += p.vx;
         p.y += p.vy;
 
-        p.life -= 0.05;
+        // ralentissement progressif
+        p.vx *= 0.985;
+        p.vy *= 0.985;
+
+        // disparition lente
+        p.life -= 0.012;
 
         if (p.life <= 0) {
           particles.splice(i, 1);
@@ -63,7 +87,7 @@ export default function CursorTrail() {
         ctx.fillStyle = `rgba(0,198,255,${p.life})`;
 
         ctx.shadowColor = "#00c6ff";
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
 
         ctx.fill();
       }
@@ -75,6 +99,7 @@ export default function CursorTrail() {
 
     return () => {
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", mouseMove);
     };
   }, []);
 
