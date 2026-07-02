@@ -29,14 +29,14 @@ export default function CursorTrail() {
     const particles: any[] = [];
 
     window.addEventListener("mousemove", (e) => {
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 2; i++) {
         particles.push({
           x: e.clientX,
           y: e.clientY,
           vx: (Math.random() - 0.5) * 2,
           vy: (Math.random() - 0.5) * 2,
           life: 1,
-          size: 2 + Math.random() * 4,
+          size: 0.8 + Math.random() * 1.8,
         });
       }
     });
@@ -50,7 +50,7 @@ export default function CursorTrail() {
         p.x += p.vx;
         p.y += p.vy;
 
-        p.life -= 0.02;
+        p.life -= 0.05;
 
         if (p.life <= 0) {
           particles.splice(i, 1);
@@ -63,7 +63,7 @@ export default function CursorTrail() {
         ctx.fillStyle = `rgba(0,198,255,${p.life})`;
 
         ctx.shadowColor = "#00c6ff";
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 8;
 
         ctx.fill();
       }
