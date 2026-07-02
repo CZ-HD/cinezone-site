@@ -8,6 +8,7 @@ import PresenceTracker from "./components/PresenceTracker";
 import UserMenu from "./components/UserMenu";
 import "./globals.css";
 import NotificationsBell from "./components/NotificationsBell";
+import CursorTrail from "./components/CursorTrail";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cinezone-hd.fr"),
@@ -85,8 +86,9 @@ export default function RootLayout({
         }}
       >
         <PresenceTracker />
+        <CursorTrail />
 
-        <header style={headerStyle}>
+<header style={headerStyle}>
           <div style={topHeaderStyle}>
             {/* Logo */}
             <Link href="/" style={logoLinkStyle}>
