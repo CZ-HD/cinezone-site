@@ -24,17 +24,20 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
   }, [movieId]);
 
   const handleDownload = async () => {
-    try {
-      const response = await fetch(`/api/download/${movieId}`);
-      const data = await response.json();
+  try {
+    const response = await fetch(`/api/download/${movieId}`);
+    const data = await response.json();
 
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      console.error(err);
+    console.log("Lien reçu :", JSON.stringify(data.url));
+    alert(JSON.stringify(data.url));
+
+    if (data.url) {
+      window.location.href = data.url;
     }
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const baseStyle: React.CSSProperties = {
     display: "inline-flex",
