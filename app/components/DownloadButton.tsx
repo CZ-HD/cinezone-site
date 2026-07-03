@@ -28,9 +28,6 @@ export default function DownloadButton({ movieId }: { movieId: number }) {
     const response = await fetch(`/api/download/${movieId}`);
     const data = await response.json();
 
-    console.log("Lien reçu :", JSON.stringify(data.url));
-    alert(JSON.stringify(data.url));
-
     if (data.url) {
       window.location.href = data.url;
     }
