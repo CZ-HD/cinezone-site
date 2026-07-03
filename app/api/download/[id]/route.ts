@@ -52,9 +52,7 @@ console.log("ERROR :", error);
 
     console.log("REDIRECTION :", finalLink);
 
-    return NextResponse.json({
-      url: finalLink,
-    });
+    return NextResponse.redirect(finalLink, 302);
   } catch (err: any) {
     console.error("ERREUR API DOWNLOAD :", err);
 
