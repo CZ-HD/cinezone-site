@@ -390,20 +390,21 @@ const result = [];
 
 for (const [movieId, count] of topIds) {
   const { data: movie } = await supabase
-  .from("downloads")
-  .select("id,title")
-  .eq("id", Number(movieId))
-  .single();
+    .from("downloads")
+    .select("id,title")
+    .eq("id", Number(movieId))
+    .single();
 
-if (!movie) {
-  console.log("Film introuvable :", movieId);
-}
+  if (!movie) {
+    console.log("Film introuvable :", movieId);
+  }
 
-if (movie) {
-  result.push({
-    ...movie,
-    count,
-  });
+  if (movie) {
+    result.push({
+      ...movie,
+      count,
+    });
+  }
 }
 
 console.log("LOGS", logs);
