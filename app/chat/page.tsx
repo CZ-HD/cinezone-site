@@ -1633,20 +1633,37 @@ const newText = text.replace(
             setShowMentions(false);
           }}
         >
-          <img
-  src={
-    u.avatar &&
-    u.avatar !== "null" &&
-    u.avatar !== ""
-      ? u.avatar
-      : DEFAULT_AVATAR
-  }
-  alt="avatar"
-  style={mentionAvatar}
-  onError={(e) => {
-    e.currentTarget.src = DEFAULT_AVATAR;
-  }}
-/>
+          {u.id === "__everyone__" ? (
+  <div
+    style={{
+      width: 40,
+      height: 40,
+      borderRadius: "50%",
+      background: "#2563eb",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 22,
+    }}
+  >
+    🌍
+  </div>
+) : (
+  <img
+    src={
+      u.avatar &&
+      u.avatar !== "null" &&
+      u.avatar !== ""
+        ? u.avatar
+        : DEFAULT_AVATAR
+    }
+    alt="avatar"
+    style={mentionAvatar}
+    onError={(e) => {
+      e.currentTarget.src = DEFAULT_AVATAR;
+    }}
+  />
+)}
 
           <div
             style={{
