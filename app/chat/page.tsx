@@ -1619,10 +1619,15 @@ const statusColor =
           type="button"
           style={mentionItem}
           onClick={() => {
-            const newText = text.replace(
-              /@([^\s]*)$/,
-              `@${u.username} `
-            );
+            const mention =
+  u.id === "__everyone__"
+    ? "@toutlemonde "
+    : `@${u.username} `;
+
+const newText = text.replace(
+  /@([^\s]*)$/,
+  mention
+);
 
             setText(newText);
             setShowMentions(false);
@@ -1687,9 +1692,30 @@ const statusColor =
   .limit(12);
 
         if (!error) {
-          setMentionResults(data || []);
-          setShowMentions(true);
-        }
+  let results = data || [];
+
+  if (
+    isAdmin &&
+    (
+      query === "" ||
+      "toutlemonde".startsWith(query.toLowerCase()) ||
+      "everyone".startsWith(query.toLowerCase())
+    )
+  ) {
+    results = [
+      {
+        id: "__everyone__",
+        username: "toutlemonde",
+        email: "Notifier tous les membres",
+        avatar: DEFAULT_AVATAR,
+      },
+      ...results,
+    ];
+  }
+
+  setMentionResults(results);
+  setShowMentions(true);
+}
       } else {
         setShowMentions(false);
       }
