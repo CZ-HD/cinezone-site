@@ -1,25 +1,81 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
 export default function SoutenirPage() {
-  // =========================
+  // =========================================================
   // CONFIGURATION
-  // =========================
+  // =========================================================
 
   const objectif = 130;
-  const collecte = 0;
+
+  const [collecte, setCollecte] = useState(0);
+  const [chargement, setChargement] = useState(true);
 
   const progression = Math.min((collecte / objectif) * 100, 100);
 
   const paypalUrl =
     "https://paypal.me/cinemovies?country.x=FR&locale.x=fr_FR";
 
+  // =========================================================
+  // CHARGEMENT DES SOUTIENS
+  // =========================================================
+
+  useEffect(() => {
+    async function chargerCollecte() {
+      try {
+        const { data, error } = await supabase
+          .from("soutiens")
+          .select("montant")
+          .eq("statut", "confirme");
+
+        if (error) {
+          console.error(
+            "Erreur lors du chargement des soutiens :",
+            error
+          );
+          return;
+        }
+
+        const total = (data || []).reduce(
+          (somme, soutien) =>
+            somme + Number(soutien.montant || 0),
+          0
+        );
+
+        setCollecte(total);
+      } catch (error) {
+        console.error(
+          "Erreur inattendue lors du chargement des soutiens :",
+          error
+        );
+      } finally {
+        setChargement(false);
+      }
+    }
+
+    chargerCollecte();
+
+    // Actualisation automatique toutes les 30 secondes
+    const interval = setInterval(() => {
+      chargerCollecte();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // =========================================================
+  // AFFICHAGE
+  // =========================================================
+
   return (
     <main style={pageStyle}>
       <section style={supportCard}>
 
-        {/* =========================
+        {/* =====================================================
             BANNIÈRE
-        ========================= */}
+        ====================================================== */}
 
         <div style={bannerWrapper}>
           <img
@@ -29,9 +85,9 @@ export default function SoutenirPage() {
           />
         </div>
 
-        {/* =========================
+        {/* =====================================================
             TITRE
-        ========================= */}
+        ====================================================== */}
 
         <div style={heart}>❤️</div>
 
@@ -45,11 +101,12 @@ export default function SoutenirPage() {
           à ses frais de fonctionnement, vous pouvez apporter votre soutien.
         </p>
 
-        {/* =========================
+        {/* =====================================================
             POURQUOI LE SOUTIEN ?
-        ========================= */}
+        ====================================================== */}
 
         <div style={whyBox}>
+
           <div style={whyTitle}>
             🎬 Pourquoi avons-nous besoin de votre soutien ?
           </div>
@@ -62,13 +119,18 @@ export default function SoutenirPage() {
 
           <p style={whyText}>
             Le fonctionnement du site entraîne différents frais, notamment
-            liés à <strong>l'hébergement, aux serveurs et au stockage</strong>
+            liés à{" "}
+            <strong>
+              l'hébergement, aux serveurs et au stockage
+            </strong>{" "}
             nécessaires à son bon fonctionnement.
           </p>
 
           <p style={whyText}>
             Notre objectif actuel est de réunir{" "}
-            <strong style={{ color: "#67e8f9" }}>130 €</strong>{" "}
+            <strong style={{ color: "#67e8f9" }}>
+              130 €
+            </strong>{" "}
             afin de contribuer à ces frais.
           </p>
 
@@ -83,16 +145,19 @@ export default function SoutenirPage() {
             🔒 Les éventuelles informations personnelles ou données sensibles
             présentes sur un justificatif seront masquées avant publication.
           </p>
+
         </div>
 
-        {/* =========================
+        {/* =====================================================
             OBJECTIF
-        ========================= */}
+        ====================================================== */}
 
         <div style={goalBox}>
 
           <div style={goalHeader}>
-            <span>🎯 Objectif actuel</span>
+            <span>
+              🎯 Objectif actuel
+            </span>
 
             <strong>
               {objectif} €
@@ -100,13 +165,13 @@ export default function SoutenirPage() {
           </div>
 
           <div style={costsLine}>
-            💾 Hébergement
+            <span>💾 Hébergement</span>
             <span>•</span>
-            🖥️ Serveurs
+            <span>🖥️ Serveurs</span>
             <span>•</span>
-            📦 Stockage
+            <span>📦 Stockage</span>
             <span>•</span>
-            ⚙️ Fonctionnement
+            <span>⚙️ Fonctionnement</span>
           </div>
 
           <p style={goalDescription}>
@@ -114,28 +179,32 @@ export default function SoutenirPage() {
             au fonctionnement de CineZone.
           </p>
 
-          {/* =========================
+          {/* ===================================================
               MONTANTS
-          ========================= */}
+          ==================================================== */}
 
           <div style={amountRow}>
 
             <span>
               <strong style={amount}>
-                {collecte} €
+                {chargement
+                  ? "..."
+                  : `${collecte.toFixed(2)} €`}
               </strong>{" "}
               récoltés
             </span>
 
             <span style={percentage}>
-              {progression.toFixed(1)} %
+              {chargement
+                ? "..."
+                : `${progression.toFixed(1)} %`}
             </span>
 
           </div>
 
-          {/* =========================
-              BARRE
-          ========================= */}
+          {/* ===================================================
+              BARRE DE PROGRESSION
+          ==================================================== */}
 
           <div
             style={progressOuter}
@@ -155,9 +224,9 @@ export default function SoutenirPage() {
             </div>
           </div>
 
-          {/* =========================
+          {/* ===================================================
               ÉCHELLE
-          ========================= */}
+          ==================================================== */}
 
           <div style={goalFooter}>
             <span>0 €</span>
@@ -166,12 +235,13 @@ export default function SoutenirPage() {
 
         </div>
 
-        {/* =========================
+        {/* =====================================================
             OBJECTIF ATTEINT
-        ========================= */}
+        ====================================================== */}
 
         {progression >= 100 && (
           <div style={successBox}>
+
             <div style={successTitle}>
               🎉 Objectif atteint !
             </div>
@@ -182,12 +252,13 @@ export default function SoutenirPage() {
               sera publiée sur CineZone, avec les informations personnelles
               masquées si nécessaire.
             </p>
+
           </div>
         )}
 
-        {/* =========================
+        {/* =====================================================
             CHAQUE GESTE COMPTE
-        ========================= */}
+        ====================================================== */}
 
         <div style={thanksBox}>
 
@@ -209,9 +280,9 @@ export default function SoutenirPage() {
 
         </div>
 
-        {/* =========================
+        {/* =====================================================
             PAYPAL
-        ========================= */}
+        ====================================================== */}
 
         <a
           href={paypalUrl}
@@ -226,9 +297,9 @@ export default function SoutenirPage() {
           🔒 Vous serez redirigé vers PayPal pour effectuer votre soutien.
         </p>
 
-        {/* =========================
+        {/* =====================================================
             REMERCIEMENT FINAL
-        ========================= */}
+        ====================================================== */}
 
         <div style={signature}>
 
@@ -266,6 +337,7 @@ const pageStyle: React.CSSProperties = {
 
 const supportCard: React.CSSProperties = {
   width: "100%",
+
   maxWidth: "900px",
 
   margin: "0 auto",
@@ -402,8 +474,7 @@ const whyText: React.CSSProperties = {
 
   lineHeight: 1.7,
 
-  margin:
-    "0 0 13px",
+  margin: "0 0 13px",
 };
 
 const transparencyBox: React.CSSProperties = {
@@ -436,8 +507,7 @@ const privacyText: React.CSSProperties = {
 
   lineHeight: 1.55,
 
-  margin:
-    "12px 0 0",
+  margin: "12px 0 0",
 };
 
 /* =========================================================
@@ -502,8 +572,7 @@ const goalDescription: React.CSSProperties = {
 
   lineHeight: 1.6,
 
-  margin:
-    "15px 0 25px",
+  margin: "15px 0 25px",
 };
 
 /* =========================================================
@@ -694,8 +763,7 @@ const thanksTitle: React.CSSProperties = {
 const thanksText: React.CSSProperties = {
   color: "#94a3b8",
 
-  margin:
-    "0 0 9px",
+  margin: "0 0 9px",
 
   lineHeight: 1.65,
 
@@ -801,9 +869,15 @@ if (typeof document !== "undefined") {
 
     style.textContent = `
       @media (max-width: 600px) {
+
         main {
           padding-left: 10px !important;
           padding-right: 10px !important;
+        }
+
+        section {
+          padding-left: 18px !important;
+          padding-right: 18px !important;
         }
 
         h1 {
@@ -815,6 +889,7 @@ if (typeof document !== "undefined") {
           width: 100%;
           box-sizing: border-box;
         }
+
       }
     `;
 
