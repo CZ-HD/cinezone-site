@@ -240,7 +240,7 @@ export default function ChatPage() {
 
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("username, avatar, role, role_color, status_text")
+        .select("username, avatar, role, role_color, status_text, donateur")
         .eq("id", data.user.id)
         .single();
 
@@ -250,7 +250,7 @@ export default function ChatPage() {
         role: profileData?.role || "user",
         role_color: profileData?.role_color || "#00c6ff",
         status_text: profileData?.status_text || "🟢 En ligne",
-        donateur: profileData?.donateur || false,
+        donateur: profileData?.donateur === true,
       };
 
       setProfile(fixedProfile);
@@ -402,7 +402,7 @@ export default function ChatPage() {
             avatar: item.avatar,
             role: item.role,
             status_text: item.status_text,
-            donateur: item.donateur,
+            donateur: item.donateur === true,
           }));
 
         const uniqueMembers = members.filter(
@@ -428,7 +428,7 @@ setOnlineMembers(uniqueMembers);
       avatar: profile.avatar,
       role: profile.role,
       status_text: profile.status_text || "🟢 En ligne",
-      donateur: profile.donateur || false,
+      donateur: profile.donateur === true,
     });
   }
 });
@@ -628,7 +628,7 @@ member.user_id === user.id
         updatedProfile?.role,
 
       status_text: safeStatus,
-      donateur: updatedProfile?.donateur || member.donateur || false,
+      donateur: updatedProfile?.donateur === true || member.donateur === true,
     }
   : member
 
@@ -1404,10 +1404,6 @@ const liveRoleColor =
 const liveStatusText =
   liveProfile?.status_text ||
   msg.status_text;
-
-const isDonor =
-  liveProfile?.donateur === true ||
-  msg.donateur === true;
             
 const nameColor =
   liveRole === "admin"
@@ -1481,7 +1477,7 @@ const statusColor =
     {name}
   </span>
 
-  {isDonor && (
+  {liveProfile?.donateur === true && (
     <span style={donorBadge}>🏆 DONATEUR</span>
   )}
 
@@ -1845,9 +1841,7 @@ const newText = text.replace(
                         }}
                       >
                         {member.username || "Utilisateur"}
-                        {member.donateur && (
-                          <span style={donorBadge}>🏆 DONATEUR</span>
-                        )}
+                        {member.donateur === true && <span style={donorBadge}>🏆 DONATEUR</span>}
                         {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
                       </p>
                       <p
@@ -2706,15 +2700,16 @@ const donorBadge: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   gap: "4px",
-  color: "#ffd54a",
-  background:
-    "linear-gradient(135deg, rgba(255,193,7,0.18), rgba(255,140,0,0.12))",
-  border: "1px solid rgba(255,193,7,0.55)",
-  fontSize: "10px",
-  fontWeight: 950,
   marginLeft: "7px",
   padding: "3px 8px",
   borderRadius: "999px",
+  background:
+    "linear-gradient(135deg, rgba(255,193,7,0.18), rgba(255,140,0,0.12))",
+  border: "1px solid rgba(255,193,7,0.55)",
+  color: "#ffd54a",
+  fontSize: "10px",
+  fontWeight: 950,
+  letterSpacing: "0.3px",
   boxShadow:
     "0 0 10px rgba(255,193,7,0.25), inset 0 0 8px rgba(255,193,7,0.06)",
   whiteSpace: "nowrap",
