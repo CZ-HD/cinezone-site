@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const FIRST_DELAY = 35000;    // Première apparition : 35 secondes
 const VISIBLE_TIME = 10000;   // Visible : 10 secondes
@@ -8,18 +8,25 @@ const REAPPEAR_TIME = 50000;  // Réapparaît : toutes les 50 secondes
 
 export default function InfoPopup() {
   const [visible, setVisible] = useState(false);
+  const isHovering = useRef(false);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
 
   useEffect(() => {
-    let hideTimer: ReturnType<typeof setTimeout> | undefined;
-
     const showPopup = () => {
       setVisible(true);
 
-      if (hideTimer) clearTimeout(hideTimer);
+      if (hideTimer.current) {
+        clearTimeout(hideTimer.current);
+      }
 
-      hideTimer = setTimeout(() => {
-        setVisible(false);
-      }, VISIBLE_TIME);
+      // Si la souris n'est pas dessus, le compte à rebours démarre.
+      if (!isHovering.current) {
+        hideTimer.current = setTimeout(() => {
+          setVisible(false);
+        }, VISIBLE_TIME);
+      }
     };
 
     const firstTimer = setTimeout(showPopup, FIRST_DELAY);
@@ -27,15 +34,36 @@ export default function InfoPopup() {
 
     return () => {
       clearTimeout(firstTimer);
-      if (hideTimer) clearTimeout(hideTimer);
+      if (hideTimer.current) clearTimeout(hideTimer.current);
       clearInterval(interval);
     };
   }, []);
+
+  const handleMouseEnter = () => {
+    isHovering.current = true;
+
+    if (hideTimer.current) {
+      clearTimeout(hideTimer.current);
+      hideTimer.current = undefined;
+    }
+  };
+
+  const handleMouseLeave = () => {
+    isHovering.current = false;
+
+    if (visible) {
+      hideTimer.current = setTimeout(() => {
+        setVisible(false);
+      }, VISIBLE_TIME);
+    }
+  };
 
   if (!visible) return null;
 
   return (
     <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{
         position: "absolute",
         right: "75px",
