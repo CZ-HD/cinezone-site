@@ -177,13 +177,6 @@ export default function SoutenirPage() {
 
             <div style={amountLeft}>
 
-              <div>
-                <strong style={amount}>
-                  {chargement ? "..." : `${collecte.toFixed(2)} €`}
-                </strong>{" "}
-                récoltés
-              </div>
-
               <div style={contributors}>
                 👥{" "}
                 <strong>
@@ -229,7 +222,9 @@ export default function SoutenirPage() {
           ========================= */}
 
           <div style={goalFooter}>
-            <span>0 €</span>
+            <span>
+              {chargement ? "..." : `${collecte.toFixed(2)} €`}
+            </span>
             <span>{objectif} €</span>
           </div>
 
