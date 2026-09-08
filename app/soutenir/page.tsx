@@ -274,21 +274,82 @@ export default function SoutenirPage() {
         </div>
 
         {/* =========================
-            PAYPAL
+            MOYENS DE SOUTIEN
         ========================= */}
 
-        <a
-          href={paypalUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={paypalButton}
-        >
-          ❤️ Soutenir CineZone
-        </a>
+        <div style={paymentSection}>
 
-        <p style={secureText}>
-          🔒 Vous serez redirigé vers PayPal pour effectuer votre soutien.
-        </p>
+          <div style={paymentTitle}>
+            💙 Choisissez votre moyen de soutien
+          </div>
+
+          <p style={paymentIntro}>
+            Soutenez CineZone HD avec la méthode qui vous convient le mieux.
+          </p>
+
+          <div className="cinezone-payment-grid" style={paymentGrid}>
+
+            {/* PAYPAL */}
+            <div style={paymentCard}>
+              <div style={paymentIcon}>🅿️</div>
+
+              <div style={paymentCardTitle}>
+                PayPal
+              </div>
+
+              <p style={paymentCardText}>
+                Soutenez directement CineZone HD avec votre compte PayPal.
+              </p>
+
+              <a
+                href={paypalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={paypalButton}
+              >
+                🅿️ Soutenir avec PayPal
+              </a>
+
+              <div style={paymentSecure}>
+                🔒 Paiement sécurisé via PayPal
+              </div>
+            </div>
+
+            {/* KO-FI */}
+            <div style={paymentCard}>
+              <div style={paymentIcon}>☕</div>
+
+              <div style={paymentCardTitle}>
+                Ko-fi
+              </div>
+
+              <p style={paymentCardText}>
+                PayPal ou carte bancaire. Aucun compte PayPal n'est nécessaire
+                pour choisir le paiement par carte.
+              </p>
+
+              <a
+                href="https://ko-fi.com/cinezonehd"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={kofiButton}
+              >
+                💙 Soutenir avec Ko-fi
+              </a>
+
+              <div style={paymentSecure}>
+                🔒 PayPal ou carte bancaire
+              </div>
+            </div>
+
+          </div>
+
+          <p style={paymentNote}>
+            ❤️ Chaque contribution est volontaire et aide CineZone HD à
+            financer son stockage, ses serveurs et son fonctionnement.
+          </p>
+
+        </div>
 
         {/* =========================
             REMERCIEMENT FINAL
@@ -787,50 +848,132 @@ const thanksText: React.CSSProperties = {
 };
 
 /* =========================================================
-   PAYPAL
+   MOYENS DE SOUTIEN
 ========================================================= */
+
+const paymentSection: React.CSSProperties = {
+  marginTop: "30px",
+  padding: "28px",
+  borderRadius: "24px",
+  background:
+    "linear-gradient(145deg, rgba(0,198,255,0.07), rgba(138,43,226,0.045))",
+  border:
+    "1px solid rgba(0,198,255,0.24)",
+  boxShadow:
+    "0 0 35px rgba(0,198,255,0.08), inset 0 0 25px rgba(255,255,255,0.02)",
+};
+
+const paymentTitle: React.CSSProperties = {
+  color: "#fff",
+  fontSize: "22px",
+  fontWeight: 950,
+  textAlign: "center",
+  textShadow: "0 0 12px rgba(0,198,255,0.35)",
+};
+
+const paymentIntro: React.CSSProperties = {
+  color: "#94a3b8",
+  fontSize: "14px",
+  lineHeight: 1.6,
+  textAlign: "center",
+  margin: "8px auto 22px",
+};
+
+const paymentGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "18px",
+};
+
+const paymentCard: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  padding: "24px 18px",
+  borderRadius: "20px",
+  background:
+    "linear-gradient(145deg, rgba(5,17,35,0.96), rgba(0,5,14,0.98))",
+  border:
+    "1px solid rgba(103,232,249,0.16)",
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 22px rgba(0,120,255,0.06)",
+  textAlign: "center",
+};
+
+const paymentIcon: React.CSSProperties = {
+  fontSize: "34px",
+  marginBottom: "8px",
+};
+
+const paymentCardTitle: React.CSSProperties = {
+  color: "#67e8f9",
+  fontSize: "19px",
+  fontWeight: 950,
+  marginBottom: "8px",
+};
+
+const paymentCardText: React.CSSProperties = {
+  color: "#cbd5e1",
+  fontSize: "13px",
+  lineHeight: 1.6,
+  minHeight: "62px",
+  margin: "0 0 18px",
+};
 
 const paypalButton: React.CSSProperties = {
   display: "inline-flex",
-
   alignItems: "center",
-
   justifyContent: "center",
-
-  minWidth: "300px",
-
-  padding: "17px 32px",
-
+  width: "100%",
+  boxSizing: "border-box",
+  padding: "15px 18px",
   borderRadius: "999px",
-
   textDecoration: "none",
-
   color: "#fff",
-
-  fontSize: "17px",
-
+  fontSize: "15px",
   fontWeight: 950,
-
-  textTransform: "uppercase",
-
-  letterSpacing: "0.5px",
-
+  letterSpacing: "0.2px",
   background:
     "linear-gradient(135deg, #0072ff 0%, #00a8ff 50%, #00c6ff 100%)",
-
   border:
     "1px solid rgba(103,232,249,0.65)",
-
   boxShadow:
-    "0 0 30px rgba(0,198,255,0.38), inset 0 1px 0 rgba(255,255,255,0.25)",
+    "0 0 25px rgba(0,198,255,0.28), inset 0 1px 0 rgba(255,255,255,0.25)",
 };
 
-const secureText: React.CSSProperties = {
+const kofiButton: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+  boxSizing: "border-box",
+  padding: "15px 18px",
+  borderRadius: "999px",
+  textDecoration: "none",
+  color: "#fff",
+  fontSize: "15px",
+  fontWeight: 950,
+  letterSpacing: "0.2px",
+  background:
+    "linear-gradient(135deg, #0072ff 0%, #5b5ce2 50%, #8a2be2 100%)",
+  border:
+    "1px solid rgba(167,139,250,0.65)",
+  boxShadow:
+    "0 0 25px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
+};
+
+const paymentSecure: React.CSSProperties = {
   color: "#64748b",
+  fontSize: "11px",
+  marginTop: "11px",
+};
 
+const paymentNote: React.CSSProperties = {
+  color: "#94a3b8",
   fontSize: "12px",
-
-  marginTop: "13px",
+  lineHeight: 1.6,
+  textAlign: "center",
+  margin: "20px 0 0",
 };
 
 /* =========================================================
@@ -898,6 +1041,10 @@ if (typeof document !== "undefined") {
           min-width: 0 !important;
           width: 100%;
           box-sizing: border-box;
+        }
+
+        .cinezone-payment-grid {
+          grid-template-columns: 1fr !important;
         }
 
         .cinezone-contributors {
