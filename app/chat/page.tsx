@@ -51,6 +51,7 @@ type Message = {
   role?: string;
   role_color?: string;
   status_text?: string;
+  donateur?: boolean;
   content: string;
   created_at: string;
   pinned?: boolean;
@@ -64,6 +65,7 @@ type Profile = {
   role?: string;
   role_color?: string;
   status_text?: string;
+  donateur?: boolean;
 };
 
 type ProfileMap = Record<
@@ -74,6 +76,7 @@ type ProfileMap = Record<
     role?: string | null;
     role_color?: string | null;
     status_text?: string | null;
+    donateur?: boolean | null;
   }
 >;
 
@@ -102,6 +105,7 @@ type OnlineMember = {
   avatar?: string;
   role?: string;
   status_text?: string;
+  donateur?: boolean;
 };
 
 type TypingUser = {
@@ -182,7 +186,7 @@ export default function ChatPage() {
 
     const { data: profilesData, error } = await supabase
       .from("profiles")
-      .select("id, username, avatar, role, role_color, status_text")
+      .select("id, username, avatar, role, role_color, status_text, donateur")
       .in("id", userIds);
 
     if (error) {
@@ -199,6 +203,7 @@ export default function ChatPage() {
         role: item.role,
         role_color: item.role_color,
         status_text: item.status_text,
+        donateur: item.donateur,
       };
     });
 
@@ -216,6 +221,7 @@ export default function ChatPage() {
         role: profileData.role,
         role_color: profileData.role_color,
         status_text: profileData.status_text,
+        donateur: profileData.donateur,
       },
     }));
   };
@@ -244,6 +250,7 @@ export default function ChatPage() {
         role: profileData?.role || "user",
         role_color: profileData?.role_color || "#00c6ff",
         status_text: profileData?.status_text || "🟢 En ligne",
+        donateur: profileData?.donateur || false,
       };
 
       setProfile(fixedProfile);
@@ -295,7 +302,7 @@ export default function ChatPage() {
           if (newMessage.user_id) {
             const { data: liveProfile } = await supabase
               .from("profiles")
-              .select("id, username, avatar, role, role_color, status_text")
+              .select("id, username, avatar, role, role_color, status_text, donateur")
               .eq("id", newMessage.user_id)
               .maybeSingle();
 
@@ -395,6 +402,7 @@ export default function ChatPage() {
             avatar: item.avatar,
             role: item.role,
             status_text: item.status_text,
+            donateur: item.donateur,
           }));
 
         const uniqueMembers = members.filter(
@@ -420,6 +428,7 @@ setOnlineMembers(uniqueMembers);
       avatar: profile.avatar,
       role: profile.role,
       status_text: profile.status_text || "🟢 En ligne",
+      donateur: profile.donateur || false,
     });
   }
 });
@@ -619,6 +628,7 @@ member.user_id === user.id
         updatedProfile?.role,
 
       status_text: safeStatus,
+      donateur: updatedProfile?.donateur || member.donateur || false,
     }
   : member
 
@@ -670,7 +680,7 @@ setShowProfile(false);
         .from("profiles")
         .update({ avatar: publicUrl })
         .eq("id", user.id)
-        .select("id, username, avatar, role, role_color, status_text")
+        .select("id, username, avatar, role, role_color, status_text, donateur")
         .single();
 
       if (error) {
@@ -732,7 +742,7 @@ setShowProfile(false);
 
       const { data: freshProfile } = await supabase
         .from("profiles")
-        .select("id, username, avatar, role, role_color, status_text")
+        .select("id, username, avatar, role, role_color, status_text, donateur")
         .eq("id", user.id)
         .single();
 
@@ -894,7 +904,7 @@ setShowProfile(false);
 
     const { data: freshProfile } = await supabase
       .from("profiles")
-      .select("id, username, avatar, role, role_color, status_text")
+      .select("id, username, avatar, role, role_color, status_text, donateur")
       .eq("id", user.id)
       .single();
 
@@ -1065,6 +1075,10 @@ setShowProfile(false);
   <div style={{ minWidth: 0 }}>
     <p style={miniProfileName}>
       {displayName}
+
+  {profile?.donateur && (
+    <span style={donorBadge}>🏆 DONATEUR</span>
+  )}
 
   {isAdmin && (
     <span style={adminBadge}>
@@ -1390,6 +1404,10 @@ const liveRoleColor =
 const liveStatusText =
   liveProfile?.status_text ||
   msg.status_text;
+
+const isDonor =
+  liveProfile?.donateur === true ||
+  msg.donateur === true;
             
 const nameColor =
   liveRole === "admin"
@@ -1462,6 +1480,10 @@ const statusColor =
   >
     {name}
   </span>
+
+  {isDonor && (
+    <span style={donorBadge}>🏆 DONATEUR</span>
+  )}
 
   {liveRole === "admin" && (
     <span style={adminBadge}>ADMIN</span>
@@ -1823,6 +1845,9 @@ const newText = text.replace(
                         }}
                       >
                         {member.username || "Utilisateur"}
+                        {member.donateur && (
+                          <span style={donorBadge}>🏆 DONATEUR</span>
+                        )}
                         {member.role === "admin" && <span style={adminBadge}>ADMIN</span>}
                       </p>
                       <p
@@ -2675,6 +2700,25 @@ const activityCard: React.CSSProperties = {
   color: "#dbeafe",
   fontSize: "13px",
   lineHeight: 1.45,
+};
+
+const donorBadge: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "4px",
+  color: "#ffd54a",
+  background:
+    "linear-gradient(135deg, rgba(255,193,7,0.18), rgba(255,140,0,0.12))",
+  border: "1px solid rgba(255,193,7,0.55)",
+  fontSize: "10px",
+  fontWeight: 950,
+  marginLeft: "7px",
+  padding: "3px 8px",
+  borderRadius: "999px",
+  boxShadow:
+    "0 0 10px rgba(255,193,7,0.25), inset 0 0 8px rgba(255,193,7,0.06)",
+  whiteSpace: "nowrap",
+  verticalAlign: "middle",
 };
 
 const adminBadge: React.CSSProperties = {
