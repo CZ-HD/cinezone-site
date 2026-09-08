@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+const FIRST_DELAY = 3000;     // Première apparition : 3 secondes
+const VISIBLE_TIME = 10000;   // Visible : 10 secondes
+const REAPPEAR_TIME = 60000;  // Réapparaît : toutes les 60 secondes
+
 export default function InfoPopup() {
   const [visible, setVisible] = useState(false);
 
@@ -11,16 +15,15 @@ export default function InfoPopup() {
     const showPopup = () => {
       setVisible(true);
 
+      if (hideTimer) clearTimeout(hideTimer);
+
       hideTimer = setTimeout(() => {
         setVisible(false);
-      }, 12000);
+      }, VISIBLE_TIME);
     };
 
-    // Première apparition après 5 secondes
-    const firstTimer = setTimeout(showPopup, 5000);
-
-    // Réapparition toutes les 2 minutes
-    const interval = setInterval(showPopup, 120000);
+    const firstTimer = setTimeout(showPopup, FIRST_DELAY);
+    const interval = setInterval(showPopup, REAPPEAR_TIME);
 
     return () => {
       clearTimeout(firstTimer);
@@ -35,10 +38,10 @@ export default function InfoPopup() {
     <div
       style={{
         position: "absolute",
-        right: "90px",
+        right: "75px",
         top: "50%",
         transform: "translateY(-50%)",
-        width: "300px",
+        width: "370px",
         maxWidth: "calc(100% - 40px)",
         zIndex: 10,
         animation: "cinezoneInfoIn 0.45s ease forwards",
@@ -47,61 +50,59 @@ export default function InfoPopup() {
       <div
         style={{
           position: "relative",
-          padding: "20px",
-          borderRadius: "20px",
+          padding: "24px",
+          borderRadius: "22px",
           background:
-            "linear-gradient(145deg, rgba(2,15,35,0.97), rgba(5,28,55,0.94))",
-          border: "1px solid rgba(0,198,255,0.42)",
+            "linear-gradient(145deg, rgba(2,15,35,0.98), rgba(5,28,55,0.95))",
+          border: "1px solid rgba(0,198,255,0.45)",
           boxShadow:
-            "0 0 30px rgba(0,198,255,0.20), 0 15px 45px rgba(0,0,0,0.65), inset 0 0 20px rgba(0,198,255,0.04)",
+            "0 0 35px rgba(0,198,255,0.22), 0 18px 50px rgba(0,0,0,0.70), inset 0 0 24px rgba(0,198,255,0.05)",
           backdropFilter: "blur(18px)",
           WebkitBackdropFilter: "blur(18px)",
           color: "#fff",
         }}
       >
-        {/* Bouton fermer */}
         <button
           onClick={() => setVisible(false)}
           aria-label="Fermer"
           style={{
             position: "absolute",
-            top: "9px",
-            right: "10px",
-            width: "27px",
-            height: "27px",
+            top: "10px",
+            right: "11px",
+            width: "30px",
+            height: "30px",
             borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.16)",
-            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            background: "rgba(255,255,255,0.07)",
             color: "#aaa",
             cursor: "pointer",
-            fontSize: "17px",
+            fontSize: "18px",
             lineHeight: 1,
           }}
         >
           ×
         </button>
 
-        {/* Titre */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
-            paddingRight: "25px",
-            marginBottom: "12px",
+            gap: "12px",
+            paddingRight: "35px",
+            marginBottom: "15px",
           }}
         >
           <div
             style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "11px",
+              width: "42px",
+              height: "42px",
+              borderRadius: "12px",
               display: "grid",
               placeItems: "center",
               background:
                 "linear-gradient(135deg, #00c6ff, #0072ff)",
-              boxShadow: "0 0 18px rgba(0,198,255,0.35)",
-              fontSize: "18px",
+              boxShadow: "0 0 20px rgba(0,198,255,0.40)",
+              fontSize: "21px",
               flexShrink: 0,
             }}
           >
@@ -111,21 +112,20 @@ export default function InfoPopup() {
           <strong
             style={{
               color: "#67e8f9",
-              fontSize: "14px",
+              fontSize: "16px",
               fontWeight: 900,
-              letterSpacing: "0.4px",
+              letterSpacing: "0.5px",
             }}
           >
             INFO CINEZONE HD
           </strong>
         </div>
 
-        {/* Message */}
         <div
           style={{
-            color: "#dbeafe",
-            fontSize: "13px",
-            lineHeight: 1.65,
+            color: "#e2e8f0",
+            fontSize: "14px",
+            lineHeight: 1.7,
           }}
         >
           Les liens reviennent tout doucement grâce au soutien de nos premiers
@@ -134,7 +134,9 @@ export default function InfoPopup() {
           <br />
           <br />
 
-          📢 Pensez à partager <strong>CineZone HD</strong> autour de vous !
+          📢 Pensez à partager{" "}
+          <strong style={{ color: "#fff" }}>CineZone HD</strong> autour de vous
+          !
 
           <br />
           <br />
@@ -142,7 +144,7 @@ export default function InfoPopup() {
           <span
             style={{
               color: "#67e8f9",
-              fontWeight: 800,
+              fontWeight: 900,
             }}
           >
             Plus nous serons nombreux, plus nous pourrons ajouter de films et
@@ -155,7 +157,7 @@ export default function InfoPopup() {
         @keyframes cinezoneInfoIn {
           from {
             opacity: 0;
-            transform: translateY(-50%) translateX(25px) scale(0.96);
+            transform: translateY(-50%) translateX(30px) scale(0.94);
           }
 
           to {
@@ -164,21 +166,30 @@ export default function InfoPopup() {
           }
         }
 
-        @media (max-width: 1100px) {
+        @media (max-width: 1200px) {
           div {
-            right: 35px !important;
-            width: 270px !important;
+            right: 45px !important;
+            width: 340px !important;
           }
         }
 
-        @media (max-width: 800px) {
+        @media (max-width: 900px) {
           div {
             position: fixed !important;
-            right: 16px !important;
+            right: 18px !important;
             bottom: 20px !important;
             top: auto !important;
-            width: 300px !important;
+            width: 340px !important;
+            max-width: calc(100vw - 36px) !important;
             transform: none !important;
+          }
+        }
+
+        @media (max-width: 500px) {
+          div {
+            width: calc(100vw - 28px) !important;
+            right: 14px !important;
+            bottom: 14px !important;
           }
         }
       `}</style>
