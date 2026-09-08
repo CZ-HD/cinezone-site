@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import HomeAnnouncements from "@/app/components/HomeAnnouncements";
+import InfoPopup from "@/app/components/InfoPopup";
 
 const API_KEY = "783698341437f0c7827887dbd9a2b426";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -83,6 +84,7 @@ export default function Home() {
         <section
           style={{
             ...heroStyle,
+            position: "relative",
             backgroundImage: `
               linear-gradient(
                 90deg,
@@ -175,6 +177,9 @@ export default function Home() {
               <HomeAnnouncements />
             </div>
           </div>
+
+          {/* Petit popup d’information temporaire */}
+          <InfoPopup />
 
           {/* Flèche suivante */}
           <button
