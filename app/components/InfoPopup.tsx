@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-const FIRST_DELAY = 3000;     // Première apparition : 3 secondes
+const FIRST_DELAY = 35000;    // Première apparition : 35 secondes
 const VISIBLE_TIME = 10000;   // Visible : 10 secondes
-const REAPPEAR_TIME = 60000;  // Réapparaît : toutes les 60 secondes
+const REAPPEAR_TIME = 50000;  // Réapparaît : toutes les 50 secondes
 
 export default function InfoPopup() {
   const [visible, setVisible] = useState(false);
@@ -89,7 +89,7 @@ export default function InfoPopup() {
             alignItems: "center",
             gap: "12px",
             paddingRight: "35px",
-            marginBottom: "15px",
+            marginBottom: "12px",
           }}
         >
           <div
@@ -117,39 +117,99 @@ export default function InfoPopup() {
               letterSpacing: "0.5px",
             }}
           >
-            INFO CINEZONE HD
+            📢 INFO CINEZONE HD
           </strong>
+        </div>
+
+        <div
+          style={{
+            color: "#94a3b8",
+            fontSize: "11px",
+            marginBottom: "14px",
+          }}
+        >
+          🕒 08/09/2026 12:16:00
+        </div>
+
+        <div
+          style={{
+            display: "inline-block",
+            padding: "4px 9px",
+            marginBottom: "14px",
+            borderRadius: "8px",
+            background: "rgba(0,198,255,0.10)",
+            border: "1px solid rgba(0,198,255,0.22)",
+            color: "#67e8f9",
+            fontSize: "11px",
+            fontWeight: 900,
+            letterSpacing: "0.4px",
+          }}
+        >
+          ADMIN
         </div>
 
         <div
           style={{
             color: "#e2e8f0",
             fontSize: "14px",
-            lineHeight: 1.7,
+            lineHeight: 1.65,
           }}
         >
-          Les liens reviennent tout doucement grâce au soutien de nos premiers
-          membres. ❤️
+          Les liens de téléchargement commencent à revenir tout doucement sur
+          CineZone HD ! ❤️
+          <br />
+          Grâce au soutien de <strong>deux membres</strong>, nous avons déjà
+          pu relancer une partie des liens et commencer à remettre le catalogue
+          en ordre. 🙏
 
           <br />
           <br />
 
-          📢 Pensez à partager{" "}
-          <strong style={{ color: "#fff" }}>CineZone HD</strong> autour de vous
-          !
+          Mais malheureusement, cela ne suffit pas encore pour remplir le
+          catalogue avec beaucoup de nouveautés. Le stockage et l'ajout de
+          nouveaux films représentent un coût important.
 
           <br />
           <br />
 
-          <span
-            style={{
-              color: "#67e8f9",
-              fontWeight: 900,
-            }}
-          >
-            Plus nous serons nombreux, plus nous pourrons ajouter de films et
-            de nouveautés. 🎬
+          <span style={{ color: "#b6e0ff", fontWeight: 700 }}>
+            💙 Si vous appréciez CineZone HD et souhaitez voir revenir davantage
+            de films et de nouveautés, chaque soutien peut vraiment faire la
+            différence.
           </span>
+
+          <br />
+          <br />
+
+          📢 Pensez également à partager{" "}
+          <strong style={{ color: "#fff" }}>CineZone HD</strong> autour de vous,
+          le plus possible !
+          <br />
+          <span style={{ color: "#67e8f9", fontWeight: 900 }}>
+            Plus nous serons nombreux, plus nous pourrons faire grandir la
+            communauté et plus nous pourrons ajouter de films et de nouveautés
+            au catalogue. 🎬🔥
+          </span>
+
+          <br />
+          <br />
+
+          🙏 Un énorme merci aux <strong>deux premiers membres</strong> qui nous
+          ont déjà soutenus ❤️ et merci à toute la communauté pour votre
+          fidélité et votre patience.
+
+          <br />
+          <br />
+
+          🎥 Les liens reviennent progressivement… mais avec votre aide, nous
+          pourrons accélérer les choses !
+
+          <br />
+          <br />
+
+          <strong style={{ color: "#67e8f9" }}>
+            ❤️ L'équipe CineZone HD 🎬
+          </strong>
         </div>
       </div>
 
