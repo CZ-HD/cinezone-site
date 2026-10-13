@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
@@ -37,9 +38,15 @@ export default async function PlayerPage({ params }: any) {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
+          padding: "24px",
+          textAlign: "center",
         }}
       >
         <h1>🎬 Vidéo introuvable</h1>
+
+        <p style={{ color: "#aaa", marginTop: "10px" }}>
+          Le lecteur de ce film n'est pas encore disponible.
+        </p>
 
         <Link
           href={`/movie/${params.id}`}
@@ -92,6 +99,8 @@ export default async function PlayerPage({ params }: any) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: "20px",
+            flexWrap: "wrap",
           }}
         >
           <Link
@@ -111,6 +120,7 @@ export default async function PlayerPage({ params }: any) {
               display: "flex",
               gap: "30px",
               alignItems: "center",
+              flexWrap: "wrap",
             }}
           >
             <Link
@@ -146,7 +156,7 @@ export default async function PlayerPage({ params }: any) {
           padding: "35px",
         }}
       >
-        {/* INFOS */}
+        {/* INFORMATIONS DU FILM */}
 
         <div
           style={{
@@ -160,20 +170,25 @@ export default async function PlayerPage({ params }: any) {
           {movie.poster_path && (
             <img
               src={imageUrl(movie.poster_path, "w500")}
-              alt={movie.title}
+              alt={movie.title ?? "Affiche du film"}
               style={{
                 width: "230px",
+                maxWidth: "100%",
                 borderRadius: "18px",
                 boxShadow: "0 25px 60px rgba(0,0,0,.8)",
+                objectFit: "cover",
               }}
             />
           )}
 
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: "250px" }}>
             <h1
               style={{
-                fontSize: "52px",
+                fontSize: "clamp(28px, 4vw, 52px)",
+                lineHeight: 1.15,
+                marginTop: 0,
                 marginBottom: "20px",
+                overflowWrap: "anywhere",
               }}
             >
               {movie.title}
@@ -197,51 +212,59 @@ export default async function PlayerPage({ params }: any) {
                 ⭐ {movie.vote_average ?? "-"} /10
               </span>
 
-              <span
-                style={{
-                  background: "#111",
-                  padding: "8px 14px",
-                  borderRadius: "999px",
-                }}
-              >
-                📅 {movie.release_date}
-              </span>
+              {movie.release_date && (
+                <span
+                  style={{
+                    background: "#111",
+                    padding: "8px 14px",
+                    borderRadius: "999px",
+                  }}
+                >
+                  📅 {movie.release_date}
+                </span>
+              )}
 
-              <span
-                style={{
-                  background:
-                    movie.codec === "H265"
-                      ? "rgba(0,255,170,.18)"
-                      : "rgba(255,255,255,.08)",
-                  color:
-                    movie.codec === "H265"
-                      ? "#00ffaa"
-                      : "#fff",
-                  borderRadius: "999px",
-                  padding: "8px 14px",
-                }}
-              >
-                {movie.codec}
-              </span>
+              {movie.codec && (
+                <span
+                  style={{
+                    background:
+                      movie.codec === "H265"
+                        ? "rgba(0,255,170,.18)"
+                        : "rgba(255,255,255,.08)",
+                    color:
+                      movie.codec === "H265"
+                        ? "#00ffaa"
+                        : "#fff",
+                    borderRadius: "999px",
+                    padding: "8px 14px",
+                  }}
+                >
+                  {movie.codec}
+                </span>
+              )}
 
-              <span
-                style={{
-                  background: "rgba(0,198,255,.18)",
-                  color: "#67e8f9",
-                  borderRadius: "999px",
-                  padding: "8px 14px",
-                }}
-              >
-                {movie.audio}
-              </span>
+              {movie.audio && (
+                <span
+                  style={{
+                    background: "rgba(0,198,255,.18)",
+                    color: "#67e8f9",
+                    borderRadius: "999px",
+                    padding: "8px 14px",
+                  }}
+                >
+                  {movie.audio}
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* LECTEUR */}
+        {/* LECTEUR UPBOLT OU SEEKSTREAMING */}
 
-        <div
+        <section
+          aria-label={`Lecteur vidéo : ${movie.title}`}
           style={{
+            width: "100%",
             borderRadius: "18px",
             overflow: "hidden",
             boxShadow: "0 25px 80px rgba(0,0,0,.85)",
@@ -250,15 +273,49 @@ export default async function PlayerPage({ params }: any) {
         >
           <iframe
             src={movie.stream_link}
+            title={`Lecteur vidéo - ${movie.title}`}
+            allow="autoplay; fullscreen; picture-in-picture"
             allowFullScreen
-            loading="lazy"
+            loading="eager"
+            referrerPolicy="strict-origin-when-cross-origin"
             style={{
               width: "100%",
-              height: "88vh",
+              aspectRatio: "16 / 9",
+              height: "auto",
               border: "none",
               display: "block",
+              background: "#000",
             }}
           />
+        </section>
+
+        {/* RETOUR AU FILM */}
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "30px",
+          }}
+        >
+          <Link
+            href={`/movie/${params.id}`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              padding: "12px 22px",
+              borderRadius: "999px",
+              background: "rgba(0,198,255,.12)",
+              border: "1px solid rgba(0,198,255,.35)",
+              color: "#67e8f9",
+              textDecoration: "none",
+              fontWeight: 700,
+            }}
+          >
+            ← Retour à la fiche du film
+          </Link>
         </div>
       </div>
     </main>
