@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -189,11 +188,12 @@ export default function InfoPopup() {
         </div>
 
         <p style={textStyle}>
-          💙 CineZone Play s'ouvre à tous ! Regardez directement les films
-          disponibles en streaming sur le site, sans créer de compte.
+          💙 Bonne nouvelle ! CineZone Play est désormais ouvert
+          à tous. Consultez le catalogue et regardez directement
+          les films disponibles en streaming, sans créer de compte.
         </p>
 
-        {/* STREAMING */}
+        {/* ACCÈS PUBLIC */}
 
         <section
           style={{
@@ -212,18 +212,18 @@ export default function InfoPopup() {
               margin: "0 0 8px",
             }}
           >
-            ▶️ VISIONNAGE EN STREAMING
+            ▶️ ACCÈS LIBRE AU SITE
           </h3>
 
-          <p style={textStyle}>✅ Accès libre au site pour tous.</p>
-          <p style={textStyle}>✅ Lecture dans le lecteur intégré.</p>
-          <p style={textStyle}>✅ Aucune inscription pour regarder.</p>
+          <p style={textStyle}>✅ Consultation du catalogue public.</p>
+          <p style={textStyle}>✅ Streaming dans le lecteur intégré.</p>
+          <p style={textStyle}>✅ Aucun compte nécessaire pour regarder.</p>
           <p style={{ ...textStyle, marginBottom: 0 }}>
-            ✅ Une partie du catalogue restera accessible.
+            ✅ Films disponibles accessibles à tous.
           </p>
         </section>
 
-        {/* LIENS DIRECTS */}
+        {/* FONCTIONS RÉSERVÉES AUX MEMBRES */}
 
         <section
           style={{
@@ -242,24 +242,26 @@ export default function InfoPopup() {
               margin: "0 0 8px",
             }}
           >
-            🔗 LIENS DIRECTS
-            <span style={{ fontSize: "10px" }}> (CAS PARTICULIERS)</span>
+            🔒 FONCTIONS RÉSERVÉES AUX MEMBRES
           </h3>
 
           <p style={textStyle}>
-            Certains membres pourront demander un lien direct vers un film
-            pour un usage personnel.
+            🎞️ <strong>Demandes de films :</strong> inscription
+            et connexion obligatoires pour proposer un film.
           </p>
 
-          <p style={{ ...textStyle, marginBottom: 0, color: "#ffd1dc" }}>
-            ⚠️ <strong style={{ color: "#ff718d" }}>
-              Une inscription sera alors nécessaire
-            </strong>{" "}
-            selon les modalités qui seront mises en place.
+          <p style={textStyle}>
+            💬 <strong>Chat :</strong> connectez-vous ou créez
+            un compte pour participer aux discussions.
+          </p>
+
+          <p style={{ ...textStyle, marginBottom: 0 }}>
+            👤 <strong>Compte et favoris :</strong> ces fonctions
+            restent réservées aux membres connectés.
           </p>
         </section>
 
-        {/* À SAVOIR */}
+        {/* INFORMATIONS IMPORTANTES */}
 
         <section
           style={{
@@ -282,8 +284,8 @@ export default function InfoPopup() {
           </h3>
 
           <p style={textStyle}>
-            🟠 Les liens directs de téléchargement seront progressivement
-            supprimés.
+            🟠 Les liens directs de téléchargement seront
+            progressivement supprimés.
           </p>
 
           <p style={textStyle}>
@@ -291,8 +293,8 @@ export default function InfoPopup() {
           </p>
 
           <p style={{ ...textStyle, marginBottom: 0 }}>
-            🟠 D'autres films pourront devenir temporairement ou définitivement
-            indisponibles pendant la transition.
+            🟠 D'autres films pourront être temporairement ou
+            définitivement indisponibles pendant la transition.
           </p>
         </section>
 
