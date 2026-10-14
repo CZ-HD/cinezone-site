@@ -701,52 +701,138 @@ loadAdminMovies();
     }
   };
 
-  const saveBulkDownloads = async () => {
-    if (!bulkInput.trim()) {
-      setMessage("❌ Ajoute au moins une ligne.");
-      return;
-    }
+  
+const saveBulkDownloads = async () => {
+  if (!bulkInput.trim()) {
+    setMessage("❌ Ajoute au moins une ligne.");
+    return;
+  }
 
-    setBulkLoading(true);
-    setMessage("📦 Ajout multiple en cours...");
+  setBulkLoading(true);
+  setMessage("📦 Ajout multiple en cours...");
 
-    const lines = bulkInput
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+  const lines = bulkInput
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
-    let success = 0;
-    let errors = 0;
-    const errorDetails: string[] = [];
+  let success = 0;
+  let errors = 0;
+  const errorDetails: string[] = [];
 
-    try {
-      for (const line of lines) {
-        let tmdbId = "";
-        let downloadLink = "";
-        let streamingLink = "";
+  try {
+    for (const line of lines) {
+      let tmdbId = "";
+      let downloadLink = "";
+      let streamingLink = "";
 
-        if (line.includes("|")) {
-          // Format : ID TMDB | lien téléchargement | lien streaming
-          const parts = line.split("|");
-          tmdbId = parts[0]?.trim() || "";
-          downloadLink = parts[1]?.trim() || "";
-          streamingLink = parts[2]?.trim() || "";
-        } else {
-          // Ancien format : ID TMDB puis lien de téléchargement
-          const parts = line.split(/\s+/);
-          tmdbId = parts[0] || "";
-          downloadLink = parts.slice(1).join(" ").trim();
-        }
+      // Format : ID TMDB | lien téléchargement | lien streaming
+      if (line.includes("|")) {
+        const parts = line.split("|");
 
-        if (
-          !tmdbId ||
-          (!downloadLink && !streamingLink) ||
-          !/^\d+$/.test(tmdbId)
-        ) {
+        tmdbId = parts[0]?.trim() || "";
+        downloadLink = parts[1]?.trim() || "";
+        streamingLink = parts[2]?.trim() || "";
+      } else {
+        // Ancien format : ID TMDB puis lien téléchargement
+        const parts = line.split(/\s+/);
+
+        tmdbId = parts[0] || "";
+        downloadLink = parts.slice(1).join(" ").trim();
+      }
+
+      if (
+        !/^\d+$/.test(tmdbId) ||
+        (!downloadLink && !streamingLink)
+      ) {
+        errors++;
+        errorDetails.push(`Ligne invalide : ${line}`);
+        continue;
+      }
+
+      try {
+        const movieRes = await fetch(
+          `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${API_KEY}&language=fr-FR`
+        );
+
+        if (!movieRes.ok) {
           errors++;
-          errorDetails.push(`Ligne invalide : ${line}`);
+          errorDetails.push(
+            `TMDB ${tmdbId} : film introuvable (HTTP ${movieRes.status})`
+          );
           continue;
         }
+
+        const movie = await movieRes.json();
+
+        // Les champs restent strictement séparés.
+        const payload = {
+          id: Number(tmdbId),
+          link: downloadLink
+            ? addAffiliate(downloadLink)
+            : null,
+          stream_link: streamingLink || null,
+          codec: bulkCodec,
+          audio: bulkAudio,
+          title: movie.title || "Film sans titre",
+          poster_path: movie.poster_path || null,
+          backdrop_path: movie.backdrop_path || null,
+          vote_average: movie.vote_average ?? null,
+          release_date: movie.release_date || null,
+          release_year: movie.release_date
+            ? Number(movie.release_date.substring(0, 4))
+            : null,
+          imdb_id: movie.imdb_id || null,
+        };
+
+        const res = await fetch("/api/downloads", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await res.json().catch(() => ({}));
+
+        if (res.ok && result.success) {
+          success++;
+        } else {
+          errors++;
+          errorDetails.push(
+            `TMDB ${tmdbId} : ${
+              result.error || `erreur HTTP ${res.status}`
+            }`
+          );
+        }
+      } catch (error) {
+        errors++;
+        errorDetails.push(
+          `TMDB ${tmdbId} : erreur de communication`
+        );
+      }
+    }
+
+    await loadAdminMovies();
+
+    setMessage(
+      `📦 Terminé : ${success} film(s) enregistré(s), ${errors} erreur(s).` +
+        (errorDetails.length
+          ? "\n" + errorDetails.slice(0, 8).join("\n")
+          : "")
+    );
+
+    if (errors === 0) {
+      setBulkInput("");
+    }
+  } catch (error) {
+    console.error("Erreur ajout multiple :", error);
+    setMessage("❌ Une erreur est survenue pendant l'ajout multiple.");
+  } finally {
+    setBulkLoading(false);
+  }
+};
+
 
         try {
           const movieRes = await fetch(
