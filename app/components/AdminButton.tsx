@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 const CREATOR_EMAILS = [
   "blackph4tom@gmail.com",
   "lafooteusedu54@hotmail.fr",
-];
+].map((email) => email.toLowerCase());
 
 export default function AdminButton() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -15,45 +15,68 @@ export default function AdminButton() {
   const [demandeCount, setDemandeCount] = useState(0);
 
   useEffect(() => {
-    async function checkAdmin() {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-
-      if (!user) return;
-
-      if (user.email && CREATOR_EMAILS.includes(user.email)) {
-        setIsAdmin(true);
-        await loadCounts();
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role,status")
-        .eq("id", user.id)
-        .single();
-
-      if (profile?.role === "admin" && profile?.status === "approved") {
-        setIsAdmin(true);
-        await loadCounts();
-      }
-    }
+    let cancelled = false;
 
     async function loadCounts() {
-      const { count: pending } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
+      const [pendingResult, demandesResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending"),
 
-      const { count: demandes } = await supabase
-        .from("demandes_films")
-        .select("*", { count: "exact", head: true });
+        supabase
+          .from("demandes_films")
+          .select("*", { count: "exact", head: true }),
+      ]);
 
-      setPendingCount(pending || 0);
-      setDemandeCount(demandes || 0);
+      if (cancelled) return;
+
+      setPendingCount(pendingResult.count || 0);
+      setDemandeCount(demandesResult.count || 0);
+    }
+
+    async function checkAdmin() {
+      try {
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
+
+        if (cancelled || error || !user) return;
+
+        const email = user.email?.toLowerCase() || "";
+
+        // Les deux fondateurs conservent leur accès administrateur.
+        if (CREATOR_EMAILS.includes(email)) {
+          setIsAdmin(true);
+          await loadCounts();
+          return;
+        }
+
+        // Les autres comptes doivent avoir le rôle admin
+        // et un compte approuvé dans Supabase.
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role, status")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (cancelled || profileError || !profile) return;
+
+        if (profile.role === "admin" && profile.status === "approved") {
+          setIsAdmin(true);
+          await loadCounts();
+        }
+      } catch (error) {
+        console.error("Erreur de vérification administrateur :", error);
+      }
     }
 
     checkAdmin();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!isAdmin) return null;
@@ -65,6 +88,9 @@ export default function AdminButton() {
       href="/admin"
       style={{
         position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
         color: "#fff",
         textDecoration: "none",
         fontSize: "14px",
@@ -75,8 +101,9 @@ export default function AdminButton() {
           "linear-gradient(135deg, rgba(255,215,100,0.35), rgba(255,140,0,0.22))",
         border: "1px solid rgba(255,215,100,0.55)",
         boxShadow: "0 0 18px rgba(255,215,100,0.35)",
+        whiteSpace: "nowrap",
       }}
-      title={`${pendingCount} membre(s) en attente, ${demandeCount} demande(s) film`}
+      title={`${pendingCount} membre(s) en attente, ${demandeCount} demande(s) de film`}
     >
       👑 Admin
 
