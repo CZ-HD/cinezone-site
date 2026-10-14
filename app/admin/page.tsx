@@ -717,136 +717,176 @@ loadAdminMovies();
 
     let success = 0;
     let errors = 0;
+    const errorDetails: string[] = [];
 
-    for (const line of lines) {
-      let tmdbId = "";
-      let downloadLink = "";
-      let streamingLink = "";
+    try {
+      for (const line of lines) {
+        let tmdbId = "";
+        let downloadLink = "";
+        let streamingLink = "";
 
-      if (line.includes("|")) {
-        // Format : ID TMDB | lien téléchargement | lien streaming
-        // Les 2 liens sont facultatifs, mais il en faut au moins un.
-        const parts = line.split("|");
-        tmdbId = parts[0]?.trim() || "";
-        downloadLink = parts[1]?.trim() || "";
-        streamingLink = parts[2]?.trim() || "";
-      } else {
-        // Compatibilité avec l'ancien format : ID TMDB puis lien téléchargement.
-        const parts = line.trim().split(/\s+/);
-        tmdbId = parts[0] || "";
-        downloadLink = parts.slice(1).join(" ").trim();
-      }
+        if (line.includes("|")) {
+          // Format : ID TMDB | lien téléchargement | lien streaming
+          const parts = line.split("|");
+          tmdbId = parts[0]?.trim() || "";
+          downloadLink = parts[1]?.trim() || "";
+          streamingLink = parts[2]?.trim() || "";
+        } else {
+          // Ancien format : ID TMDB puis lien de téléchargement
+          const parts = line.split(/\s+/);
+          tmdbId = parts[0] || "";
+          downloadLink = parts.slice(1).join(" ").trim();
+        }
 
-      if (!tmdbId || (!downloadLink && !streamingLink) || !/^\d+$/.test(tmdbId)) {
-        errors++;
-        continue;
-      }
-
-      try {
-        const movieRes = await fetch(
-          `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${API_KEY}&language=fr-FR`
-        );
-
-        if (!movieRes.ok) {
+        if (
+          !tmdbId ||
+          (!downloadLink && !streamingLink) ||
+          !/^\d+$/.test(tmdbId)
+        ) {
           errors++;
+          errorDetails.push(`Ligne invalide : ${line}`);
           continue;
         }
 
-        const movie = await movieRes.json();
+        try {
+          const movieRes = await fetch(
+            `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${API_KEY}&language=fr-FR`
+          );
 
-        const res = await fetch("/api/downloads", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-  id: Number(tmdbId),
-  link: downloadLink ? addAffiliate(downloadLink) : "",
-  stream_link: streamingLink || null,
-  codec: bulkCodec,
-  audio: bulkAudio,
-  title: movie.title,
-  poster_path: movie.poster_path,
-  backdrop_path: movie.backdrop_path,
-  vote_average: movie.vote_average,
-  release_date: movie.release_date,
-  release_year: movie.release_date
-    ? Number(movie.release_date.substring(0, 4))
-    : null,
-  imdb_id: movie.imdb_id || null,
-}),
-        });
+          if (!movieRes.ok) {
+            errors++;
+            errorDetails.push(`TMDB ${tmdbId} : film introuvable (HTTP ${movieRes.status})`);
+            continue;
+          }
 
-        if (res.ok) {
-          success++;
-        } else {
+          const movie = await movieRes.json();
+          const res = await fetch("/api/downloads", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: Number(tmdbId),
+              link: downloadLink ? addAffiliate(downloadLink) : null,
+              stream_link: streamingLink || null,
+              codec: bulkCodec,
+              audio: bulkAudio,
+              title: movie.title,
+              poster_path: movie.poster_path,
+              backdrop_path: movie.backdrop_path,
+              vote_average: movie.vote_average,
+              release_date: movie.release_date,
+              release_year: movie.release_date
+                ? Number(movie.release_date.substring(0, 4))
+                : null,
+              imdb_id: movie.imdb_id || null,
+            }),
+          });
+
+          const result = await res.json().catch(() => ({}));
+          if (res.ok && result.success) {
+            success++;
+          } else {
+            errors++;
+            errorDetails.push(
+              `TMDB ${tmdbId} : ${result.error || `erreur HTTP ${res.status}`}`
+            );
+          }
+        } catch {
           errors++;
+          errorDetails.push(`TMDB ${tmdbId} : erreur de communication`);
         }
-      } catch {
-        errors++;
       }
-    }
 
-    setBulkLoading(false);
-    setBulkInput("");
-    setMessage(
-      `✅ Ajout terminé : ${success} film(s) ajouté(s), ${errors} erreur(s).`
-    );
-    loadAdminMovies();
+      await loadAdminMovies();
+      setBulkInput("");
+      setMessage(
+        `📦 Terminé : ${success} film(s) enregistré(s), ${errors} erreur(s).` +
+          (errorDetails.length
+            ? "\n" + errorDetails.slice(0, 8).join("\n")
+            : "")
+      );
+    } finally {
+      setBulkLoading(false);
+    }
   };
 
   const saveManualDownload = async () => {
+    const title = manualTitle.trim();
+    const year = manualYear.trim();
+    const poster = manualPoster.trim();
+    const backdrop = manualBackdrop.trim();
+    const downloadLink = manualLink.trim();
+    const streamingLink = manualStreamLink.trim();
+
     if (
-  !manualTitle ||
-  !manualYear ||
-  !manualPoster ||
-  (!manualLink && !manualStreamLink)
-) {
-  setMessage(
-    "❌ Remplis le titre, l'année, l'affiche et au moins un lien (téléchargement ou streaming)."
-  );
-  return;
-}
-
-    setMessage("Ajout manuel du film en cours...");
-
-    const res = await fetch("/api/downloads", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-  link: addAffiliate(manualLink),
-  stream_link: manualStreamLink || null,
-  codec: manualCodec,
-  audio: manualAudio,
-  title: manualTitle,
-  poster_path: manualPoster,
-  backdrop_path: manualBackdrop || manualPoster,
-  vote_average: manualVote ? Number(manualVote) : null,
-  release_date: `${manualYear}-01-01`,
-  release_year: Number(manualYear),
-  imdb_id: manualImdb ? cleanImdb(manualImdb) : null,
-})
-    });
-
-    const result = await res.json();
-
-    if (!res.ok) {
-      setMessage("❌ Erreur : " + result.error);
+      !title ||
+      !year ||
+      !poster ||
+      (!downloadLink && !streamingLink)
+    ) {
+      setMessage(
+        "❌ Remplis le titre, l'année, l'affiche et au moins un lien (téléchargement ou streaming)."
+      );
       return;
     }
 
-    setMessage("✅ Film ajouté manuellement !");
-    setManualTitle("");
-    setManualYear("");
-    setManualPoster("");
-    setManualBackdrop("");
-    setManualVote("");
-    setManualImdb("");
-    setManualLink("");
-    setManualStreamLink("");
-    loadAdminMovies();
+    const numericYear = Number(year);
+    if (
+      !Number.isInteger(numericYear) ||
+      numericYear < 1888 ||
+      numericYear > new Date().getFullYear() + 5
+    ) {
+      setMessage("❌ L'année indiquée est invalide.");
+      return;
+    }
+
+    setMessage("⏳ Ajout manuel du film en cours...");
+
+    try {
+      const res = await fetch("/api/downloads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          link: downloadLink ? addAffiliate(downloadLink) : null,
+          stream_link: streamingLink || null,
+          codec: manualCodec,
+          audio: manualAudio,
+          title,
+          poster_path: poster,
+          backdrop_path: backdrop || poster,
+          vote_average: manualVote.trim() ? Number(manualVote) : null,
+          release_date: `${year}-01-01`,
+          release_year: numericYear,
+          imdb_id: manualImdb.trim()
+            ? cleanImdb(manualImdb.trim())
+            : null,
+        }),
+      });
+
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.success) {
+        setMessage(
+          "❌ Erreur lors de l'ajout : " +
+            (result.error || `Erreur HTTP ${res.status}`)
+        );
+        return;
+      }
+
+      setMessage("✅ Film ajouté manuellement avec succès !");
+      setManualTitle("");
+      setManualYear("");
+      setManualPoster("");
+      setManualBackdrop("");
+      setManualVote("");
+      setManualImdb("");
+      setManualLink("");
+      setManualStreamLink("");
+      await loadAdminMovies();
+    } catch (error) {
+      console.error("Erreur ajout manuel du film :", error);
+      setMessage(
+        "❌ Impossible d'ajouter le film. Vérifie ta connexion et réessaie."
+      );
+    }
   };
 
   const updateAllMovies = async () => {
