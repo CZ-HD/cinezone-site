@@ -26,12 +26,19 @@ export async function GET(
       );
     }
 
-    // Récupérer exclusivement le lien de téléchargement.
+    // Lire uniquement le lien de téléchargement.
     const { data, error } = await supabase
       .from("downloads")
       .select("id, link")
       .eq("id", movieId)
       .maybeSingle();
+
+    // Diagnostic temporaire : vérifier la valeur réellement lue.
+    console.log("VÉRIFICATION SUPABASE :", {
+      movieId,
+      linkLu: data?.link ?? null,
+      erreur: error?.message ?? null,
+    });
 
     if (error) {
       console.error("ERREUR SUPABASE DOWNLOAD :", error);
@@ -53,7 +60,6 @@ export async function GET(
 
     const downloadUrl = data.link.trim();
 
-    // Vérifier que le lien est une URL valide.
     let parsedUrl: URL;
 
     try {
@@ -65,16 +71,20 @@ export async function GET(
       );
     }
 
-    if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+    if (
+      parsedUrl.protocol !== "https:" &&
+      parsedUrl.protocol !== "http:"
+    ) {
       return NextResponse.json(
         { error: "Protocole du lien de téléchargement non autorisé" },
         { status: 400 }
       );
     }
 
+    // Ajouter l'affiliation uniquement aux liens 1fichier.
     const finalLink = addAffiliate(downloadUrl);
 
-    // Enregistrer le clic sans bloquer la redirection si le journal échoue.
+    // Enregistrer le clic sans bloquer le téléchargement si le journal échoue.
     const { error: logError } = await supabase
       .from("download_logs")
       .insert({ movie_id: movieId });
