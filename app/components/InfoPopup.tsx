@@ -161,7 +161,7 @@ export default function InfoPopup() {
               sur CineZone Play.
             </li>
             <li>
-              Certains films et épisodes resteront accessibles ; d'autres
+              Certains films resteront accessibles ; d'autres
               pourront être indisponibles pendant ou après la transition.
             </li>
           </ul>
