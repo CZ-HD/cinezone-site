@@ -10,7 +10,7 @@ const CREATOR_EMAILS = [
 ];
 
 // ✅ Activer / désactiver la maintenance ici
-const MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE = true;
 
 export default function AuthGuard({
   children,
