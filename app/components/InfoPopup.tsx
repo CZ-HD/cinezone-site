@@ -8,16 +8,17 @@ export default function InfoPopup() {
 
   if (!visible) return null;
 
-  const sectionTitle: React.CSSProperties = {
-    fontSize: "17px",
-    fontWeight: 900,
-    lineHeight: 1.35,
-    margin: "0 0 10px",
+  const textStyle: React.CSSProperties = {
+    fontSize: "12px",
+    lineHeight: 1.55,
+    color: "#e2e8f0",
+    margin: "0 0 7px",
   };
 
-  const itemStyle: React.CSSProperties = {
-    margin: "0 0 8px",
-    paddingLeft: "2px",
+  const sectionStyle: React.CSSProperties = {
+    padding: "11px 12px",
+    marginBottom: "11px",
+    borderRadius: "13px",
   };
 
   return (
@@ -28,7 +29,7 @@ export default function InfoPopup() {
         right: "24px",
         top: "50%",
         transform: "translateY(-50%)",
-        width: "410px",
+        width: "370px",
         maxWidth: "calc(100% - 32px)",
         zIndex: 20,
         fontFamily: "Arial, Helvetica, sans-serif",
@@ -37,20 +38,20 @@ export default function InfoPopup() {
       <div
         style={{
           position: "relative",
-          padding: "24px",
-          borderRadius: "24px",
-          background:
-            "linear-gradient(145deg, rgba(2,12,30,0.99), rgba(4,27,53,0.99))",
-          border: "2px solid #00c6ff",
-          boxShadow:
-            "0 0 12px rgba(0,198,255,0.45), 0 0 38px rgba(0,198,255,0.22), 0 20px 55px rgba(0,0,0,0.75)",
-          color: "#fff",
-          maxHeight: "85vh",
-          overflowY: "auto",
           boxSizing: "border-box",
+          padding: "16px",
+          borderRadius: "21px",
+          background:
+            "linear-gradient(145deg, rgba(2,12,30,0.98), rgba(4,27,53,0.98))",
+          border: "1.5px solid #00c6ff",
+          boxShadow:
+            "0 0 18px rgba(0,198,255,0.2), 0 12px 35px rgba(0,0,0,0.65)",
+          color: "#fff",
+          maxHeight: "82vh",
+          overflowY: "auto",
         }}
       >
-        {/* BOUTON FERMER */}
+        {/* EN-TÊTE */}
 
         <button
           type="button"
@@ -58,45 +59,41 @@ export default function InfoPopup() {
           aria-label="Fermer l'annonce"
           style={{
             position: "absolute",
-            top: "12px",
-            right: "12px",
-            width: "32px",
-            height: "32px",
+            top: "9px",
+            right: "9px",
+            width: "27px",
+            height: "27px",
             borderRadius: "50%",
             border: "1px solid rgba(255,255,255,0.25)",
             background: "#152b43",
             color: "#fff",
             cursor: "pointer",
-            fontSize: "21px",
-            fontWeight: 700,
-            display: "grid",
-            placeItems: "center",
+            fontSize: "18px",
+            lineHeight: 1,
           }}
         >
           ×
         </button>
 
-        {/* EN-TÊTE */}
-
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "12px",
-            paddingRight: "28px",
-            marginBottom: "12px",
+            gap: "10px",
+            paddingRight: "25px",
+            marginBottom: "9px",
           }}
         >
           <div
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "14px",
+              width: "38px",
+              height: "38px",
+              borderRadius: "11px",
               display: "grid",
               placeItems: "center",
               background: "linear-gradient(135deg, #00d4ff, #0066ff)",
-              boxShadow: "0 0 22px rgba(0,198,255,0.4)",
-              fontSize: "25px",
+              boxShadow: "0 0 14px rgba(0,198,255,0.3)",
+              fontSize: "20px",
               flexShrink: 0,
             }}
           >
@@ -106,9 +103,8 @@ export default function InfoPopup() {
           <strong
             style={{
               color: "#67e8f9",
-              fontSize: "17px",
+              fontSize: "14px",
               fontWeight: 900,
-              letterSpacing: "0.4px",
             }}
           >
             📢 INFO CINEZONE PLAY
@@ -118,8 +114,8 @@ export default function InfoPopup() {
         <div
           style={{
             color: "#a9bfd4",
-            fontSize: "12px",
-            marginBottom: "14px",
+            fontSize: "10px",
+            marginBottom: "10px",
           }}
         >
           🗓️ 14 octobre 2026
@@ -128,37 +124,35 @@ export default function InfoPopup() {
         <div
           style={{
             display: "inline-block",
-            padding: "6px 11px",
-            marginBottom: "16px",
-            borderRadius: "8px",
+            padding: "5px 9px",
+            marginBottom: "11px",
+            borderRadius: "7px",
             background: "linear-gradient(90deg, #0072ff, #00bde9)",
             color: "#fff",
-            fontSize: "11px",
+            fontSize: "10px",
             fontWeight: 900,
-            letterSpacing: "0.5px",
-            boxShadow: "0 0 16px rgba(0,150,255,0.3)",
           }}
         >
           INFORMATION OFFICIELLE
         </div>
 
-        {/* TITRE PRINCIPAL */}
+        {/* TITRE */}
 
         <div
           style={{
             textAlign: "center",
-            padding: "18px 10px",
-            marginBottom: "16px",
-            borderRadius: "15px",
+            padding: "12px 8px",
+            marginBottom: "12px",
+            borderRadius: "12px",
             background:
-              "linear-gradient(135deg, rgba(0,198,255,0.16), rgba(0,40,100,0.4))",
-            border: "1px solid rgba(0,198,255,0.5)",
+              "linear-gradient(135deg, rgba(0,198,255,0.12), rgba(0,40,100,0.35))",
+            border: "1px solid rgba(0,198,255,0.45)",
           }}
         >
           <h2
             style={{
-              margin: "0 0 10px",
-              fontSize: "25px",
+              margin: "0 0 5px",
+              fontSize: "20px",
               lineHeight: 1.25,
               fontWeight: 900,
               color: "#fff",
@@ -169,11 +163,10 @@ export default function InfoPopup() {
 
           <div
             style={{
-              color: "#ffcf45",
-              fontSize: "25px",
-              lineHeight: 1.2,
-              fontWeight: 1000,
-              textShadow: "0 0 16px rgba(255,160,0,0.25)",
+              color: "#ffca45",
+              fontSize: "20px",
+              lineHeight: 1.25,
+              fontWeight: 900,
             }}
           >
             OUVERT AU PUBLIC !
@@ -181,146 +174,135 @@ export default function InfoPopup() {
 
           <div
             style={{
-              marginTop: "12px",
-              padding: "9px 8px",
-              borderRadius: "9px",
-              background: "rgba(0,198,255,0.12)",
-              border: "1px solid rgba(0,198,255,0.4)",
+              marginTop: "9px",
+              padding: "7px 5px",
+              borderRadius: "8px",
+              background: "rgba(0,198,255,0.1)",
+              border: "1px solid rgba(0,198,255,0.35)",
               color: "#a5f3fc",
-              fontSize: "12px",
+              fontSize: "10px",
               fontWeight: 900,
             }}
           >
-            🔓 ACCÈS LIBRE • AUCUNE INSCRIPTION REQUISE
+            🔓 ACCÈS LIBRE • SANS INSCRIPTION
           </div>
         </div>
 
-        <p
-          style={{
-            color: "#e2e8f0",
-            fontSize: "14px",
-            lineHeight: 1.65,
-            margin: "0 0 18px",
-          }}
-        >
-          💙 CineZone Play s'ouvre à tous ! Consultez le catalogue et regardez
-          directement les films disponibles en streaming sur le site, sans
-          avoir besoin de créer un compte.
+        <p style={textStyle}>
+          💙 CineZone Play s'ouvre à tous ! Regardez directement les films
+          disponibles en streaming sur le site, sans créer de compte.
         </p>
 
-        {/* SECTION STREAMING */}
+        {/* STREAMING */}
 
         <section
           style={{
-            padding: "16px",
-            marginBottom: "16px",
-            borderRadius: "16px",
+            ...sectionStyle,
             background:
-              "linear-gradient(145deg, rgba(0,120,255,0.15), rgba(0,25,55,0.75))",
+              "linear-gradient(145deg, rgba(0,100,220,0.16), rgba(0,25,55,0.7))",
             border: "1px solid #00aaff",
-            boxShadow: "inset 0 0 20px rgba(0,160,255,0.07)",
           }}
         >
-          <h3 style={{ ...sectionTitle, color: "#67e8f9" }}>
+          <h3
+            style={{
+              fontSize: "14px",
+              lineHeight: 1.3,
+              fontWeight: 900,
+              color: "#67e8f9",
+              margin: "0 0 8px",
+            }}
+          >
             ▶️ VISIONNAGE EN STREAMING
           </h3>
 
-          <p style={itemStyle}>✅ Accès libre au site pour tous.</p>
-          <p style={itemStyle}>
-            ✅ Lecture directement dans le lecteur intégré.
-          </p>
-          <p style={itemStyle}>
-            ✅ Aucune inscription pour regarder les films disponibles.
-          </p>
-          <p style={{ ...itemStyle, marginBottom: 0 }}>
+          <p style={textStyle}>✅ Accès libre au site pour tous.</p>
+          <p style={textStyle}>✅ Lecture dans le lecteur intégré.</p>
+          <p style={textStyle}>✅ Aucune inscription pour regarder.</p>
+          <p style={{ ...textStyle, marginBottom: 0 }}>
             ✅ Une partie du catalogue restera accessible.
           </p>
         </section>
 
-        {/* SECTION LIENS DIRECTS */}
+        {/* LIENS DIRECTS */}
 
         <section
           style={{
-            padding: "16px",
-            marginBottom: "16px",
-            borderRadius: "16px",
+            ...sectionStyle,
             background:
-              "linear-gradient(145deg, rgba(120,0,30,0.2), rgba(35,5,20,0.75))",
+              "linear-gradient(145deg, rgba(120,0,30,0.18), rgba(35,5,20,0.7))",
             border: "1px solid #ff4268",
-            boxShadow: "inset 0 0 20px rgba(255,40,90,0.06)",
           }}
         >
-          <h3 style={{ ...sectionTitle, color: "#ff718d" }}>
+          <h3
+            style={{
+              fontSize: "14px",
+              lineHeight: 1.3,
+              fontWeight: 900,
+              color: "#ff718d",
+              margin: "0 0 8px",
+            }}
+          >
             🔗 LIENS DIRECTS
-            <span style={{ fontSize: "12px" }}> (CAS PARTICULIERS)</span>
+            <span style={{ fontSize: "10px" }}> (CAS PARTICULIERS)</span>
           </h3>
 
-          <p
-            style={{
-              margin: "0 0 10px",
-              fontSize: "13px",
-              lineHeight: 1.65,
-            }}
-          >
-            Certains membres pourront souhaiter récupérer un lien direct vers
-            un film pour un usage personnel.
+          <p style={textStyle}>
+            Certains membres pourront demander un lien direct vers un film
+            pour un usage personnel.
           </p>
 
-          <p
-            style={{
-              margin: 0,
-              fontSize: "13px",
-              lineHeight: 1.65,
-              color: "#ffd1dc",
-            }}
-          >
-            <strong style={{ color: "#ff718d" }}>
-              ⚠️ Une inscription sera alors nécessaire
+          <p style={{ ...textStyle, marginBottom: 0, color: "#ffd1dc" }}>
+            ⚠️ <strong style={{ color: "#ff718d" }}>
+              Une inscription sera alors nécessaire
             </strong>{" "}
-            pour les personnes souhaitant obtenir ces liens, selon les
-            modalités qui seront mises en place.
+            selon les modalités qui seront mises en place.
           </p>
         </section>
 
-        {/* SECTION À SAVOIR */}
+        {/* À SAVOIR */}
 
         <section
           style={{
-            padding: "16px",
-            marginBottom: "17px",
-            borderRadius: "16px",
+            ...sectionStyle,
             background:
-              "linear-gradient(145deg, rgba(120,65,0,0.2), rgba(45,25,0,0.75))",
+              "linear-gradient(145deg, rgba(120,65,0,0.18), rgba(45,25,0,0.7))",
             border: "1px solid #ffb000",
-            boxShadow: "inset 0 0 20px rgba(255,170,0,0.05)",
           }}
         >
-          <h3 style={{ ...sectionTitle, color: "#ffca45" }}>
+          <h3
+            style={{
+              fontSize: "14px",
+              lineHeight: 1.3,
+              fontWeight: 900,
+              color: "#ffca45",
+              margin: "0 0 8px",
+            }}
+          >
             ⚠️ À SAVOIR
           </h3>
 
-          <p style={itemStyle}>
+          <p style={textStyle}>
             🟠 Les liens directs de téléchargement seront progressivement
             supprimés.
           </p>
 
-          <p style={itemStyle}>
+          <p style={textStyle}>
             🟠 Certains films resteront disponibles en streaming.
           </p>
 
-          <p style={{ ...itemStyle, marginBottom: 0 }}>
+          <p style={{ ...textStyle, marginBottom: 0 }}>
             🟠 D'autres films pourront devenir temporairement ou définitivement
-            indisponibles pendant ou après la transition.
+            indisponibles pendant la transition.
           </p>
         </section>
 
-        {/* MESSAGE DE FIN */}
+        {/* MESSAGE FINAL */}
 
         <div
           style={{
-            padding: "15px",
-            borderRadius: "14px",
-            background: "rgba(0,198,255,0.08)",
+            padding: "11px",
+            borderRadius: "12px",
+            background: "rgba(0,198,255,0.07)",
             border: "1px solid rgba(0,198,255,0.25)",
             textAlign: "center",
           }}
@@ -328,19 +310,18 @@ export default function InfoPopup() {
           <p
             style={{
               color: "#c9f4ff",
-              fontSize: "13px",
-              lineHeight: 1.65,
-              margin: "0 0 12px",
+              fontSize: "11px",
+              lineHeight: 1.55,
+              margin: "0 0 7px",
             }}
           >
-            ❤️ Merci à toute la communauté pour votre fidélité, votre soutien
-            et votre patience pendant cette évolution.
+            ❤️ Merci pour votre fidélité, votre soutien et votre patience.
           </p>
 
           <strong
             style={{
               color: "#67e8f9",
-              fontSize: "15px",
+              fontSize: "13px",
             }}
           >
             🎬 L'équipe CineZone Play
@@ -352,12 +333,12 @@ export default function InfoPopup() {
         @media (max-width: 900px) {
           aside {
             position: fixed !important;
-            right: 16px !important;
-            bottom: 16px !important;
+            right: 12px !important;
+            bottom: 12px !important;
             top: auto !important;
             transform: none !important;
-            width: 410px !important;
-            max-width: calc(100vw - 32px) !important;
+            width: 370px !important;
+            max-width: calc(100vw - 24px) !important;
           }
         }
       `}</style>
