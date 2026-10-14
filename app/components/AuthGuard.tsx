@@ -11,7 +11,7 @@ const CREATOR_EMAILS = [
 
 // true = maintenance activée
 // false = site public normalement
-const MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE = true;
 
 // Pages accessibles sans connexion
 const PUBLIC_PAGES = [
