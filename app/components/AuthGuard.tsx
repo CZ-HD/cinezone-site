@@ -9,7 +9,7 @@ const CREATOR_EMAILS = [
   "lafooteusedu54@hotmail.fr",
 ];
 
-// true = maintenance pour les visiteurs et membres ordinaires
+// true = maintenance activée
 // false = site public normalement
 const MAINTENANCE_MODE = false;
 
@@ -18,33 +18,49 @@ const PUBLIC_PAGES = [
   "/",
   "/login",
   "/register",
-  "/waiting",
   "/forgot-password",
   "/reset-password",
   "/contact",
+  "/actualites",
   "/films",
   "/sagas",
-  "/demande-film",
+  "/series",
+  "/tv",
+  "/movie",
+  "/player",
+  "/downloads",
 ];
 
-// Pages et sous-pages qui nécessitent une connexion
+// Pages réservées aux membres connectés
 const PROTECTED_PREFIXES = [
   "/compte",
   "/profil",
   "/notifications",
+  "/demande-film",
+  "/favoris",
+  "/perso",
+  "/chat",
+  "/waiting",
 ];
 
 function isPublicPage(pathname: string) {
   return (
     PUBLIC_PAGES.includes(pathname) ||
     pathname.startsWith("/films/") ||
-    pathname.startsWith("/sagas/")
+    pathname.startsWith("/sagas/") ||
+    pathname.startsWith("/series/") ||
+    pathname.startsWith("/tv/") ||
+    pathname.startsWith("/movie/") ||
+    pathname.startsWith("/player/") ||
+    pathname.startsWith("/downloads/") ||
+    pathname.startsWith("/download/")
   );
 }
 
 function isProtectedPage(pathname: string) {
   return PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    (prefix) =>
+      pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 }
 
@@ -80,75 +96,102 @@ export default function AuthGuard({
           !!user?.email &&
           CREATOR_EMAILS.includes(user.email.toLowerCase());
 
-        // Les fondateurs gardent leur accès.
+        // Les fondateurs gardent toujours leur accès.
         if (isCreator) {
           setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        // Pendant la maintenance, les visiteurs et membres ordinaires
-        // ne peuvent pas accéder au site, y compris à la connexion.
+        // En maintenance, les visiteurs et membres ordinaires
+        // voient le message et ne peuvent pas accéder au site.
         if (MAINTENANCE_MODE) {
           setMaintenance(true);
           setLoading(false);
           return;
         }
 
-        // Les pages publiques ne nécessitent pas de connexion.
+        // Les pages publiques sont accessibles sans connexion.
         if (isPublicPage(pathname)) {
           setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        // Les autres pages restent accessibles uniquement aux membres
-        // connectés et approuvés.
+        // Les pages privées nécessitent une connexion.
+        if (isProtectedPage(pathname)) {
+          if (error || !user) {
+            window.location.replace("/login");
+            return;
+          }
+
+          const { data: profile, error: profileError } =
+            await supabase
+              .from("profiles")
+              .select("status, role")
+              .eq("id", user.id)
+              .maybeSingle();
+
+          if (cancelled) return;
+
+          if (
+            profileError ||
+            !profile ||
+            profile.status !== "approved"
+          ) {
+            window.location.replace("/waiting");
+            return;
+          }
+
+          setAuthorized(true);
+          setLoading(false);
+          return;
+        }
+
+        // Pour toute autre page, on conserve la connexion
+        // et l'approbation obligatoires.
         if (error || !user) {
           window.location.replace("/login");
           return;
         }
 
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("status, role")
-          .eq("id", user.id)
-          .maybeSingle();
+        const { data: profile, error: profileError } =
+          await supabase
+            .from("profiles")
+            .select("status, role")
+            .eq("id", user.id)
+            .maybeSingle();
 
         if (cancelled) return;
 
-        if (profileError || !profile || profile.status !== "approved") {
+        if (
+          profileError ||
+          !profile ||
+          profile.status !== "approved"
+        ) {
           window.location.replace("/waiting");
           return;
         }
 
-        // Une demande de film reste réservée aux membres connectés.
-        if (pathname === "/demande-film") {
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
-
-        // Autorisation des pages protégées.
-        if (isProtectedPage(pathname)) {
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
-
-        // Les autres pages conservent le comportement normal :
-        // membre connecté et approuvé.
         setAuthorized(true);
         setLoading(false);
       } catch (error) {
-        console.error("Erreur de vérification des accès :", error);
+        console.error(
+          "Erreur de vérification des accès :",
+          error
+        );
 
         if (cancelled) return;
 
         if (MAINTENANCE_MODE) {
           setMaintenance(true);
           setLoading(false);
-        } else if (isPublicPage(pathname)) {
+          return;
+        }
+
+        // En cas d'erreur, seules les pages publiques restent
+        // accessibles sans vérification de compte.
+        if (isPublicPage(pathname)) {
           setAuthorized(true);
           setLoading(false);
         } else {
@@ -202,14 +245,21 @@ export default function AuthGuard({
             width: "100%",
             maxWidth: "620px",
             padding: "32px 26px",
-            border: "1px solid rgba(96, 165, 250, 0.45)",
+            border:
+              "1px solid rgba(96, 165, 250, 0.45)",
             borderRadius: "16px",
             background: "rgba(15, 23, 42, 0.96)",
-            boxShadow: "0 0 40px rgba(37, 99, 235, 0.18)",
+            boxShadow:
+              "0 0 40px rgba(37, 99, 235, 0.18)",
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: "42px", marginBottom: "16px" }}>
+          <div
+            style={{
+              fontSize: "42px",
+              marginBottom: "16px",
+            }}
+          >
             🎬
           </div>
 
@@ -233,23 +283,25 @@ export default function AuthGuard({
               lineHeight: 1.8,
             }}
           >
-            Nous travaillons actuellement à la conversion du site vers
-            un nouveau système de streaming avec lecture directement
-            intégrée au lecteur vidéo. Le site sera prochainement
-            accessible librement, sans inscription pour regarder
-            les films disponibles.
+            Nous travaillons actuellement à la conversion du
+            site vers un nouveau système de streaming avec
+            lecture directement intégrée au lecteur vidéo.
+            Le site sera prochainement accessible librement,
+            sans inscription pour regarder les films disponibles.
           </p>
 
           <div
             style={{
               marginTop: "26px",
               paddingTop: "18px",
-              borderTop: "1px solid rgba(148, 163, 184, 0.2)",
+              borderTop:
+                "1px solid rgba(148, 163, 184, 0.2)",
               color: "#94a3b8",
               fontSize: "13px",
             }}
           >
-            Merci de votre patience et à très bientôt sur CineZone Play.
+            Merci de votre patience et à très bientôt sur
+            CineZone Play.
           </div>
         </section>
       </main>
