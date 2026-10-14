@@ -19,47 +19,89 @@ export async function GET(
   try {
     const movieId = Number(params.id);
 
-    console.log("FILM CLIQUE :", movieId);
+    if (!Number.isInteger(movieId) || movieId <= 0) {
+      return NextResponse.json(
+        { error: "Identifiant du film invalide" },
+        { status: 400 }
+      );
+    }
 
+    // Récupérer exclusivement le lien de téléchargement.
     const { data, error } = await supabase
-  .from("downloads")
-  .select("*")
-  .eq("id", movieId)
-  .maybeSingle();
+      .from("downloads")
+      .select("id, link")
+      .eq("id", movieId)
+      .maybeSingle();
 
-console.log("ID recherché :", movieId);
-console.log("DATA :", data);
-console.log("ERROR :", error);
-
-    if (error || !data?.link) {
-      console.error("Lien introuvable :", error);
+    if (error) {
+      console.error("ERREUR SUPABASE DOWNLOAD :", error);
 
       return NextResponse.json(
-        { error: "Lien introuvable" },
+        { error: "Erreur lors de la recherche du lien de téléchargement" },
+        { status: 500 }
+      );
+    }
+
+    if (!data?.link || typeof data.link !== "string") {
+      console.error("LIEN DE TÉLÉCHARGEMENT ABSENT :", movieId);
+
+      return NextResponse.json(
+        { error: "Lien de téléchargement introuvable" },
         { status: 404 }
       );
     }
 
+    const downloadUrl = data.link.trim();
+
+    // Vérifier que le lien est une URL valide.
+    let parsedUrl: URL;
+
+    try {
+      parsedUrl = new URL(downloadUrl);
+    } catch {
+      return NextResponse.json(
+        { error: "Le lien de téléchargement est invalide" },
+        { status: 500 }
+      );
+    }
+
+    if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+      return NextResponse.json(
+        { error: "Protocole du lien de téléchargement non autorisé" },
+        { status: 400 }
+      );
+    }
+
+    const finalLink = addAffiliate(downloadUrl);
+
+    // Enregistrer le clic sans bloquer la redirection si le journal échoue.
     const { error: logError } = await supabase
       .from("download_logs")
-      .insert({
-        movie_id: movieId,
-      });
+      .insert({ movie_id: movieId });
 
-    console.log("DOWNLOAD LOG :", logError);
+    if (logError) {
+      console.error("ERREUR JOURNAL TÉLÉCHARGEMENT :", logError);
+    }
 
-    const finalLink = addAffiliate(data.link);
+    console.log("TÉLÉCHARGEMENT :", {
+      movieId,
+      linkFromDatabase: downloadUrl,
+      finalLink,
+    });
 
-    console.log("REDIRECTION :", finalLink);
-
-    return NextResponse.json({
-  url: finalLink,
-});
-  } catch (err: any) {
+    return NextResponse.json(
+      { url: finalLink },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
+  } catch (err: unknown) {
     console.error("ERREUR API DOWNLOAD :", err);
 
     return NextResponse.json(
-      { error: err.message },
+      { error: "Erreur interne lors du téléchargement" },
       { status: 500 }
     );
   }
