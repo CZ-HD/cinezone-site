@@ -9,18 +9,44 @@ const CREATOR_EMAILS = [
   "lafooteusedu54@hotmail.fr",
 ];
 
-// 🔧 true = maintenance activée
-// ✅ false = site accessible normalement
-const MAINTENANCE_MODE = true;
+// true = maintenance pour les visiteurs et membres ordinaires
+// false = site public normalement
+const MAINTENANCE_MODE = false;
 
+// Pages accessibles sans connexion
 const PUBLIC_PAGES = [
+  "/",
   "/login",
   "/register",
   "/waiting",
   "/forgot-password",
   "/reset-password",
   "/contact",
+  "/films",
+  "/sagas",
+  "/demande-film",
 ];
+
+// Pages et sous-pages qui nécessitent une connexion
+const PROTECTED_PREFIXES = [
+  "/compte",
+  "/profil",
+  "/notifications",
+];
+
+function isPublicPage(pathname: string) {
+  return (
+    PUBLIC_PAGES.includes(pathname) ||
+    pathname.startsWith("/films/") ||
+    pathname.startsWith("/sagas/")
+  );
+}
+
+function isProtectedPage(pathname: string) {
+  return PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
 
 export default function AuthGuard({
   children,
@@ -49,40 +75,40 @@ export default function AuthGuard({
 
         if (cancelled) return;
 
-        // Les fondateurs gardent toujours leur accès.
         const isCreator =
           !error &&
           !!user?.email &&
           CREATOR_EMAILS.includes(user.email.toLowerCase());
 
+        // Les fondateurs gardent leur accès.
         if (isCreator) {
           setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        // Maintenance : aucun accès pour les membres ordinaires,
-        // y compris aux pages de connexion et d'inscription.
+        // Pendant la maintenance, les visiteurs et membres ordinaires
+        // ne peuvent pas accéder au site, y compris à la connexion.
         if (MAINTENANCE_MODE) {
           setMaintenance(true);
           setLoading(false);
           return;
         }
 
-        // En fonctionnement normal, les pages publiques restent accessibles.
-        if (PUBLIC_PAGES.includes(pathname)) {
+        // Les pages publiques ne nécessitent pas de connexion.
+        if (isPublicPage(pathname)) {
           setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        // En fonctionnement normal, un visiteur doit se connecter.
+        // Les autres pages restent accessibles uniquement aux membres
+        // connectés et approuvés.
         if (error || !user) {
           window.location.replace("/login");
           return;
         }
 
-        // Vérification du compte dans Supabase.
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("status, role")
@@ -96,6 +122,22 @@ export default function AuthGuard({
           return;
         }
 
+        // Une demande de film reste réservée aux membres connectés.
+        if (pathname === "/demande-film") {
+          setAuthorized(true);
+          setLoading(false);
+          return;
+        }
+
+        // Autorisation des pages protégées.
+        if (isProtectedPage(pathname)) {
+          setAuthorized(true);
+          setLoading(false);
+          return;
+        }
+
+        // Les autres pages conservent le comportement normal :
+        // membre connecté et approuvé.
         setAuthorized(true);
         setLoading(false);
       } catch (error) {
@@ -105,6 +147,10 @@ export default function AuthGuard({
 
         if (MAINTENANCE_MODE) {
           setMaintenance(true);
+          setLoading(false);
+        } else if (isPublicPage(pathname)) {
+          setAuthorized(true);
+          setLoading(false);
         } else {
           window.location.replace("/login");
         }
@@ -131,7 +177,7 @@ export default function AuthGuard({
           fontSize: "16px",
         }}
       >
-        Vérification des accès...
+        Chargement...
       </div>
     );
   }
@@ -163,12 +209,7 @@ export default function AuthGuard({
             textAlign: "center",
           }}
         >
-          <div
-            style={{
-              fontSize: "42px",
-              marginBottom: "16px",
-            }}
-          >
+          <div style={{ fontSize: "42px", marginBottom: "16px" }}>
             🎬
           </div>
 
@@ -215,9 +256,7 @@ export default function AuthGuard({
     );
   }
 
-  if (!authorized) {
-    return null;
-  }
+  if (!authorized) return null;
 
   return <>{children}</>;
 }
