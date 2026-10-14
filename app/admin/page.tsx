@@ -721,18 +721,23 @@ loadAdminMovies();
     for (const line of lines) {
       let tmdbId = "";
       let downloadLink = "";
+      let streamingLink = "";
 
       if (line.includes("|")) {
+        // Format : ID TMDB | lien téléchargement | lien streaming
+        // Les 2 liens sont facultatifs, mais il en faut au moins un.
         const parts = line.split("|");
-        tmdbId = parts[0]?.trim();
-        downloadLink = parts[1]?.trim();
+        tmdbId = parts[0]?.trim() || "";
+        downloadLink = parts[1]?.trim() || "";
+        streamingLink = parts[2]?.trim() || "";
       } else {
+        // Compatibilité avec l'ancien format : ID TMDB puis lien téléchargement.
         const parts = line.trim().split(/\s+/);
-        tmdbId = parts[0];
-        downloadLink = parts.slice(1).join(" ");
+        tmdbId = parts[0] || "";
+        downloadLink = parts.slice(1).join(" ").trim();
       }
 
-      if (!tmdbId || !downloadLink) {
+      if (!tmdbId || (!downloadLink && !streamingLink) || !/^\d+$/.test(tmdbId)) {
         errors++;
         continue;
       }
@@ -756,7 +761,8 @@ loadAdminMovies();
           },
           body: JSON.stringify({
   id: Number(tmdbId),
-  link: addAffiliate(downloadLink),
+  link: downloadLink ? addAffiliate(downloadLink) : "",
+  stream_link: streamingLink || null,
   codec: bulkCodec,
   audio: bulkAudio,
   title: movie.title,
@@ -1159,13 +1165,13 @@ const filteredNotifications = notifications.filter((notif) => {
       <section style={cardStyle}>
         <h2>📦 Ajout multiple TMDB</h2>
         <p style={subText}>
-          Format : ID TMDB | lien de téléchargement. Un film par ligne.
+          Format : ID TMDB | lien de téléchargement | lien streaming. Un film par ligne. Les liens sont facultatifs, mais chaque ligne doit contenir au moins un lien.
         </p>
 
         <textarea
   value={bulkInput}
   onChange={(e) => setBulkInput(e.target.value)}
-  placeholder={`12345 | https://lien-film-1.com\n67890 | https://lien-film-2.com\n11223 | https://lien-film-3.com`}
+  placeholder={`12345 | https://telechargement-1.com | https://streaming-1.com\n67890 | https://telechargement-2.com | https://streaming-2.com\n11223 | | https://streaming-3.com`}
   style={textareaStyle}
 />
 
