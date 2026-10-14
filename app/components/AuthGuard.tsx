@@ -29,6 +29,9 @@ const PUBLIC_PAGES = [
   "/movie",
   "/player",
   "/downloads",
+  "/download",
+  "/soutenir",
+  "/chat",
 ];
 
 // Pages réservées aux membres connectés
@@ -39,7 +42,6 @@ const PROTECTED_PREFIXES = [
   "/demande-film",
   "/favoris",
   "/perso",
-  "/chat",
   "/waiting",
 ];
 
@@ -53,7 +55,8 @@ function isPublicPage(pathname: string) {
     pathname.startsWith("/movie/") ||
     pathname.startsWith("/player/") ||
     pathname.startsWith("/downloads/") ||
-    pathname.startsWith("/download/")
+    pathname.startsWith("/download/") ||
+    pathname.startsWith("/actualites/")
   );
 }
 
@@ -96,15 +99,15 @@ export default function AuthGuard({
           !!user?.email &&
           CREATOR_EMAILS.includes(user.email.toLowerCase());
 
-        // Les fondateurs gardent toujours leur accès.
+        // Les fondateurs conservent leur accès.
         if (isCreator) {
           setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        // En maintenance, les visiteurs et membres ordinaires
-        // voient le message et ne peuvent pas accéder au site.
+        // Maintenance : les visiteurs et membres ordinaires
+        // voient le message de maintenance.
         if (MAINTENANCE_MODE) {
           setMaintenance(true);
           setLoading(false);
@@ -118,43 +121,13 @@ export default function AuthGuard({
           return;
         }
 
-        // Les pages privées nécessitent une connexion.
-        if (isProtectedPage(pathname)) {
-          if (error || !user) {
-            window.location.replace("/login");
-            return;
-          }
-
-          const { data: profile, error: profileError } =
-            await supabase
-              .from("profiles")
-              .select("status, role")
-              .eq("id", user.id)
-              .maybeSingle();
-
-          if (cancelled) return;
-
-          if (
-            profileError ||
-            !profile ||
-            profile.status !== "approved"
-          ) {
-            window.location.replace("/waiting");
-            return;
-          }
-
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
-
-        // Pour toute autre page, on conserve la connexion
-        // et l'approbation obligatoires.
+        // Toute page privée exige une connexion.
         if (error || !user) {
           window.location.replace("/login");
           return;
         }
 
+        // Vérification de l'approbation du compte.
         const { data: profile, error: profileError } =
           await supabase
             .from("profiles")
@@ -173,6 +146,14 @@ export default function AuthGuard({
           return;
         }
 
+        // Les membres connectés et approuvés accèdent aux pages privées.
+        if (isProtectedPage(pathname)) {
+          setAuthorized(true);
+          setLoading(false);
+          return;
+        }
+
+        // Les autres pages nécessitent également un compte approuvé.
         setAuthorized(true);
         setLoading(false);
       } catch (error) {
@@ -189,8 +170,7 @@ export default function AuthGuard({
           return;
         }
 
-        // En cas d'erreur, seules les pages publiques restent
-        // accessibles sans vérification de compte.
+        // En cas d'erreur, les pages publiques restent accessibles.
         if (isPublicPage(pathname)) {
           setAuthorized(true);
           setLoading(false);
@@ -245,12 +225,10 @@ export default function AuthGuard({
             width: "100%",
             maxWidth: "620px",
             padding: "32px 26px",
-            border:
-              "1px solid rgba(96, 165, 250, 0.45)",
+            border: "1px solid rgba(96, 165, 250, 0.45)",
             borderRadius: "16px",
             background: "rgba(15, 23, 42, 0.96)",
-            boxShadow:
-              "0 0 40px rgba(37, 99, 235, 0.18)",
+            boxShadow: "0 0 40px rgba(37, 99, 235, 0.18)",
             textAlign: "center",
           }}
         >
@@ -294,8 +272,7 @@ export default function AuthGuard({
             style={{
               marginTop: "26px",
               paddingTop: "18px",
-              borderTop:
-                "1px solid rgba(148, 163, 184, 0.2)",
+              borderTop: "1px solid rgba(148, 163, 184, 0.2)",
               color: "#94a3b8",
               fontSize: "13px",
             }}
