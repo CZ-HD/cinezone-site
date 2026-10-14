@@ -834,67 +834,6 @@ const saveBulkDownloads = async () => {
 };
 
 
-        try {
-          const movieRes = await fetch(
-            `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${API_KEY}&language=fr-FR`
-          );
-
-          if (!movieRes.ok) {
-            errors++;
-            errorDetails.push(`TMDB ${tmdbId} : film introuvable (HTTP ${movieRes.status})`);
-            continue;
-          }
-
-          const movie = await movieRes.json();
-          const res = await fetch("/api/downloads", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: Number(tmdbId),
-              link: downloadLink ? addAffiliate(downloadLink) : null,
-              stream_link: streamingLink || null,
-              codec: bulkCodec,
-              audio: bulkAudio,
-              title: movie.title,
-              poster_path: movie.poster_path,
-              backdrop_path: movie.backdrop_path,
-              vote_average: movie.vote_average,
-              release_date: movie.release_date,
-              release_year: movie.release_date
-                ? Number(movie.release_date.substring(0, 4))
-                : null,
-              imdb_id: movie.imdb_id || null,
-            }),
-          });
-
-          const result = await res.json().catch(() => ({}));
-          if (res.ok && result.success) {
-            success++;
-          } else {
-            errors++;
-            errorDetails.push(
-              `TMDB ${tmdbId} : ${result.error || `erreur HTTP ${res.status}`}`
-            );
-          }
-        } catch {
-          errors++;
-          errorDetails.push(`TMDB ${tmdbId} : erreur de communication`);
-        }
-      }
-
-      await loadAdminMovies();
-      setBulkInput("");
-      setMessage(
-        `📦 Terminé : ${success} film(s) enregistré(s), ${errors} erreur(s).` +
-          (errorDetails.length
-            ? "\n" + errorDetails.slice(0, 8).join("\n")
-            : "")
-      );
-    } finally {
-      setBulkLoading(false);
-    }
-  };
-
   const saveManualDownload = async () => {
     const title = manualTitle.trim();
     const year = manualYear.trim();
