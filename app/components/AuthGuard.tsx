@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -9,12 +10,8 @@ const CREATOR_EMAILS = [
   "lafooteusedu54@hotmail.fr",
 ];
 
-// true = maintenance activée
-// false = site public normalement
 const MAINTENANCE_MODE = true;
 
-// Rôles autorisés à accéder au site pendant la maintenance.
-// Vérifier que ces valeurs correspondent aux rôles utilisés dans Supabase.
 const ADMIN_ROLES = [
   "admin",
   "administrator",
@@ -23,7 +20,6 @@ const ADMIN_ROLES = [
   "owner",
 ];
 
-// Pages accessibles sans connexion lorsque le site est ouvert
 const PUBLIC_PAGES = [
   "/",
   "/login",
@@ -44,7 +40,6 @@ const PUBLIC_PAGES = [
   "/chat",
 ];
 
-// Pages réservées aux membres connectés
 const PROTECTED_PREFIXES = [
   "/compte",
   "/profil",
@@ -88,149 +83,163 @@ export default function AuthGuard({
   const [maintenance, setMaintenance] = useState(false);
   const [authorized, setAuthorized] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const checkAccess = useCallback(async () => {
+    setLoading(true);
+    setMaintenance(false);
+    setAuthorized(false);
 
-    async function checkAccess() {
-      setLoading(true);
-      setMaintenance(false);
-      setAuthorized(false);
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
 
-      try {
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
+      const normalizedEmail = user?.email?.trim().toLowerCase();
 
-        if (cancelled) return;
-
-        const normalizedEmail = user?.email?.trim().toLowerCase();
-
-        const isCreator =
-          !error &&
-          !!normalizedEmail &&
-          CREATOR_EMAILS.some(
-            (email) =>
-              email.trim().toLowerCase() === normalizedEmail
-          );
-
-        // Les deux fondateurs conservent leur accès.
-        if (isCreator) {
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
-
-        // Pendant la maintenance, seuls les administrateurs
-        // dont le rôle est reconnu peuvent accéder au site.
-        if (MAINTENANCE_MODE) {
-          if (!error && user) {
-            const {
-              data: profile,
-              error: profileError,
-            } = await supabase
-              .from("profiles")
-              .select("role")
-              .eq("id", user.id)
-              .maybeSingle();
-
-            if (cancelled) return;
-
-            const role = String(profile?.role ?? "")
-              .trim()
-              .toLowerCase();
-
-            if (
-              !profileError &&
-              profile &&
-              ADMIN_ROLES.includes(role)
-            ) {
-              setAuthorized(true);
-              setLoading(false);
-              return;
-            }
-          }
-
-          // Visiteurs et membres ordinaires :
-          // afficher la page de maintenance.
-          setMaintenance(true);
-          setLoading(false);
-          return;
-        }
-
-        // Hors maintenance, les pages publiques restent accessibles.
-        if (isPublicPage(pathname)) {
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
-
-        // Les pages privées nécessitent une connexion.
-        if (error || !user) {
-          window.location.replace("/login");
-          return;
-        }
-
-        // Vérification du profil et de l'approbation du compte.
-        const {
-          data: profile,
-          error: profileError,
-        } = await supabase
-          .from("profiles")
-          .select("status, role")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (cancelled) return;
-
-        if (
-          profileError ||
-          !profile ||
-          profile.status !== "approved"
-        ) {
-          window.location.replace("/waiting");
-          return;
-        }
-
-        if (isProtectedPage(pathname)) {
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
-
-        setAuthorized(true);
-        setLoading(false);
-      } catch (error) {
-        console.error(
-          "Erreur de vérification des accès :",
-          error
+      const isCreator =
+        !error &&
+        !!normalizedEmail &&
+        CREATOR_EMAILS.some(
+          (email) => email.trim().toLowerCase() === normalizedEmail
         );
 
-        if (cancelled) return;
+      // Les deux fondateurs ont toujours accès au site.
+      if (isCreator) {
+        setAuthorized(true);
+        setLoading(false);
+        return;
+      }
 
-        // En cas d'erreur pendant la maintenance,
-        // ne pas ouvrir le site aux membres ordinaires.
-        if (MAINTENANCE_MODE) {
-          setMaintenance(true);
+      // Pendant la maintenance, vérifier les administrateurs.
+      if (MAINTENANCE_MODE) {
+        if (!error && user) {
+          const {
+            data: profile,
+            error: profileError,
+          } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          const role = String(profile?.role ?? "")
+            .trim()
+            .toLowerCase();
+
+          if (
+            !profileError &&
+            profile &&
+            ADMIN_ROLES.includes(role)
+          ) {
+            setAuthorized(true);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Autoriser la page de connexion pour permettre
+        // aux fondateurs de se connecter pendant la maintenance.
+        if (pathname === "/login") {
+          setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        if (isPublicPage(pathname)) {
-          setAuthorized(true);
-          setLoading(false);
-        } else {
-          window.location.replace("/login");
-        }
+        // Les visiteurs et membres ordinaires restent bloqués.
+        setMaintenance(true);
+        setLoading(false);
+        return;
+      }
+
+      // Fonctionnement normal lorsque la maintenance est désactivée.
+      if (isPublicPage(pathname)) {
+        setAuthorized(true);
+        setLoading(false);
+        return;
+      }
+
+      if (error || !user) {
+        window.location.replace("/login");
+        return;
+      }
+
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select("status, role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (
+        profileError ||
+        !profile ||
+        profile.status !== "approved"
+      ) {
+        window.location.replace("/waiting");
+        return;
+      }
+
+      setAuthorized(true);
+      setLoading(false);
+    } catch (error) {
+      console.error("Erreur de vérification des accès :", error);
+
+      if (MAINTENANCE_MODE && pathname !== "/login") {
+        setMaintenance(true);
+        setLoading(false);
+        return;
+      }
+
+      if (MAINTENANCE_MODE && pathname === "/login") {
+        setAuthorized(true);
+        setLoading(false);
+        return;
+      }
+
+      if (isPublicPage(pathname)) {
+        setAuthorized(true);
+        setLoading(false);
+      } else {
+        window.location.replace("/login");
       }
     }
+  }, [pathname]);
 
-    checkAccess();
+  useEffect(() => {
+    let active = true;
+
+    const runCheck = async () => {
+      if (active) {
+        await checkAccess();
+      }
+    };
+
+    void runCheck();
+
+    // Recontrôler les droits après une connexion ou déconnexion.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "TOKEN_REFRESHED"
+      ) {
+        setTimeout(() => {
+          if (active) {
+            void checkAccess();
+          }
+        }, 0);
+      }
+    });
 
     return () => {
-      cancelled = true;
+      active = false;
+      subscription.unsubscribe();
     };
-  }, [pathname]);
+  }, [checkAccess]);
 
   if (loading) {
     return (
@@ -277,12 +286,7 @@ export default function AuthGuard({
             textAlign: "center",
           }}
         >
-          <div
-            style={{
-              fontSize: "42px",
-              marginBottom: "16px",
-            }}
-          >
+          <div style={{ fontSize: "42px", marginBottom: "16px" }}>
             🎬
           </div>
 
