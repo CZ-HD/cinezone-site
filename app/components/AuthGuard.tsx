@@ -222,11 +222,10 @@ export default function AuthGuard({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (
-        event === "SIGNED_IN" ||
-        event === "SIGNED_OUT" ||
-        event === "TOKEN_REFRESHED"
-      ) {
+      // Revalider les droits lors d'une vraie connexion/déconnexion.
+      // TOKEN_REFRESHED renouvelle seulement le jeton : relancer checkAccess()
+      // ici masquait toute la page avec « Chargement… » à chaque renouvellement.
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         setTimeout(() => {
           if (active) {
             void checkAccess();
