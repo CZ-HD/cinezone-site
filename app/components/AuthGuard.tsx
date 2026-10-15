@@ -94,19 +94,22 @@ export default function AuthGuard({
 
         if (cancelled) return;
 
-        const isCreator =
-          !error &&
-          !!user?.email &&
-          CREATOR_EMAILS.includes(user.email.toLowerCase());
+        const normalizedEmail = user?.email?.trim().toLowerCase();
 
-        // Les fondateurs conservent leur accès.
-        if (isCreator) {
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
+const isCreator =
+  !error &&
+  !!normalizedEmail &&
+  CREATOR_EMAILS.some(
+    (email) => email.trim().toLowerCase() === normalizedEmail
+  );
 
-        // Maintenance : les visiteurs et membres ordinaires
+if (isCreator) {
+  setAuthorized(true);
+  setLoading(false);
+  return;
+}
+
+ // Maintenance : les visiteurs et membres ordinaires
         // voient le message de maintenance.
         if (MAINTENANCE_MODE) {
           setMaintenance(true);
