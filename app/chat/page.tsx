@@ -119,6 +119,7 @@ export default function ChatPage() {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [reactionPulse, setReactionPulse] = useState<string | null>(null);
   const [text, setText] = useState("");
+  const [draftReady, setDraftReady] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -147,6 +148,38 @@ export default function ChatPage() {
   const typingTimeoutRef = useRef<Record<string, any>>({});
   const userIdRef = useRef<string | null>(null);
   const soundEnabledRef = useRef(soundEnabled);
+
+  // Restaure le brouillon du chat pour cet utilisateur après le chargement du compte.
+  useEffect(() => {
+    if (!user?.id) return;
+
+    setDraftReady(false);
+    try {
+      const savedDraft = window.localStorage.getItem(
+        `cinezone-chat-draft-${user.id}`
+      );
+      setText(savedDraft ?? "");
+    } catch {
+      // Le chat reste utilisable même si le stockage du navigateur est indisponible.
+    }
+    setDraftReady(true);
+  }, [user?.id]);
+
+  // Sauvegarde automatiquement le texte non envoyé, y compris lors d'un rechargement.
+  useEffect(() => {
+    if (!user?.id || !draftReady) return;
+
+    try {
+      const draftKey = `cinezone-chat-draft-${user.id}`;
+      if (text) {
+        window.localStorage.setItem(draftKey, text);
+      } else {
+        window.localStorage.removeItem(draftKey);
+      }
+    } catch {
+      // Ne bloque pas la saisie si le stockage du navigateur est indisponible.
+    }
+  }, [text, user?.id, draftReady]);
 
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
