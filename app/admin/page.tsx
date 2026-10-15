@@ -129,16 +129,17 @@ const [manualAudio, setManualAudio] = useState("VF");
     checkAdmin();
   }, []);
 
-  useEffect(() => {
-    if (!isAdmin) return;
+useEffect(() => {
+  if (!isAdmin) return;
 
-    loadPresence();
-    loadUsers();
-    loadSagas();
-    loadAdminMovies();
-    loadNotifications();
-    loadDownloadStats();
-    
+  loadPresence();
+  loadUsers();
+  loadSagas();
+  loadAdminMovies();
+  loadNotifications();
+  loadDownloadStats();
+}, [isAdmin]);
+
     const timer = setInterval(() => {
       loadPresence();
       loadUsers();
