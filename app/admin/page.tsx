@@ -141,10 +141,6 @@ const [bulkAudio, setBulkAudio] = useState("VF");
     loadDownloadStats();
   }, [isAdmin]);
 
-
-    return () => clearInterval(timer);
-  }, [isAdmin]);
-
   const addAffiliate = (url: string) => {
     const affiliate = "af=5257374";
     if (!url.includes("1fichier.com")) return url;
@@ -152,7 +148,7 @@ const [bulkAudio, setBulkAudio] = useState("VF");
     return url.includes("?") ? `${url}&${affiliate}` : `${url}?${affiliate}`;
   };
 
-  const cleanImdb = (value: string) => {
+const cleanImdb = (value: string) => {
     const found = value.match(/tt\d+/);
     return found ? found[0] : value.trim();
   };
