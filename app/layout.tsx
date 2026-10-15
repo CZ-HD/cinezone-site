@@ -42,24 +42,25 @@ export const metadata: Metadata = {
     google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
   },
 
-  openGraph: {
-    title: "CineZone HD",
-    description:
-      "Plateforme communautaire gratuite pour les passionnés de cinéma.",
-    url: "https://cinezone-hd.fr",
-    siteName: "CineZone HD",
-    images: [
-      {
-        url: "/android-chrome-512x512.png",
-        width: 512,
-        height: 512,
-        alt: "CineZone HD",
-      },
-    ],
-    locale: "fr_FR",
-    type: "website",
-  },
-};
+  
+openGraph: {
+  title: "CineZone Play – Streaming HD",
+  description:
+    "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD.",
+  url: "https://cinezone-hd.fr",
+  siteName: "CineZone Play",
+  images: [
+    {
+      url: "/android-chrome-512x512.png",
+      width: 512,
+      height: 512,
+      alt: "CineZone Play",
+    },
+  ],
+  locale: "fr_FR",
+  type: "website",
+},
+
 
 export default function RootLayout({
   children,
@@ -138,10 +139,11 @@ textShadow: "0 0 12px #ff0000",
       letterSpacing: "0.3px",
     }}
   >
-    🚀 INFO CINEZONE HD : Le streaming HD est actuellement en cours de
+    🚀 INFO CINEZONE PLAY : Le streaming HD est actuellement en cours de
     déploiement sur le site. Les films seront ajoutés progressivement.
     Merci de votre patience, de votre compréhension et de votre fidélité.
-    ❤️ L'équipe d'administration de CineZone HD vous remercie ! 🎬
+    ❤️ L'équipe d'administration de CineZone Play vous remercie ! 🎬
+
   </div>
 </div>
         </header>
@@ -152,10 +154,10 @@ textShadow: "0 0 12px #ff0000",
           </div>
 
           <footer style={footerStyle}>
-            <h2 style={footerTitle}>CineZone HD</h2>
+            <h2 style={footerTitle}>CineZone Play</h2>
 
             <p style={footerSubtitle}>
-              Plateforme communautaire gratuite pour les passionnés de cinéma.
+              Votre espace dédié au cinéma et au streaming HD.
             </p>
 
             <div style={footerLinks}>
@@ -171,7 +173,7 @@ textShadow: "0 0 12px #ff0000",
             </div>
 
             <p style={footerLegal}>
-              Made with ❤️ by CineZone — 2026.
+              Made with ❤️ by CineZone Play — 2026.
             </p>
           </footer>
         </AuthGuard>
