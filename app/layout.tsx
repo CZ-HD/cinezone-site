@@ -10,11 +10,13 @@ import "./globals.css";
 import NotificationsBell from "./components/NotificationsBell";
 import CursorTrail from "./components/CursorTrail";
 
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cinezone-hd.fr"),
 
-  title: "CineZone HD",
-  description: "Films gratuits et catalogue CineZone HD",
+  title: "CineZone Play – Streaming HD",
+  description:
+    "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD avec lecture directement intégrée au lecteur vidéo.",
 
   icons: {
     icon: [
