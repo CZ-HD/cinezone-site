@@ -13,7 +13,17 @@ const CREATOR_EMAILS = [
 // false = site public normalement
 const MAINTENANCE_MODE = true;
 
-// Pages accessibles sans connexion
+// Rôles autorisés à accéder au site pendant la maintenance.
+// Vérifier que ces valeurs correspondent aux rôles utilisés dans Supabase.
+const ADMIN_ROLES = [
+  "admin",
+  "administrator",
+  "administrateur",
+  "founder",
+  "owner",
+];
+
+// Pages accessibles sans connexion lorsque le site est ouvert
 const PUBLIC_PAGES = [
   "/",
   "/login",
@@ -96,47 +106,80 @@ export default function AuthGuard({
 
         const normalizedEmail = user?.email?.trim().toLowerCase();
 
-const isCreator =
-  !error &&
-  !!normalizedEmail &&
-  CREATOR_EMAILS.some(
-    (email) => email.trim().toLowerCase() === normalizedEmail
-  );
+        const isCreator =
+          !error &&
+          !!normalizedEmail &&
+          CREATOR_EMAILS.some(
+            (email) =>
+              email.trim().toLowerCase() === normalizedEmail
+          );
 
-if (isCreator) {
-  setAuthorized(true);
-  setLoading(false);
-  return;
-}
+        // Les deux fondateurs conservent leur accès.
+        if (isCreator) {
+          setAuthorized(true);
+          setLoading(false);
+          return;
+        }
 
- // Maintenance : les visiteurs et membres ordinaires
-        // voient le message de maintenance.
+        // Pendant la maintenance, seuls les administrateurs
+        // dont le rôle est reconnu peuvent accéder au site.
         if (MAINTENANCE_MODE) {
+          if (!error && user) {
+            const {
+              data: profile,
+              error: profileError,
+            } = await supabase
+              .from("profiles")
+              .select("role")
+              .eq("id", user.id)
+              .maybeSingle();
+
+            if (cancelled) return;
+
+            const role = String(profile?.role ?? "")
+              .trim()
+              .toLowerCase();
+
+            if (
+              !profileError &&
+              profile &&
+              ADMIN_ROLES.includes(role)
+            ) {
+              setAuthorized(true);
+              setLoading(false);
+              return;
+            }
+          }
+
+          // Visiteurs et membres ordinaires :
+          // afficher la page de maintenance.
           setMaintenance(true);
           setLoading(false);
           return;
         }
 
-        // Les pages publiques sont accessibles sans connexion.
+        // Hors maintenance, les pages publiques restent accessibles.
         if (isPublicPage(pathname)) {
           setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        // Toute page privée exige une connexion.
+        // Les pages privées nécessitent une connexion.
         if (error || !user) {
           window.location.replace("/login");
           return;
         }
 
-        // Vérification de l'approbation du compte.
-        const { data: profile, error: profileError } =
-          await supabase
-            .from("profiles")
-            .select("status, role")
-            .eq("id", user.id)
-            .maybeSingle();
+        // Vérification du profil et de l'approbation du compte.
+        const {
+          data: profile,
+          error: profileError,
+        } = await supabase
+          .from("profiles")
+          .select("status, role")
+          .eq("id", user.id)
+          .maybeSingle();
 
         if (cancelled) return;
 
@@ -149,14 +192,12 @@ if (isCreator) {
           return;
         }
 
-        // Les membres connectés et approuvés accèdent aux pages privées.
         if (isProtectedPage(pathname)) {
           setAuthorized(true);
           setLoading(false);
           return;
         }
 
-        // Les autres pages nécessitent également un compte approuvé.
         setAuthorized(true);
         setLoading(false);
       } catch (error) {
@@ -167,13 +208,14 @@ if (isCreator) {
 
         if (cancelled) return;
 
+        // En cas d'erreur pendant la maintenance,
+        // ne pas ouvrir le site aux membres ordinaires.
         if (MAINTENANCE_MODE) {
           setMaintenance(true);
           setLoading(false);
           return;
         }
 
-        // En cas d'erreur, les pages publiques restent accessibles.
         if (isPublicPage(pathname)) {
           setAuthorized(true);
           setLoading(false);
