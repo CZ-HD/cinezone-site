@@ -44,22 +44,26 @@ export const metadata: Metadata = {
 
   
 openGraph: {
-  title: "CineZone Play – Streaming HD",
-  description:
-    "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD.",
-  url: "https://cinezone-hd.fr",
-  siteName: "CineZone Play",
-  images: [
-    {
-      url: "/android-chrome-512x512.png",
-      width: 512,
-      height: 512,
-      alt: "CineZone Play",
-    },
-  ],
-  locale: "fr_FR",
-  type: "website",
-},
+    title: "CineZone Play – Streaming HD",
+    description:
+      "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD.",
+    url: "https://cinezone-hd.fr",
+    siteName: "CineZone Play",
+    images: [
+      {
+        url: "/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "CineZone Play",
+      },
+    ],
+    locale: "fr_FR",
+    type: "website",
+  },
+};
+
+export default function RootLayout({
+
 
 
 export default function RootLayout({
