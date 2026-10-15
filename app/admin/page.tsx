@@ -123,28 +123,24 @@ const [manualCodec, setManualCodec] = useState("H264");
 
 const [audio, setAudio] = useState("VF");
 const [bulkAudio, setBulkAudio] = useState("VF");
-const [manualAudio, setManualAudio] = useState("VF");  
-  
+
+  const [manualAudio, setManualAudio] = useState("VF");
+
   useEffect(() => {
     checkAdmin();
   }, []);
 
-useEffect(() => {
-  if (!isAdmin) return;
+  useEffect(() => {
+    if (!isAdmin) return;
 
-  loadPresence();
-  loadUsers();
-  loadSagas();
-  loadAdminMovies();
-  loadNotifications();
-  loadDownloadStats();
-}, [isAdmin]);
+    loadPresence();
+    loadUsers();
+    loadSagas();
+    loadAdminMovies();
+    loadNotifications();
+    loadDownloadStats();
+  }, [isAdmin]);
 
-    const timer = setInterval(() => {
-      loadPresence();
-      loadUsers();
-      loadNotifications();
-    }, 5000);
 
     return () => clearInterval(timer);
   }, [isAdmin]);
