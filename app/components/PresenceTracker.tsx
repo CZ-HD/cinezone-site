@@ -8,40 +8,54 @@ export default function PresenceTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
+    let cancelled = false;
+    let updating = false;
 
     async function updatePresence() {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
+      // Évite de lancer une seconde mise à jour si la précédente est encore en cours.
+      if (cancelled || updating) return;
+      updating = true;
 
-      if (!user) return;
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || cancelled || !data.user) return;
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("username, avatar, role")
-        .eq("id", user.id)
-        .maybeSingle();
+        const user = data.user;
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username, avatar, role")
+          .eq("id", user.id)
+          .maybeSingle();
 
-      await supabase.from("user_presence").upsert(
-        {
-          user_id: user.id,
-          email: user.email,
-          username: profile?.username || user.email || "Nouveau membre",
-          avatar: profile?.avatar || null,
-          role: profile?.role || "user",
-          current_page: pathname || "/",
-          last_seen: new Date().toISOString(),
-        },
-        {
-          onConflict: "user_id",
-        }
-      );
+        if (cancelled) return;
+
+        await supabase.from("user_presence").upsert(
+          {
+            user_id: user.id,
+            email: user.email,
+            username: profile?.username || user.email || "Nouveau membre",
+            avatar: profile?.avatar || null,
+            role: profile?.role || "user",
+            current_page: pathname || "/",
+            last_seen: new Date().toISOString(),
+          },
+          { onConflict: "user_id" }
+        );
+      } catch (error) {
+        console.error("Erreur de mise à jour de présence :", error);
+      } finally {
+        updating = false;
+      }
     }
 
-    updatePresence();
-    interval = setInterval(updatePresence, 5000);
+    void updatePresence();
+    // 30 secondes suffisent pour actualiser la présence sans interroger Supabase toutes les 5 secondes.
+    const interval = setInterval(() => void updatePresence(), 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [pathname]);
 
   return null;
