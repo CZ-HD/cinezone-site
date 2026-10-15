@@ -21,47 +21,57 @@ export default function NotificationsBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    init();
-  }, []);
+    let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-  async function init() {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) return;
+    async function init() {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || cancelled || !data.user) return;
 
-    setUser(data.user);
-    await loadNotifications(data.user.id);
+        const currentUser = data.user;
+        setUser(currentUser);
 
-    const channel = supabase
-      .channel(`notifications-user-${data.user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        (payload) => {
-          const notif = payload.new as Notification & { user_id: string };
+        const { data: notificationData, error: notificationsError } = await supabase
+          .from("notifications")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .eq("read", false)
+          .order("created_at", { ascending: false })
+          .limit(20);
 
-          if (notif.user_id === data.user.id && !notif.read) {
-            setNotifications((prev) => [notif, ...prev]);
-          }
+        if (cancelled) return;
+        if (notificationsError) {
+          console.error("Erreur de chargement des notifications :", notificationsError);
         }
-      )
-      .subscribe();
+        setNotifications(notificationData || []);
 
+        channel = supabase
+          .channel(`notifications-user-${currentUser.id}`)
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "notifications" },
+            (payload) => {
+              const notif = payload.new as Notification & { user_id: string };
+              if (notif.user_id === currentUser.id && !notif.read) {
+                setNotifications((prev) => [notif, ...prev.filter((item) => item.id !== notif.id)]);
+              }
+            }
+          )
+          .subscribe();
+      } catch (error) {
+        if (!cancelled) console.error("Erreur d'initialisation des notifications :", error);
+      }
+    }
+
+    void init();
+
+    // Le nettoyage est retourné directement par useEffect afin que React ferme bien le canal.
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) void supabase.removeChannel(channel);
     };
-  }
-
-  async function loadNotifications(userId: string) {
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("read", false)
-      .order("created_at", { ascending: false })
-      .limit(20);
-
-    setNotifications(data || []);
-  }
+  }, []);
 
   async function markAsRead(id: string) {
     await supabase
