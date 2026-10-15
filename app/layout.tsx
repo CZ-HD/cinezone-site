@@ -62,9 +62,6 @@ openGraph: {
   },
 };
 
-export default function RootLayout({
-
-
 
 export default function RootLayout({
   children,
@@ -74,13 +71,13 @@ export default function RootLayout({
   const showSeries = false;
 
   const navLinks = [
-  ["Films", "/films"],
-  ["🎞️ Sagas", "/sagas"],
-  ...(showSeries ? [["Séries", "/series"]] : []),
-  ["🎬 Demande film", "/demande-film"],
-  ["❤️ Soutenir", "/soutenir"],
-];
-  
+    ["Films", "/films"],
+    ["🎞️ Sagas", "/sagas"],
+    ...(showSeries ? [["Séries", "/series"]] : []),
+    ["🎬 Demande film", "/demande-film"],
+    ["❤️ Soutenir", "/soutenir"],
+  ];
+
   return (
     <html lang="fr" suppressHydrationWarning>
       <body
@@ -96,18 +93,14 @@ export default function RootLayout({
         <PresenceTracker />
         <CursorTrail />
 
-<header style={headerStyle}>
+        <header style={headerStyle}>
           <div style={topHeaderStyle}>
-            {/* Logo */}
             <Link href="/" style={logoLinkStyle}>
               <div style={logoBoxStyle}>CZ</div>
-
               <span style={logoTextStyle}>CineZone Play</span>
             </Link>
 
-            {/* Navbar */}
             <nav style={navWrapper}>
-              {/* Navigation principale */}
               <div style={navCenter}>
                 <MenuDropdown />
 
@@ -118,13 +111,11 @@ export default function RootLayout({
                 ))}
               </div>
 
-              {/* Actions */}
               <div style={navActions}>
                 <ChatNavLink />
                 <NotificationsBell />
               </div>
 
-              {/* Profil */}
               <div style={profileSection}>
                 <AdminButton />
                 <UserMenu />
@@ -132,24 +123,22 @@ export default function RootLayout({
             </nav>
           </div>
 
-          {/* Bandeau */}
-<div style={marqueeContainer}>
-  <div
-    style={{
-      ...marqueeText,
-      color: "#ff0000",
-fontWeight: 900,
-textShadow: "0 0 12px #ff0000",
-      letterSpacing: "0.3px",
-    }}
-  >
-    🚀 INFO CINEZONE PLAY : Le streaming HD est actuellement en cours de
-    déploiement sur le site. Les films seront ajoutés progressivement.
-    Merci de votre patience, de votre compréhension et de votre fidélité.
-    ❤️ L'équipe d'administration de CineZone Play vous remercie ! 🎬
-
-  </div>
-</div>
+          <div style={marqueeContainer}>
+            <div
+              style={{
+                ...marqueeText,
+                color: "#ff0000",
+                fontWeight: 900,
+                textShadow: "0 0 12px #ff0000",
+                letterSpacing: "0.3px",
+              }}
+            >
+              🚀 INFO CINEZONE PLAY : Le streaming HD est actuellement en cours de
+              déploiement sur le site. Les films seront ajoutés progressivement.
+              Merci de votre patience, de votre compréhension et de votre fidélité.
+              ❤️ L'équipe d'administration de CineZone Play vous remercie ! 🎬
+            </div>
+          </div>
         </header>
 
         <AuthGuard>
@@ -185,6 +174,7 @@ textShadow: "0 0 12px #ff0000",
     </html>
   );
 }
+
 
 const headerStyle: React.CSSProperties = {
   position: "fixed",
