@@ -1,0 +1,77 @@
+
+/* CineZone Play — Thème Halloween */
+body.cz-halloween-active {
+  background:
+    radial-gradient(ellipse at top, #351000 0%, #120509 48%, #030205 100%) !important;
+  position: relative;
+}
+
+body.cz-halloween-active header {
+  border-bottom: 1px solid rgba(255, 105, 0, 0.65) !important;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(255, 80, 0, 0.18) !important;
+}
+
+.cz-halloween-decoration {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cz-halloween-pumpkin {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  font-size: 42px;
+  filter: drop-shadow(0 0 12px rgba(255, 100, 0, 0.8));
+  animation: cz-pumpkin-glow 3s ease-in-out infinite alternate;
+}
+
+.cz-halloween-bat {
+  position: absolute;
+  top: 15%;
+  font-size: 25px;
+  opacity: 0.8;
+  animation: cz-bat-fly 16s linear infinite;
+}
+
+.cz-bat-one {
+  left: -40px;
+}
+
+.cz-bat-two {
+  top: 32%;
+  left: -70px;
+  animation-delay: 7s;
+  animation-duration: 21s;
+}
+
+.cz-halloween-web {
+  position: absolute;
+  top: 115px;
+  right: 18px;
+  color: #ff8a00;
+  font-size: 48px;
+  opacity: 0.55;
+}
+
+@keyframes cz-pumpkin-glow {
+  from { filter: drop-shadow(0 0 5px rgba(255, 100, 0, 0.4)); }
+  to { filter: drop-shadow(0 0 16px rgba(255, 100, 0, 0.9)); }
+}
+
+@keyframes cz-bat-fly {
+  0% { transform: translate(-50px, 0) rotate(0deg); }
+  50% { transform: translate(55vw, 35px) rotate(8deg); }
+  100% { transform: translate(110vw, -10px) rotate(-5deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cz-halloween-bat,
+  .cz-halloween-pumpkin {
+    animation: none !important;
+  }
+}
