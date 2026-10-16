@@ -2,76 +2,163 @@
 /* CineZone Play — Thème Halloween */
 body.cz-halloween-active {
   background:
+    radial-gradient(ellipse at 50% 0%, rgba(100, 24, 80, 0.22), transparent 48%),
     radial-gradient(ellipse at top, #351000 0%, #120509 48%, #030205 100%) !important;
   position: relative;
 }
 
 body.cz-halloween-active header {
-  border-bottom: 1px solid rgba(255, 105, 0, 0.65) !important;
+  border-bottom: 1px solid rgba(255, 105, 0, 0.75) !important;
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.8),
-    0 0 25px rgba(255, 80, 0, 0.18) !important;
+    0 0 25px rgba(255, 80, 0, 0.25) !important;
 }
 
+/* Décorations globales, sans bloquer les clics */
 .cz-halloween-decoration {
   position: fixed;
   inset: 0;
   z-index: 90;
   pointer-events: none;
   overflow: hidden;
+  contain: layout paint;
 }
 
+/* Citrouille lumineuse */
 .cz-halloween-pumpkin {
   position: absolute;
-  right: 22px;
-  bottom: 18px;
-  font-size: 42px;
+  right: 24px;
+  bottom: 20px;
+  font-size: clamp(34px, 4vw, 52px);
   filter: drop-shadow(0 0 12px rgba(255, 100, 0, 0.8));
   animation: cz-pumpkin-glow 3s ease-in-out infinite alternate;
 }
 
+/* Chauves-souris */
 .cz-halloween-bat {
   position: absolute;
-  top: 15%;
+  left: -70px;
+  top: 18%;
   font-size: 25px;
-  opacity: 0.8;
-  animation: cz-bat-fly 16s linear infinite;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 8px rgba(160, 80, 255, 0.7));
+  animation: cz-bat-fly 18s linear infinite;
+  will-change: transform;
 }
 
 .cz-bat-one {
-  left: -40px;
+  top: 18%;
+  animation-duration: 18s;
 }
 
 .cz-bat-two {
-  top: 32%;
-  left: -70px;
-  animation-delay: 7s;
-  animation-duration: 21s;
+  top: 42%;
+  animation-delay: 6s;
+  animation-duration: 23s;
+  font-size: 20px;
 }
 
+.cz-bat-three {
+  top: 65%;
+  animation-delay: 11s;
+  animation-duration: 20s;
+  font-size: 23px;
+}
+
+/* Toiles d'araignée dans les coins */
 .cz-halloween-web {
   position: absolute;
-  top: 115px;
-  right: 18px;
-  color: #ff8a00;
-  font-size: 48px;
+  font-size: clamp(34px, 4vw, 54px);
   opacity: 0.55;
+  filter: drop-shadow(0 0 8px rgba(180, 110, 255, 0.45));
 }
 
+.cz-web-top-left {
+  top: 78px;
+  left: 10px;
+  transform: rotate(-15deg);
+}
+
+.cz-web-top-right {
+  top: 82px;
+  right: 12px;
+  transform: rotate(12deg);
+}
+
+.cz-web-bottom-left {
+  bottom: 12px;
+  left: 12px;
+  transform: rotate(180deg);
+}
+
+/* Fantôme flottant */
+.cz-halloween-ghost {
+  position: absolute;
+  top: 28%;
+  right: 8%;
+  font-size: 30px;
+  opacity: 0.75;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+  animation: cz-ghost-float 5s ease-in-out infinite;
+}
+
+/* Animations */
 @keyframes cz-pumpkin-glow {
-  from { filter: drop-shadow(0 0 5px rgba(255, 100, 0, 0.4)); }
-  to { filter: drop-shadow(0 0 16px rgba(255, 100, 0, 0.9)); }
+  from {
+    filter: drop-shadow(0 0 5px rgba(255, 100, 0, 0.45));
+    transform: scale(1);
+  }
+  to {
+    filter: drop-shadow(0 0 18px rgba(255, 100, 0, 0.95));
+    transform: scale(1.06);
+  }
 }
 
 @keyframes cz-bat-fly {
-  0% { transform: translate(-50px, 0) rotate(0deg); }
-  50% { transform: translate(55vw, 35px) rotate(8deg); }
-  100% { transform: translate(110vw, -10px) rotate(-5deg); }
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  45% {
+    transform: translate3d(50vw, 35px, 0) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(calc(100vw + 100px), -15px, 0) rotate(-5deg);
+  }
 }
 
+@keyframes cz-ghost-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+
+/* Respect des préférences d'accessibilité */
 @media (prefers-reduced-motion: reduce) {
   .cz-halloween-bat,
-  .cz-halloween-pumpkin {
+  .cz-halloween-pumpkin,
+  .cz-halloween-ghost {
     animation: none !important;
+    will-change: auto;
+  }
+}
+
+/* Sur mobile, décorations plus discrètes */
+@media (max-width: 600px) {
+  .cz-halloween-pumpkin {
+    right: 12px;
+    bottom: 12px;
+    font-size: 32px;
+  }
+
+  .cz-halloween-web {
+    font-size: 32px;
+  }
+
+  .cz-halloween-ghost {
+    right: 5%;
+    font-size: 24px;
   }
 }
