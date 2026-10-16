@@ -3,6 +3,7 @@
 
 import { useEffect } from "react";
 import { supabase } from "../../lib/supabase";
+import HalloweenTheme from "./HalloweenTheme";
 
 export default function HalloweenThemeLoader() {
   useEffect(() => {
@@ -16,7 +17,10 @@ export default function HalloweenThemeLoader() {
         .maybeSingle();
 
       if (error) {
-        console.error("Chargement du thème Halloween impossible :", error.message);
+        console.error(
+          "Chargement du thème Halloween impossible :",
+          error.message
+        );
         return;
       }
 
@@ -36,5 +40,5 @@ export default function HalloweenThemeLoader() {
     };
   }, []);
 
-  return null;
+  return <HalloweenTheme />;
 }
