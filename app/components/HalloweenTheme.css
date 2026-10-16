@@ -1,20 +1,26 @@
 
-/* CineZone Play — Thème Halloween */
+/* ==================================================
+   CINEZONE PLAY — HALLOWEEN IMMERSIF
+   Activé uniquement avec cz-halloween-active
+   ================================================== */
+
 body.cz-halloween-active {
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(100, 24, 80, 0.22), transparent 48%),
-    radial-gradient(ellipse at top, #351000 0%, #120509 48%, #030205 100%) !important;
-  position: relative;
+    radial-gradient(ellipse at 50% 0%, rgba(107, 33, 168, 0.25), transparent 48%),
+    radial-gradient(ellipse at 50% 100%, rgba(249, 115, 22, 0.12), transparent 55%),
+    linear-gradient(180deg, #100819 0%, #08040d 55%, #030205 100%) !important;
+  color: #fff;
 }
 
+/* En-tête */
 body.cz-halloween-active header {
-  border-bottom: 1px solid rgba(255, 105, 0, 0.75) !important;
+  border-bottom: 1px solid rgba(255, 126, 32, 0.7) !important;
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.8),
-    0 0 25px rgba(255, 80, 0, 0.25) !important;
+    0 12px 45px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(249, 115, 22, 0.18) !important;
 }
 
-/* Décorations globales, sans bloquer les clics */
+/* Lueur décorative autour de l'écran */
 .cz-halloween-decoration {
   position: fixed;
   inset: 0;
@@ -22,32 +28,33 @@ body.cz-halloween-active header {
   pointer-events: none;
   overflow: hidden;
   contain: layout paint;
+  background:
+    radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.09), transparent 35%),
+    radial-gradient(ellipse at bottom right, rgba(249, 115, 22, 0.08), transparent 35%);
 }
 
-/* Citrouille lumineuse */
+/* Citrouille */
 .cz-halloween-pumpkin {
   position: absolute;
   right: 24px;
-  bottom: 20px;
-  font-size: clamp(34px, 4vw, 52px);
-  filter: drop-shadow(0 0 12px rgba(255, 100, 0, 0.8));
+  bottom: 18px;
+  font-size: clamp(42px, 5vw, 64px);
+  filter: drop-shadow(0 0 12px rgba(255, 105, 0, 0.8));
   animation: cz-pumpkin-glow 3s ease-in-out infinite alternate;
 }
 
 /* Chauves-souris */
 .cz-halloween-bat {
   position: absolute;
-  left: -70px;
-  top: 18%;
+  left: -80px;
   font-size: 25px;
   opacity: 0.9;
-  filter: drop-shadow(0 0 8px rgba(160, 80, 255, 0.7));
-  animation: cz-bat-fly 18s linear infinite;
-  will-change: transform;
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.7));
+  animation: cz-bat-fly 19s linear infinite;
 }
 
 .cz-bat-one {
-  top: 18%;
+  top: 20%;
   animation-duration: 18s;
 }
 
@@ -55,61 +62,61 @@ body.cz-halloween-active header {
   top: 42%;
   animation-delay: 6s;
   animation-duration: 23s;
-  font-size: 20px;
+  font-size: 21px;
 }
 
 .cz-bat-three {
-  top: 65%;
+  top: 68%;
   animation-delay: 11s;
-  animation-duration: 20s;
-  font-size: 23px;
+  animation-duration: 21s;
+  font-size: 24px;
 }
 
-/* Toiles d'araignée dans les coins */
+/* Toiles d'araignée */
 .cz-halloween-web {
   position: absolute;
-  font-size: clamp(34px, 4vw, 54px);
-  opacity: 0.55;
-  filter: drop-shadow(0 0 8px rgba(180, 110, 255, 0.45));
+  font-size: clamp(42px, 5vw, 68px);
+  opacity: 0.72;
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
 }
 
 .cz-web-top-left {
-  top: 78px;
-  left: 10px;
-  transform: rotate(-15deg);
+  top: 82px;
+  left: 8px;
+  transform: rotate(-18deg);
 }
 
 .cz-web-top-right {
   top: 82px;
-  right: 12px;
-  transform: rotate(12deg);
+  right: 8px;
+  transform: rotate(15deg);
 }
 
 .cz-web-bottom-left {
-  bottom: 12px;
-  left: 12px;
+  bottom: 10px;
+  left: 10px;
   transform: rotate(180deg);
 }
 
-/* Fantôme flottant */
+/* Fantôme */
 .cz-halloween-ghost {
   position: absolute;
-  top: 28%;
+  top: 30%;
   right: 8%;
-  font-size: 30px;
-  opacity: 0.75;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+  font-size: 34px;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
   animation: cz-ghost-float 5s ease-in-out infinite;
 }
 
-/* Animations */
+/* Animations légères */
 @keyframes cz-pumpkin-glow {
   from {
-    filter: drop-shadow(0 0 5px rgba(255, 100, 0, 0.45));
+    filter: drop-shadow(0 0 5px rgba(255, 105, 0, 0.4));
     transform: scale(1);
   }
   to {
-    filter: drop-shadow(0 0 18px rgba(255, 100, 0, 0.95));
+    filter: drop-shadow(0 0 20px rgba(255, 105, 0, 0.95));
     transform: scale(1.06);
   }
 }
@@ -118,7 +125,7 @@ body.cz-halloween-active header {
   0% {
     transform: translate3d(0, 0, 0) rotate(0deg);
   }
-  45% {
+  50% {
     transform: translate3d(50vw, 35px, 0) rotate(8deg);
   }
   100% {
@@ -131,34 +138,33 @@ body.cz-halloween-active header {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-18px);
+    transform: translateY(-16px);
   }
 }
 
-/* Respect des préférences d'accessibilité */
+/* Accessibilité */
 @media (prefers-reduced-motion: reduce) {
   .cz-halloween-bat,
   .cz-halloween-pumpkin,
   .cz-halloween-ghost {
     animation: none !important;
-    will-change: auto;
   }
 }
 
-/* Sur mobile, décorations plus discrètes */
+/* Mobile */
 @media (max-width: 600px) {
   .cz-halloween-pumpkin {
-    right: 12px;
-    bottom: 12px;
-    font-size: 32px;
+    right: 10px;
+    bottom: 10px;
+    font-size: 38px;
   }
 
   .cz-halloween-web {
-    font-size: 32px;
+    font-size: 36px;
   }
 
   .cz-halloween-ghost {
     right: 5%;
-    font-size: 24px;
+    font-size: 25px;
   }
 }
