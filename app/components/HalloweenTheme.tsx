@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect } from "react";
@@ -6,44 +5,52 @@ import "./HalloweenTheme.css";
 
 export default function HalloweenTheme() {
   useEffect(() => {
-    let decoration: HTMLDivElement | null = null;
-    let observer: MutationObserver | null = null;
-
-    function updateDecoration() {
-      const enabled = document.body.classList.contains(
+    const updateDecoration = () => {
+      const active = document.body.classList.contains(
         "cz-halloween-active"
       );
 
-      if (enabled && !decoration) {
-        decoration = document.createElement("div");
-        decoration.className = "cz-halloween-decoration";
-        decoration.setAttribute("aria-hidden", "true");
+      const existing = document.querySelector(
+        ".cz-halloween-decoration"
+      );
 
-        decoration.innerHTML = `
-          <span class="cz-halloween-pumpkin">🎃</span>
-          <span class="cz-halloween-bat cz-bat-one">🦇</span>
-          <span class="cz-halloween-bat cz-bat-two">🦇</span>
-          <span class="cz-halloween-web">🕸️</span>
-        `;
-
-        document.body.appendChild(decoration);
-      } else if (!enabled && decoration) {
-        decoration.remove();
-        decoration = null;
+      if (!active) {
+        existing?.remove();
+        return;
       }
-    }
+
+      if (existing) return;
+
+      const decoration = document.createElement("div");
+      decoration.className = "cz-halloween-decoration";
+      decoration.setAttribute("aria-hidden", "true");
+
+      decoration.innerHTML = `
+        <span class="cz-halloween-pumpkin">🎃</span>
+        <span class="cz-halloween-bat cz-bat-one">🦇</span>
+        <span class="cz-halloween-bat cz-bat-two">🦇</span>
+        <span class="cz-halloween-bat cz-bat-three">🦇</span>
+        <span class="cz-halloween-web cz-web-top-left">🕸️</span>
+        <span class="cz-halloween-web cz-web-top-right">🕸️</span>
+        <span class="cz-halloween-web cz-web-bottom-left">🕸️</span>
+        <span class="cz-halloween-ghost">👻</span>
+      `;
+
+      document.body.appendChild(decoration);
+    };
 
     updateDecoration();
 
-    observer = new MutationObserver(updateDecoration);
+    const observer = new MutationObserver(updateDecoration);
+
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ["class"],
     });
 
     return () => {
-      observer?.disconnect();
-      decoration?.remove();
+      observer.disconnect();
+      document.querySelector(".cz-halloween-decoration")?.remove();
     };
   }, []);
 
