@@ -90,10 +90,10 @@ export default function RootLayout({
           fontFamily: "Arial, sans-serif",
         }}
       >
-        >
-  <HalloweenThemeLoader />
-  <PresenceTracker />
-  <CursorTrail />
+        
+      <HalloweenThemeLoader />
+        <PresenceTracker />
+        <CursorTrail />
 
         <header style={headerStyle}>
           <div style={topHeaderStyle}>
