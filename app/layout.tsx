@@ -9,7 +9,7 @@ import UserMenu from "./components/UserMenu";
 import "./globals.css";
 import NotificationsBell from "./components/NotificationsBell";
 import CursorTrail from "./components/CursorTrail";
-
+import HalloweenThemeLoader from "./components/HalloweenThemeLoader";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cinezone-hd.fr"),
@@ -90,8 +90,10 @@ export default function RootLayout({
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <PresenceTracker />
-        <CursorTrail />
+        >
+  <HalloweenThemeLoader />
+  <PresenceTracker />
+  <CursorTrail />
 
         <header style={headerStyle}>
           <div style={topHeaderStyle}>
