@@ -31,12 +31,6 @@ type ChatUser = {
   user_metadata?: Record<string, unknown>;
 } | null;
 
-type MentionProfile = {
-  id: string;
-  username: string | null;
-  email?: string | null;
-};
-
 const MAX_MESSAGES = 50;
 const MAX_LENGTH = 1000;
 
@@ -50,8 +44,6 @@ export default function Shoutbox() {
   const [error, setError] = useState("");
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [unread, setUnread] = useState(0);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [mentionProfiles, setMentionProfiles] = useState<MentionProfile[]>([]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -138,44 +130,6 @@ export default function Shoutbox() {
     setLoading(false);
   }, []);
 
-  const refreshMentionPermissions = useCallback(async (currentUser: ChatUser) => {
-    setIsAdmin(false);
-    setMentionProfiles([]);
-    if (!currentUser) return;
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role,status")
-      .eq("id", currentUser.id)
-      .maybeSingle();
-
-    if (profileError) {
-      console.warn("Shoutbox droits de mention:", profileError.message);
-      return;
-    }
-
-    const allowed =
-      String(profile?.role || "").toLowerCase() === "admin" &&
-      String(profile?.status || "").toLowerCase() === "approved";
-    if (!allowed) return;
-
-    setIsAdmin(true);
-    const { data: members, error: membersError } = await supabase
-      .from("profiles")
-      .select("id,username,email")
-      .eq("status", "approved")
-      .order("username", { ascending: true });
-
-    if (membersError) {
-      console.warn("Shoutbox liste des mentions:", membersError.message);
-      return;
-    }
-
-    setMentionProfiles(
-      (members || []).filter((member) => member.id && member.username)
-    );
-  }, []);
-
   useEffect(() => {
     let active = true;
 
@@ -188,7 +142,7 @@ export default function Shoutbox() {
 
       userRef.current = data.user;
       setUser(data.user);
-      await Promise.all([loadMessages(), refreshMentionPermissions(data.user)]);
+      await loadMessages();
     }
 
     void initialize();
@@ -196,10 +150,8 @@ export default function Shoutbox() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      const nextUser = session?.user ?? null;
-      userRef.current = nextUser;
-      setUser(nextUser);
-      void refreshMentionPermissions(nextUser);
+      userRef.current = session?.user ?? null;
+      setUser(session?.user ?? null);
     });
 
     const channel = supabase
@@ -266,7 +218,7 @@ export default function Shoutbox() {
       subscription.unsubscribe();
       void supabase.removeChannel(channel);
     };
-  }, [loadMessages, refreshMentionPermissions, soundEnabled]);
+  }, [loadMessages, soundEnabled]);
 
   useEffect(() => {
     if (isOpen && listRef.current) {
@@ -274,31 +226,10 @@ export default function Shoutbox() {
     }
   }, [messages, isOpen]);
 
-  const mentionMatch = input.match(/(?:^|\s)@([^\s@]*)$/);
-  const mentionQuery = mentionMatch?.[1]?.toLocaleLowerCase("fr") || "";
-  const mentionSuggestions = isAdmin && mentionMatch
-    ? mentionProfiles
-        .filter((member) =>
-          member.id !== user?.id &&
-          (member.username || "").toLocaleLowerCase("fr").includes(mentionQuery)
-        )
-        .slice(0, 8)
-    : [];
-
-  function chooseMention(member: MentionProfile) {
-    if (!member.username) return;
-    const match = input.match(/(?:^|\s)@([^\s@]*)$/);
-    if (!match || match.index === undefined) return;
-    const prefix = input.slice(0, match.index);
-    const whitespace = match[0].startsWith(" ") ? " " : "";
-    setInput(`${prefix}${whitespace}@${member.username} `);
-    inputRef.current?.focus();
-  }
-
   async function sendMessage(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
 
-    let content = input.trim();
+    const content = input.trim();
     const currentUser = userRef.current;
 
     if (!content || sending) return;
@@ -326,23 +257,6 @@ export default function Shoutbox() {
 
     if (profileError) {
       console.warn("Shoutbox profil utilisateur:", profileError.message);
-    }
-
-    const mentionedMembers: MentionProfile[] = [];
-    if (isAdmin) {
-      const alreadyMentioned = new Set<string>();
-      content = content.replace(/@([^\s@]+)/g, (rawMention, rawName: string) => {
-        const value = rawName.toLocaleLowerCase("fr");
-        const member = mentionProfiles.find(
-          (candidate) => (candidate.username || "").toLocaleLowerCase("fr") === value
-        );
-        if (!member || member.id === currentUser.id || alreadyMentioned.has(member.id)) {
-          return rawMention;
-        }
-        alreadyMentioned.add(member.id);
-        mentionedMembers.push(member);
-        return `@${member.username}`;
-      });
     }
 
     const username =
@@ -403,28 +317,6 @@ export default function Shoutbox() {
 
     setInput("");
     inputRef.current?.focus();
-
-    if (isAdmin && mentionedMembers.length > 0) {
-      const { error: notificationError } = await supabase
-        .from("notifications")
-        .insert(
-          mentionedMembers.map((member) => ({
-            user_id: member.id,
-            type: "mention",
-            title: "🔔 Mention dans la shoutbox",
-            message: `${username} t'a mentionné dans la shoutbox.`,
-            link: "/chat",
-            read: false,
-            read_at: null,
-            created_at: new Date().toISOString(),
-          }))
-        );
-
-      if (notificationError) {
-        console.error("Shoutbox notifications:", notificationError.message);
-        setError("Message envoyé, mais notification impossible : vérifie les droits Supabase.");
-      }
-    }
   }
 
   function formatTime(value: string) {
@@ -610,43 +502,26 @@ export default function Shoutbox() {
             )}
           </div>
 
-          <div style={styles.composerWrap}>
-            {mentionSuggestions.length > 0 && (
-              <div style={styles.mentionList} role="listbox" aria-label="Membres à mentionner">
-                {mentionSuggestions.map((member) => (
-                  <button
-                    key={member.id}
-                    type="button"
-                    style={styles.mentionOption}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => chooseMention(member)}
-                  >
-                    <strong>@{member.username}</strong>
-                    <span style={styles.mentionEmail}>{member.email || "Membre"}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-            <form
-              style={styles.composer}
-              onSubmit={(event) => void sendMessage(event)}
-            >
-              <input
-                ref={inputRef}
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                placeholder={
-                  user
-                    ? "Discute avec la communauté… (Tape @ pour mentionner)"
-                    : "Connecte-toi pour participer à la discussion"
-                }
-                maxLength={MAX_LENGTH}
-                disabled={!user || sending}
-                style={styles.input}
-                aria-label="Ton message"
-              />
+          <form
+            style={styles.composer}
+            onSubmit={(event) => void sendMessage(event)}
+          >
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              placeholder={
+                user
+                  ? "Discute avec la communauté… (Entrée pour envoyer)"
+                  : "Connecte-toi pour participer à la discussion"
+              }
+              maxLength={MAX_LENGTH}
+              disabled={!user || sending}
+              style={styles.input}
+              aria-label="Ton message"
+            />
 
-              <button
+            <button
               type="submit"
               disabled={!user || sending || !input.trim()}
               style={{
@@ -659,9 +534,8 @@ export default function Shoutbox() {
               }}
             >
               {sending ? "Envoi…" : "➤ Envoyer"}
-              </button>
-            </form>
-          </div>
+            </button>
+          </form>
 
           {error && (
             <p role="alert" style={styles.error}>
@@ -869,43 +743,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#8291a9",
     fontSize: 12,
     textAlign: "center",
-  },
-  composerWrap: {
-    position: "relative",
-    marginTop: 4,
-  },
-  mentionList: {
-    position: "absolute",
-    left: 0,
-    bottom: "calc(100% + 6px)",
-    zIndex: 50,
-    width: "min(320px, 90vw)",
-    maxHeight: 220,
-    overflowY: "auto",
-    padding: 6,
-    border: "1px solid rgba(0, 198, 255, 0.55)",
-    borderRadius: 9,
-    background: "#071225",
-    boxShadow: "0 12px 28px rgba(0,0,0,.45)",
-  },
-  mentionOption: {
-    display: "flex",
-    width: "100%",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 2,
-    padding: "8px 10px",
-    border: 0,
-    borderRadius: 6,
-    background: "transparent",
-    color: "#e2e8f0",
-    cursor: "pointer",
-    textAlign: "left",
-    fontSize: 12,
-  },
-  mentionEmail: {
-    color: "#8494ad",
-    fontSize: 10,
   },
   composer: {
     display: "flex",
