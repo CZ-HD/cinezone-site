@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AuthGuard from "./components/AuthGuard";
 import AdminButton from "./components/AdminButton";
-import ChatNavLink from "./components/ChatNavLink";
 import MenuDropdown from "./components/MenuDropdown";
 import PresenceTracker from "./components/PresenceTracker";
 import UserMenu from "./components/UserMenu";
@@ -114,7 +113,6 @@ export default function RootLayout({
               </div>
 
               <div style={navActions}>
-                <ChatNavLink />
                 <NotificationsBell />
               </div>
 
