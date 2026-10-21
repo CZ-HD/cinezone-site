@@ -35,6 +35,7 @@ type MentionProfile = {
   id: string;
   username: string | null;
   email?: string | null;
+  avatar?: string | null;
 };
 
 const MAX_MESSAGES = 50;
@@ -162,7 +163,7 @@ export default function Shoutbox() {
     setIsAdmin(true);
     const { data: members, error: membersError } = await supabase
       .from("profiles")
-      .select("id,username,email")
+      .select("id,username,email,avatar")
       .eq("status", "approved")
       .order("username", { ascending: true });
 
@@ -277,21 +278,20 @@ export default function Shoutbox() {
   const mentionMatch = input.match(/(?:^|\s)@([^\s@]*)$/);
   const mentionQuery = mentionMatch?.[1]?.toLocaleLowerCase("fr") || "";
   const mentionSuggestions = isAdmin && mentionMatch
-    ? mentionProfiles
-        .filter((member) =>
-          member.id !== user?.id &&
-          (member.username || "").toLocaleLowerCase("fr").includes(mentionQuery)
-        )
-        .slice(0, 8)
+    ? mentionProfiles.filter((member) =>
+        member.id !== user?.id &&
+        (member.username || "").toLocaleLowerCase("fr").includes(mentionQuery)
+      )
     : [];
 
-  function chooseMention(member: MentionProfile) {
-    if (!member.username) return;
+  function chooseMention(member: MentionProfile | "everyone") {
     const match = input.match(/(?:^|\s)@([^\s@]*)$/);
     if (!match || match.index === undefined) return;
     const prefix = input.slice(0, match.index);
     const whitespace = match[0].startsWith(" ") ? " " : "";
-    setInput(`${prefix}${whitespace}@${member.username} `);
+    const mention = member === "everyone" ? "@toutlemonde" : `@${member.username}`;
+    if (member !== "everyone" && !member.username) return;
+    setInput(`${prefix}${whitespace}${mention} `);
     inputRef.current?.focus();
   }
 
@@ -329,10 +329,15 @@ export default function Shoutbox() {
     }
 
     const mentionedMembers: MentionProfile[] = [];
+    let mentionEveryone = false;
     if (isAdmin) {
       const alreadyMentioned = new Set<string>();
       content = content.replace(/@([^\s@]+)/g, (rawMention, rawName: string) => {
         const value = rawName.toLocaleLowerCase("fr");
+        if (["toutlemonde", "everyone"].includes(value)) {
+          mentionEveryone = true;
+          return "@toutlemonde";
+        }
         const member = mentionProfiles.find(
           (candidate) => (candidate.username || "").toLocaleLowerCase("fr") === value
         );
@@ -404,25 +409,42 @@ export default function Shoutbox() {
     setInput("");
     inputRef.current?.focus();
 
-    if (isAdmin && mentionedMembers.length > 0) {
-      const { error: notificationError } = await supabase
-        .from("notifications")
-        .insert(
-          mentionedMembers.map((member) => ({
-            user_id: member.id,
-            type: "mention",
-            title: "🔔 Mention dans la shoutbox",
-            message: `${username} t'a mentionné dans la shoutbox.`,
-            link: "/chat",
-            read: false,
-            read_at: null,
-            created_at: new Date().toISOString(),
-          }))
-        );
+    if (isAdmin && (mentionedMembers.length > 0 || mentionEveryone)) {
+      let recipients = mentionedMembers;
+      if (mentionEveryone) {
+        const { data: allMembers, error: allMembersError } = await supabase
+          .from("profiles")
+          .select("id,username,email,avatar")
+          .eq("status", "approved")
+          .neq("id", currentUser.id);
+        if (allMembersError) {
+          console.error("Shoutbox mention everyone:", allMembersError.message);
+          setError("Message envoyé, mais la liste des notifications n'a pas pu être chargée.");
+          return;
+        }
+        recipients = allMembers || [];
+      }
 
-      if (notificationError) {
-        console.error("Shoutbox notifications:", notificationError.message);
-        setError("Message envoyé, mais notification impossible : vérifie les droits Supabase.");
+      if (recipients.length > 0) {
+        const { error: notificationError } = await supabase
+          .from("notifications")
+          .insert(
+            recipients.map((member) => ({
+              user_id: member.id,
+              type: "mention",
+              title: "🔔 Mention dans la shoutbox",
+              message: `${username} t'a mentionné dans la shoutbox.`,
+              link: "/chat",
+              read: false,
+              read_at: null,
+              created_at: new Date().toISOString(),
+            }))
+          );
+
+        if (notificationError) {
+          console.error("Shoutbox notifications:", notificationError.message);
+          setError("Message envoyé, mais notification impossible : vérifie les droits Supabase.");
+        }
       }
     }
   }
@@ -611,8 +633,23 @@ export default function Shoutbox() {
           </div>
 
           <div style={styles.composerWrap}>
-            {mentionSuggestions.length > 0 && (
+            {isAdmin && mentionMatch && (mentionSuggestions.length > 0 || "toutlemonde".includes(mentionQuery)) && (
               <div style={styles.mentionList} role="listbox" aria-label="Membres à mentionner">
+                {"toutlemonde".includes(mentionQuery) && (
+                  <button
+                    key="everyone"
+                    type="button"
+                    style={styles.mentionOption}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => chooseMention("everyone")}
+                  >
+                    <span style={styles.mentionAvatarFallback} aria-hidden="true">🌐</span>
+                    <span style={styles.mentionDetails}>
+                      <strong>@toutlemonde</strong>
+                      <span style={styles.mentionEmail}>Notifier tous les membres</span>
+                    </span>
+                  </button>
+                )}
                 {mentionSuggestions.map((member) => (
                   <button
                     key={member.id}
@@ -621,8 +658,18 @@ export default function Shoutbox() {
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => chooseMention(member)}
                   >
-                    <strong>@{member.username}</strong>
-                    <span style={styles.mentionEmail}>{member.email || "Membre"}</span>
+                    {member.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={member.avatar} alt="" style={styles.mentionAvatar} loading="lazy" />
+                    ) : (
+                      <span style={styles.mentionAvatarFallback} aria-hidden="true">
+                        {(member.username || "M").charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span style={styles.mentionDetails}>
+                      <strong>@{member.username}</strong>
+                      <span style={styles.mentionEmail}>{member.email || "Membre"}</span>
+                    </span>
                   </button>
                 ))}
               </div>
@@ -688,7 +735,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: "2px solid rgba(0, 198, 255, 0.75)",
     borderRadius: "10px",
     boxShadow: "0 7px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(0, 198, 255, 0.06)",
-    overflow: "hidden",
+    overflow: "visible",
     fontFamily: "Arial, sans-serif",
   },
   topBar: {
@@ -878,22 +925,23 @@ const styles: Record<string, React.CSSProperties> = {
     position: "absolute",
     left: 0,
     bottom: "calc(100% + 6px)",
-    zIndex: 50,
-    width: "min(320px, 90vw)",
-    maxHeight: 220,
+    zIndex: 1000,
+    width: "min(340px, calc(100vw - 32px))",
+    maxHeight: "min(320px, 55vh)",
     overflowY: "auto",
+    overscrollBehavior: "contain",
     padding: 6,
     border: "1px solid rgba(0, 198, 255, 0.55)",
     borderRadius: 9,
     background: "#071225",
-    boxShadow: "0 12px 28px rgba(0,0,0,.45)",
+    boxShadow: "0 12px 28px rgba(0,0,0,.55)",
   },
   mentionOption: {
     display: "flex",
     width: "100%",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
     padding: "8px 10px",
     border: 0,
     borderRadius: 6,
@@ -902,6 +950,35 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     textAlign: "left",
     fontSize: 12,
+  },
+  mentionAvatar: {
+    width: 36,
+    height: 36,
+    flexShrink: 0,
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "1px solid rgba(0, 198, 255, 0.5)",
+    background: "#172554",
+  },
+  mentionAvatarFallback: {
+    width: 36,
+    height: 36,
+    flexShrink: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "50%",
+    background: "#1d4ed8",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 800,
+  },
+  mentionDetails: {
+    display: "flex",
+    minWidth: 0,
+    flexDirection: "column",
+    gap: 2,
+    overflowWrap: "anywhere",
   },
   mentionEmail: {
     color: "#8494ad",
