@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AuthGuard from "./components/AuthGuard";
 import AdminButton from "./components/AdminButton";
+import ChatNavLink from "./components/ChatNavLink";
 import MenuDropdown from "./components/MenuDropdown";
 import PresenceTracker from "./components/PresenceTracker";
 import UserMenu from "./components/UserMenu";
@@ -9,7 +10,6 @@ import "./globals.css";
 import NotificationsBell from "./components/NotificationsBell";
 import CursorTrail from "./components/CursorTrail";
 import HalloweenThemeLoader from "./components/HalloweenThemeLoader";
-import Shoutbox from "./components/Shoutbox";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cinezone-hd.fr"),
@@ -42,7 +42,8 @@ export const metadata: Metadata = {
     google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
   },
 
-  openGraph: {
+  
+openGraph: {
     title: "CineZone Play – Streaming HD",
     description:
       "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD.",
@@ -60,6 +61,7 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
+
 
 export default function RootLayout({
   children,
@@ -88,12 +90,10 @@ export default function RootLayout({
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <HalloweenThemeLoader />
+        
+      <HalloweenThemeLoader />
         <PresenceTracker />
         <CursorTrail />
-
-        {/* Shoutbox compacte, au-dessus de la navigation principale */}
-        <Shoutbox />
 
         <header style={headerStyle}>
           <div style={topHeaderStyle}>
@@ -114,6 +114,7 @@ export default function RootLayout({
               </div>
 
               <div style={navActions}>
+                <ChatNavLink />
                 <NotificationsBell />
               </div>
 
@@ -143,7 +144,9 @@ export default function RootLayout({
         </header>
 
         <AuthGuard>
-          <div style={pageContentStyle}>{children}</div>
+          <div style={{ paddingTop: "118px" }}>
+            {children}
+          </div>
 
           <footer style={footerStyle}>
             <h2 style={footerTitle}>CineZone Play</h2>
@@ -174,9 +177,10 @@ export default function RootLayout({
   );
 }
 
+
 const headerStyle: React.CSSProperties = {
   position: "fixed",
-  top: "var(--cz-shoutbox-height, 36px)",
+  top: 0,
   left: 0,
   right: 0,
   zIndex: 100,
@@ -303,10 +307,6 @@ const navLinkStyle: React.CSSProperties = {
   border: "1px solid rgba(0,198,255,0.18)",
   boxShadow:
     "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 14px rgba(0,140,255,0.10)",
-};
-
-const pageContentStyle: React.CSSProperties = {
-  paddingTop: "calc(118px + var(--cz-shoutbox-height, 36px))",
 };
 
 const footerStyle: React.CSSProperties = {
