@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -155,12 +154,15 @@ export default function Shoutbox() {
       return;
     }
 
-    const allowed =
-      String(profile?.role || "").toLowerCase() === "admin" &&
-      String(profile?.status || "").toLowerCase() === "approved";
-    if (!allowed) return;
+    const isApproved = String(profile?.status || "").toLowerCase() === "approved";
+    const admin =
+      String(profile?.role || "").toLowerCase() === "admin" && isApproved;
 
-    setIsAdmin(true);
+    setIsAdmin(admin);
+    // Tous les membres approuvés peuvent mentionner individuellement.
+    // Seuls les administrateurs peuvent utiliser @toutlemonde.
+    if (!isApproved) return;
+
     const { data: members, error: membersError } = await supabase
       .from("profiles")
       .select("id,username,email,avatar")
@@ -277,7 +279,7 @@ export default function Shoutbox() {
 
   const mentionMatch = input.match(/(?:^|\s)@([^\s@]*)$/);
   const mentionQuery = mentionMatch?.[1]?.toLocaleLowerCase("fr") || "";
-  const mentionSuggestions = isAdmin && mentionMatch
+  const mentionSuggestions = user && mentionMatch
     ? mentionProfiles.filter((member) =>
         member.id !== user?.id &&
         (member.username || "").toLocaleLowerCase("fr").includes(mentionQuery)
@@ -330,25 +332,27 @@ export default function Shoutbox() {
 
     const mentionedMembers: MentionProfile[] = [];
     let mentionEveryone = false;
-    if (isAdmin) {
-      const alreadyMentioned = new Set<string>();
-      content = content.replace(/@([^\s@]+)/g, (rawMention, rawName: string) => {
-        const value = rawName.toLocaleLowerCase("fr");
-        if (["toutlemonde", "everyone"].includes(value)) {
+    const alreadyMentioned = new Set<string>();
+    content = content.replace(/@([^\s@]+)/g, (rawMention, rawName: string) => {
+      const value = rawName.toLocaleLowerCase("fr");
+      if (["toutlemonde", "everyone"].includes(value)) {
+        // @toutlemonde reste strictement réservé aux administrateurs.
+        if (isAdmin) {
           mentionEveryone = true;
           return "@toutlemonde";
         }
-        const member = mentionProfiles.find(
-          (candidate) => (candidate.username || "").toLocaleLowerCase("fr") === value
-        );
-        if (!member || member.id === currentUser.id || alreadyMentioned.has(member.id)) {
-          return rawMention;
-        }
-        alreadyMentioned.add(member.id);
-        mentionedMembers.push(member);
-        return `@${member.username}`;
-      });
-    }
+        return rawMention;
+      }
+      const member = mentionProfiles.find(
+        (candidate) => (candidate.username || "").toLocaleLowerCase("fr") === value
+      );
+      if (!member || member.id === currentUser.id || alreadyMentioned.has(member.id)) {
+        return rawMention;
+      }
+      alreadyMentioned.add(member.id);
+      mentionedMembers.push(member);
+      return `@${member.username}`;
+    });
 
     const username =
       profile?.username ||
@@ -409,7 +413,7 @@ export default function Shoutbox() {
     setInput("");
     inputRef.current?.focus();
 
-    if (isAdmin && (mentionedMembers.length > 0 || mentionEveryone)) {
+    if (mentionedMembers.length > 0 || (isAdmin && mentionEveryone)) {
       let recipients = mentionedMembers;
       if (mentionEveryone) {
         const { data: allMembers, error: allMembersError } = await supabase
@@ -633,7 +637,7 @@ export default function Shoutbox() {
           </div>
 
           <div style={styles.composerWrap}>
-            {isAdmin && mentionMatch && (mentionSuggestions.length > 0 || "toutlemonde".includes(mentionQuery)) && (
+            {user && mentionMatch && (mentionSuggestions.length > 0 || (isAdmin && "toutlemonde".includes(mentionQuery))) && (
               <div style={styles.mentionList} role="listbox" aria-label="Membres à mentionner">
                 {"toutlemonde".includes(mentionQuery) && (
                   <button
