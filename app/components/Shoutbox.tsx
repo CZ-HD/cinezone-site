@@ -432,6 +432,9 @@ export default function Shoutbox() {
     setInput("");
     inputRef.current?.focus();
 
+    // Recharge immédiatement la liste après l'envoi, sans attendre Realtime ni un F5.
+    void loadMessages();
+
     if (mentionedMembers.length > 0 || (isAdmin && mentionEveryone)) {
       let recipients = mentionedMembers;
       if (mentionEveryone) {
