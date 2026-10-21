@@ -460,7 +460,7 @@ export default function Shoutbox() {
               type: "mention",
               title: "🔔 Mention dans la shoutbox",
               message: `${username} t'a mentionné dans la shoutbox.`,
-              link: "/",
+              link: "/?openShoutbox=1",
               read: false,
               read_at: null,
               created_at: new Date().toISOString(),
