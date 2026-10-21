@@ -82,7 +82,51 @@ export default function Shoutbox() {
       return;
     }
 
-    setMessages(((data || []) as ShoutMessage[]).reverse());
+    const loadedMessages = ((data || []) as ShoutMessage[]).reverse();
+
+    // Récupère les pseudos et avatars depuis les profils, sans utiliser les e-mails.
+    const userIds = [...new Set(loadedMessages.map((message) => message.user_id).filter(Boolean))];
+
+    if (userIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id,username,avatar,role,role_color,status_text")
+        .in("id", userIds);
+
+      if (profilesError) {
+        console.warn("Shoutbox profils:", profilesError.message);
+        setMessages(
+          loadedMessages.map((message) => ({
+            ...message,
+            username: message.username || "Membre",
+          }))
+        );
+      } else {
+        const profilesById = new Map(
+          (profiles || []).map((profile) => [profile.id, profile])
+        );
+
+        setMessages(
+          loadedMessages.map((message) => {
+            const profile = profilesById.get(message.user_id);
+            return {
+              ...message,
+              username: profile?.username || message.username || "Membre",
+              avatar: profile?.avatar || message.avatar || null,
+              role: profile?.role || message.role || null,
+              role_color: profile?.role_color || message.role_color || null,
+              status_text: profile?.status_text || message.status_text || null,
+            };
+          })
+        );
+      }
+    } else {
+      setMessages(loadedMessages.map((message) => ({
+        ...message,
+        username: message.username || "Membre",
+      })));
+    }
+
     setLoading(false);
   }, []);
 
@@ -123,12 +167,9 @@ export default function Shoutbox() {
           const message = payload.new as ShoutMessage;
           if (!message?.id) return;
 
-          setMessages((current) => {
-            if (current.some((item) => item.id === message.id)) {
-              return current;
-            }
-            return [...current, message].slice(-MAX_MESSAGES);
-          });
+          // Recharge les messages pour associer le vrai pseudo du profil,
+          // même si l'événement Realtime ne contient que les données du message.
+          void loadMessages();
 
           if (
             userRef.current &&
@@ -208,28 +249,46 @@ export default function Shoutbox() {
 
     const metadata = currentUser.user_metadata || {};
 
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("username,avatar,role,role_color,status_text")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.warn("Shoutbox profil utilisateur:", profileError.message);
+    }
+
     const username =
+      profile?.username ||
       (typeof metadata.username === "string" && metadata.username) ||
       (typeof metadata.user_name === "string" && metadata.user_name) ||
-      currentUser.email?.split("@")[0] ||
       "Membre";
 
     const avatar =
+      profile?.avatar ||
       (typeof metadata.avatar_url === "string" && metadata.avatar_url) ||
       (typeof metadata.avatar === "string" && metadata.avatar) ||
       null;
 
-    // Ces valeurs ne constituent pas une autorisation de sécurité.
-    // Les vrais rôles doivent être validés côté serveur/Supabase.
-    const name = username.toLowerCase();
+    // Le rôle affiché provient d'abord du profil Supabase.
+    // Les permissions réelles doivent rester contrôlées côté Supabase/serveur.
+    const name = username.trim().toLowerCase();
+    const profileRole = typeof profile?.role === "string" ? profile.role : "";
     const role =
       name === "vadrox"
         ? "DEV"
-        : name === "athena"
+        : name === "athéna." || name === "athena"
           ? "ADMIN"
-          : typeof metadata.role === "string"
-            ? metadata.role
-            : "MEMBER";
+          : profileRole || (typeof metadata.role === "string" ? metadata.role : "MEMBER");
+
+    const roleColor =
+      profile?.role_color ||
+      (role.toUpperCase() === "ADMIN"
+        ? "#fb7185"
+        : role.toUpperCase() === "DEV"
+          ? "#c084fc"
+          : null);
 
     const { error: insertError } = await supabase
       .from("messages")
@@ -240,13 +299,8 @@ export default function Shoutbox() {
         username,
         avatar,
         role,
-        role_color:
-          role.toUpperCase() === "ADMIN"
-            ? "#fb7185"
-            : role.toUpperCase() === "DEV"
-              ? "#c084fc"
-              : null,
-        status_text: null,
+        role_color: roleColor,
+        status_text: profile?.status_text || null,
         pinned: false,
         reply_to: null,
       });
