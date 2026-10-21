@@ -53,6 +53,17 @@ export default function Shoutbox() {
   useEffect(() => {
     openRef.current = isOpen;
     if (isOpen) setUnread(0);
+
+    // La shoutbox se trouve juste sous la navbar fixe.
+    // La variable permet au contenu de commencer après le panneau, ouvert ou fermé.
+    document.documentElement.style.setProperty(
+      "--cz-shoutbox-height",
+      isOpen ? "184px" : "30px"
+    );
+
+    return () => {
+      document.documentElement.style.removeProperty("--cz-shoutbox-height");
+    };
   }, [isOpen]);
 
   const loadMessages = useCallback(async () => {
@@ -485,6 +496,11 @@ export default function Shoutbox() {
 
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
+    position: "fixed",
+    top: "118px",
+    left: 0,
+    right: 0,
+    zIndex: 90,
     width: "100%",
     boxSizing: "border-box",
     color: "#e2e8f0",
@@ -493,7 +509,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "Arial, sans-serif",
   },
   topBar: {
-    minHeight: 36,
+    minHeight: 30,
     display: "flex",
     alignItems: "center",
     gap: 14,
@@ -566,7 +582,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "0 clamp(12px, 4.3vw, 74px) 9px",
   },
   panelHeader: {
-    height: 25,
+    height: 20,
     display: "flex",
     alignItems: "center",
     gap: 12,
@@ -600,7 +616,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
   messageList: {
-    height: 170,
+    height: 85,
     overflowY: "auto",
     border: "1px solid #1b2940",
     borderRadius: 6,
@@ -609,13 +625,13 @@ const styles: Record<string, React.CSSProperties> = {
     boxSizing: "border-box",
   },
   messageRow: {
-    minHeight: 24,
+    minHeight: 20,
     display: "flex",
     alignItems: "center",
     gap: 7,
     borderBottom: "1px solid rgba(100, 116, 139, 0.08)",
-    fontSize: 12,
-    lineHeight: 1.4,
+    fontSize: 11,
+    lineHeight: 1.35,
   },
   time: {
     width: 36,
