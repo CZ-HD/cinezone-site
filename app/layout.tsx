@@ -9,6 +9,7 @@ import "./globals.css";
 import NotificationsBell from "./components/NotificationsBell";
 import CursorTrail from "./components/CursorTrail";
 import HalloweenThemeLoader from "./components/HalloweenThemeLoader";
+import Shoutbox from "./components/Shoutbox";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cinezone-hd.fr"),
@@ -41,8 +42,7 @@ export const metadata: Metadata = {
     google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
   },
 
-  
-openGraph: {
+  openGraph: {
     title: "CineZone Play – Streaming HD",
     description:
       "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD.",
@@ -60,7 +60,6 @@ openGraph: {
     type: "website",
   },
 };
-
 
 export default function RootLayout({
   children,
@@ -89,8 +88,7 @@ export default function RootLayout({
           fontFamily: "Arial, sans-serif",
         }}
       >
-        
-      <HalloweenThemeLoader />
+        <HalloweenThemeLoader />
         <PresenceTracker />
         <CursorTrail />
 
@@ -142,6 +140,8 @@ export default function RootLayout({
         </header>
 
         <AuthGuard>
+          <Shoutbox />
+
           <div style={{ paddingTop: "118px" }}>
             {children}
           </div>
@@ -174,7 +174,6 @@ export default function RootLayout({
     </html>
   );
 }
-
 
 const headerStyle: React.CSSProperties = {
   position: "fixed",
