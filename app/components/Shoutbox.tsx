@@ -58,7 +58,7 @@ export default function Shoutbox() {
     // La variable permet au contenu de commencer après le panneau, ouvert ou fermé.
     document.documentElement.style.setProperty(
       "--cz-shoutbox-height",
-      isOpen ? "126px" : "28px"
+      isOpen ? "170px" : "38px"
     );
 
     return () => {
@@ -497,25 +497,29 @@ export default function Shoutbox() {
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     position: "fixed",
-    top: "116px",
-    left: 0,
-    right: 0,
+    top: "112px",
+    left: "50%",
+    transform: "translateX(-50%)",
     zIndex: 90,
-    width: "100%",
+    width: "calc(100% - 36px)",
+    maxWidth: "1180px",
     boxSizing: "border-box",
     color: "#e2e8f0",
-    background: "rgba(5, 12, 27, 0.98)",
-    borderBottom: "1px solid rgba(0, 198, 255, 0.18)",
+    background: "rgba(5, 12, 27, 0.97)",
+    border: "1px solid rgba(0, 198, 255, 0.28)",
+    borderRadius: "12px",
+    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35), 0 0 18px rgba(0, 198, 255, 0.07)",
+    overflow: "hidden",
     fontFamily: "Arial, sans-serif",
   },
   topBar: {
-    minHeight: 28,
+    minHeight: 34,
     display: "flex",
     alignItems: "center",
     gap: 14,
-    padding: "0 clamp(10px, 2vw, 32px)",
+    padding: "0 12px",
     boxSizing: "border-box",
-    background: "#080f20",
+    background: "linear-gradient(90deg, rgba(8, 15, 32, 0.98), rgba(13, 25, 46, 0.98))",
   },
   toggle: {
     display: "inline-flex",
@@ -579,7 +583,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: "nowrap",
   },
   panel: {
-    padding: "0 clamp(10px, 2vw, 32px) 6px",
+    padding: "0 10px 8px",
   },
   panelHeader: {
     height: 16,
@@ -616,7 +620,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
   messageList: {
-    height: 48,
+    height: 78,
     overflowY: "auto",
     border: "1px solid #1b2940",
     borderRadius: 6,
@@ -693,7 +697,7 @@ const styles: Record<string, React.CSSProperties> = {
   input: {
     flex: 1,
     minWidth: 0,
-    height: 29,
+    height: 32,
     boxSizing: "border-box",
     padding: "0 10px",
     borderRadius: 6,
