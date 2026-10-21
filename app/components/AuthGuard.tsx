@@ -1,339 +1,348 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import AuthGuard from "./components/AuthGuard";
+import AdminButton from "./components/AdminButton";
+import MenuDropdown from "./components/MenuDropdown";
+import PresenceTracker from "./components/PresenceTracker";
+import UserMenu from "./components/UserMenu";
+import "./globals.css";
+import NotificationsBell from "./components/NotificationsBell";
+import CursorTrail from "./components/CursorTrail";
+import HalloweenThemeLoader from "./components/HalloweenThemeLoader";
 
-"use client";
+export const metadata: Metadata = {
+  metadataBase: new URL("https://www.cinezone-hd.fr"),
 
-import { useCallback, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+  title: "CineZone Play – Streaming HD",
+  description:
+    "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD avec lecture directement intégrée au lecteur vidéo.",
 
-const CREATOR_EMAILS = [
-  "blackph4tom@gmail.com",
-  "lafooteusedu54@hotmail.fr",
-];
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      {
+        url: "/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/android-chrome-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: ["/apple-touch-icon.png"],
+  },
 
-const MAINTENANCE_MODE = true;
+  manifest: "/site.webmanifest",
 
-const ADMIN_ROLES = [
-  "admin",
-  "administrator",
-  "administrateur",
-  "founder",
-  "owner",
-];
+  verification: {
+    google: "iKzI4FL0MlAnHucVSprcOLlCgxowMTB2DJENXsljGpE",
+  },
 
-const PUBLIC_PAGES = [
-  "/",
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/contact",
-  "/actualites",
-  "/films",
-  "/sagas",
-  "/series",
-  "/tv",
-  "/movie",
-  "/player",
-  "/downloads",
-  "/download",
-  "/soutenir",
-  "/chat",
-];
+  
+openGraph: {
+    title: "CineZone Play – Streaming HD",
+    description:
+      "CineZone Play : découvrez notre catalogue de films et profitez du streaming HD.",
+    url: "https://cinezone-hd.fr",
+    siteName: "CineZone Play",
+    images: [
+      {
+        url: "/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "CineZone Play",
+      },
+    ],
+    locale: "fr_FR",
+    type: "website",
+  },
+};
 
-const PROTECTED_PREFIXES = [
-  "/compte",
-  "/profil",
-  "/notifications",
-  "/demande-film",
-  "/favoris",
-  "/perso",
-  "/waiting",
-];
 
-function isPublicPage(pathname: string) {
-  return (
-    PUBLIC_PAGES.includes(pathname) ||
-    pathname.startsWith("/films/") ||
-    pathname.startsWith("/sagas/") ||
-    pathname.startsWith("/series/") ||
-    pathname.startsWith("/tv/") ||
-    pathname.startsWith("/movie/") ||
-    pathname.startsWith("/player/") ||
-    pathname.startsWith("/downloads/") ||
-    pathname.startsWith("/download/") ||
-    pathname.startsWith("/actualites/")
-  );
-}
-
-function isProtectedPage(pathname: string) {
-  return PROTECTED_PREFIXES.some(
-    (prefix) =>
-      pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
-}
-
-export default function AuthGuard({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const showSeries = false;
 
-  const [loading, setLoading] = useState(true);
-  const [maintenance, setMaintenance] = useState(false);
-  const [authorized, setAuthorized] = useState(false);
+  const navLinks = [
+    ["Films", "/films"],
+    ["🎞️ Sagas", "/sagas"],
+    ...(showSeries ? [["Séries", "/series"]] : []),
+    ["🎬 Demande film", "/demande-film"],
+    ["❤️ Soutenir", "/soutenir"],
+  ];
 
-  const checkAccess = useCallback(async () => {
-    setLoading(true);
-    setMaintenance(false);
-    setAuthorized(false);
-
-    try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      const normalizedEmail = user?.email?.trim().toLowerCase();
-
-      const isCreator =
-        !error &&
-        !!normalizedEmail &&
-        CREATOR_EMAILS.some(
-          (email) => email.trim().toLowerCase() === normalizedEmail
-        );
-
-      // Les deux fondateurs ont toujours accès au site.
-      if (isCreator) {
-        setAuthorized(true);
-        setLoading(false);
-        return;
-      }
-
-      // Pendant la maintenance, vérifier les administrateurs.
-      if (MAINTENANCE_MODE) {
-        if (!error && user) {
-          const {
-            data: profile,
-            error: profileError,
-          } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", user.id)
-            .maybeSingle();
-
-          const role = String(profile?.role ?? "")
-            .trim()
-            .toLowerCase();
-
-          if (
-            !profileError &&
-            profile &&
-            ADMIN_ROLES.includes(role)
-          ) {
-            setAuthorized(true);
-            setLoading(false);
-            return;
-          }
-        }
-
-        // Autoriser la page de connexion pour permettre
-        // aux fondateurs de se connecter pendant la maintenance.
-        if (pathname === "/login") {
-          setAuthorized(true);
-          setLoading(false);
-          return;
-        }
-
-        // Les visiteurs et membres ordinaires restent bloqués.
-        setMaintenance(true);
-        setLoading(false);
-        return;
-      }
-
-      // Fonctionnement normal lorsque la maintenance est désactivée.
-      if (isPublicPage(pathname)) {
-        setAuthorized(true);
-        setLoading(false);
-        return;
-      }
-
-      if (error || !user) {
-        window.location.replace("/login");
-        return;
-      }
-
-      const {
-        data: profile,
-        error: profileError,
-      } = await supabase
-        .from("profiles")
-        .select("status, role")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (
-        profileError ||
-        !profile ||
-        profile.status !== "approved"
-      ) {
-        window.location.replace("/waiting");
-        return;
-      }
-
-      setAuthorized(true);
-      setLoading(false);
-    } catch (error) {
-      console.error("Erreur de vérification des accès :", error);
-
-      if (MAINTENANCE_MODE && pathname !== "/login") {
-        setMaintenance(true);
-        setLoading(false);
-        return;
-      }
-
-      if (MAINTENANCE_MODE && pathname === "/login") {
-        setAuthorized(true);
-        setLoading(false);
-        return;
-      }
-
-      if (isPublicPage(pathname)) {
-        setAuthorized(true);
-        setLoading(false);
-      } else {
-        window.location.replace("/login");
-      }
-    }
-  }, [pathname]);
-
-  useEffect(() => {
-    let active = true;
-
-    const runCheck = async () => {
-      if (active) {
-        await checkAccess();
-      }
-    };
-
-    void runCheck();
-
-    // Recontrôler les droits après une connexion ou déconnexion.
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      // Revalider les droits lors d'une vraie connexion/déconnexion.
-      // TOKEN_REFRESHED renouvelle seulement le jeton : relancer checkAccess()
-      // ici masquait toute la page avec « Chargement… » à chaque renouvellement.
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-        setTimeout(() => {
-          if (active) {
-            void checkAccess();
-          }
-        }, 0);
-      }
-    });
-
-    return () => {
-      active = false;
-      subscription.unsubscribe();
-    };
-  }, [checkAccess]);
-
-  if (loading) {
-    return (
-      <div
+  return (
+    <html lang="fr" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
         style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#080d18",
-          color: "#60a5fa",
-          fontSize: "16px",
-        }}
-      >
-        Chargement...
-      </div>
-    );
-  }
-
-  if (maintenance) {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "24px",
+          margin: 0,
           background:
-            "radial-gradient(ellipse at top, #142b4b 0%, #080d18 65%)",
-          color: "#ffffff",
+            "radial-gradient(circle at top, #061528 0%, #02050a 45%, #000 100%)",
+          color: "#fff",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <section
-          style={{
-            width: "100%",
-            maxWidth: "620px",
-            padding: "32px 26px",
-            border: "1px solid rgba(96, 165, 250, 0.45)",
-            borderRadius: "16px",
-            background: "rgba(15, 23, 42, 0.96)",
-            boxShadow: "0 0 40px rgba(37, 99, 235, 0.18)",
-            textAlign: "center",
-          }}
-        >
-          <div style={{ fontSize: "42px", marginBottom: "16px" }}>
-            🎬
+        
+      <HalloweenThemeLoader />
+        <PresenceTracker />
+        <CursorTrail />
+
+        <header style={headerStyle}>
+          <div style={topHeaderStyle}>
+            <Link href="/" style={logoLinkStyle}>
+              <div style={logoBoxStyle}>CZ</div>
+              <span style={logoTextStyle}>CineZone Play</span>
+            </Link>
+
+            <nav style={navWrapper}>
+              <div style={navCenter}>
+                <MenuDropdown />
+
+                {navLinks.map(([label, href]) => (
+                  <Link key={href} href={href} style={navLinkStyle}>
+                    {label}
+                  </Link>
+                ))}
+              </div>
+
+              <div style={navActions}>
+                <NotificationsBell />
+              </div>
+
+              <div style={profileSection}>
+                <AdminButton />
+                <UserMenu />
+              </div>
+            </nav>
           </div>
 
-          <h1
-            style={{
-              margin: "0 0 22px",
-              color: "#60a5fa",
-              fontSize: "clamp(22px, 4vw, 30px)",
-              lineHeight: 1.35,
-              fontWeight: 800,
-            }}
-          >
-            CineZone Play prépare son ouverture au public !
-          </h1>
-
-          <p
-            style={{
-              margin: 0,
-              color: "#e2e8f0",
-              fontSize: "16px",
-              lineHeight: 1.8,
-            }}
-          >
-            Nous travaillons actuellement à la conversion du
-            site vers un nouveau système de streaming avec
-            lecture directement intégrée au lecteur vidéo.
-            Le site sera prochainement accessible librement,
-            sans inscription pour regarder les films disponibles.
-          </p>
-
-          <div
-            style={{
-              marginTop: "26px",
-              paddingTop: "18px",
-              borderTop: "1px solid rgba(148, 163, 184, 0.2)",
-              color: "#94a3b8",
-              fontSize: "13px",
-            }}
-          >
-            Merci de votre patience et à très bientôt sur
-            CineZone Play.
+          <div style={marqueeContainer}>
+            <div
+              style={{
+                ...marqueeText,
+                color: "#ff0000",
+                fontWeight: 900,
+                textShadow: "0 0 12px #ff0000",
+                letterSpacing: "0.3px",
+              }}
+            >
+              🚀 INFO CINEZONE PLAY : Le streaming HD est actuellement en cours de
+              déploiement sur le site. Les films seront ajoutés progressivement.
+              Merci de votre patience, de votre compréhension et de votre fidélité.
+              ❤️ L'équipe d'administration de CineZone Play vous remercie ! 🎬
+            </div>
           </div>
-        </section>
-      </main>
-    );
-  }
+        </header>
 
-  if (!authorized) return null;
+        <AuthGuard>
+          <div style={{ paddingTop: "118px" }}>
+            {children}
+          </div>
 
-  return <>{children}</>;
+          <footer style={footerStyle}>
+            <h2 style={footerTitle}>CineZone Play</h2>
+
+            <p style={footerSubtitle}>
+              Votre espace dédié au cinéma et au streaming HD.
+            </p>
+
+            <div style={footerLinks}>
+              <Link href="/actualites" style={footerLink}>
+                Actualités
+              </Link>
+
+              <span style={{ color: "#4b5563" }}>/</span>
+
+              <Link href="/contact" style={footerLink}>
+                Contactez-nous
+              </Link>
+            </div>
+
+            <p style={footerLegal}>
+              Made with ❤️ by CineZone Play — 2026.
+            </p>
+          </footer>
+        </AuthGuard>
+      </body>
+    </html>
+  );
 }
+
+
+const headerStyle: React.CSSProperties = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 100,
+  background:
+    "linear-gradient(180deg, rgba(2,8,18,0.94), rgba(0,0,0,0.72))",
+  backdropFilter: "blur(22px)",
+  borderBottom: "1px solid rgba(0,198,255,0.14)",
+  boxShadow:
+    "0 18px 55px rgba(0,0,0,0.82), 0 0 30px rgba(0,120,255,0.10)",
+};
+
+const topHeaderStyle: React.CSSProperties = {
+  minHeight: "90px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "0 26px",
+};
+
+const navWrapper: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "16px",
+};
+
+const navCenter: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  padding: "8px",
+  borderRadius: "999px",
+  background: `
+    linear-gradient(
+      135deg,
+      rgba(0,198,255,0.08),
+      rgba(10,18,35,0.88),
+      rgba(138,43,226,0.08)
+    )
+  `,
+  border: "1px solid rgba(120,220,255,0.14)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+  boxShadow: `
+    0 0 42px rgba(0,198,255,0.14),
+    inset 0 0 18px rgba(255,255,255,0.03)
+  `,
+};
+
+const navActions: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+};
+
+const profileSection: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+};
+
+const marqueeContainer: React.CSSProperties = {
+  width: "100%",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  background:
+    "linear-gradient(90deg, rgba(0,198,255,0.08), rgba(0,114,255,0.05), rgba(0,198,255,0.08))",
+  borderTop: "1px solid rgba(0,198,255,0.12)",
+  padding: "5px 0",
+  color: "#67e8f9",
+  fontWeight: 800,
+  fontSize: "12px",
+  textShadow: "0 0 6px rgba(0,198,255,0.35)",
+};
+
+const marqueeText: React.CSSProperties = {
+  display: "inline-block",
+  paddingLeft: "100%",
+  animation: "marquee 75s linear infinite",
+};
+
+const logoLinkStyle: React.CSSProperties = {
+  textDecoration: "none",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+};
+
+const logoBoxStyle: React.CSSProperties = {
+  width: "44px",
+  height: "44px",
+  borderRadius: "14px",
+  background:
+    "linear-gradient(135deg, #00c6ff 0%, #0072ff 50%, #001f4d 100%)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#fff",
+  fontWeight: 950,
+  fontSize: "18px",
+  boxShadow:
+    "0 0 22px rgba(0,198,255,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+};
+
+const logoTextStyle: React.CSSProperties = {
+  fontWeight: 950,
+  fontSize: "34px",
+  letterSpacing: "-1px",
+  background:
+    "linear-gradient(135deg, #ffffff 0%, #b6e0ff 40%, #00c6ff 70%, #0072ff 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  filter: "drop-shadow(0 0 10px rgba(0,198,255,0.25))",
+};
+
+const navLinkStyle: React.CSSProperties = {
+  color: "#fff",
+  textDecoration: "none",
+  fontSize: "14px",
+  fontWeight: 800,
+  padding: "10px 18px",
+  borderRadius: "999px",
+  background:
+    "linear-gradient(135deg, rgba(0,198,255,0.10), rgba(6,20,40,0.55), rgba(255,255,255,0.03))",
+  border: "1px solid rgba(0,198,255,0.18)",
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 14px rgba(0,140,255,0.10)",
+};
+
+const footerStyle: React.CSSProperties = {
+  padding: "45px 20px 28px",
+  textAlign: "center",
+  borderTop: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(0,0,0,0.45)",
+  color: "#8b95a7",
+};
+
+const footerTitle: React.CSSProperties = {
+  margin: 0,
+  color: "#ff2b2b",
+  fontSize: "28px",
+  fontWeight: 900,
+};
+
+const footerSubtitle: React.CSSProperties = {
+  marginTop: "10px",
+  fontSize: "16px",
+};
+
+const footerLinks: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  gap: "18px",
+  marginTop: "18px",
+  flexWrap: "wrap",
+};
+
+const footerLink: React.CSSProperties = {
+  color: "#dbeafe",
+  textDecoration: "none",
+  fontWeight: 700,
+};
+
+const footerLegal: React.CSSProperties = {
+  marginTop: "26px",
+  fontSize: "14px",
+  lineHeight: 1.6,
+};
