@@ -55,8 +55,27 @@ export default function Shoutbox() {
 
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const wrapperRef = useRef<HTMLElement>(null);
   const userRef = useRef<ChatUser>(null);
   const openRef = useRef(false);
+
+  // Réduit la shoutbox quand on clique en dehors de son panneau.
+  // Les clics dans la shoutbox (saisie, suggestions, boutons) restent inchangés.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && !wrapperRef.current?.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsidePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsidePointerDown);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     openRef.current = isOpen;
@@ -487,7 +506,7 @@ export default function Shoutbox() {
   const lastMessage = messages[messages.length - 1];
 
   return (
-    <section style={styles.wrapper} aria-label="Shoutbox CineZone Play">
+    <section ref={wrapperRef} style={styles.wrapper} aria-label="Shoutbox CineZone Play">
       <div style={styles.topBar}>
         <button
           type="button"
