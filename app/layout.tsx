@@ -135,12 +135,14 @@ export default function RootLayout({
               ❤️ L'équipe d'administration de CineZone Play vous remercie ! 🎬
             </div>
           </div>
-        </header>
+                </header>
+
+        <div style={{ paddingTop: "118px" }}>
+          <Shoutbox />
+        </div>
 
         <AuthGuard>
-          <Shoutbox />
-
-          <div style={{ paddingTop: "118px" }}>
+          <div style={{ paddingTop: "0" }}>
             {children}
           </div>
 
