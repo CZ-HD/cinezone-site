@@ -58,7 +58,7 @@ export default function Shoutbox() {
     // La variable permet au contenu de commencer après le panneau, ouvert ou fermé.
     document.documentElement.style.setProperty(
       "--cz-shoutbox-height",
-      isOpen ? "184px" : "30px"
+      isOpen ? "126px" : "28px"
     );
 
     return () => {
@@ -497,7 +497,7 @@ export default function Shoutbox() {
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     position: "fixed",
-    top: "118px",
+    top: "116px",
     left: 0,
     right: 0,
     zIndex: 90,
@@ -509,11 +509,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "Arial, sans-serif",
   },
   topBar: {
-    minHeight: 30,
+    minHeight: 28,
     display: "flex",
     alignItems: "center",
     gap: 14,
-    padding: "0 clamp(12px, 4.3vw, 74px)",
+    padding: "0 clamp(10px, 2vw, 32px)",
     boxSizing: "border-box",
     background: "#080f20",
   },
@@ -524,7 +524,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexShrink: 0,
     position: "relative",
     border: 0,
-    padding: "7px 0",
+    padding: "5px 0",
     background: "transparent",
     color: "#ff922b",
     fontWeight: 800,
@@ -579,10 +579,10 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: "nowrap",
   },
   panel: {
-    padding: "0 clamp(12px, 4.3vw, 74px) 9px",
+    padding: "0 clamp(10px, 2vw, 32px) 6px",
   },
   panelHeader: {
-    height: 20,
+    height: 16,
     display: "flex",
     alignItems: "center",
     gap: 12,
@@ -612,20 +612,20 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 6,
     background: "#0d172a",
     color: "#cbd5e1",
-    padding: "3px 8px",
+    padding: "2px 7px",
     cursor: "pointer",
   },
   messageList: {
-    height: 85,
+    height: 48,
     overflowY: "auto",
     border: "1px solid #1b2940",
     borderRadius: 6,
     background: "rgba(2, 8, 22, 0.82)",
-    padding: "5px 9px",
+    padding: "3px 7px",
     boxSizing: "border-box",
   },
   messageRow: {
-    minHeight: 20,
+    minHeight: 17,
     display: "flex",
     alignItems: "center",
     gap: 7,
@@ -634,23 +634,23 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: 1.35,
   },
   time: {
-    width: 36,
+    width: 34,
     flexShrink: 0,
     color: "#64748b",
     fontSize: 10,
     fontVariantNumeric: "tabular-nums",
   },
   avatar: {
-    width: 17,
-    height: 17,
+    width: 16,
+    height: 16,
     flexShrink: 0,
     borderRadius: "50%",
     objectFit: "cover",
     border: "1px solid #34445d",
   },
   avatarFallback: {
-    width: 17,
-    height: 17,
+    width: 16,
+    height: 16,
     flexShrink: 0,
     borderRadius: "50%",
     display: "flex",
@@ -688,14 +688,14 @@ const styles: Record<string, React.CSSProperties> = {
   composer: {
     display: "flex",
     gap: 8,
-    marginTop: 6,
+    marginTop: 4,
   },
   input: {
     flex: 1,
     minWidth: 0,
-    height: 34,
+    height: 29,
     boxSizing: "border-box",
-    padding: "0 12px",
+    padding: "0 10px",
     borderRadius: 6,
     border: "1px solid #263853",
     background: "#080f20",
@@ -705,7 +705,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sendButton: {
     flexShrink: 0,
-    padding: "0 16px",
+    padding: "0 12px",
     borderRadius: 6,
     border: "1px solid #009de0",
     background: "linear-gradient(135deg, #00a8e8, #0755c9)",
