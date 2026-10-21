@@ -9,7 +9,7 @@ const CREATOR_EMAILS = [
   "lafooteusedu54@hotmail.fr",
 ];
 
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 const ADMIN_ROLES = [
   "admin",
