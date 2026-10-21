@@ -129,13 +129,14 @@ export default function RootLayout({
                 letterSpacing: "0.3px",
               }}
             >
+              
               🚀 INFO CINEZONE PLAY : Le streaming HD est actuellement en cours de
               déploiement sur le site. Les films seront ajoutés progressivement.
               Merci de votre patience, de votre compréhension et de votre fidélité.
               ❤️ L'équipe d'administration de CineZone Play vous remercie ! 🎬
             </div>
           </div>
-                </header>
+        </header>
 
         <div style={{ paddingTop: "118px" }}>
           <Shoutbox />
@@ -174,6 +175,7 @@ export default function RootLayout({
     </html>
   );
 }
+
 
 const headerStyle: React.CSSProperties = {
   position: "fixed",
