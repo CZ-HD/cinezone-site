@@ -67,7 +67,7 @@ function isPublicPage(pathname: string) {
 function isProtectedPage(pathname: string) {
   return PROTECTED_PREFIXES.some(
     (prefix) =>
-      pathname === prefix || pathname.startsWith(${prefix}/)
+      pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 }
 
