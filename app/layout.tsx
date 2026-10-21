@@ -8,7 +8,6 @@ import UserMenu from "./components/UserMenu";
 import "./globals.css";
 import NotificationsBell from "./components/NotificationsBell";
 import CursorTrail from "./components/CursorTrail";
-import HalloweenThemeLoader from "./components/HalloweenThemeLoader";
 import Shoutbox from "./components/Shoutbox";
 
 export const metadata: Metadata = {
@@ -88,7 +87,6 @@ export default function RootLayout({
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <HalloweenThemeLoader />
         <PresenceTracker />
         <CursorTrail />
 
