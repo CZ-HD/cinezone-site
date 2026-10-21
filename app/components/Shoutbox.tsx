@@ -58,7 +58,7 @@ export default function Shoutbox() {
     // La variable permet au contenu de commencer après le panneau, ouvert ou fermé.
     document.documentElement.style.setProperty(
       "--cz-shoutbox-height",
-      isOpen ? "170px" : "38px"
+      isOpen ? "190px" : "38px"
     );
 
     return () => {
@@ -498,25 +498,25 @@ const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     position: "relative",
     zIndex: 20,
-    width: "calc(100% - 32px)",
-    maxWidth: "1240px",
-    margin: "8px auto 12px",
+    width: "calc(100% - 40px)",
+    maxWidth: "1120px",
+    margin: "10px auto 14px",
     boxSizing: "border-box",
     color: "#e2e8f0",
     background: "rgba(5, 12, 27, 0.98)",
     border: "1px solid rgba(0, 198, 255, 0.32)",
-    borderBottom: "2px solid rgba(0, 198, 255, 0.62)",
+    borderBottom: "2px solid rgba(0, 198, 255, 0.75)",
     borderRadius: "10px",
     boxShadow: "0 7px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(0, 198, 255, 0.06)",
     overflow: "hidden",
     fontFamily: "Arial, sans-serif",
   },
   topBar: {
-    minHeight: 38,
+    minHeight: 40,
     display: "flex",
     alignItems: "center",
     gap: 14,
-    padding: "0 14px",
+    padding: "0 16px",
     boxSizing: "border-box",
     borderBottom: "1px solid rgba(100, 116, 139, 0.22)",
     background: "linear-gradient(90deg, rgba(8, 15, 32, 0.99), rgba(13, 25, 46, 0.99))",
@@ -572,7 +572,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: "transparent",
     color: "#d4dbe8",
     fontSize: 13,
-    lineHeight: 1.45,
+    lineHeight: 1.5,
     cursor: "pointer",
   },
   previewName: {
@@ -621,7 +621,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
   messageList: {
-    height: 118,
+    height: 132,
     overflowY: "auto",
     border: "1px solid #1b2940",
     borderRadius: 6,
@@ -636,7 +636,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 8,
     borderBottom: "1px solid rgba(100, 116, 139, 0.14)",
     fontSize: 13,
-    lineHeight: 1.45,
+    lineHeight: 1.5,
   },
   time: {
     width: 40,
