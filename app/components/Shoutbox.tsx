@@ -530,16 +530,29 @@ export default function Shoutbox() {
         );
       }
 
-      const isKnownMember = mentionProfiles.some((member) =>
+      const mentionedMember = mentionProfiles.find((member) =>
         (member.username || "").toLocaleLowerCase("fr") === mentionedName
       );
-      if (!isKnownMember) return part;
+      if (!mentionedMember) return part;
+
+      // Préserve les couleurs historiques du DEV et de l'ADMIN,
+      // y compris lorsque leur pseudo apparaît dans une mention.
+      const normalizedMention = (mentionedMember.username || "").trim().toLocaleLowerCase("fr");
+      const mentionColor =
+        normalizedMention === "vadrox"
+          ? "#c084fc"
+          : normalizedMention === "athéna." || normalizedMention === "athena"
+            ? "#fb7185"
+            : "#22d3ee";
 
       return (
         <strong key={`${index}-${part}`} style={{
-          color: "#22d3ee",
+          color: mentionColor,
           fontWeight: 900,
-          textShadow: "0 0 7px rgba(34,211,238,0.28)",
+          textShadow:
+            mentionColor === "#22d3ee"
+              ? "0 0 7px rgba(34,211,238,0.28)"
+              : `0 0 7px ${mentionColor}44`,
         }}>
           {part}
         </strong>
