@@ -40,6 +40,44 @@ type MentionProfile = {
 const MAX_MESSAGES = 50;
 const MAX_LENGTH = 1000;
 
+function renderColoredMentions(content: string) {
+  const parts = content.split(/(@toutlemonde|@[^\s@]+)/gi);
+
+  return parts.map((part, index) => {
+    if (/^@toutlemonde$/i.test(part)) {
+      return (
+        <span
+          key={index}
+          style={{
+            color: "#67e8f9",
+            fontWeight: 900,
+            textShadow: "0 0 8px rgba(103,232,249,0.45)",
+          }}
+        >
+          {part}
+        </span>
+      );
+    }
+
+    if (part.startsWith("@")) {
+      return (
+        <span
+          key={index}
+          style={{
+            color: "#f472b6",
+            fontWeight: 900,
+            textShadow: "0 0 8px rgba(244,114,182,0.4)",
+          }}
+        >
+          {part}
+        </span>
+      );
+    }
+
+    return <span key={index}>{part}</span>;
+  });
+}
+
 export default function Shoutbox() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ShoutMessage[]>([]);
@@ -237,10 +275,14 @@ export default function Shoutbox() {
           const message = payload.new as ShoutMessage;
           if (!message?.id) return;
 
-          // Actualisation immédiate via Realtime, avec récupération du profil.
+          // Recharge les messages pour associer le vrai pseudo du profil,
+          // même si l'événement Realtime ne contient que les données du message.
           void loadMessages();
 
-          if (userRef.current && message.user_id !== userRef.current.id) {
+          if (
+            userRef.current &&
+            message.user_id !== userRef.current.id
+          ) {
             if (!openRef.current) {
               setUnread((count) => count + 1);
             }
@@ -279,15 +321,8 @@ export default function Shoutbox() {
         }
       });
 
-    // Filet de sécurité : si Supabase Realtime ne livre pas un événement,
-    // les messages se synchronisent quand même sans recharger la page.
-    const refreshInterval = window.setInterval(() => {
-      void loadMessages();
-    }, 3000);
-
     return () => {
       active = false;
-      window.clearInterval(refreshInterval);
       subscription.unsubscribe();
       void supabase.removeChannel(channel);
     };
@@ -435,8 +470,8 @@ export default function Shoutbox() {
     setInput("");
     inputRef.current?.focus();
 
-    // Recharge et attend la mise à jour locale juste après l'envoi.
-    await loadMessages();
+    // Recharge immédiatement la liste après l'envoi, sans attendre Realtime ni un F5.
+    void loadMessages();
 
     if (mentionedMembers.length > 0 || (isAdmin && mentionEveryone)) {
       let recipients = mentionedMembers;
@@ -463,7 +498,7 @@ export default function Shoutbox() {
               type: "mention",
               title: "🔔 Mention dans la shoutbox",
               message: `${username} t'a mentionné dans la shoutbox.`,
-              link: "/?openShoutbox=1",
+              link: "/chat",
               read: false,
               read_at: null,
               created_at: new Date().toISOString(),
@@ -544,7 +579,7 @@ export default function Shoutbox() {
                 <strong style={styles.previewName}>
                   {lastMessage.username || "Membre"} :
                 </strong>{" "}
-                {lastMessage.content}
+                {renderColoredMentions(lastMessage.content)}
               </>
             ) : (
               <span style={{ color: "#8494ad" }}>
@@ -653,7 +688,7 @@ export default function Shoutbox() {
                     </span>
 
                     <span style={styles.messageContent}>
-                      {message.content}
+                      {renderColoredMentions(message.content)}
                     </span>
                   </div>
                 );
