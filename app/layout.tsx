@@ -114,10 +114,10 @@ export default function RootLayout({
               </div>
 
               <div style={profileSection}>
-               <AdminButton />
-               <UserMenu />
-               <AuthLinks />
-              </div>>
+  <AdminButton />
+  <UserMenu />
+  <AuthLinks />
+</div>
             </nav>
           </div>
 
