@@ -9,6 +9,7 @@ import "./globals.css";
 import NotificationsBell from "./components/NotificationsBell";
 import CursorTrail from "./components/CursorTrail";
 import Shoutbox from "./components/Shoutbox";
+import AuthLinks from "./components/AuthLinks";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cinezone-hd.fr"),
@@ -113,9 +114,10 @@ export default function RootLayout({
               </div>
 
               <div style={profileSection}>
-                <AdminButton />
-                <UserMenu />
-              </div>
+               <AdminButton />
+               <UserMenu />
+               <AuthLinks />
+              </div>>
             </nav>
           </div>
 
