@@ -237,14 +237,10 @@ export default function Shoutbox() {
           const message = payload.new as ShoutMessage;
           if (!message?.id) return;
 
-          // Recharge les messages pour associer le vrai pseudo du profil,
-          // même si l'événement Realtime ne contient que les données du message.
+          // Actualisation immédiate via Realtime, avec récupération du profil.
           void loadMessages();
 
-          if (
-            userRef.current &&
-            message.user_id !== userRef.current.id
-          ) {
+          if (userRef.current && message.user_id !== userRef.current.id) {
             if (!openRef.current) {
               setUnread((count) => count + 1);
             }
@@ -283,8 +279,15 @@ export default function Shoutbox() {
         }
       });
 
+    // Filet de sécurité : si Supabase Realtime ne livre pas un événement,
+    // les messages se synchronisent quand même sans recharger la page.
+    const refreshInterval = window.setInterval(() => {
+      void loadMessages();
+    }, 3000);
+
     return () => {
       active = false;
+      window.clearInterval(refreshInterval);
       subscription.unsubscribe();
       void supabase.removeChannel(channel);
     };
@@ -432,8 +435,8 @@ export default function Shoutbox() {
     setInput("");
     inputRef.current?.focus();
 
-    // Recharge immédiatement la liste après l'envoi, sans attendre Realtime ni un F5.
-    void loadMessages();
+    // Recharge et attend la mise à jour locale juste après l'envoi.
+    await loadMessages();
 
     if (mentionedMembers.length > 0 || (isAdmin && mentionEveryone)) {
       let recipients = mentionedMembers;
