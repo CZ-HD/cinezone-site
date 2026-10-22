@@ -511,44 +511,36 @@ export default function Shoutbox() {
 
   const lastMessage = messages[messages.length - 1];
 
-  // Met en évidence uniquement les pseudos réellement mentionnés.
-  // Palette cyan/bleu pour les membres, orange pour @toutlemonde.
+  // Colore uniquement les mentions reconnues, sans modifier les couleurs
+  // des pseudos d'auteur ni les badges DEV/ADMIN.
   function renderMentionedText(content: string) {
-    return content.split(/(@[^\\s@]+)/g).map((part, index) => {
+    return content.split(/(@[^\s@]+)/g).map((part, index) => {
       if (!part.startsWith("@")) return part;
 
       const mentionedName = part.slice(1).toLocaleLowerCase("fr");
       if (["toutlemonde", "everyone"].includes(mentionedName)) {
         return (
-          <strong
-            key={`${index}-${part}`}
-            style={{
-              color: "#fbbf24",
-              fontWeight: 800,
-              textShadow: "0 0 7px rgba(251,191,36,0.18)",
-            }}
-          >
+          <strong key={`${index}-${part}`} style={{
+            color: "#fbbf24",
+            fontWeight: 800,
+            textShadow: "0 0 7px rgba(251,191,36,0.22)",
+          }}>
             {part}
           </strong>
         );
       }
 
-      const isKnownMember = mentionProfiles.some(
-        (member) =>
-          (member.username || "").toLocaleLowerCase("fr") === mentionedName
+      const isKnownMember = mentionProfiles.some((member) =>
+        (member.username || "").toLocaleLowerCase("fr") === mentionedName
       );
-
       if (!isKnownMember) return part;
 
       return (
-        <strong
-          key={`${index}-${part}`}
-          style={{
-            color: "#38bdf8",
-            fontWeight: 800,
-            textShadow: "0 0 7px rgba(56,189,248,0.18)",
-          }}
-        >
+        <strong key={`${index}-${part}`} style={{
+          color: "#22d3ee",
+          fontWeight: 900,
+          textShadow: "0 0 7px rgba(34,211,238,0.28)",
+        }}>
           {part}
         </strong>
       );
