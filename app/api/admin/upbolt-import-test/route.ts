@@ -34,14 +34,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Configuration Supabase
+    // 2. Configuration Supabase et UpBolt
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
     const upboltKey = process.env.UPBOLT_API_KEY;
 
     if (!supabaseUrl || !supabaseKey || !upboltKey) {
       return NextResponse.json(
-        { success: false, error: "Configuration API ou Supabase manquante." },
+        {
+          success: false,
+          error: "Configuration API ou Supabase manquante.",
+          databaseModified: false,
+          newUploadStarted: false,
+        },
         { status: 500 }
       );
     }
@@ -82,7 +87,10 @@ export async function POST(request: Request) {
 
       if (error) {
         return NextResponse.json(
-          { success: false, error: "Vérification du profil impossible." },
+          {
+            success: false,
+            error: "Vérification du profil impossible.",
+          },
           { status: 500 }
         );
       }
@@ -99,7 +107,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Vérifier le film dans Supabase (lecture uniquement)
+    // 5. Lire le film dans Supabase (lecture uniquement)
     const { data: film, error: filmError } = await supabase
       .from("downloads")
       .select("id,title,link,stream_link")
@@ -108,33 +116,52 @@ export async function POST(request: Request) {
 
     if (filmError || !film) {
       return NextResponse.json(
-        { success: false, error: "Film de test introuvable." },
+        {
+          success: false,
+          error: "Film de test introuvable.",
+          databaseModified: false,
+          newUploadStarted: false,
+        },
         { status: 404 }
       );
     }
 
-    const sourceUrl = new URL(film.link);
-    const fileCode = sourceUrl.searchParams.keys().next().value;
+    // 6. Vérifier le lien source
+    let sourceUrl: URL;
+
+    try {
+      sourceUrl = new URL(film.link);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Lien source invalide." },
+        { status: 400 }
+      );
+    }
 
     if (
       sourceUrl.hostname !== "1fichier.com" &&
       sourceUrl.hostname !== "www.1fichier.com"
     ) {
       return NextResponse.json(
-        { success: false, error: "Lien source incorrect." },
+        { success: false, error: "Domaine source incorrect." },
         { status: 400 }
       );
     }
 
+    const fileCode = sourceUrl.searchParams.keys().next().value;
+
     if (fileCode !== EXPECTED_FILE_CODE) {
       return NextResponse.json(
-        { success: false, error: "Le fichier ne correspond pas au test." },
+        {
+          success: false,
+          error: "Le fichier ne correspond pas au test.",
+        },
         { status: 409 }
       );
     }
 
-    // 6. Consulter les imports URL existants chez UpBolt.
-    // IMPORTANT : cette route ne lance aucun nouvel import.
+    // 7. Consulter les imports URL existants chez UpBolt.
+    // AUCUN nouvel import n'est lancé.
     const statusUrl = new URL(
       "https://upbolt.to/api/file/url_uploads"
     );
@@ -171,6 +198,7 @@ export async function POST(request: Request) {
           success: false,
           error: "Impossible de consulter les imports UpBolt.",
           httpStatus: response.status,
+          apiMessage: data.msg ?? data.message ?? null,
           databaseModified: false,
           newUploadStarted: false,
         },
@@ -178,13 +206,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // 7. Rechercher uniquement l'import correspondant au fichier testé.
+    // 8. Récupérer la liste des imports
     const uploads = Array.isArray(data.result)
       ? data.result
       : Array.isArray(data.result?.uploads)
         ? data.result.uploads
         : [];
 
+    // 9. Rechercher l'import correspondant au film
     const matchingUploads = uploads
       .filter((item: any) => {
         const remoteUrl = String(item.remote_url || "");
@@ -199,31 +228,50 @@ export async function POST(request: Request) {
         status: item.status ?? null,
         progress: item.progress ?? null,
         fileCode: item.file_code ?? null,
+
+        // Informations détaillées pour comprendre l'erreur
+        availableFields: Object.keys(item),
+        error: item.error ?? null,
+        message: item.message ?? null,
+        msg: item.msg ?? null,
+        reason: item.reason ?? null,
+        errorMessage: item.error_message ?? null,
+        statusMessage: item.status_message ?? null,
+        created: item.created ?? item.created_at ?? null,
       }));
 
+    // 10. Retourner le diagnostic
     return NextResponse.json(
       {
         success: true,
-        message: "Consultation des imports UpBolt terminée.",
+        message: "Diagnostic détaillé UpBolt terminé.",
+
         film: {
           id: film.id,
           title: film.title,
         },
+
         upbolt: {
-          matchingImports: matchingUploads,
-          matchingCount: matchingUploads.length,
           apiStatus: data.status ?? null,
           apiMessage: data.msg ?? data.message ?? null,
+          matchingImports: matchingUploads,
+          matchingCount: matchingUploads.length,
         },
-        streamLinkEmpty: !film.stream_link,
+
+        streamLinkEmpty:
+          !film.stream_link || film.stream_link.trim() === "",
+
         databaseModified: false,
         newUploadStarted: false,
       },
       {
         status: 200,
-        headers: { "Cache-Control": "no-store" },
+        headers: {
+          "Cache-Control": "no-store",
+        },
       }
     );
+
   } catch (error) {
     console.error("DIAGNOSTIC UPBOLT :", error);
 
