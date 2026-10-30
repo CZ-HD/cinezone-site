@@ -34,37 +34,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Confirmation obligatoire
-    let body: { confirmUpload?: boolean };
-
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Confirmation JSON invalide." },
-        { status: 400 }
-      );
-    }
-
-    if (body.confirmUpload !== true) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Confirmation de l'import manquante.",
-          uploadStarted: false,
-          databaseModified: false,
-        },
-        { status: 400 }
-      );
-    }
-
-    // 3. Configuration Supabase
+    // 2. Configuration Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+    const upboltKey = process.env.UPBOLT_API_KEY;
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseUrl || !supabaseKey || !upboltKey) {
       return NextResponse.json(
-        { success: false, error: "Configuration Supabase manquante." },
+        { success: false, error: "Configuration API ou Supabase manquante." },
         { status: 500 }
       );
     }
@@ -77,7 +54,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // 4. Vérifier l'utilisateur
+    // 3. Vérifier l'utilisateur
     const { data: userData, error: authError } =
       await supabase.auth.getUser(accessToken);
 
@@ -90,7 +67,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Vérifier les droits administrateur
+    // 4. Vérifier les droits administrateur
     const userEmail = user.email?.toLowerCase();
 
     let isAdmin =
@@ -122,82 +99,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Vérifier les clés API
-    const fichierKey = process.env.FICHIER_API_KEY;
-    const upboltKey = process.env.UPBOLT_API_KEY;
-
-    if (!fichierKey || !upboltKey) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Une clé API est absente de Vercel.",
-          diagnostic: {
-            fichierKeyPresent: !!fichierKey,
-            upboltKeyPresent: !!upboltKey,
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    // 7. Lire uniquement le film 9737
+    // 5. Vérifier le film dans Supabase (lecture uniquement)
     const { data: film, error: filmError } = await supabase
       .from("downloads")
       .select("id,title,link,stream_link")
       .eq("id", FILM_ID)
       .maybeSingle();
 
-    if (filmError) {
+    if (filmError || !film) {
       return NextResponse.json(
-        { success: false, error: "Lecture Supabase impossible." },
-        { status: 500 }
-      );
-    }
-
-    if (!film) {
-      return NextResponse.json(
-        { success: false, error: "Film 9737 introuvable." },
+        { success: false, error: "Film de test introuvable." },
         { status: 404 }
       );
     }
 
-    // 8. Ne jamais écraser un streaming existant
-    if (
-      typeof film.stream_link === "string" &&
-      film.stream_link.trim() !== ""
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Un lien streaming existe déjà. Import annulé.",
-        },
-        { status: 409 }
-      );
-    }
-
-    // 9. Vérifier le lien 1fichier
-    let sourceUrl: URL;
-
-    try {
-      sourceUrl = new URL(film.link);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Lien 1fichier invalide." },
-        { status: 400 }
-      );
-    }
+    const sourceUrl = new URL(film.link);
+    const fileCode = sourceUrl.searchParams.keys().next().value;
 
     if (
       sourceUrl.hostname !== "1fichier.com" &&
       sourceUrl.hostname !== "www.1fichier.com"
     ) {
       return NextResponse.json(
-        { success: false, error: "Domaine source incorrect." },
+        { success: false, error: "Lien source incorrect." },
         { status: 400 }
       );
     }
-
-    const fileCode = sourceUrl.searchParams.keys().next().value;
 
     if (fileCode !== EXPECTED_FILE_CODE) {
       return NextResponse.json(
@@ -206,200 +133,106 @@ export async function POST(request: Request) {
       );
     }
 
-    const cleanSourceUrl = `https://1fichier.com/?${fileCode}`;
-
-    // 10. Vérifier les informations 1fichier
-    const fichierResponse = await fetch(
-      "https://api.1fichier.com/v1/file/info.cgi",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${fichierKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: cleanSourceUrl,
-          pretty: 1,
-        }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(20000),
-      }
+    // 6. Consulter les imports URL existants chez UpBolt.
+    // IMPORTANT : cette route ne lance aucun nouvel import.
+    const statusUrl = new URL(
+      "https://upbolt.to/api/file/url_uploads"
     );
 
-    const fichierText = await fichierResponse.text();
+    statusUrl.searchParams.set("key", upboltKey);
 
-    let fichierData: any;
+    const response = await fetch(statusUrl.toString(), {
+      method: "GET",
+      cache: "no-store",
+      signal: AbortSignal.timeout(20000),
+    });
 
-    try {
-      fichierData = JSON.parse(fichierText);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Réponse 1fichier invalide." },
-        { status: 502 }
-      );
-    }
+    const responseText = await response.text();
 
-    if (!fichierResponse.ok || fichierData.status === "KO") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Vérification 1fichier refusée.",
-          details: fichierData.message || "Erreur inconnue.",
-        },
-        { status: 502 }
-      );
-    }
-
-    // 11. Obtenir le lien temporaire
-    const tokenResponse = await fetch(
-      "https://api.1fichier.com/v1/download/get_token.cgi",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${fichierKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: cleanSourceUrl,
-          single: 1,
-          pretty: 1,
-        }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(20000),
-      }
-    );
-
-    const tokenText = await tokenResponse.text();
-
-    let tokenData: any;
+    let data: any;
 
     try {
-      tokenData = JSON.parse(tokenText);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Réponse du téléchargement invalide." },
-        { status: 502 }
-      );
-    }
-
-    if (
-      !tokenResponse.ok ||
-      tokenData.status !== "OK" ||
-      typeof tokenData.url !== "string" ||
-      !tokenData.url.startsWith("https://")
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Impossible d'obtenir le lien temporaire 1fichier.",
-          details: tokenData.message || "Erreur inconnue.",
-        },
-        { status: 502 }
-      );
-    }
-
-    // 12. Envoyer le fichier vers UpBolt
-    const upboltUrl = new URL(
-      "https://upbolt.to/api/upload/url"
-    );
-
-    upboltUrl.searchParams.set("key", upboltKey);
-    upboltUrl.searchParams.set("url", tokenData.url);
-
-    let uploadResponse: Response;
-
-    try {
-      uploadResponse = await fetch(upboltUrl.toString(), {
-        method: "GET",
-        cache: "no-store",
-        signal: AbortSignal.timeout(30000),
-      });
-    } catch (error) {
-      console.error("ERREUR CONNEXION UPBOLT :", error);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Impossible de contacter UpBolt.",
-          uploadStarted: false,
-          databaseModified: false,
-        },
-        { status: 502 }
-      );
-    }
-
-    // 13. Lire la réponse UpBolt
-    const uploadText = await uploadResponse.text();
-
-    let uploadData: any;
-
-    try {
-      uploadData = JSON.parse(uploadText);
+      data = JSON.parse(responseText);
     } catch {
       return NextResponse.json(
         {
           success: false,
           error: "Réponse UpBolt invalide.",
-          uploadStarted: false,
           databaseModified: false,
+          newUploadStarted: false,
         },
         { status: 502 }
       );
     }
 
-    if (!uploadResponse.ok || !uploadData.filecode) {
-      console.error("ERREUR IMPORT UPBOLT :", {
-        status: uploadResponse.status,
-        message: uploadData.message,
-      });
-
+    if (!response.ok) {
       return NextResponse.json(
         {
           success: false,
-          error: "UpBolt n'a pas confirmé la création de l'import.",
-          details: uploadData.message || "Erreur inconnue.",
-          uploadStarted: false,
+          error: "Impossible de consulter les imports UpBolt.",
+          httpStatus: response.status,
           databaseModified: false,
+          newUploadStarted: false,
         },
         { status: 502 }
       );
     }
 
-    // 14. Résultat
+    // 7. Rechercher uniquement l'import correspondant au fichier testé.
+    const uploads = Array.isArray(data.result)
+      ? data.result
+      : Array.isArray(data.result?.uploads)
+        ? data.result.uploads
+        : [];
+
+    const matchingUploads = uploads
+      .filter((item: any) => {
+        const remoteUrl = String(item.remote_url || "");
+        const code = String(item.file_code || "");
+
+        return (
+          remoteUrl.includes(EXPECTED_FILE_CODE) ||
+          code === EXPECTED_FILE_CODE
+        );
+      })
+      .map((item: any) => ({
+        status: item.status ?? null,
+        progress: item.progress ?? null,
+        fileCode: item.file_code ?? null,
+      }));
+
     return NextResponse.json(
       {
         success: true,
-        message: "Import distant accepté par UpBolt.",
+        message: "Consultation des imports UpBolt terminée.",
         film: {
           id: film.id,
           title: film.title,
-          filename: fichierData.filename || fichierData.name || null,
-          size: fichierData.size || fichierData.filesize || null,
         },
         upbolt: {
-          fileCode: uploadData.filecode,
-          importAccepted: true,
+          matchingImports: matchingUploads,
+          matchingCount: matchingUploads.length,
+          apiStatus: data.status ?? null,
+          apiMessage: data.msg ?? data.message ?? null,
         },
-        streamLinkEmpty: true,
-        uploadStarted: true,
+        streamLinkEmpty: !film.stream_link,
         databaseModified: false,
-        nextStep:
-          "Vérifier l'état de l'import UpBolt avant toute autre opération.",
+        newUploadStarted: false,
       },
       {
         status: 200,
         headers: { "Cache-Control": "no-store" },
       }
     );
-
   } catch (error) {
-    console.error("ERREUR IMPORT UPBOLT :", error);
+    console.error("DIAGNOSTIC UPBOLT :", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: "Erreur interne pendant le test d'import.",
+        error: "Erreur pendant le diagnostic UpBolt.",
         databaseModified: false,
+        newUploadStarted: false,
       },
       { status: 500 }
     );
