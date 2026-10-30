@@ -78,6 +78,9 @@ export default function AdminPage() {
   const [migrationLoading, setMigrationLoading] = useState(false);
   const [migrationPreview, setMigrationPreview] = useState<unknown>(null);
   const [migrationError, setMigrationError] = useState("");
+  const [badBoysTestLoading, setBadBoysTestLoading] = useState(false);
+  const [badBoysTestResult, setBadBoysTestResult] = useState<unknown>(null);
+  const [badBoysTestError, setBadBoysTestError] = useState("");
 
   const [id, setId] = useState("");
   const [link, setLink] = useState("");
@@ -1116,6 +1119,55 @@ const filteredNotifications = notifications.filter((notif) => {
     }
   };
 
+  const testBadBoysUpbolt = async () => {
+    if (badBoysTestLoading) return;
+
+    const confirmed = window.confirm(
+      "Lancer le test UpBolt pour Bad Boys (1995) uniquement ? Aucun autre film ne sera envoyé et Supabase ne sera pas modifié."
+    );
+    if (!confirmed) return;
+
+    setBadBoysTestLoading(true);
+    setBadBoysTestError("");
+    setBadBoysTestResult(null);
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      const accessToken = sessionData.session?.access_token;
+
+      if (sessionError || !accessToken) {
+        throw new Error("Session administrateur introuvable. Reconnecte-toi.");
+      }
+
+      const response = await fetch("/api/admin/upbolt-import-badboys", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || result.success === false) {
+        setBadBoysTestResult(result);
+        throw new Error(
+          result.error || `Erreur HTTP ${response.status}`
+        );
+      }
+
+      setBadBoysTestResult(result);
+    } catch (error) {
+      setBadBoysTestError(
+        error instanceof Error ? error.message : "Erreur inconnue."
+      );
+    } finally {
+      setBadBoysTestLoading(false);
+    }
+  };
+
   const filteredAdminMovies = useMemo(() => {
     const q = filmSearch.toLowerCase().trim();
     if (!q) return adminMovies.slice(0, 60);
@@ -1243,6 +1295,61 @@ const filteredNotifications = notifications.filter((notif) => {
       ❌ {migrationError}
     </p>
   )}
+
+  <div
+    style={{
+      marginTop: "22px",
+      paddingTop: "18px",
+      borderTop: "1px solid rgba(255,255,255,0.12)",
+    }}
+  >
+    <h3 style={{ marginTop: 0 }}>🧪 Test isolé — Bad Boys (1995)</h3>
+    <p style={subText}>
+      Test limité au film ID 9737. Aucun autre film ne sera envoyé.
+      Le lien 1fichier sera conservé et aucune écriture Supabase ne sera effectuée.
+      Si l'ancien import en erreur existe toujours chez UpBolt, le test sera bloqué
+      pour éviter un doublon.
+    </p>
+    <button
+      type="button"
+      onClick={testBadBoysUpbolt}
+      disabled={badBoysTestLoading}
+      style={{
+        ...btnGreen,
+        opacity: badBoysTestLoading ? 0.6 : 1,
+        cursor: badBoysTestLoading ? "wait" : "pointer",
+      }}
+    >
+      {badBoysTestLoading
+        ? "⏳ Vérification / test en cours..."
+        : "🎬 Tester l'import Bad Boys (1995)"}
+    </button>
+
+    {badBoysTestError && (
+      <p style={{ color: "#fb7185", marginTop: "12px" }}>
+        ❌ {badBoysTestError}
+      </p>
+    )}
+
+    {badBoysTestResult !== null && (
+      <pre
+        style={{
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+          maxHeight: "320px",
+          overflowY: "auto",
+          padding: "14px",
+          marginTop: "12px",
+          borderRadius: "12px",
+          background: "rgba(0,0,0,0.28)",
+          color: "#d1d5db",
+          fontSize: "12px",
+        }}
+      >
+        {JSON.stringify(badBoysTestResult, null, 2)}
+      </pre>
+    )}
+  </div>
 
   {migrationPreview !== null && (
     <div style={{ marginTop: "18px" }}>
