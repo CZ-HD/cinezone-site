@@ -229,25 +229,100 @@ export async function POST(request: Request) {
       );
     }
 
-    // 11. Résultat sans exposer de clé ni de lien temporaire
+    
+    // 11. Demander un lien temporaire à 1fichier
+    let tokenResponse: Response;
+
+    try {
+      tokenResponse = await fetch(
+        "https://api.1fichier.com/v1/download/get_token.cgi",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${fichierKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: cleanSourceUrl,
+            single: 1,
+            pretty: 1,
+          }),
+          cache: "no-store",
+          signal: AbortSignal.timeout(20000),
+        }
+      );
+    } catch (error) {
+      console.error("ERREUR TOKEN 1FICHIER :", error);
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Impossible de demander le lien temporaire à 1fichier.",
+        },
+        { status: 502 }
+      );
+    }
+
+    // 12. Lire la réponse du service
+    const tokenText = await tokenResponse.text();
+
+    let tokenData: any;
+
+    try {
+      tokenData = JSON.parse(tokenText);
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Réponse du service de téléchargement invalide.",
+          httpStatus: tokenResponse.status,
+        },
+        { status: 502 }
+      );
+    }
+
+    if (
+      !tokenResponse.ok ||
+      tokenData.status !== "OK" ||
+      typeof tokenData.url !== "string" ||
+      !tokenData.url.startsWith("https://")
+    ) {
+      console.error("ERREUR TOKEN 1FICHIER :", {
+        httpStatus: tokenResponse.status,
+        status: tokenData.status,
+        message: tokenData.message,
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "1fichier n'a pas fourni de lien temporaire valide.",
+          httpStatus: tokenResponse.status,
+          details: tokenData.message || "Erreur inconnue.",
+        },
+        { status: 502 }
+      );
+    }
+
+    // 13. Résultat : ne jamais afficher le lien temporaire
     return NextResponse.json(
       {
         success: true,
-        message: "Accès API 1fichier confirmé.",
+        message: "Lien temporaire 1fichier obtenu.",
         film: {
           id: film.id,
           title: film.title,
-          fileCode,
-        },
-        fichier: {
-          status: fichierData.status || "Réponse reçue",
           filename: fichierData.filename || fichierData.name || null,
           size: fichierData.size || fichierData.filesize || null,
-          responseReceived: true,
+        },
+        fichier: {
+          infoVerified: true,
+          downloadTokenObtained: true,
         },
         streamLinkEmpty: true,
         databaseModified: false,
         uploadStarted: false,
+        nextStep: "Vérifier le lien temporaire puis préparer son transfert vers UpBolt.",
       },
       {
         status: 200,
@@ -258,7 +333,10 @@ export async function POST(request: Request) {
     console.error("ERREUR TEST 1FICHIER :", error);
 
     return NextResponse.json(
-      { success: false, error: "Erreur interne pendant le test." },
+      {
+        success: false,
+        error: "Erreur interne pendant le test.",
+      },
       { status: 500 }
     );
   }
