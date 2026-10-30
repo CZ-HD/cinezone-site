@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Client serveur en lecture seule pour ce test
+    // 4. Client serveur
     const adminClient = createClient(supabaseUrl, serviceKey, {
       auth: {
         persistSession: false,
@@ -141,8 +141,7 @@ export async function POST(request: Request) {
 
     const cleanSourceUrl = `https://1fichier.com/?${fileCode}`;
 
-    // 6. Vérifier les anciens imports UpBolt.
-    // Ne jamais créer un doublon automatiquement.
+    // 6. Vérifier les anciens imports UpBolt
     const statusUrl = new URL(
       "https://upbolt.to/api/file/url_uploads"
     );
@@ -154,7 +153,17 @@ export async function POST(request: Request) {
     });
 
     const statusText = await statusResponse.text();
-    const statusData = JSON.parse(statusText);
+
+    let statusData: any;
+
+    try {
+      statusData = JSON.parse(statusText);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Réponse de la liste UpBolt invalide." },
+        { status: 502 }
+      );
+    }
 
     if (!statusResponse.ok) {
       return NextResponse.json(
@@ -169,23 +178,55 @@ export async function POST(request: Request) {
         ? statusData.result.uploads
         : [];
 
-    const previousImport = uploads.find((item: any) =>
+    const matchingImports = uploads.filter((item: any) =>
       String(item.remote_url || "").includes(EXPECTED_FILE_CODE)
     );
 
-    if (previousImport) {
+    if (matchingImports.length > 1) {
       return NextResponse.json(
         {
           success: false,
-          error: "Un ancien import Bad Boys existe déjà chez UpBolt.",
-          previousStatus: previousImport.status ?? null,
-          previousProgress: previousImport.progress ?? null,
-          action: "Aucun nouvel import lancé. Vérification manuelle nécessaire.",
+          error: "Plusieurs anciens imports Bad Boys ont été trouvés. Test bloqué par sécurité.",
+          matchingImports: matchingImports.length,
           databaseModified: false,
           newUploadStarted: false,
         },
         { status: 409 }
       );
+    }
+
+    const previousImport = matchingImports[0];
+
+    if (previousImport) {
+      const previousStatus = String(previousImport.status ?? "")
+        .trim()
+        .toUpperCase();
+
+      const previousProgress = Number(previousImport.progress ?? -1);
+      const previousFileCode = String(previousImport.file_code ?? "").trim();
+      const previousFolderId = Number(previousImport.fld_id ?? -1);
+
+      const safeToRetry =
+        previousStatus === "ERROR" &&
+        previousProgress === 0 &&
+        previousFileCode === "" &&
+        previousFolderId === 0;
+
+      if (!safeToRetry) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Ancien import présent : les conditions de nouvelle tentative ne sont pas réunies.",
+            previousStatus,
+            previousProgress,
+            previousFileCodeExists: !!previousFileCode,
+            previousFolderId,
+            databaseModified: false,
+            newUploadStarted: false,
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // 7. Vérifier le fichier chez 1fichier
@@ -215,7 +256,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 8. Obtenir une URL temporaire 1fichier
+    // 8. Obtenir une nouvelle URL temporaire
     const tokenResponse = await fetch(
       "https://api.1fichier.com/v1/download/get_token.cgi",
       {
@@ -267,7 +308,11 @@ export async function POST(request: Request) {
       importData = JSON.parse(importText);
     } catch {
       return NextResponse.json(
-        { success: false, error: "Réponse UpBolt invalide." },
+        {
+          success: false,
+          error: "Réponse UpBolt invalide.",
+          databaseModified: false,
+        },
         { status: 502 }
       );
     }
@@ -285,6 +330,7 @@ export async function POST(request: Request) {
           error: "UpBolt n'a pas confirmé l'import.",
           apiResponse: importData,
           databaseModified: false,
+          newUploadStarted: false,
         },
         { status: 502 }
       );
@@ -299,6 +345,8 @@ export async function POST(request: Request) {
           id: film.id,
           title: film.title,
         },
+        previousImportRetry:
+          previousImport ? "Ancien import ERROR à 0 % conservé." : "Aucun ancien import trouvé.",
         upbolt: {
           fileCode: upboltFileCode,
           status: "accepted",
