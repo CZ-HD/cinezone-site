@@ -224,12 +224,13 @@ export async function POST(request: Request) {
           code === EXPECTED_FILE_CODE
         );
       })
+      
       .map((item: any) => ({
         status: item.status ?? null,
         progress: item.progress ?? null,
         fileCode: item.file_code ?? null,
-
-        // Informations détaillées pour comprendre l'erreur
+        fld_id: item.fld_id ?? null,
+        remote_url: item.remote_url ?? null,
         availableFields: Object.keys(item),
         error: item.error ?? null,
         message: item.message ?? null,
