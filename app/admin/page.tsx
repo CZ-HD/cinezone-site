@@ -81,6 +81,9 @@ export default function AdminPage() {
   const [badBoysTestLoading, setBadBoysTestLoading] = useState(false);
   const [badBoysTestResult, setBadBoysTestResult] = useState<unknown>(null);
   const [badBoysTestError, setBadBoysTestError] = useState("");
+  const [badBoysDiagnosticLoading, setBadBoysDiagnosticLoading] = useState(false);
+  const [badBoysDiagnosticResult, setBadBoysDiagnosticResult] = useState<unknown>(null);
+  const [badBoysDiagnosticError, setBadBoysDiagnosticError] = useState("");
 
   const [id, setId] = useState("");
   const [link, setLink] = useState("");
@@ -1168,6 +1171,47 @@ const filteredNotifications = notifications.filter((notif) => {
     }
   };
 
+  const diagnoseBadBoys1fichier = async () => {
+    if (badBoysDiagnosticLoading) return;
+
+    const confirmed = window.confirm(
+      "Diagnostiquer uniquement le lien 1fichier de Bad Boys (1995) ? Aucun transfert UpBolt et aucune modification Supabase ne seront effectués."
+    );
+    if (!confirmed) return;
+
+    setBadBoysDiagnosticLoading(true);
+    setBadBoysDiagnosticError("");
+    setBadBoysDiagnosticResult(null);
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+
+      if (sessionError || !accessToken) {
+        throw new Error("Session administrateur introuvable. Reconnecte-toi.");
+      }
+
+      const response = await fetch("/api/admin/upbolt-diagnostic-badboys", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: "no-store",
+      });
+      const result = await response.json().catch(() => ({}));
+      setBadBoysDiagnosticResult(result);
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.error || `Erreur HTTP ${response.status}`);
+      }
+    } catch (error) {
+      setBadBoysDiagnosticError(
+        error instanceof Error ? error.message : "Erreur inconnue."
+      );
+    } finally {
+      setBadBoysDiagnosticLoading(false);
+    }
+  };
+
   const filteredAdminMovies = useMemo(() => {
     const q = filmSearch.toLowerCase().trim();
     if (!q) return adminMovies.slice(0, 60);
@@ -1310,6 +1354,47 @@ const filteredNotifications = notifications.filter((notif) => {
       Si l'ancien import en erreur existe toujours chez UpBolt, le test sera bloqué
       pour éviter un doublon.
     </p>
+    <button
+      type="button"
+      onClick={diagnoseBadBoys1fichier}
+      disabled={badBoysDiagnosticLoading}
+      style={{
+        ...btnGreen,
+        marginBottom: "12px",
+        opacity: badBoysDiagnosticLoading ? 0.6 : 1,
+        cursor: badBoysDiagnosticLoading ? "wait" : "pointer",
+      }}
+    >
+      {badBoysDiagnosticLoading
+        ? "⏳ Diagnostic 1fichier en cours..."
+        : "🔎 Diagnostiquer le lien 1fichier"}
+    </button>
+
+    {badBoysDiagnosticError && (
+      <p style={{ color: "#fb7185", marginTop: "12px" }}>
+        ❌ {badBoysDiagnosticError}
+      </p>
+    )}
+
+    {badBoysDiagnosticResult !== null && (
+      <pre
+        style={{
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+          maxHeight: "320px",
+          overflowY: "auto",
+          padding: "14px",
+          marginTop: "12px",
+          borderRadius: "12px",
+          background: "rgba(0,0,0,0.28)",
+          color: "#d1d5db",
+          fontSize: "12px",
+        }}
+      >
+        {JSON.stringify(badBoysDiagnosticResult, null, 2)}
+      </pre>
+    )}
+
     <button
       type="button"
       onClick={testBadBoysUpbolt}
