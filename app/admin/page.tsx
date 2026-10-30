@@ -84,6 +84,9 @@ export default function AdminPage() {
   const [badBoysDiagnosticLoading, setBadBoysDiagnosticLoading] = useState(false);
   const [badBoysDiagnosticResult, setBadBoysDiagnosticResult] = useState<unknown>(null);
   const [badBoysDiagnosticError, setBadBoysDiagnosticError] = useState("");
+  const [upboltImportDiagnosticLoading, setUpboltImportDiagnosticLoading] = useState(false);
+  const [upboltImportDiagnosticResult, setUpboltImportDiagnosticResult] = useState<unknown>(null);
+  const [upboltImportDiagnosticError, setUpboltImportDiagnosticError] = useState("");
 
   const [id, setId] = useState("");
   const [link, setLink] = useState("");
@@ -1212,6 +1215,47 @@ const filteredNotifications = notifications.filter((notif) => {
     }
   };
 
+  const diagnoseBadBoysUpboltImport = async () => {
+    if (upboltImportDiagnosticLoading) return;
+
+    const confirmed = window.confirm(
+      "Interroger UpBolt en lecture seule pour le nouvel import Bad Boys (code vb11zvss1e5m) ? Aucun transfert, aucune suppression et aucune modification Supabase ne seront effectués."
+    );
+    if (!confirmed) return;
+
+    setUpboltImportDiagnosticLoading(true);
+    setUpboltImportDiagnosticError("");
+    setUpboltImportDiagnosticResult(null);
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+
+      if (sessionError || !accessToken) {
+        throw new Error("Session administrateur introuvable. Reconnecte-toi.");
+      }
+
+      const response = await fetch("/api/admin/upbolt-diagnostic-import", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: "no-store",
+      });
+      const result = await response.json().catch(() => ({}));
+      setUpboltImportDiagnosticResult(result);
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.error || `Erreur HTTP ${response.status}`);
+      }
+    } catch (error) {
+      setUpboltImportDiagnosticError(
+        error instanceof Error ? error.message : "Erreur inconnue."
+      );
+    } finally {
+      setUpboltImportDiagnosticLoading(false);
+    }
+  };
+
   const filteredAdminMovies = useMemo(() => {
     const q = filmSearch.toLowerCase().trim();
     if (!q) return adminMovies.slice(0, 60);
@@ -1392,6 +1436,48 @@ const filteredNotifications = notifications.filter((notif) => {
         }}
       >
         {JSON.stringify(badBoysDiagnosticResult, null, 2)}
+      </pre>
+    )}
+
+    <button
+      type="button"
+      onClick={diagnoseBadBoysUpboltImport}
+      disabled={upboltImportDiagnosticLoading}
+      style={{
+        ...btnBlue,
+        marginBottom: "12px",
+        marginLeft: "8px",
+        opacity: upboltImportDiagnosticLoading ? 0.6 : 1,
+        cursor: upboltImportDiagnosticLoading ? "wait" : "pointer",
+      }}
+    >
+      {upboltImportDiagnosticLoading
+        ? "⏳ Lecture UpBolt en cours..."
+        : "🧾 Diagnostiquer l'import UpBolt"}
+    </button>
+
+    {upboltImportDiagnosticError && (
+      <p style={{ color: "#fb7185", marginTop: "12px" }}>
+        ❌ {upboltImportDiagnosticError}
+      </p>
+    )}
+
+    {upboltImportDiagnosticResult !== null && (
+      <pre
+        style={{
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+          maxHeight: "360px",
+          overflowY: "auto",
+          padding: "14px",
+          marginTop: "12px",
+          borderRadius: "12px",
+          background: "rgba(0,0,0,0.28)",
+          color: "#d1d5db",
+          fontSize: "12px",
+        }}
+      >
+        {JSON.stringify(upboltImportDiagnosticResult, null, 2)}
       </pre>
     )}
 
