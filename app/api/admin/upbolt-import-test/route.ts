@@ -15,7 +15,7 @@ const EXPECTED_FILE_CODE = "udfaignd1kg2xzk48218";
 
 export async function POST(request: Request) {
   try {
-    // 1. Authentification
+    // 1. Vérifier la session administrateur
     const authorization = request.headers.get("authorization");
 
     if (!authorization?.startsWith("Bearer ")) {
@@ -27,7 +27,38 @@ export async function POST(request: Request) {
 
     const accessToken = authorization.slice(7).trim();
 
-    // 2. Configuration Supabase
+    if (!accessToken) {
+      return NextResponse.json(
+        { success: false, error: "Jeton manquant." },
+        { status: 401 }
+      );
+    }
+
+    // 2. Confirmation obligatoire
+    let body: { confirmUpload?: boolean };
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Confirmation JSON invalide." },
+        { status: 400 }
+      );
+    }
+
+    if (body.confirmUpload !== true) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Confirmation de l'import manquante.",
+          uploadStarted: false,
+          databaseModified: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    // 3. Configuration Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
 
@@ -46,7 +77,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // 3. Vérification utilisateur
+    // 4. Vérifier l'utilisateur
     const { data: userData, error: authError } =
       await supabase.auth.getUser(accessToken);
 
@@ -59,7 +90,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Vérification administrateur
+    // 5. Vérifier les droits administrateur
     const userEmail = user.email?.toLowerCase();
 
     let isAdmin =
@@ -91,17 +122,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Vérification de la clé 1fichier
+    // 6. Vérifier les clés API
     const fichierKey = process.env.FICHIER_API_KEY;
+    const upboltKey = process.env.UPBOLT_API_KEY;
 
-    if (!fichierKey) {
+    if (!fichierKey || !upboltKey) {
       return NextResponse.json(
-        { success: false, error: "FICHIER_API_KEY absente de Vercel." },
+        {
+          success: false,
+          error: "Une clé API est absente de Vercel.",
+          diagnostic: {
+            fichierKeyPresent: !!fichierKey,
+            upboltKeyPresent: !!upboltKey,
+          },
+        },
         { status: 500 }
       );
     }
 
-    // 6. Lecture du seul film 9737
+    // 7. Lire uniquement le film 9737
     const { data: film, error: filmError } = await supabase
       .from("downloads")
       .select("id,title,link,stream_link")
@@ -122,7 +161,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 7. Protection contre l'écrasement d'un streaming
+    // 8. Ne jamais écraser un streaming existant
     if (
       typeof film.stream_link === "string" &&
       film.stream_link.trim() !== ""
@@ -130,13 +169,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Un lien streaming existe déjà. Opération arrêtée.",
+          error: "Un lien streaming existe déjà. Import annulé.",
         },
         { status: 409 }
       );
     }
 
-    // 8. Vérifier le lien source
+    // 9. Vérifier le lien 1fichier
     let sourceUrl: URL;
 
     try {
@@ -153,7 +192,7 @@ export async function POST(request: Request) {
       sourceUrl.hostname !== "www.1fichier.com"
     ) {
       return NextResponse.json(
-        { success: false, error: "Le domaine source n'est pas 1fichier." },
+        { success: false, error: "Domaine source incorrect." },
         { status: 400 }
       );
     }
@@ -162,57 +201,40 @@ export async function POST(request: Request) {
 
     if (fileCode !== EXPECTED_FILE_CODE) {
       return NextResponse.json(
-        { success: false, error: "Le lien ne correspond pas au film de test." },
+        { success: false, error: "Le fichier ne correspond pas au test." },
         { status: 409 }
       );
     }
 
-    // Retirer les paramètres d'affiliation
     const cleanSourceUrl = `https://1fichier.com/?${fileCode}`;
 
-    // 9. Interroger l'API officielle 1fichier
-    let fichierResponse: Response;
+    // 10. Vérifier les informations 1fichier
+    const fichierResponse = await fetch(
+      "https://api.1fichier.com/v1/file/info.cgi",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${fichierKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: cleanSourceUrl,
+          pretty: 1,
+        }),
+        cache: "no-store",
+        signal: AbortSignal.timeout(20000),
+      }
+    );
 
-    try {
-      fichierResponse = await fetch(
-        "https://api.1fichier.com/v1/file/info.cgi",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${fichierKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: cleanSourceUrl,
-            pretty: 1,
-          }),
-          cache: "no-store",
-          signal: AbortSignal.timeout(20000),
-        }
-      );
-    } catch (error) {
-      console.error("ERREUR CONNEXION 1FICHIER :", error);
-
-      return NextResponse.json(
-        { success: false, error: "Impossible de contacter l'API 1fichier." },
-        { status: 502 }
-      );
-    }
-
-    // 10. Lire la réponse
-    const responseText = await fichierResponse.text();
+    const fichierText = await fichierResponse.text();
 
     let fichierData: any;
 
     try {
-      fichierData = JSON.parse(responseText);
+      fichierData = JSON.parse(fichierText);
     } catch {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Réponse 1fichier non valide.",
-          httpStatus: fichierResponse.status,
-        },
+        { success: false, error: "Réponse 1fichier invalide." },
         { status: 502 }
       );
     }
@@ -221,49 +243,32 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "1fichier a refusé la vérification.",
-          httpStatus: fichierResponse.status,
-          details: fichierData.message || "Erreur API 1fichier.",
+          error: "Vérification 1fichier refusée.",
+          details: fichierData.message || "Erreur inconnue.",
         },
         { status: 502 }
       );
     }
 
-    
-    // 11. Demander un lien temporaire à 1fichier
-    let tokenResponse: Response;
-
-    try {
-      tokenResponse = await fetch(
-        "https://api.1fichier.com/v1/download/get_token.cgi",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${fichierKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: cleanSourceUrl,
-            single: 1,
-            pretty: 1,
-          }),
-          cache: "no-store",
-          signal: AbortSignal.timeout(20000),
-        }
-      );
-    } catch (error) {
-      console.error("ERREUR TOKEN 1FICHIER :", error);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Impossible de demander le lien temporaire à 1fichier.",
+    // 11. Obtenir le lien temporaire
+    const tokenResponse = await fetch(
+      "https://api.1fichier.com/v1/download/get_token.cgi",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${fichierKey}`,
+          "Content-Type": "application/json",
         },
-        { status: 502 }
-      );
-    }
+        body: JSON.stringify({
+          url: cleanSourceUrl,
+          single: 1,
+          pretty: 1,
+        }),
+        cache: "no-store",
+        signal: AbortSignal.timeout(20000),
+      }
+    );
 
-    // 12. Lire la réponse du service
     const tokenText = await tokenResponse.text();
 
     let tokenData: any;
@@ -272,11 +277,7 @@ export async function POST(request: Request) {
       tokenData = JSON.parse(tokenText);
     } catch {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Réponse du service de téléchargement invalide.",
-          httpStatus: tokenResponse.status,
-        },
+        { success: false, error: "Réponse du téléchargement invalide." },
         { status: 502 }
       );
     }
@@ -287,55 +288,118 @@ export async function POST(request: Request) {
       typeof tokenData.url !== "string" ||
       !tokenData.url.startsWith("https://")
     ) {
-      console.error("ERREUR TOKEN 1FICHIER :", {
-        httpStatus: tokenResponse.status,
-        status: tokenData.status,
-        message: tokenData.message,
-      });
-
       return NextResponse.json(
         {
           success: false,
-          error: "1fichier n'a pas fourni de lien temporaire valide.",
-          httpStatus: tokenResponse.status,
+          error: "Impossible d'obtenir le lien temporaire 1fichier.",
           details: tokenData.message || "Erreur inconnue.",
         },
         { status: 502 }
       );
     }
 
-    // 13. Résultat : ne jamais afficher le lien temporaire
+    // 12. Envoyer le fichier vers UpBolt
+    const upboltUrl = new URL(
+      "https://upbolt.to/api/upload/url"
+    );
+
+    upboltUrl.searchParams.set("key", upboltKey);
+    upboltUrl.searchParams.set("url", tokenData.url);
+
+    let uploadResponse: Response;
+
+    try {
+      uploadResponse = await fetch(upboltUrl.toString(), {
+        method: "GET",
+        cache: "no-store",
+        signal: AbortSignal.timeout(30000),
+      });
+    } catch (error) {
+      console.error("ERREUR CONNEXION UPBOLT :", error);
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Impossible de contacter UpBolt.",
+          uploadStarted: false,
+          databaseModified: false,
+        },
+        { status: 502 }
+      );
+    }
+
+    // 13. Lire la réponse UpBolt
+    const uploadText = await uploadResponse.text();
+
+    let uploadData: any;
+
+    try {
+      uploadData = JSON.parse(uploadText);
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Réponse UpBolt invalide.",
+          uploadStarted: false,
+          databaseModified: false,
+        },
+        { status: 502 }
+      );
+    }
+
+    if (!uploadResponse.ok || !uploadData.filecode) {
+      console.error("ERREUR IMPORT UPBOLT :", {
+        status: uploadResponse.status,
+        message: uploadData.message,
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: "UpBolt n'a pas confirmé la création de l'import.",
+          details: uploadData.message || "Erreur inconnue.",
+          uploadStarted: false,
+          databaseModified: false,
+        },
+        { status: 502 }
+      );
+    }
+
+    // 14. Résultat
     return NextResponse.json(
       {
         success: true,
-        message: "Lien temporaire 1fichier obtenu.",
+        message: "Import distant accepté par UpBolt.",
         film: {
           id: film.id,
           title: film.title,
           filename: fichierData.filename || fichierData.name || null,
           size: fichierData.size || fichierData.filesize || null,
         },
-        fichier: {
-          infoVerified: true,
-          downloadTokenObtained: true,
+        upbolt: {
+          fileCode: uploadData.filecode,
+          importAccepted: true,
         },
         streamLinkEmpty: true,
+        uploadStarted: true,
         databaseModified: false,
-        uploadStarted: false,
-        nextStep: "Vérifier le lien temporaire puis préparer son transfert vers UpBolt.",
+        nextStep:
+          "Vérifier l'état de l'import UpBolt avant toute autre opération.",
       },
       {
         status: 200,
         headers: { "Cache-Control": "no-store" },
       }
     );
+
   } catch (error) {
-    console.error("ERREUR TEST 1FICHIER :", error);
+    console.error("ERREUR IMPORT UPBOLT :", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: "Erreur interne pendant le test.",
+        error: "Erreur interne pendant le test d'import.",
+        databaseModified: false,
       },
       { status: 500 }
     );
