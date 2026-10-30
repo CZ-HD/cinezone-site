@@ -74,6 +74,11 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Prévisualisation uniquement : aucun transfert ni écriture en base.
+  const [migrationLoading, setMigrationLoading] = useState(false);
+  const [migrationPreview, setMigrationPreview] = useState<unknown>(null);
+  const [migrationError, setMigrationError] = useState("");
+
   const [id, setId] = useState("");
   const [link, setLink] = useState("");
   const [streamTmdbId, setStreamTmdbId] = useState("");
@@ -1070,6 +1075,47 @@ const filteredNotifications = notifications.filter((notif) => {
   const readNotifications = notifications.filter((n) => n.read).length;
   const unreadNotifications = notifications.filter((n) => !n.read).length;
 
+  const previewUpboltMigration = async () => {
+    setMigrationLoading(true);
+    setMigrationError("");
+    setMigrationPreview(null);
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      const accessToken = sessionData.session?.access_token;
+
+      if (sessionError || !accessToken) {
+        throw new Error("Session administrateur introuvable. Reconnecte-toi.");
+      }
+
+      const response = await fetch("/api/admin/upbolt-migration/preview", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        cache: "no-store",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.success === false) {
+        throw new Error(
+          result.error || `Erreur HTTP ${response.status}`
+        );
+      }
+
+      setMigrationPreview(result);
+    } catch (error) {
+      setMigrationError(
+        error instanceof Error ? error.message : "Erreur inconnue."
+      );
+    } finally {
+      setMigrationLoading(false);
+    }
+  };
+
   const filteredAdminMovies = useMemo(() => {
     const q = filmSearch.toLowerCase().trim();
     if (!q) return adminMovies.slice(0, 60);
@@ -1169,6 +1215,59 @@ const filteredNotifications = notifications.filter((notif) => {
 </div>
 
 </section>
+<section style={cardStyle}>
+  <h2>🚀 Migration streaming UpBolt</h2>
+  <p style={subText}>
+    Prévisualise les films concernés avant toute migration. Cette action
+    interroge uniquement l'API de prévisualisation : elle ne lance aucun
+    transfert et ne modifie aucun lien dans Supabase.
+  </p>
+
+  <button
+    type="button"
+    onClick={previewUpboltMigration}
+    disabled={migrationLoading}
+    style={{
+      ...btnBlue,
+      opacity: migrationLoading ? 0.6 : 1,
+      cursor: migrationLoading ? "wait" : "pointer",
+    }}
+  >
+    {migrationLoading
+      ? "⏳ Analyse en cours..."
+      : "🔍 Prévisualiser la migration"}
+  </button>
+
+  {migrationError && (
+    <p style={{ color: "#fb7185", marginTop: "15px" }}>
+      ❌ {migrationError}
+    </p>
+  )}
+
+  {migrationPreview !== null && (
+    <div style={{ marginTop: "18px" }}>
+      <p style={{ color: "#4ade80" }}>
+        ✅ Prévisualisation reçue. Aucun transfert n'a été lancé.
+      </p>
+      <pre
+        style={{
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+          maxHeight: "420px",
+          overflowY: "auto",
+          padding: "14px",
+          borderRadius: "12px",
+          background: "rgba(0,0,0,0.28)",
+          color: "#d1d5db",
+          fontSize: "12px",
+        }}
+      >
+        {JSON.stringify(migrationPreview, null, 2)}
+      </pre>
+    </div>
+  )}
+</section>
+
 <section style={cardStyle}>
   <button
     onClick={() => setShowTopDownloads(!showTopDownloads)}
